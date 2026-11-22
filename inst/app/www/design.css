@@ -1,7 +1,8 @@
 /* PROTOTYPE (spike/lattice-ui-prototype): the modernized design pages.
    This file is the shared structure and the chosen look ("?look=a", the
    default): Option A, neutral and clean, with Option B's charcoal navbar.
-   Options B and C are kept for reference in look-b.css and look-c.css.
+   Options B and C are kept for reference in look-b.css and look-c.css;
+   Option D is this look with a slimmer navbar (look-d.css).
    Everything is scoped to the navbar, to .fh-design (the three Lattice
    pages, see mod_design_ui()) and to modal dialogs. The content of the
    Welcome, Help and About pages (.fh-page) is not touched and stays light.
@@ -164,7 +165,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   outline-offset: 2px;
 }
 
-/* Prototype only: pick one of the three looks (theme.js). */
+/* Prototype only: pick one of the looks (theme.js). */
 #fieldhub-app .fh-look-switch {
   float: right;
   display: inline-flex;
@@ -175,7 +176,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   overflow: hidden;
 }
 #fieldhub-app .fh-look-switch button {
-  width: 28px;
+  width: 24px;
   padding: 0;
   color: var(--fhd-nav-ink);
   background: transparent;
@@ -631,7 +632,8 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   line-height: 34px;
 }
 /* Empty state: Shiny's validation message, where the plot will be. */
-#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation {
+#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation,
+#fieldhub-app .fh-summary-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -642,7 +644,14 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   font-size: 15px;
   text-align: center;
 }
-#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation::before {
+#fieldhub-app .fh-summary-empty {
+  min-height: 360px;
+  margin: 14px 0 0;
+  border: 1px dashed var(--fhd-line-strong);
+  border-radius: var(--fhd-radius-lg);
+}
+#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation::before,
+#fieldhub-app .fh-summary-empty::before {
   content: "";
   width: 68px;
   height: 46px;
@@ -657,7 +666,129 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   opacity: 0.8;
 }
 
-/* ---------- Summary and field book ---------- */
+/* ---------- Summary (app_design_summary()) ----------
+   A grid of figures, the seed as a quiet line, then two tables.
+   Explanations are tooltips on the dotted terms. */
+#fieldhub-app .fh-summary { display: grid; gap: 26px; padding: 22px 0 8px; }
+#fieldhub-app .fh-summary section { display: grid; gap: 10px; min-width: 0; }
+#fieldhub-app .fh-design .fh-summary h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+#fieldhub-app .fh-summary dl,
+#fieldhub-app .fh-summary dd { margin: 0; }
+#fieldhub-app .fh-tip {
+  text-decoration: underline dotted var(--fhd-line-strong);
+  text-underline-offset: 4px;
+  cursor: help;
+}
+#fieldhub-app .fh-tip:focus-visible { outline: 2px solid var(--fhd-focus); outline-offset: 3px; border-radius: 2px; }
+.tooltip .tooltip-inner { max-width: 260px; padding: 7px 10px; font-size: 12.5px; line-height: 1.4; text-align: left; }
+
+#fieldhub-app .fh-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+  overflow: hidden;
+}
+#fieldhub-app .fh-stats > div {
+  margin: 0 -1px -1px 0;
+  padding: 13px 16px 14px;
+  border-right: 1px solid var(--fhd-line);
+  border-bottom: 1px solid var(--fhd-line);
+}
+#fieldhub-app .fh-stats dt { color: var(--fhd-muted); font-size: 12.5px; font-weight: 400; line-height: 1.35; }
+#fieldhub-app .fh-stats dd {
+  margin-top: 3px;
+  color: var(--fhd-ink);
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+#fieldhub-app .fh-stats small { display: block; margin-top: 2px; color: var(--fhd-muted); font-size: 12px; overflow-wrap: anywhere; }
+
+#fieldhub-app .fh-seed-line {
+  margin: 0;
+  padding: 0 2px;
+  color: var(--fhd-muted);
+  font-size: 13px;
+}
+#fieldhub-app .fh-design .fh-seed-line code {
+  margin-left: 8px;
+  padding: 0;
+  color: var(--fhd-muted);
+  background: transparent;
+  font-size: 13px;
+  user-select: all;
+}
+#fieldhub-app .fh-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: -4px 0 -4px 6px;
+  padding: 0;
+  color: var(--fhd-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--fhd-radius);
+  font-size: 13px;
+  cursor: pointer;
+}
+#fieldhub-app .fh-copy:hover { color: var(--fhd-ink); background: var(--fhd-hover); }
+#fieldhub-app .fh-copy:focus-visible { outline: 2px solid var(--fhd-focus); outline-offset: 1px; }
+#fieldhub-app .fh-copy.is-copied { color: var(--fhd-action); }
+.fh-clipboard { position: fixed; top: 0; left: -9999px; }
+
+#fieldhub-app .fh-summary-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+#fieldhub-app .fh-summary-head span { color: var(--fhd-muted); font-size: 13px; }
+#fieldhub-app .fh-summary-link {
+  margin-left: auto;
+  padding: 2px 0;
+  color: var(--fhd-action);
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+#fieldhub-app .fh-summary-link:focus-visible { outline: 2px solid var(--fhd-focus); outline-offset: 3px; border-radius: 2px; }
+#fieldhub-app .fh-table-wrap {
+  overflow-x: auto;
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+}
+#fieldhub-app .fh-table {
+  width: 100%;
+  color: var(--fhd-ink);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  border-collapse: collapse;
+}
+#fieldhub-app .fh-table th {
+  padding: 9px 14px;
+  color: var(--fhd-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--fhd-line-strong);
+}
+#fieldhub-app .fh-table td { padding: 8px 14px; border-bottom: 1px solid var(--fhd-line); }
+#fieldhub-app .fh-table tr:last-child td { border-bottom: 0; }
+#fieldhub-app .fh-table .fh-num-cell { text-align: right; }
+
+/* ---------- Printed summaries and the field book ---------- */
 #fieldhub-app .fh-design pre {
   padding: 16px 18px;
   color: var(--fhd-ink);
@@ -792,6 +923,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   #fieldhub-app .fh-design .well { padding: 16px; }
   #fieldhub-app .fh-design .fieldhub-layout-downloads { justify-content: flex-start; }
   #fieldhub-app .fh-design .fieldhub-plot-toolbar { margin-left: 0; }
+  #fieldhub-app .fh-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* View controls first, downloads under them. */
   #fieldhub-app .fh-design .fieldhub-plot-header { flex-direction: column-reverse; align-items: flex-start; }
   #fieldhub-app .fh-design .fieldhub-plot-controls { flex: none; width: 100%; }

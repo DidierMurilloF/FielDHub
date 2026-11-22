@@ -32,9 +32,10 @@ mod_design_ui <- function(id, spec) {
     if (isTRUE(spec$summary)) shiny::tabPanel(
       if (modern) "Summary" else "Summary Design",
       feedback(
-        shiny::br(),
+        if (!modern) shiny::br(),
         shiny::div(class = "fieldhub-design-summary",
-          app_output_feedback(shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE))))
+          app_output_feedback(if (modern) shiny::uiOutput(ns("summary")) else
+            shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE))))
     ),
     shiny::tabPanel(
       "Field Layout",
@@ -79,7 +80,9 @@ mod_design_ui <- function(id, spec) {
         shiny::div(id = ns("results"), shiny::fluidRow(if (spatial) {
           app_spatial_tabs(ns, spec)
         } else {
-          do.call(shiny::tabsetPanel, Filter(Negate(is.null), tabs))
+          # Prototype: the tabs have an id, so the summary can open the field book
+          do.call(shiny::tabsetPanel, c(Filter(Negate(is.null), tabs),
+                                        if (modern) list(id = ns("result_tabs"))))
         }))
       )
     )
@@ -191,7 +194,16 @@ mod_design_server <- function(id, spec) {
     design <- app_design_task("run", spec$engine, arguments,
       long_running = spec$long_running, busy_message = spec$busy_message)
 
-    if (isTRUE(spec$summary)) {
+    if (isTRUE(spec$summary) && app_design_modern(spec)) {
+      output$summary <- shiny::renderUI({
+        state <- app_design_state(design)
+        if (is.null(state)) {
+          return(shiny::p(class = "fh-summary-empty", "Generate the design to see the summary."))
+        }
+        app_design_summary(design(), block_levels = c("Replicates", "Incomplete blocks"),
+                           tabset = session$ns("result_tabs"))
+      })
+    } else if (isTRUE(spec$summary)) {
       output$summary <- shiny::renderPrint({
         shiny::req(design())
         cat("Randomization was successful!", "\n", "\n")

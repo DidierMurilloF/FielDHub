@@ -22,10 +22,18 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
     selected = if (layout$select_layout) 1 else NULL)))
   if ("location" %in% names(layout$ids)) {
     if (is.null(locations)) locations <- seq_len(length(levels(as.factor(x$fieldBook$LOCATION))))
-    controls <- c(controls, list(select(ns(layout$ids[["location"]]), "Location:", locations,
-      selected = if (layout$select_location) 1 else NULL)))
+    location <- select(ns(layout$ids[["location"]]), "Location:", locations,
+      selected = if (layout$select_location) 1 else NULL)
+    # One location is nothing to choose from: the toolbar keeps the input
+    # (the server reads it) but does not show it
+    if (toolbar && length(locations) < 2L) location <- shiny::div(hidden = NA, location)
+    controls <- c(controls, list(location))
   }
-  if (toolbar) return(app_layout_toolbar(ns(paste0(layout$output, "_menu")), controls))
+  if (toolbar) {
+    # The menu is worth a button while it offers a choice
+    useful <- "stacked" %in% names(layout$ids) || length(choices) > 1L || length(locations) > 1L
+    return(app_layout_toolbar(ns(paste0(layout$output, "_menu")), controls, menu = useful))
+  }
   columns <- Map(function(width, control) shiny::column(width, control), layout$widths, controls)
   if (layout$container == "page") {
     shiny::wellPanel(do.call(shiny::fluidPage, columns))
@@ -43,11 +51,13 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
 #' (layout-menu.js opens and closes it). The inputs keep their ids.
 #' @param menu_id The id of the menu, for \code{aria-controls}.
 #' @param controls The plot type control, then the controls of the menu.
+#' @param menu Whether the menu offers a choice; its inputs stay on the
+#'   page either way.
 #' @noRd
-app_layout_toolbar <- function(menu_id, controls) {
+app_layout_toolbar <- function(menu_id, controls, menu = TRUE) {
   shiny::div(class = "fh-view-bar",
     shiny::div(class = "fh-segmented", controls[[1L]]),
-    shiny::div(class = "fh-view-menu",
+    shiny::div(class = "fh-view-menu", hidden = if (!menu) NA,
       shiny::tags$button(type = "button", class = "btn fh-view-menu-toggle",
         `aria-haspopup` = "true", `aria-expanded` = "false", `aria-controls` = menu_id,
         shiny::icon("sliders", verify_fa = FALSE), shiny::span("Layout options"),

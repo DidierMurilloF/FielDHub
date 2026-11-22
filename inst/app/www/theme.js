@@ -37,9 +37,10 @@
     }
     if (button) paint(button);
   }
-  // Prototype only: switch between the three looks (design.css, look-b.css, look-c.css).
+  // Prototype only: switch between the looks (design.css, look-b.css, look-c.css, look-d.css).
   function lookSwitch() {
-    var names = {a: "Option A: neutral", b: "Option B: cards", c: "Option C: compact"};
+    var names = {a: "Option A: neutral", b: "Option B: cards", c: "Option C: compact",
+                 d: "Option D: A with a slim navbar"};
     var group = document.createElement("div");
     group.className = "fh-look-switch";
     group.setAttribute("role", "group");

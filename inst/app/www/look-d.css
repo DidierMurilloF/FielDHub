@@ -1,0 +1,25 @@
+/* PROTOTYPE, Option D ("?look=d"): Option A with Option C's slim navbar.
+   Only the navbar's height changes: its padding, the size of the brand,
+   links, logo, theme toggle and look switcher. Colours and everything
+   below the navbar are design.css (Option A), untouched. */
+
+html[data-look="d"] #fieldhub-app .navbar-default { min-height: 46px; }
+html[data-look="d"] #fieldhub-app .navbar-default .navbar-brand {
+  height: 46px;
+  padding: 13px 12px 13px 16px;
+  font-size: 15px;
+}
+html[data-look="d"] #fieldhub-app .navbar-default .navbar-nav > li > a {
+  padding: 13px 10px;
+  font-size: 13px !important;
+}
+html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { height: 28px; margin: 9px 12px 9px 8px; }
+html[data-look="d"] #fieldhub-app .fh-theme-toggle { width: 30px; height: 30px; margin-top: 8px; }
+html[data-look="d"] #fieldhub-app .fh-look-switch { height: 26px; margin-top: 10px; }
+html[data-look="d"] #fieldhub-app .fh-look-switch button { line-height: 24px; }
+
+/* The stacked navbar on small screens is slimmer too. */
+@media (max-width: 767px) {
+  html[data-look="d"] #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 8px 16px; }
+  html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { margin: 6px 16px 12px; }
+}
