@@ -120,7 +120,7 @@ onestage_dense_work <- function(v, r, B, factors, sizes2, form) {
 #' `run_search()`): every search of the call ends with one drift check that
 #' is not charged, so a call of s searches does s - 1 more of them than the
 #' one reserved (s is 20 in mode 4; in mode 1 it is `resolvable_searches()`,
-#' 20 up to 1000 blocks and 1 from 2715; 1 in mode 2), and a check that
+#' 20 up to 1000 blocks and 1 from 2155; 1 in mode 2), and a check that
 #' alarms adds one refresh of that search's design. The checks are small
 #' beside the cap: the 19 of a shared row step with 1000 rows and n = 8000
 #' are 5.1e8 units, 0.26% of `onestage_work_limit`, and the largest nested

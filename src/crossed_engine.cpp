@@ -351,7 +351,10 @@ class Engine {
   // one.
   enum Verdict { kExact, kBreach, kStopped };
   Verdict checkpoint(const CrossedSpace& joint, CrossedSpace& row) {
-    if (pending_ == 0) return kExact;
+    if (pending_ == 0) {
+      if (lazy_) note_exact(joint);  // exact already: keep it if it is the best
+      return kExact;
+    }
     if (!budget_.work(row_refresh_ + lay_.n)) return kStopped;
     const RowValue value = row_value(lay_, row.treatments());
     out_.row_checkpoints += 1;
@@ -455,6 +458,7 @@ class Engine {
             if (!improves(joint, ratio)) continue;
             const double joint_scale = joint.last_scale();
             double row_ratio = 1.0, row_scale = 1.0;
+            bool crossing = false, confirmed = false;
             if (lay_.row_of[x] != lay_.row_of[y]) {
               if (!budget_.work((4.0 * lay_.r + 8.0) * lay_.Br)) return false;
               double tr = 0.0;
@@ -470,13 +474,20 @@ class Engine {
                 if (budget_.stopped()) return false;
                 continue;
               }
-              out_.row_swaps += 1;
-              if (lazy_ && !confirm) {
-                if (pending_ == 0) note_exact(joint);
-                ++pending_;
-              }
+              crossing = true;
+              confirmed = confirm;
+              // The design before the first unconfirmed swap is exact.
+              if (lazy_ && !confirm && pending_ == 0) note_exact(joint);
             }
-            if (!apply(joint, row, x, y, ratio, row_ratio, joint_scale, row_scale)) return false;
+            const double applied = out_.accepted;
+            const bool went_on = apply(joint, row, x, y, ratio, row_ratio, joint_scale, row_scale);
+            // Counted only for a swap that was made (the work limit may
+            // refuse it). A confirmed swap proves the whole design exact.
+            if (crossing && out_.accepted > applied) {
+              out_.row_swaps += 1;
+              if (lazy_) pending_ = confirmed ? 0 : pending_ + 1;
+            }
+            if (!went_on) return false;
             if (budget_.stopped()) return true;
             since = 0.0;
             if (lazy_) {
