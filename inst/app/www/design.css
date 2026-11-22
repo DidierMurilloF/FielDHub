@@ -139,6 +139,14 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   margin: 12px 14px 12px 8px;
   border-radius: 4px;
 }
+/* On the charcoal bar the wordmark stands on its own, without the green
+   plate of ndsulogo.jpg (Option C keeps the plate on its white bar). */
+html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
+  content: url("ndsulogo-transparent.png");
+  height: 21px;
+  margin: 18px 12px 17px 8px;
+  border-radius: 0;
+}
 
 #fieldhub-app .fh-theme-toggle {
   float: right;

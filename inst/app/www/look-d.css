@@ -13,7 +13,7 @@ html[data-look="d"] #fieldhub-app .navbar-default .navbar-nav > li > a {
   padding: 13px 10px;
   font-size: 13px !important;
 }
-html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { height: 28px; margin: 9px 12px 9px 8px; }
+html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { height: 22px; margin: 12px 14px 12px 10px; }
 html[data-look="d"] #fieldhub-app .fh-theme-toggle { width: 30px; height: 30px; margin-top: 8px; }
 html[data-look="d"] #fieldhub-app .fh-look-switch { height: 26px; margin-top: 10px; }
 html[data-look="d"] #fieldhub-app .fh-look-switch button { line-height: 24px; }
@@ -21,7 +21,7 @@ html[data-look="d"] #fieldhub-app .fh-look-switch button { line-height: 24px; }
 /* The stacked navbar on small screens is slimmer too. */
 @media (max-width: 767px) {
   html[data-look="d"] #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 8px 16px; }
-  html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { margin: 6px 16px 12px; }
+  html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { margin: 8px 16px 14px; }
 }
 
 /* A compact page header, like Option C's: a smaller title with the guide
@@ -31,7 +31,20 @@ html[data-look="d"] #fieldhub-app .fh-design-head {
   padding: 12px 0 10px;
 }
 html[data-look="d"] #fieldhub-app .fh-design-head h2 { font-size: 20px; }
-html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide { font-size: 13px; }
+/* The guide link is a quiet aside: body size and weight, muted, and
+   underlined only when pointed at or focused. */
+html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide {
+  color: var(--fhd-muted);
+  font-size: var(--fhd-text);
+  font-weight: 400;
+  text-decoration: none;
+}
+html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide:hover,
+html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide:focus-visible {
+  color: var(--fhd-ink);
+  text-decoration: underline;
+}
+html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide::after { font-size: 0.75em; }
 html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 14px; }
 
 @media (max-width: 767px) {

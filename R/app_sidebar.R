@@ -49,9 +49,12 @@ app_sidebar_layout <- function(spec) {
   list(rows = rows, gutters = !spec$module %in% c("pREPS", "multi_loc_preps"),
     upload_width = if (identical(spec$kind, "classic") && spec$module != "CRD") 8L else 7L,
     upload_label = switch(spec$module, Optim = "Import Entries' List?",
-      SSPD = "Do you have your own data?", "Import entries' list?"),
-    file_label = if (spec$module %in% c("RowCol", "SPD", "SSPD", "STRIPD"))
-      "Upload a csv File:" else "Upload a CSV File:")
+      SSPD = "Do you have your own data?",
+      Square_Lattice = , Rectangular_Lattice = , Alpha_Lattice = "Import entries list",
+      "Import entries' list?"),
+    file_label = if (spec$module %in% c("RowCol", "SPD", "SSPD", "STRIPD")) "Upload a csv File:" else
+      if (spec$module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) "CSV file" else
+        "Upload a CSV File:")
 }
 
 #' Restore visible labels and widget types without changing validation or defaults
@@ -78,6 +81,12 @@ app_sidebar_control <- function(control, module) {
   if (module %in% c("Optim", "multi_loc_preps")) labels["rep_checks"] <- "Input # Check's Reps:"
   if (module == "multi_loc_preps") labels["use_checks"] <- "Include checks?"
   if (module == "RCBD_augmented") labels["checks"] <- "Checks per Block:"
+  # Prototype: plain labels on the lattice pages, in the words of the Summary
+  if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) {
+    labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
+      planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
+      seed = "Random seed")
+  }
   if (control$id %in% names(labels)) control$label <- unname(labels[control$id])
   control
 }
