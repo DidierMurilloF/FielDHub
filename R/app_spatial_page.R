@@ -319,7 +319,9 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       app_spatial_table(validate_design(spec$setup$view(inputs$values, choices)),
                         caption = spec$setup$caption,
                         design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
-                        export = spec$setup$export, rows = spec$setup$rows)
+                        export = spec$setup$export, rows = spec$setup$rows,
+                        height = spec$setup$height, tip = spec$setup$tip,
+                        plain = isTRUE(spec$setup$plain))
     }, server = is.null(spec$setup$rows))
   }
   if (!is.null(spec$report)) {
@@ -371,21 +373,35 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
 
 #' A table of a spatial page (entry list, allocation, check options)
 #'
+#' @description The table is as tall as its rows: \code{height} is the
+#' most it grows to before it scrolls, not a box it always fills.
+#'
 #' @param data The data frame.
 #' @param caption Optional caption.
-#' @param height Scroll height.
+#' @param height The tallest the rows get before they scroll.
 #' @param filter \code{"top"} to filter by column, \code{"none"}.
 #' @param design Optional result whose metadata the export buttons carry.
 #' @param export Optional name of the exported table (adds export buttons).
 #' @param rows Optional number of rows per page; otherwise shows all rows.
+#' @param tip Optional explanation of the caption, shown as a tooltip on an
+#'   (i) beside it.
+#' @param plain \code{TRUE} for the table alone: no search box, row count
+#'   or page links (a short reference table).
 #' @noRd
 app_spatial_table <- function(data, caption = NULL, height = "600px", filter = "none",
-                              design = NULL, export = NULL, rows = NULL) {
+                              design = NULL, export = NULL, rows = NULL, tip = NULL, plain = FALSE) {
+  if (is.null(height)) height <- "600px"
   options <- list(pageLength = rows %||% nrow(data), autoWidth = FALSE, scrollX = TRUE, scrollY = height,
+                  scrollCollapse = TRUE,
                   columnDefs = list(list(className = "dt-center", targets = "_all")))
+  if (plain) options$dom <- "t"
+  if (!is.null(caption) && !is.null(tip)) {
+    caption <- shiny::tags$caption(caption, shiny::span(class = "fh-tip fh-info", tabindex = "0",
+      role = "img", `data-fh-tip` = NA, title = tip, `aria-label` = tip,
+      shiny::icon("circle-info", verify_fa = FALSE)))
+  }
   if (!is.null(rows)) {
     options$paging <- TRUE
-    options$scrollCollapse <- TRUE
     options$lengthMenu <- unique(c(rows, 10L, 25L, 50L, 100L))
   }
   if (!is.null(export)) {

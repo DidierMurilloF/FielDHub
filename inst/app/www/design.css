@@ -1047,12 +1047,13 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 #fieldhub-app .fh-design table.dataTable caption,
 #fieldhub-app .fh-design .dataTables_wrapper caption {
-  padding: 6px 2px;
+  padding: 8px 10px 4px;
   color: var(--fhd-muted);
   font-size: 13px;
   text-align: left;
   caption-side: top;
 }
+#fieldhub-app .fh-design table.dataTable caption .fh-info { margin-left: 6px; }
 #fieldhub-app .fh-design table.dataTable.cell-border tbody :is(th, td) { border-color: var(--fhd-line); }
 /* A cell coloured by the design (checks, fillers) keeps dark ink on its colour. */
 #fieldhub-app .fh-design table.dataTable tbody td[style*="background-color"] { color: #22303c; }

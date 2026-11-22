@@ -136,8 +136,12 @@ build_design_specs <- function() {
   # location's entries and checks
   percent_setup <- list(
     type = "table", stage = "randomize",
-    caption = paste("Reference guide to design your experiment. Choose the percentage (%)",
-                    "of checks based on the total number of plots you want to have in the final layout."),
+    # A short line over the table; the full guide is its tooltip. The table
+    # is as tall as its rows, and scrolls past about ten of them.
+    caption = "Choose the share of checks for the plot count you want.",
+    tip = paste("Reference guide to design your experiment. Choose the percentage (%)",
+                "of checks based on the total number of plots you want to have in the final layout."),
+    height = "400px", plain = TRUE,
     view = function(values, choices) choices$checks_percent$table
   )
   # The allocation pages (sparse, multi-location p-rep): the allocation of
