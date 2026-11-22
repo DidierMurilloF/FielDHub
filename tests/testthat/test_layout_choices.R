@@ -60,11 +60,31 @@ test_that("the layout options are named by the shape of their field, with the va
   crd <- CRD(t = 15, reps = 4, seed = 5)
   expect_identical(layout_choice_labels(crd), c("4 \u00d7 15" = 1L, "15 \u00d7 4" = 2L))
   expect_identical(unname(layout_choice_labels(crd)), layout_choices(crd))
+  # the most square field first, the wider of two alike before the taller
+  rcbd <- RCBD(t = 18, reps = 3, seed = 4)
+  for (stacked in c("vertical", "horizontal")) {
+    labels <- layout_choice_labels(rcbd, stacked = stacked)
+    sizes <- vapply(strsplit(sub(" \\([0-9]+\\)$", "", names(labels)), " \u00d7 ", fixed = TRUE), as.numeric, numeric(2))
+    key <- abs(sizes[1L, ] - sizes[2L, ])
+    expect_false(is.unsorted(key))
+    expect_true(all(diff(sizes[1L, ])[diff(key) == 0] >= 0))
+    expect_setequal(unname(labels), layout_choices(rcbd, stacked = stacked))
+    # the title of each option is the shape of its name
+    for (i in seq_along(labels)) {
+      title <- checked_layout_view(rcbd, layout = labels[[i]], planter = "serpentine", location = 1,
+                                   stacked = stacked)$out_layout$labels$title
+      expect_true(endsWith(title, sub(" \\([0-9]+\\)$", "", names(labels)[[i]])))
+    }
+  }
+  # a page opens on the first
+  panel <- as.character(app_classic_layout_panel(shiny::NS("x"), classic_workflow_spec("RCBD"), rcbd))
+  first <- layout_choice_labels(rcbd)[1L]
+  expect_match(panel, sprintf('<option value="%s" selected>%s</option>', first, names(first)), fixed = TRUE)
   # two options of one shape are numbered
   lattice <- square_lattice(t = 49, k = 7, reps = 3, seed = 1)
-  expect_identical(names(layout_choice_labels(lattice)), c("1: 21 \u00d7 7", "2: 21 \u00d7 7"))
+  expect_identical(names(layout_choice_labels(lattice)), c("21 \u00d7 7 (1)", "21 \u00d7 7 (2)"))
   expect_identical(names(layout_choice_labels(lattice, stacked = "horizontal")),
-                   c("1: 7 \u00d7 21", "2: 7 \u00d7 21"))
+                   c("7 \u00d7 21 (1)", "7 \u00d7 21 (2)"))
   expect_identical(layout_choice_labels(lattice, stacked = "grid_panel"), integer())
   for (design in list(crd, lattice)) {
     expect_identical(unname(layout_choice_labels(design)), layout_choices(design))

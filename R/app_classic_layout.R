@@ -15,7 +15,8 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
     controls <- c(controls, list(select(ns(layout$ids[["stacked"]]), "Reps layout", stacking)))
   }
   controls <- c(controls, list(select(ns(layout$ids[["layout"]]), "Layout option", choices,
-    selected = if (layout$select_layout) 1 else NULL)))
+    # the page opens on the first, the most square field
+    selected = if (length(choices)) choices[[1L]])))
   if ("location" %in% names(layout$ids)) {
     if (is.null(locations)) locations <- seq_len(length(levels(as.factor(x$fieldBook$LOCATION))))
     location <- select(ns(layout$ids[["location"]]), "Location", locations,

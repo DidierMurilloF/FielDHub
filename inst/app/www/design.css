@@ -683,16 +683,6 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 #fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > [hidden] { display: none; }
 #fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) .control-label { margin-bottom: 2px; font-size: 12px; }
 #fieldhub-app .fh-design .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) select.form-control { height: 32px; line-height: 30px; }
-/* A pair whose first field is not asked (the treatments come from the
-   file): the other takes the row. Shiny marks a shown conditional panel
-   with a class; where no panel has it (an older Shiny), the pair stays. */
-#fieldhub-app:has(.shiny-conditional--shown) .fh-design .fieldhub-input-row > [class*="col-"]:has(> .shiny-panel-conditional:only-child:not(.shiny-conditional--shown)) {
-  display: none;
-}
-#fieldhub-app:has(.shiny-conditional--shown) .fh-design .fieldhub-input-row > [class*="col-"]:has(> .shiny-panel-conditional:only-child:not(.shiny-conditional--shown)) + [class*="col-"] {
-  width: 100%;
-  padding-left: 15px;
-}
 #fieldhub-app .fh-view-menu-panel .control-label { margin-bottom: 4px; color: var(--fhd-muted); font-weight: 600; }
 #fieldhub-app .fh-design .fh-view-menu-panel select.form-control {
   height: 36px;
