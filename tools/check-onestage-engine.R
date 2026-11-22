@@ -233,17 +233,19 @@
 # truncation: the work cap cuts, it never refuses (spec 6.1 W1-W6; phase 2
 # Task 8 Step 3b). [baseline], seeds= and tmax= are ignored.
 # Calls. The row step, the column step and the joint call, nested and shared,
-# on 24/6/2, 100/5/4, 200/100/4, 500/10/4 and 1000/2/4, seeds 1:3, each given
-# a room of 1, 1.5 and 3 times w (start + finish) of onestage_call_work(), as
-# onestage_stage1() and the build give it (the engine limit is room / w for
-# the joint call and room / w less the finish for a step). The column step
+# on 24/6/2, 100/5/4, 200/100/4, 500/10/4, 1000/2/4 and 1500/750/3 (the last
+# two have calls whose search and start-plus-finish weights differ: modes 1,
+# 3 and 4), seeds 1:3, each given
+# a room of 1, 1.5 and 3 times the weighted start plus finish of
+# onestage_call_work(), as onestage_stage1() and the build give it (the
+# engine limit is onestage_engine_limit() of the room). The column step
 # starts from the row step's design at the largest room, the joint call from
 # the column step's. Per call:
 # - it returns a design that is complete in each replicate and scored;
 # - the joint call's result is full rank where its start is (by
 #   onestage_joint_efficiency()), and not below the Row floors;
-# - the engine's reported work, plus the reserved finish for a step, is at
-#   most room / w;
+# - the engine's reported work is at most its limit, and its weighted work
+#   (onestage_weighted_work()) at most the room;
 # - joint call: the start formula is at least the engine's start work, the
 #   finish formula equals the charged finish, and the charged finish is at
 #   least the work of the finish steps the engine counted;
@@ -473,7 +475,7 @@ if (check == "truncation") {
 
   # ---- Calls
   factors <- c(1, 1.5, 3)
-  for (shape in list(c(24, 6, 2), c(100, 5, 4), c(200, 100, 4), c(500, 10, 4), c(1000, 2, 4))) {
+  for (shape in list(c(24, 6, 2), c(100, 5, 4), c(200, 100, 4), c(500, 10, 4), c(1000, 2, 4), c(1500, 750, 3))) {
     v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
     rep_of <- rep(seq_len(r), each = v)
     row_in <- rep(rep(seq_len(nrows), each = ncols), r)
@@ -494,9 +496,8 @@ if (check == "truncation") {
         # ran), `limit` (the engine limit) and the raw result.
         run <- function(stage, factor, start) {
           st <- steps[[stage]]
-          w <- weight_of(st$mode, st$B)
-          room <- factor * w * sum(st$work)
-          limit <- if (stage == "joint") room / w else room / w - st$work[["finish"]]
+          room <- factor * weight_of(st$mode, v, st$B)[["fixed"]] * sum(st$work)
+          limit <- ns$onestage_engine_limit(st$mode, v, r, st$B, room, if (stage == "joint") B_row)
           set.seed(1000 * seed + match(stage, names(steps)))
           out <- quietly(
             if (stage == "joint") crossed(start, v, r, nrows, ncols, shared, work_cap = limit)
@@ -538,6 +539,11 @@ if (check == "truncation") {
             if (!identical(a$treatments, b$treatments)) fail("the same seed gave another design")
             if (!is.na(a$work) && !(a$work <= a$limit)) {
               fail(sprintf("reported work %.6g above the limit %.6g", a$work, a$limit))
+            }
+            if (!is.na(a$work)) {
+              room <- f * weight_of(st$mode, v, st$B)[["fixed"]] * sum(st$work)
+              used <- ns$onestage_weighted_work(st$mode, v, r, st$B, a$work, if (stage == "joint") B_row)
+              if (!(used <= room * (1 + 1e-12))) fail(sprintf("weighted work %.6g above the room %.6g", used, room))
             }
             if (stage == "joint") {
               sr <- a$raw$search
@@ -585,16 +591,17 @@ if (check == "truncation") {
     ncols <- v / nrows
     B_row <- if (shared) nrows else r * nrows
     B <- B_row + if (shared) ncols else r * ncols
-    w <- weight_of(3L, B)
     set.seed(seed)
     left <- base$work
     out <- list()
     for (s in 1:2) {
       s1 <- stage1(v, nrows, ncols, r, shared, left, s == 1L, base)
       left <- left - s1$work
-      j <- crossed(s1$treatments, v, r, nrows, ncols, shared, work_cap = left / w)
-      left <- left - w * j$search$work
-      out[[s]] <- c(row = s1$step_work[["row"]], column = s1$step_work[["column"]], joint = w * j$search$work)
+      j <- crossed(s1$treatments, v, r, nrows, ncols, shared,
+                   work_cap = ns$onestage_engine_limit(3L, v, r, B, left, B_row))
+      used <- ns$onestage_weighted_work(3L, v, r, B, j$search$work, B_row)
+      left <- left - used
+      out[[s]] <- c(row = s1$step_work[["row"]], column = s1$step_work[["column"]], joint = used)
     }
     out
   }
@@ -604,9 +611,9 @@ if (check == "truncation") {
       label <- sprintf("%d/%d/%d %s", v, nrows, r, if (shared) "latinized" else "nested")
       B_row <- if (shared) nrows else r * nrows
       B_col <- if (shared) ncols else r * ncols
-      need <- c(row = sum(call_work(if (shared) 4L else 1L, v, r, B_row)) * weight_of(if (shared) 4L else 1L, B_row),
-                column = sum(call_work(if (shared) 4L else 2L, v, r, B_col)) * weight_of(if (shared) 4L else 2L, B_col),
-                joint = sum(call_work(3L, v, r, B_row + B_col, B_row)) * weight_of(3L, B_row + B_col))
+      need <- c(row = sum(call_work(if (shared) 4L else 1L, v, r, B_row)) * weight_of(if (shared) 4L else 1L, v, B_row)[["fixed"]],
+                column = sum(call_work(if (shared) 4L else 2L, v, r, B_col)) * weight_of(if (shared) 4L else 2L, v, B_col)[["fixed"]],
+                joint = sum(call_work(3L, v, r, B_row + B_col, B_row)) * weight_of(3L, v, B_row + B_col)[["fixed"]])
       problems <- character()
       hit <- c(row = 0L, column = 0L, joint = 0L)
       for (seed in 1:5) {

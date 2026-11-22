@@ -70,8 +70,9 @@ improve_efficiency <- function(design, iterations, seed) {
 # - Otherwise the generator is seeded once with `seed` and the searches run in
 #   turn from that stream, each building its own stage 1 design. One work
 #   cap, limits$work, covers the whole build in weighted work
-#   (onestage_work_weight()): each call gets the work left as its room, and
-#   the weighted work it used is taken off.
+#   (onestage_work_weight()): each call gets the work left as its room
+#   (onestage_engine_limit()), and the weighted work it used is taken off
+#   (onestage_weighted_work()).
 #   - Search 1 always runs. Where the joint call is not startable by its
 #     shape (onestage_startable(), the backstop beyond the measured universe)
 #     it is the only search and ends with its stage 1 design.
@@ -133,8 +134,7 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
   requested <- onestage_joint_searches(searches)
   B_row <- if (latinize) nrows else reps * nrows
   B <- B_row + (if (latinize) ncols else reps * ncols)
-  weight <- onestage_work_weight(3L, B)
-  need <- weight * sum(onestage_call_work(3L, nt, reps, B, B_row))
+  need <- onestage_work_weight(3L, nt, B)[["fixed"]] * sum(onestage_call_work(3L, nt, reps, B, B_row))
   joint_startable <- onestage_startable(3L, nt, reps, B, limits = limits, B_row = B_row)
   time_limited <- 0L
   time_warning <- function() {
@@ -177,7 +177,7 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
     }
     joint <- withCallingHandlers(
       crossed_search(stage1$treatments, nt, reps, nrows, ncols, shared = latinize,
-                     work_cap = left / weight),
+                     work_cap = onestage_engine_limit(3L, nt, reps, B, left, B_row)),
       fieldhub_design_warning = function(w) {
         if (grepl("time limit", conditionMessage(w), fixed = TRUE)) {
           time_limited <<- time_limited + 1L
@@ -185,7 +185,7 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
         }
       }
     )
-    left <- left - weight * joint$search$work
+    left <- left - onestage_weighted_work(3L, nt, reps, B, joint$search$work, B_row)
     # A later search whose joint call could not score its start is dropped.
     if (s > 1L && is.na(joint$stage1_row_d)) break
     joint_cut <- isTRUE(joint$search$work_capped) || identical(joint$search$stop_reason, "time_limit")

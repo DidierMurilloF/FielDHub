@@ -21,17 +21,18 @@
 #     there was one, the work of the same call with budget = 0 less its start
 #     and its charged finish.
 # what=startup: each engine call (row step, column step, joint call) given
-#   exactly w (start + finish) of onestage_call_work() as its room; the joint
-#   call with a budget of one evaluation.
+#   exactly the start plus the finish of onestage_call_work() as its engine
+#   limit; the joint call with a budget of one evaluation.
 #   row_work,col_work,joint_work: the engine's count (a step's plus its
 #     reserved finish); row_seconds,col_seconds,joint_seconds: the call;
 #   start_seconds,finish_seconds: of the joint call (mode 3 reports them);
 #   row_status,col_status: "scored" or "none"; full_rank: the joint result.
 # what=rate: seconds to spend onestage_work_limit with the evaluation budget
 #   lifted, per call: row_work,row_seconds,row_status (the stop reason),
-#   col_*, joint_work,joint_seconds,joint_stop. Seconds per unit against
-#   `blocks` (the joint block columns; row_blocks and col_blocks for the
-#   steps) give the weight.
+#   col_*, joint_work,joint_seconds,joint_stop. The work is the engine's
+#   count (unweighted; a step's plus its reserved finish). Seconds per unit
+#   against `blocks` (the joint block columns; row_blocks and col_blocks for
+#   the steps) give the weight.
 # what=build: one build_row_column_onestage() at searches = 200.
 #   build_seconds (the whole call), engine_seconds (the sum over its engine
 #   calls), span_seconds (first engine call to last), engine_calls, and
@@ -39,8 +40,10 @@
 #   joint stage of search 1),repair,work of its "onestage_search" attribute.
 # what=call: one row_column(iterations = 200) call.
 #   call_seconds, engine_seconds, span_seconds, joint_efficiency_seconds (the
-#   sum over the calls of onestage_joint_efficiency()), optimization, and
-#   requested,complete of infoDesign$joint_searches.
+#   sum over the calls of onestage_joint_efficiency()), report_seconds
+#   (report_efficiency(): the Rep, Row and Column reports), concurrence_seconds
+#   (the three concurrence tables), optimization, and requested,complete of
+#   infoDesign$joint_searches.
 #
 # Seconds are wall time on this machine: use an idle reference machine, one
 # run at a time. Work does not depend on the machine.
@@ -138,9 +141,13 @@ wrap("blocks_engine_cpp", function(began, ended, out, ...) {
   log$calls[[length(log$calls) + 1L]] <- c(mode = list(...)[[14L]], began = began, ended = ended, work = out$work)
 })
 wrap("onestage_joint_efficiency", function(began, ended, out, ...) log$efficiency <- log$efficiency + ended - began)
+wrap("report_efficiency", function(began, ended, out, ...) log$report <- log$report + ended - began)
+wrap("concurrence_matrix", function(began, ended, out, ...) log$concurrence <- log$concurrence + ended - began)
 reset <- function() {
   log$calls <- list()
   log$efficiency <- 0
+  log$report <- 0
+  log$concurrence <- 0
 }
 engine <- function() {
   calls <- do.call(rbind, log$calls)
@@ -160,8 +167,8 @@ columns <- c("what", "t", "nrows", "ncols", "r", "latinize", "seed", "blocks", "
              "stage1_full_rank", "joint_work", "joint_seconds", "joint_stop", "joint_capped", "evaluations",
              "full_rank", "repair", "repair_work", "repair_evaluations", "start_seconds", "finish_seconds",
              "build_seconds", "call_seconds", "engine_seconds", "span_seconds", "engine_calls",
-             "joint_efficiency_seconds", "requested", "started", "complete", "work", "optimization",
-             "status", "message")
+             "joint_efficiency_seconds", "report_seconds", "concurrence_seconds", "requested", "started",
+             "complete", "work", "optimization", "status", "message")
 measure <- function(t, nrows, r, latinize, seed) {
   ncols <- t %/% nrows
   B_row <- if (latinize) nrows else r * nrows
@@ -224,12 +231,11 @@ measure <- function(t, nrows, r, latinize, seed) {
         }
       }
       row$stage1_full_rank <- full_rank(s1$treatments)
-      w <- ns$onestage_work_weight(3L, B)
       state <- get(".Random.seed", envir = globalenv())
       reset()
-      js <- ns$crossed_search(s1$treatments, t, r, nrows, ncols, shared = latinize,
-                              work_cap = (limits$work - s1$work) / w)
-      row$joint_work <- w * js$search$work
+      joint_limit <- ns$onestage_engine_limit(3L, t, r, B, limits$work - s1$work, B_row)
+      js <- ns$crossed_search(s1$treatments, t, r, nrows, ncols, shared = latinize, work_cap = joint_limit)
+      row$joint_work <- ns$onestage_weighted_work(3L, t, r, B, js$search$work, B_row)
       row$joint_seconds <- engine()[["seconds"]]
       row$joint_stop <- js$search$stop_reason
       row$joint_capped <- js$search$work_capped
@@ -240,8 +246,9 @@ measure <- function(t, nrows, r, latinize, seed) {
       if (js$search$repair != "none") {
         assign(".Random.seed", state, envir = globalenv())
         alone <- ns$crossed_search(s1$treatments, t, r, nrows, ncols, shared = latinize, budget = 0,
-                                   work_cap = (limits$work - s1$work) / w)
-        row$repair_work <- w * (alone$search$work - alone$search$start_work - alone$search$finish_charged)
+                                   work_cap = joint_limit)
+        row$repair_work <- ns$onestage_work_weight(3L, t, B)[["search"]] *
+          (alone$search$work - alone$search$start_work - alone$search$finish_charged)
       }
     } else if (what == "startup" || what == "rate") {
       start <- as.vector(vapply(seq_len(r), function(m) sample.int(t), integer(t)))
@@ -249,8 +256,9 @@ measure <- function(t, nrows, r, latinize, seed) {
         mode <- modes[[stage]]
         blocks <- if (stage == "row") B_row else B_col
         work <- ns$onestage_call_work(mode, t, r, blocks)
-        w <- ns$onestage_work_weight(mode, blocks)
-        limit <- if (what == "startup") sum(work) - work[["finish"]] else limits$work / w - work[["finish"]]
+        limit <- if (what == "startup") sum(work) - work[["finish"]] else {
+          ns$onestage_engine_limit(mode, t, r, blocks, limits$work)
+        }
         reset()
         out <- quiet(step(stage, start, limit, lifted = what == "rate"))
         short <- if (stage == "row") "row" else "col"
@@ -263,13 +271,13 @@ measure <- function(t, nrows, r, latinize, seed) {
         if (!is.null(out) && out$scored) start <- out$treatments
       }
       work <- ns$onestage_call_work(3L, t, r, B, B_row)
-      w <- ns$onestage_work_weight(3L, B)
       reset()
       js <- if (what == "startup") {
         ns$crossed_search(start, t, r, nrows, ncols, shared = latinize, budget = 1, work_cap = sum(work))
       } else {
         ns$crossed_search(start, t, r, nrows, ncols, shared = latinize, budget = .Machine$integer.max,
-                          work_cap = limits$work / w, max_stale_escapes = .Machine$integer.max)
+                          work_cap = ns$onestage_engine_limit(3L, t, r, B, limits$work, B_row),
+                          max_stale_escapes = .Machine$integer.max)
       }
       row$joint_work <- js$search$work
       row$joint_seconds <- engine()[["seconds"]]
@@ -302,6 +310,8 @@ measure <- function(t, nrows, r, latinize, seed) {
       row$span_seconds <- e[["span"]]
       row$engine_calls <- e[["calls"]]
       row$joint_efficiency_seconds <- log$efficiency
+      row$report_seconds <- log$report
+      row$concurrence_seconds <- log$concurrence
       row$optimization <- design$infoDesign$optimization
       row$requested <- design$infoDesign$joint_searches$requested
       row$complete <- design$infoDesign$joint_searches$completed

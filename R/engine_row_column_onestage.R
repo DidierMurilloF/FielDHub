@@ -18,33 +18,93 @@ onestage_form_blocks <- 500
 #' `onestage_work_limit` (W) is one cap per build, in weighted work: every
 #' stage 1, repair and joint search of the build together. Work is the
 #' engine's own count (about one unit per multiply-add of the dense algebra,
-#' plus a fixed charge per evaluation), times `onestage_work_weight()` of the
-#' call. A call that reaches the limit it was given is cut, not refused: it
+#' plus a fixed charge per evaluation), weighted by `onestage_work_weight()`.
+#' A call that reaches the limit it was given is cut, not refused: it
 #' returns the design it holds. So where a build is cut depends on the seed
 #' and the inputs only, never on the clock. It stays at the resolvable cap,
-#' 2e11, which modes 1 and 2 reach in 8.1-13.3 s on the reference machine;
-#' it is not lowered to meet the time rule, because that would cut `os`
-#' shapes. With the joint stage's present effort (`onestage_joint_passes`),
-#' measured 2026-11-22 (one search, seed 1), a nested search uses 4.7e10
-#' units at 200/100/4, 3.2e10 at 200/2/4 and 8.2e10 at 500/10/4, so at
-#' `iterations` = 200 the builds of the first two are cut after about 4 and 6
-#' of their 10 searches.
+#' 2e11; it is not lowered to meet the time rule, because that would cut
+#' `os` shapes. With the joint stage's present effort
+#' (`onestage_joint_passes`), measured 2026-11-22 (one search, seed 1), a
+#' nested search uses 4.7e10 units at 200/100/4, 3.2e10 at 200/2/4 and
+#' 8.2e10 at 500/10/4, so at `iterations` = 200 the builds of the first two
+#' are cut after about 4 and 6 of their 10 searches.
 #'
 #' `onestage_startup_limit` and `onestage_memory_limit` bound what cannot be
-#' cut: the start and the finish of an engine call (`onestage_call_work()`)
-#' and its dense state, 8 (B^2 + B v) bytes (`onestage_startable()`).
+#' cut: the start and the finish of an engine call (`onestage_call_work()`,
+#' weighted) and its memory (`onestage_startable()`).
 #' `onestage_row_share` and `onestage_column_share` are the parts of W the
 #' two steps of stage 1 may use in each search, so the repair and the joint
 #' stage of search 1 always have at least half the cap.
 #'
-#' START VALUES (Task 8 Step 3b): the start-up and memory limits, the shares
-#' and the weight are set from measurements in Task 8 Step 5.
+#' Measured 2026-11-22 (Task 8 Step 5; reference machine, idle, one run at a
+#' time, installed build of d552f67; `tools/measure-onestage-work.R`, runs
+#' and logs in `~/fieldhub-libs/runs/phase2/t8s5/`), with a weight of 1
+#' everywhere and these shares.
+#'
+#' Time rule (spec 6.1 W7), engine time of whole builds at `iterations` =
+#' 200, first engine call to last. Builds whose calls all have at most 500
+#' block columns, so a weight of 1: the three `os` shapes the cap cuts,
+#' 200/100/4, 200/2/4 and 200/100/3 nested, 14.2-14.5 s, 14.1 s and 12.8-12.9
+#' s; nested 2000/20/4 13.0-13.1 s; every other one at most 12.3 s (t = 500,
+#' 1000, 1500 and 2000; search 1 of nested 2000/100/4, which no build run
+#' held, took 14.3 s in `what=stages`). So W stays 2e11. Three builds with larger calls broke the
+#' rule at weight 1: nested 1000/500/4 15.5 s, nested 1500/750/3 15.2 s and
+#' latinized 2000/1000/3 15.5 and 14.7 s (two seeds). The weights below are
+#' for them; the builds have to be timed again with the weights (the
+#' `confirm` run of Task 8 Step 5).
+#'
+#' Start and finish (`what=startup`): the slowest are the joint call of
+#' nested 2000/1000/4, 2.23 s for 3.57e10 units (4008 block columns), and
+#' the row and column steps with 4000 blocks (nested 2000/1000/4 and
+#' 2000/2/4), 1.67 s for 2.45e10 units. `onestage_startup_limit` is the
+#' smallest value of two digits that holds the largest weighted start plus
+#' finish of the universe, 5.58e10 (that joint call, 3.82e10 by the formula,
+#' times 1.46).
+#'
+#' Shares: no `os` shape has a step of stage 1 cut in search 1 (438 builds,
+#' two seeds; the largest row step uses 3.8% of W, the largest column step
+#' 1.2%), and no universe shape has a repair cut in search 1 (570 builds).
+#' With the weights the largest need of a stage, as a part of the room it is
+#' sure of: row step 0.46 (2.73e10 of 6e10), column step 0.61 (2.46e10 of
+#' 4e10, nested 2000/2/4), joint call 0.56 (5.58e10 of 1e11).
+#'
+#' Memory: peak resident memory of one R process (`/usr/bin/time -l`), which
+#' holds about 100 MB before any engine call. S is the dense state of the
+#' joint call, 8 (B^2 + B v) bytes.
+#'
+#' | Shape | S, MB | Engine calls alone | Whole build | Whole call |
+#' |---|---|---|---|---|
+#' | 2000/1000/4 nested | 193 | 1310 | 1378 | 1646 |
+#' | 2000/2/4 nested | 193 | 1052 | 1114 | 1153 |
+#' | 2000/1000/3 nested | 120 | 885 | | 1067 |
+#' | 1500/750/4 nested | 108 | 777 | | 941 |
+#' | 1000/500/4 nested | 48 | 388 | 452 | 570 |
+#' | 500/250/4 nested | 12 | 160 | | 260 |
+#' | 2000/1000/4 latinized | 24 | 226 | 420 | 581 |
+#'
+#' The engine calls take 4.9 to 6.5 times S above the 100 MB (the engine
+#' holds several matrices of the order of the state). So
+#' `onestage_memory_factor` is 6.5, the test of `onestage_startable()` is
+#' 6.5 S <= `onestage_memory_limit`, and the limit is the smallest value of
+#' two digits that holds the universe: 6.5 x 1.926e8 = 1.25e9 bytes. A whole
+#' `row_column()` call at that size peaked at 1.65e9 bytes.
+#'
+#' Whole `row_column(iterations = 200)` calls (`what=call`), seconds: 14.3
+#' (latinized 2000/20/4), 14.6 (nested 1000/2/4), 17.2 (nested 2000/20/4),
+#' 18.9 (latinized 2000/2/4), 23.1 (nested 2000/2/4), 33.7 (nested
+#' 2000/1000/4). None is inside 15 s (60 s at a quarter of the speed), so
+#' the documentation says that the work of the search is capped, not that
+#' the call ends in a bounded time. Of the 33.7 s, 14.2 s were the singular
+#' value decomposition of the Row report, which is now read from a Gram
+#' matrix (`block_incidence_gram_values()`).
 #' @noRd
 onestage_work_limit <- 2e11
 #' @noRd
-onestage_startup_limit <- 1e11
+onestage_startup_limit <- 5.6e10
 #' @noRd
-onestage_memory_limit <- 1e9
+onestage_memory_limit <- 1.3e9
+#' @noRd
+onestage_memory_factor <- 6.5
 #' @noRd
 onestage_row_share <- 0.3
 #' @noRd
@@ -59,14 +119,114 @@ onestage_limits <- function() {
        column_share = onestage_column_share, form_blocks = onestage_form_blocks)
 }
 
-#' Weight of the work of one engine call in the work cap (phase 2 spec 6.1
-#' W1): a unit of work takes longer when the matrices are large, so the work
-#' of a call with B block columns counts as w times the engine's count. It is
-#' 1 up to 500 block columns (every `os` shape) and non-decreasing above, and
-#' it is the larger of the search's ratio and that of the start plus the
-#' finish. START VALUE: 1 everywhere; Task 8 Step 5 calibrates it.
+#' Weights of the work of one engine call in the work cap (phase 2 spec 6.1
+#' W1; controller ruling R10, 2026-11-22): a unit of work takes longer when
+#' the matrices are large, and by a different factor in the search of a call
+#' than in its start and finish. So the call's work counts in two parts:
+#' `fixed` times its start and finish (`onestage_call_work()`) and `search`
+#' times the rest of the engine's count (`onestage_weighted_work()`). Both
+#' are 1 up to 500 block columns (every `os` shape) and non-decreasing
+#' above, steps at 750, 1000, 2000, 3000 and 4000 block columns of the call.
+#'
+#' Each weight is the seconds per unit of that part, the slowest call of the
+#' size class, over the seconds per unit of the slowest call of the same
+#' mode and part with at most 500 block columns (ruling R10.3), rounded up
+#' to two decimals and never below the class before. For the start and
+#' finish of mode 3 the unit depends on the form of the dense state
+#' (`onestage_dense_work()`), so the treatment-space form (v < B) and the
+#' block-space form have their own row.
+#'
+#' Measured 2026-11-22 (Task 8 Step 5; `tools/measure-onestage-work.R`,
+#' `what=rate` for the search and `what=startup`, median of 5 seeds, for the
+#' start and finish; 88 and 96 shapes and codings at t = 200 to 2000;
+#' `~/fieldhub-libs/runs/phase2/t8s5/`). Nanoseconds per unit, fastest to
+#' slowest call:
+#'
+#' | Mode, part | B <= 500 | 501-750 | 751-1000 | 1001-2000 | 2001-3000 | 3001-4000 | 4008 |
+#' |---|---|---|---|---|---|---|---|
+#' | 1 search | .019-.048 | .045-.050 | .048 | .050-.057 | .060-.070 | .071 | |
+#' | 2 search | .036-.067 | .052-.054 | .055 | .056-.060 | .063-.070 | .070 | |
+#' | 4 search | .018-.038 | .035-.043 | .041-.054 | | | | |
+#' | 3 search | .055-.081 | .066-.078 | .066-.084 | .062-.089 | .075-.084 | .070-.092 | .070-.077 |
+#' | 1 start, finish | .061 | .060-.061 | .061 | .061-.062 | .065-.067 | .068 | |
+#' | 2 start, finish | .061-.079 | .060 | .061 | .061-.062 | .065-.067 | .068 | |
+#' | 4 start, finish | .062-.072 | .065-.068 | .066-.069 | | | | |
+#' | 3 start, finish, block form | .044-.052 | .045-.048 | .050-.055 | .051-.055 | | | |
+#' | 3 start, finish, treatment form | | .075 | .061-.062 | .058-.069 | .058-.065 | .057-.064 | .060-.063 |
+#'
+#' - The baseline of mode 4 leaves out the column steps of a design with two
+#'   columns (2 blocks), .085-.162: they use at most 8e8 units of a build.
+#' - Steps with less than 5 ms of work are left out (the clock of the steps
+#'   has 1 ms).
+#' - The search of a call depends on r and on the coding as much as on its
+#'   size: at 1002 block columns mode 3 takes .062 (latinized 2000/1000/2)
+#'   to .089 (latinized 2000/2/4).
+#' - Check (ruling R10.2): for every measured call above 500 block columns
+#'   and each part, the seconds per weighted unit are at most the baseline
+#'   and at least the baseline over 1.5. The lowest is the baseline over
+#'   1.45 (mode 3 search, latinized 2000/1000/2), then over 1.33 (mode 2
+#'   start and finish) and 1.32.
+#' - No call is measured above 4008 block columns (modes 1 and 2: 4000;
+#'   mode 4: 1000; mode 3 block form: 1002): the last weight is kept there.
 #' @noRd
-onestage_work_weight <- function(mode, B) 1
+onestage_weight_breaks <- c(500, 750, 1000, 2000, 3000, 4000)
+#' @noRd
+onestage_weights <- list(
+  search = list(c(1, 1.05, 1.05, 1.20, 1.48, 1.49, 1.49),   # mode 1
+                c(1, 1.00, 1.00, 1.00, 1.06, 1.06, 1.06),   # mode 2
+                c(1, 1.00, 1.05, 1.11, 1.11, 1.14, 1.14),   # mode 3
+                c(1, 1.15, 1.42, 1.42, 1.42, 1.42, 1.42)),  # mode 4
+  fixed = list(c(1, 1.00, 1.00, 1.02, 1.10, 1.11, 1.11),
+               c(1, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00),
+               c(1, 1.00, 1.06, 1.08, 1.08, 1.08, 1.08),    # mode 3, block-space form
+               c(1, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00)),
+  fixed_treatment_form = c(1, 1.46, 1.46, 1.46, 1.46, 1.46, 1.46)  # mode 3, v < B
+)
+
+#' @return `c(search = , fixed = )` for a call of `mode` with `v` treatments
+#'   and `B` block columns.
+#' @noRd
+onestage_work_weight <- function(mode, v, B) {
+  class <- findInterval(B, onestage_weight_breaks, left.open = TRUE) + 1L
+  fixed <- if (mode == 3 && v < B) onestage_weights$fixed_treatment_form else onestage_weights$fixed[[mode]]
+  c(search = onestage_weights$search[[mode]][class], fixed = fixed[class])
+}
+
+#' The engine's work limit for a call with the weighted room `room` (phase 2
+#' spec 6.1 W1, W3; ruling R10.2), and the weighted work of a call from the
+#' engine's count.
+#'
+#' With S and F the start and the finish of `onestage_call_work()`: the
+#' first S units of the engine's count are its start, which with F counts
+#' `fixed` times; the rest is the search and counts `search` times. So a
+#' call with room L may count S + (L - fixed (S + F)) / search units before
+#' its finish, and never uses more than L. `count` is the engine's
+#' `search$work`: for mode 3 it includes the finish, which the engine
+#' charges itself; modes 1, 2 and 4 do not count their finish, so their
+#' limit leaves it out and it is added to what they used. Where the two
+#' weights are equal (always up to 500 block columns) the limit is L / w
+#' (less F) and the work w times the count (plus F), as before the ruling.
+#' `room` must hold the weighted start and finish.
+#' @noRd
+onestage_engine_limit <- function(mode, v, r, B, room, B_row = NULL) {
+  weight <- onestage_work_weight(mode, v, B)
+  work <- onestage_call_work(mode, v, r, B, B_row)
+  counted_finish <- if (mode == 3) 0 else work[["finish"]]
+  if (weight[["search"]] == weight[["fixed"]]) return(room / weight[["search"]] - counted_finish)
+  work[["start"]] + (room - weight[["fixed"]] * sum(work)) / weight[["search"]] +
+    work[["finish"]] - counted_finish
+}
+#' @noRd
+onestage_weighted_work <- function(mode, v, r, B, count, B_row = NULL) {
+  weight <- onestage_work_weight(mode, v, B)
+  work <- onestage_call_work(mode, v, r, B, B_row)
+  if (weight[["search"]] == weight[["fixed"]]) {
+    return(weight[["search"]] * (if (mode == 3) count else count + work[["finish"]]))
+  }
+  before_finish <- if (mode == 3) max(0, count - work[["finish"]]) else count
+  weight[["fixed"]] * (min(before_finish, work[["start"]]) + work[["finish"]]) +
+    weight[["search"]] * max(0, before_finish - work[["start"]])
+}
 
 #' Work of one refresh and of one factorisation of an engine state with B
 #' block columns in `factors` block factors (1, or 2 for the joint state),
@@ -151,21 +311,23 @@ onestage_call_work <- function(mode, v, r, B, B_row = NULL) {
 }
 
 #' Whether an engine call of the onestage search can start and finish (phase
-#' 2 spec 6.1 W3): with w its weight, w (start + finish) is at most the
-#' start-up limit, the room the stage is sure of in search 1 (the row share,
-#' the column share, or what the two leave for the joint call) and `room`;
-#' and its dense state, 8 (B^2 + B v) bytes, fits the memory limit. With
-#' `room = Inf` the test reads the shape only. `stage` is "row", "column" or
-#' "joint"; by default the stage of modes 1, 2 and 3 (mode 4 runs both steps
-#' of a shared stage 1, so it must be named).
+#' 2 spec 6.1 W3): its weighted start plus finish (`onestage_call_work()`,
+#' the `fixed` weight of `onestage_work_weight()`) is at most the start-up
+#' limit, the room the stage is sure of in search 1 (the row share, the
+#' column share, or what the two leave for the joint call) and `room`; and
+#' its memory, `onestage_memory_factor` times the dense state of 8 (B^2 +
+#' B v) bytes, fits the memory limit. With `room = Inf` the test reads the
+#' shape only. `stage` is "row", "column" or "joint"; by default the stage
+#' of modes 1, 2 and 3 (mode 4 runs both steps of a shared stage 1, so it
+#' must be named).
 #' @noRd
 onestage_startable <- function(mode, v, r, B, room = Inf, limits = onestage_limits(),
                                stage = c("row", "column", "joint")[mode], B_row = NULL) {
   work <- onestage_call_work(mode, v, r, B, B_row)
   sure <- limits$work * switch(stage, row = limits$row_share, column = limits$column_share,
                                joint = 1 - limits$row_share - limits$column_share)
-  onestage_work_weight(mode, B) * sum(work) <= min(limits$startup, sure, room) &&
-    8 * (as.double(B)^2 + as.double(B) * v) <= limits$memory
+  onestage_work_weight(mode, v, B)[["fixed"]] * sum(work) <= min(limits$startup, sure, room) &&
+    onestage_memory_factor * 8 * (as.double(B)^2 + as.double(B) * v) <= limits$memory
 }
 
 #' Blocks that span segments (block engine mode 4, phase 2 spec 6.1)
@@ -258,11 +420,11 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #' gives a size warning.
 #' - The row step may use `limits$row_share * limits$work` and the column
 #'   step `limits$column_share * limits$work`, and never more than is left of
-#'   `work_left`. A step with room L is called with the engine limit L / w
-#'   less its finish (`onestage_work_weight()`, `onestage_call_work()`), and
-#'   w times the engine's count plus the finish is what it has used. A step
-#'   that reaches its limit is cut: it returns its best design so far, and
-#'   that design is the stage 1 design.
+#'   `work_left`. A step with room L is called with the engine limit of
+#'   `onestage_engine_limit()` (L / w less its finish where one weight w
+#'   holds for the call), and `onestage_weighted_work()` of the engine's
+#'   count is what it has used. A step that reaches its limit is cut: it
+#'   returns its best design so far, and that design is the stage 1 design.
 #' - A step that is not startable by its shape (`onestage_startable()`, the
 #'   backstop beyond the measured universe) is not called. The row step then
 #'   draws random replicates until the rows are connected (up to 10 draws; if
@@ -331,14 +493,15 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_left, first,
     if (!onestage_startable(mode, v, r, B, limits = limits, stage = stage)) {
       return(list(status = "not_started", used = 0))
     }
-    weight <- onestage_work_weight(mode, B)
     work <- onestage_call_work(mode, v, r, B)
-    if (weight * sum(work) > room) return(list(status = "none", used = 0))
-    out <- quietly(run(room / weight - work[["finish"]]))
+    if (onestage_work_weight(mode, v, B)[["fixed"]] * sum(work) > room) {
+      return(list(status = "none", used = 0))
+    }
+    out <- quietly(run(onestage_engine_limit(mode, v, r, B, room)))
     # A call that failed is counted at its whole room (its work is not known).
     if (is.null(out)) return(list(status = "none", used = room))
     ran <- !is.null(out$search$work)
-    used <- if (ran) weight * (out$search$work + work[["finish"]]) else 0
+    used <- if (ran) onestage_weighted_work(mode, v, r, B, out$search$work) else 0
     if (!out$scored) return(list(status = "none", used = used))
     cut <- ran && (isTRUE(out$search$work_capped) || identical(out$search$stop_reason, "time_limit"))
     list(status = if (cut) "cut" else "complete", treatments = as.integer(out$treatments), used = used)
