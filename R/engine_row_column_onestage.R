@@ -112,10 +112,20 @@ onestage_dense_work <- function(v, r, B, factors, sizes2, form) {
 #' step), with R a refresh of the step's state: the engine scores a start
 #' with n + B evaluations and one refresh (modes 1 and 4), or one refresh
 #' after `rows_within_columns()` has scored the given design once (mode 2);
-#' the start is twice that. The finish is what the engine does not charge
-#' after its search: one drift check, B (3 B + 3 n), the final refresh, and
-#' one rank-2 update, 4 B^2 + 2 B v, by which the last accepted swap may pass
-#' the limit. R reserves it: such a call gets its limit less the finish.
+#' the start is twice that. The finish is what R reserves for the work the
+#' engine does not charge: the final refresh of the call, one drift check,
+#' B (3 B + 3 n), and one rank-2 update, 4 B^2 + 2 B v, by which the last
+#' accepted swap may pass the limit. Such a call gets its limit less the
+#' finish. Not counted and not reserved (src/blocks_engine.cpp,
+#' `run_search()`): every search of the call ends with one drift check that
+#' is not charged, so a call of s searches does s - 1 more of them than the
+#' one reserved (s is 20 in mode 4; in mode 1 it is `resolvable_searches()`,
+#' 20 up to 1000 blocks and 1 from 2715; 1 in mode 2), and a check that
+#' alarms adds one refresh of that search's design. The checks are small
+#' beside the cap: the 19 of a shared row step with 1000 rows and n = 8000
+#' are 5.1e8 units, 0.26% of `onestage_work_limit`, and the largest nested
+#' row step with 20 searches (1000 blocks, n = 4000) has 2.9e8. The refresh
+#' after an alarm is the one dense step of spec 6.1 W7.
 #' @noRd
 onestage_call_work <- function(mode, v, r, B, B_row = NULL) {
   v <- as.double(v)

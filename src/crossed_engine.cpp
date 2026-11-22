@@ -196,10 +196,10 @@ class Engine {
 
   // The stage 1 Row D and Row A, the exact floors of every design kept.
   void set_floors(double d, double a) { floor_d_ = d; floor_a_ = a; }
-  // Work of a refresh and of a factorisation of the joint state, and of a
-  // refresh of the Row state (CrossedSpace::refresh_work(), factor_work()).
-  void set_work(double joint_refresh, double joint_factor, double row_refresh) {
-    joint_refresh_ = joint_refresh; joint_factor_ = joint_factor; row_refresh_ = row_refresh;
+  // Work of a factorisation of the joint state and of a refresh of the Row
+  // state (CrossedSpace::factor_work(), refresh_work()).
+  void set_work(double joint_factor, double row_refresh) {
+    joint_factor_ = joint_factor; row_refresh_ = row_refresh;
   }
 
   // True if `treat` meets the Row floors exactly (Row D and Row A from
@@ -439,7 +439,7 @@ class Engine {
   double evaluation_work_;
   bool exact_floors_;
   double floor_d_ = 0.0, floor_a_ = 0.0;
-  double joint_refresh_ = 0.0, joint_factor_ = 0.0, row_refresh_ = 0.0;
+  double joint_factor_ = 0.0, row_refresh_ = 0.0;
   std::vector<int> scratch_;
 };
 
@@ -535,7 +535,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   Engine eng(lay, budget, out, std::max(1, refresh_every), evaluation_work, !slack_floors);
   eng.order_.assign(lay.n, 0);
 
-  eng.set_work(joint.refresh_work(), joint.factor_work(), row.refresh_work());
+  eng.set_work(joint.factor_work(), row.refresh_work());
   // Full rank of a plain joint state that has just been refreshed.
   auto fresh_full = [&](const CrossedSpace& s) {
     if (!cheap) return s.full_rank();
@@ -626,7 +626,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
             out.scoring_joint += 1;
           }
           if (again) {
-            out.refreshes += 2;
+            out.refreshes += cheap ? 1 : 2;
             entry = result;
             entry_full = true;
           }
