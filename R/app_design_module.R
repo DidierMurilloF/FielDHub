@@ -17,17 +17,20 @@ mod_design_ui <- function(id, spec) {
   toggle <- if (!is.null(spec$upload)) app_upload_spec(spec$upload)$toggle
   spatial <- identical(spec$kind, "spatial")
   feedback <- function(...) app_task_feedback(ns("run"), ...)
+  # Prototype: the modernized look and wording, on the lattice pages only
+  modern <- app_design_modern(spec)
+  outline <- if (modern) "btn-block fh-btn-outline" else "btn-block"
   # A spatial page offers its experiment once it is randomized
   save <- if (spatial) {
     shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Download field book (CSV)",
-                                          class = "btn-block"))
+                                          class = outline))
   } else {
     shiny::downloadButton(ns(ids[["field_book_download"]]), "Download field book (CSV)",
-                          class = "btn-block")
+                          class = outline)
   }
   tabs <- if (!spatial) list(
     if (isTRUE(spec$summary)) shiny::tabPanel(
-      "Summary Design",
+      if (modern) "Summary" else "Summary Design",
       feedback(
         shiny::br(),
         shiny::div(class = "fieldhub-design-summary",
@@ -37,32 +40,35 @@ mod_design_ui <- function(id, spec) {
       "Field Layout",
       feedback(
         shinyjs::useShinyjs(),
+        # Prototype: the view controls sit on the plot, not in a panel below it
         app_plot_ui(ns, list(id = ids[["plot"]], title = "Field layout or heatmap"),
-                    csv_id = ids[["layout_download"]]),
-        shiny::br(),
-        shiny::column(12, shiny::uiOutput(ns(spec$layout$output))))
+                    csv_id = ids[["layout_download"]],
+                    controls = if (modern) shiny::uiOutput(ns(spec$layout$output))),
+        if (!modern) shiny::br(),
+        if (!modern) shiny::column(12, shiny::uiOutput(ns(spec$layout$output))))
     ),
     shiny::tabPanel(
       "Field Book",
       feedback(app_output_feedback(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL)))
     )
   )
-  shiny::tagList(
-    shiny::h4(spec$title),
+  page <- shiny::tagList(
+    if (modern) app_design_header(spec) else shiny::h4(spec$title),
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
         app_sidebar_ui(spec, ns = ns, toggle = toggle),
         shiny::fluidRow(
           shiny::column(6, app_task_button(
-            ns("run"), "Run!", icon = shiny::icon("circle-nodes", verify_fa = FALSE),
-            class = "btn-block", results_id = ns("results"),
+            ns("run"), if (modern) "Generate design" else "Run!",
+            icon = shiny::icon("circle-nodes", verify_fa = FALSE),
+            class = if (modern) "btn-block fh-btn-primary" else "btn-block", results_id = ns("results"),
             busy_message = if (!is.null(spec$optim)) "Optimizing allocation..." else
               if (spatial) "Preparing field dimensions..." else spec$busy_message
           )),
           shiny::column(6, shiny::actionButton(
-            ns(ids[["simulate"]]), "Simulate!",
-            icon = shiny::icon("greater-than-equal", verify_fa = FALSE), class = "btn-block"
+            ns(ids[["simulate"]]), if (modern) "Simulate data" else "Simulate!",
+            icon = shiny::icon("greater-than-equal", verify_fa = FALSE), class = outline
           ))
         ),
         shiny::br(),
@@ -78,6 +84,30 @@ mod_design_ui <- function(id, spec) {
       )
     )
   )
+  if (modern) shiny::div(class = "fh-design", page) else page
+}
+
+#' Prototype: the pages that have the modernized look
+#' @noRd
+app_design_modern <- function(spec) {
+  spec$module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")
+}
+
+#' Prototype: a slim page header for a design page (title, purpose, guide)
+#' @noRd
+app_design_header <- function(spec) {
+  purpose <- c(
+    Square_Lattice = "Resolvable incomplete blocks for a square number of treatments, with blocks as large as the square root of that number.",
+    Rectangular_Lattice = "Resolvable incomplete blocks for k(k + 1) treatments in blocks of k plots.",
+    Alpha_Lattice = "Resolvable incomplete blocks for any number of treatments that splits into equal blocks."
+  )
+  modules <- vapply(fieldhub_app_registry(), `[[`, character(1), "spec")
+  guide <- fieldhub_help_topics()$guide[match(spec$module, modules)]
+  shiny::tags$header(class = "fh-design-head",
+    shiny::div(class = "fh-design-head-copy",
+      shiny::h2(spec$title),
+      shiny::p(purpose[[spec$module]])),
+    app_external_link("Design guide", guide, class = "fh-design-guide"))
 }
 
 #' Run one design page from its spec
@@ -96,6 +126,7 @@ mod_design_ui <- function(id, spec) {
 mod_design_server <- function(id, spec) {
   shiny::moduleServer(id, function(input, output, session) {
     workflow <- spec$workflow
+    if (app_design_modern(spec)) workflow$layout$toolbar <- TRUE
     controls <- Filter(function(control) !is.null(control$parse), spec$controls)
     raw_controls <- function(ids = vapply(controls, `[[`, character(1), "id")) {
       stats::setNames(lapply(ids, function(control_id) input[[control_id]]), ids)

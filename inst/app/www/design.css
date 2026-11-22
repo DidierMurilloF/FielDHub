@@ -1,0 +1,818 @@
+/* PROTOTYPE (spike/lattice-ui-prototype): the modernized design pages.
+   This file is the shared structure and the chosen look ("?look=a", the
+   default): Option A, neutral and clean, with Option B's charcoal navbar.
+   Options B and C are kept for reference in look-b.css and look-c.css.
+   Everything is scoped to the navbar, to .fh-design (the three Lattice
+   pages, see mod_design_ui()) and to modal dialogs. The content of the
+   Welcome, Help and About pages (.fh-page) is not touched and stays light.
+   Light and dark are the same rules over two sets of tokens. */
+
+/* Neutral surfaces in both themes. Green is the accent only: the primary
+   button, links, focus rings and the active result tab. */
+:root,
+html[data-theme="light"] {
+  --fh-gold: #ffc72a;
+  --fhd-bg: #f4f5f4;
+  --fhd-surface: #ffffff;
+  --fhd-field: #ffffff;
+  --fhd-ink: #22303c;
+  --fhd-muted: #56626b;
+  --fhd-line: #dde2e2;
+  --fhd-line-strong: #a9b1b3;
+  --fhd-action: #0a5640;
+  --fhd-action-hover: #073d2e;
+  --fhd-on-action: #ffffff;
+  --fhd-hover: #eef0f0;
+  --fhd-focus: #0a5640;
+  --fhd-danger: #b00020;
+  --fhd-paper: #ffffff;
+  --fhd-shadow: rgba(20, 28, 34, 0.16);
+  /* The navbar is a charcoal bar (the maintainer's pick, from Option B). */
+  --fhd-nav-bg: #22303c;
+  --fhd-nav-ink: #ffffff;
+  --fhd-nav-line: transparent;
+  --fhd-nav-control: rgba(255, 255, 255, 0.4);
+  --fhd-nav-hover: rgba(255, 255, 255, 0.12);
+  --fhd-nav-accent: #ffc72a;
+  /* Density and shape: each look sets its own (look-b.css, look-c.css). */
+  --fhd-control: 38px;
+  --fhd-text: 14px;
+  --fhd-label: 13px;
+  --fhd-radius: 5px;
+  --fhd-radius-lg: 8px;
+  --fhd-gap: 16px;
+}
+
+html[data-theme="dark"] {
+  --fhd-bg: #15181b;
+  --fhd-surface: #1e2226;
+  --fhd-field: #14171a;
+  --fhd-ink: #e8eaec;
+  --fhd-muted: #a7aeb5;
+  --fhd-line: #31373d;
+  --fhd-line-strong: #5b646d;
+  --fhd-action: #63c6a0;
+  --fhd-action-hover: #85d8b8;
+  --fhd-on-action: #0b1a14;
+  --fhd-hover: #292e33;
+  --fhd-focus: #63c6a0;
+  --fhd-danger: #ff9a9a;
+  --fhd-paper: #fbfbf9;
+  --fhd-shadow: rgba(0, 0, 0, 0.5);
+  --fhd-nav-bg: #1c2024;
+  --fhd-nav-ink: #e8eaec;
+  --fhd-nav-line: #31373d;
+}
+/* Native controls go dark only where the page does: the other design pages
+   are still light in this prototype. */
+html[data-theme="dark"] #fieldhub-app .fh-design,
+html[data-theme="dark"] .modal { color-scheme: dark; }
+
+/* ---------- Navbar (every page): a neutral bar on one row ---------- */
+#fieldhub-app .navbar-default {
+  min-height: 56px;
+  background: var(--fhd-nav-bg);
+  border: 0;
+  border-bottom: 1px solid var(--fhd-nav-line);
+}
+#fieldhub-app .navbar-default .navbar-brand {
+  height: 56px;
+  padding: 18px 14px 18px 18px;
+  color: var(--fhd-nav-ink);
+  font-size: 17px;
+  font-weight: 700;
+}
+#fieldhub-app .navbar-default .navbar-nav > li > a {
+  padding: 18px 11px;
+  color: var(--fhd-nav-ink);
+  line-height: 20px;
+}
+#fieldhub-app .navbar-default .navbar-nav > li > a:hover,
+#fieldhub-app .navbar-default .navbar-nav > li > a:focus,
+#fieldhub-app .navbar-default .navbar-brand:hover {
+  color: var(--fhd-nav-accent);
+  background: transparent;
+}
+#fieldhub-app .navbar-default .navbar-nav > .active > a,
+#fieldhub-app .navbar-default .navbar-nav > .active > a:hover,
+#fieldhub-app .navbar-default .navbar-nav > .active > a:focus,
+#fieldhub-app .navbar-default .navbar-nav > .open > a,
+#fieldhub-app .navbar-default .navbar-nav > .open > a:hover,
+#fieldhub-app .navbar-default .navbar-nav > .open > a:focus {
+  color: var(--fhd-nav-ink);
+  background: transparent;
+}
+#fieldhub-app .navbar-default .navbar-nav > .active > a {
+  box-shadow: inset 0 -3px 0 var(--fh-gold);
+}
+#fieldhub-app .navbar .dropdown-menu {
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: 0 0 6px 6px;
+  padding: 6px 0;
+  box-shadow: 0 8px 24px var(--fhd-shadow);
+}
+#fieldhub-app .navbar .dropdown-menu > li > a {
+  color: var(--fhd-ink);
+  padding: 8px 18px;
+}
+#fieldhub-app .navbar .dropdown-menu > li > a:hover,
+#fieldhub-app .navbar .dropdown-menu > li > a:focus {
+  background: var(--fhd-hover);
+  color: var(--fhd-ink);
+}
+#fieldhub-app .navbar .dropdown-menu > .active > a,
+#fieldhub-app .navbar .dropdown-menu > .active > a:hover,
+#fieldhub-app .navbar .dropdown-menu > .active > a:focus {
+  background: var(--fhd-hover);
+  color: var(--fhd-ink);
+  font-weight: 700;
+}
+#fieldhub-app .navbar a:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: -2px;
+}
+#fieldhub-app .navbar .fieldhub-navbar-logo {
+  width: auto;
+  height: 32px;
+  margin: 12px 14px 12px 8px;
+  border-radius: 4px;
+}
+
+#fieldhub-app .fh-theme-toggle {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 10px 6px 0;
+  padding: 0;
+  color: var(--fhd-nav-ink);
+  background: transparent;
+  border: 1px solid var(--fhd-nav-control);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+#fieldhub-app .fh-theme-toggle:hover {
+  background: var(--fhd-nav-hover);
+  border-color: var(--fhd-nav-ink);
+}
+#fieldhub-app .fh-theme-toggle:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 2px;
+}
+
+/* Prototype only: pick one of the three looks (theme.js). */
+#fieldhub-app .fh-look-switch {
+  float: right;
+  display: inline-flex;
+  height: 28px;
+  margin: 14px 6px 0;
+  border: 1px solid var(--fhd-nav-control);
+  border-radius: 14px;
+  overflow: hidden;
+}
+#fieldhub-app .fh-look-switch button {
+  width: 28px;
+  padding: 0;
+  color: var(--fhd-nav-ink);
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 26px;
+  cursor: pointer;
+}
+#fieldhub-app .fh-look-switch button:hover { background: var(--fhd-nav-hover); }
+#fieldhub-app .fh-look-switch button[aria-pressed="true"] {
+  color: var(--fhd-nav-bg);
+  background: var(--fhd-nav-ink);
+}
+#fieldhub-app .fh-look-switch button:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: -2px;
+}
+
+/* ---------- Page ---------- */
+#fieldhub-app .fh-design {
+  min-height: calc(100vh - var(--fieldhub-navbar-height, 62px));
+  background: var(--fhd-bg);
+  color: var(--fhd-ink);
+  font-size: var(--fhd-text);
+}
+
+/* A quiet title block on the page background, closed by a hairline. */
+#fieldhub-app .fh-design-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 32px;
+  margin: 0 28px;
+  padding: 24px 0 16px;
+  border-bottom: 1px solid var(--fhd-line);
+}
+#fieldhub-app .fh-design-head h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--fhd-ink);
+}
+#fieldhub-app .fh-design-head p {
+  margin: 5px 0 0;
+  max-width: 78ch;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--fhd-muted);
+}
+#fieldhub-app .fh-design-head a.fh-design-guide {
+  flex: none;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+#fieldhub-app .fh-design-head a.fh-design-guide::after {
+  content: "\2197";
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.85em;
+  text-decoration: none;
+}
+#fieldhub-app .fh-design-head a:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+#fieldhub-app .fh-design > .row {
+  margin: 0;
+  padding: 22px 13px 48px;
+}
+#fieldhub-app .fh-design [role="main"] > div > .row { margin: 0; }
+#fieldhub-app .fh-design h3,
+#fieldhub-app .fh-design h4,
+#fieldhub-app .fh-design h5 { margin-left: 0; color: var(--fhd-ink); }
+#fieldhub-app .fh-design a { color: var(--fhd-action); }
+
+/* ---------- Surfaces ---------- */
+#fieldhub-app .fh-design .well {
+  margin: 0;
+  padding: 20px 20px 22px;
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+  box-shadow: none;
+}
+/* Plot type and layout options: a quiet strip under the plot. */
+#fieldhub-app .fh-design .tab-content .well {
+  margin-top: 4px;
+  padding: 16px 12px 4px;
+  background: transparent;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}
+#fieldhub-app .fh-design .tab-content .well .container-fluid { padding: 0; }
+#fieldhub-app .fh-design .tab-content .col-sm-12 { padding: 0; }
+
+/* The action group closes the sidebar. */
+#fieldhub-app .fh-design [role="complementary"] > .fieldhub-sidebar-controls {
+  padding-bottom: 6px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--fhd-line);
+}
+#fieldhub-app .fh-design [role="complementary"] > br { display: none; }
+#fieldhub-app .fh-design [role="complementary"] > .row { margin: 0 -5px 10px; }
+#fieldhub-app .fh-design [role="complementary"] > .row > [class*="col-"] { padding: 0 5px; }
+#fieldhub-app .fh-design .fieldhub-sidebar-controls .fieldhub-input-left { padding-right: 8px; }
+#fieldhub-app .fh-design .fieldhub-sidebar-controls .fieldhub-input-right { padding-left: 8px; }
+
+/* ---------- Controls (design pages and dialogs) ---------- */
+:is(#fieldhub-app .fh-design, .modal) .form-group { margin-bottom: var(--fhd-gap); }
+:is(#fieldhub-app .fh-design, .modal) .control-label {
+  margin-bottom: 6px;
+  font-size: var(--fhd-label);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--fhd-ink);
+}
+:is(#fieldhub-app .fh-design, .modal) .form-control,
+:is(#fieldhub-app .fh-design, .modal) .selectize-input,
+:is(#fieldhub-app .fh-design, .modal) .dataTables_wrapper select,
+:is(#fieldhub-app .fh-design, .modal) .dataTables_wrapper input {
+  height: var(--fhd-control);
+  min-height: var(--fhd-control);
+  padding: 0 11px;
+  font-size: var(--fhd-text);
+  line-height: calc(var(--fhd-control) - 2px);
+  color: var(--fhd-ink);
+  background: var(--fhd-field);
+  border: 1px solid var(--fhd-line-strong);
+  border-radius: var(--fhd-radius);
+  box-shadow: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+:is(#fieldhub-app .fh-design, .modal) .form-control::placeholder { color: var(--fhd-muted); opacity: 1; }
+:is(#fieldhub-app .fh-design, .modal) .form-control[readonly] { background: var(--fhd-field); }
+:is(#fieldhub-app .fh-design, .modal) .form-control:focus,
+:is(#fieldhub-app .fh-design, .modal) .selectize-input.focus,
+:is(#fieldhub-app .fh-design, .modal) .dataTables_wrapper select:focus,
+:is(#fieldhub-app .fh-design, .modal) .dataTables_wrapper input:focus {
+  border-color: var(--fhd-focus);
+  box-shadow: 0 0 0 2px var(--fhd-bg), 0 0 0 4px var(--fhd-focus);
+  outline: 0;
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-input {
+  align-items: center;
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-input > .item,
+:is(#fieldhub-app .fh-design, .modal) .selectize-input > input { color: var(--fhd-ink); }
+:is(#fieldhub-app .fh-design, .modal) .selectize-control.single .selectize-input::after {
+  border-color: var(--fhd-muted) transparent transparent;
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-control.single .selectize-input.dropdown-active::after {
+  border-color: transparent transparent var(--fhd-muted);
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-dropdown {
+  margin-top: 4px;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line-strong);
+  border-radius: var(--fhd-radius);
+  box-shadow: 0 8px 24px var(--fhd-shadow);
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-dropdown .option { padding: 8px 11px; }
+:is(#fieldhub-app .fh-design, .modal) .selectize-dropdown .active {
+  color: var(--fhd-ink);
+  background: var(--fhd-hover);
+}
+:is(#fieldhub-app .fh-design, .modal) .selectize-dropdown .selected {
+  color: var(--fhd-ink);
+  background: var(--fhd-hover);
+  font-weight: 700;
+}
+:is(#fieldhub-app .fh-design, .modal) :is(.radio, .checkbox, .radio-inline, .checkbox-inline) {
+  color: var(--fhd-ink);
+}
+:is(#fieldhub-app .fh-design, .modal) :is(.radio, .checkbox) label,
+:is(#fieldhub-app .fh-design, .modal) :is(.radio-inline, .checkbox-inline) {
+  font-size: 14px;
+  line-height: 20px;
+}
+:is(#fieldhub-app .fh-design, .modal) :is(.radio, .checkbox) + :is(.radio, .checkbox) { margin-top: 6px; }
+:is(#fieldhub-app .fh-design, .modal) input:is([type="radio"], [type="checkbox"]) {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--fhd-action);
+}
+:is(#fieldhub-app .fh-design, .modal) input:is([type="radio"], [type="checkbox"]):focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 2px;
+}
+:is(#fieldhub-app .fh-design, .modal) .help-block { color: var(--fhd-muted); font-size: 13px; }
+.fieldhub-input-error { color: var(--fhd-danger, #b00020); }
+
+/* File input: browse button and file name share one outline. */
+#fieldhub-app .fh-design .input-group .btn-file {
+  height: var(--fhd-control);
+  border-radius: var(--fhd-radius) 0 0 var(--fhd-radius);
+  border-right: 0;
+}
+#fieldhub-app .fh-design .input-group .form-control { border-radius: 0 var(--fhd-radius) var(--fhd-radius) 0; }
+#fieldhub-app .fh-design .progress {
+  height: 6px;
+  margin: 6px 0 0;
+  background: var(--fhd-line);
+  border-radius: 3px;
+  box-shadow: none;
+}
+#fieldhub-app .fh-design .progress-bar {
+  background: var(--fhd-action);
+  font-size: 0;
+  box-shadow: none;
+}
+
+/* ---------- Buttons ---------- */
+#fieldhub-app .fh-design .btn,
+.modal .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: var(--fhd-control);
+  padding: 0 14px;
+  font-size: var(--fhd-text);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line-strong);
+  border-radius: var(--fhd-radius);
+  box-shadow: none;
+  text-shadow: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+#fieldhub-app .fh-design .btn.btn-block { display: flex; width: 100%; }
+#fieldhub-app .fh-design .btn:hover,
+.modal .btn:hover {
+  color: var(--fhd-ink);
+  background: var(--fhd-hover);
+  border-color: var(--fhd-ink);
+}
+#fieldhub-app .fh-design .btn:focus-visible,
+.modal .btn:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 2px;
+}
+#fieldhub-app .fh-design .btn.fh-btn-primary,
+.modal .modal-footer .btn.action-button {
+  color: var(--fhd-on-action);
+  background: var(--fhd-action);
+  border-color: var(--fhd-action);
+}
+#fieldhub-app .fh-design .btn.fh-btn-primary:hover,
+.modal .modal-footer .btn.action-button:hover {
+  color: var(--fhd-on-action);
+  background: var(--fhd-action-hover);
+  border-color: var(--fhd-action-hover);
+}
+#fieldhub-app .fh-design .btn[disabled],
+#fieldhub-app .fh-design .btn.disabled { opacity: 0.55; cursor: not-allowed; }
+/* Plot downloads: small and quiet, they are not the page's main action. */
+#fieldhub-app .fh-design .fieldhub-layout-downloads .btn {
+  height: 32px;
+  padding: 0 11px;
+  font-size: 13px;
+  color: var(--fhd-ink);
+  border-color: var(--fhd-line);
+  background: var(--fhd-surface);
+}
+#fieldhub-app .fh-design .fieldhub-layout-downloads .btn:hover {
+  border-color: var(--fhd-ink);
+  background: var(--fhd-hover);
+}
+
+/* ---------- Result tabs ---------- */
+#fieldhub-app .fh-design .nav-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 4px;
+  border-bottom: 1px solid var(--fhd-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#fieldhub-app .fh-design .nav-tabs > li { float: none; flex: none; margin: 0; }
+#fieldhub-app .fh-design .nav-tabs > li > a {
+  margin: 0;
+  padding: 11px 14px 10px;
+  font-size: 15px !important;
+  font-weight: 600;
+  color: var(--fhd-muted);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+}
+#fieldhub-app .fh-design .nav-tabs > li > a:hover {
+  color: var(--fhd-ink);
+  border-bottom-color: var(--fhd-line-strong);
+}
+#fieldhub-app .fh-design .nav-tabs > li.active > a,
+#fieldhub-app .fh-design .nav-tabs > li.active > a:hover,
+#fieldhub-app .fh-design .nav-tabs > li.active > a:focus {
+  color: var(--fhd-ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid var(--fhd-action);
+}
+#fieldhub-app .fh-design .nav-tabs > li > a:focus-visible {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: -2px;
+}
+
+/* ---------- Plot card: view controls and downloads in its header, the
+   plot on paper below (light in both themes) ---------- */
+/* The plot is drawn at the size of .fieldhub-layout-image (layout-images.js)
+   and .has-plot comes and goes with every redraw. So .has-plot may change
+   colours only: if it moved or resized the image box, each redraw would ask
+   for another size and the plot would redraw forever. */
+#fieldhub-app .fh-design .fieldhub-plot-panel {
+  margin-top: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--fhd-radius-lg);
+}
+#fieldhub-app .fh-design .fieldhub-plot-header {
+  align-items: center;
+  width: 100%;
+  min-height: 57px;
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid transparent;
+}
+#fieldhub-app .fh-design .fieldhub-plot-controls { flex: 1 1 320px; min-height: 36px; }
+#fieldhub-app .fh-design .fieldhub-plot-panel.has-plot {
+  background: var(--fhd-surface);
+  border-color: var(--fhd-line);
+}
+#fieldhub-app .fh-design .fieldhub-plot-panel.has-plot > .fieldhub-plot-header {
+  border-bottom-color: var(--fhd-line);
+}
+#fieldhub-app .fh-design .fieldhub-layout-image {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--fhd-line-strong);
+  border-radius: var(--fhd-radius-lg);
+}
+#fieldhub-app .fh-design .fieldhub-plot-panel.has-plot .fieldhub-layout-image {
+  background: var(--fhd-paper);
+  border-color: transparent;
+  border-radius: 0 0 calc(var(--fhd-radius-lg) - 1px) calc(var(--fhd-radius-lg) - 1px);
+}
+
+/* View controls (app_layout_toolbar()): plot type, then the layout menu. */
+#fieldhub-app .fh-view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+#fieldhub-app .fh-view-bar .form-group { margin: 0; }
+#fieldhub-app .fh-view-bar .shiny-input-container { width: auto; max-width: none; }
+#fieldhub-app .fh-segmented .control-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+#fieldhub-app .fh-segmented .shiny-options-group {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--fhd-bg);
+  border: 1px solid var(--fhd-line);
+  border-radius: calc(var(--fhd-radius) + 3px);
+}
+#fieldhub-app .fh-segmented label.radio-inline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+#fieldhub-app .fh-segmented label.radio-inline input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+#fieldhub-app .fh-segmented label.radio-inline span {
+  display: block;
+  height: 28px;
+  padding: 0 13px;
+  color: var(--fhd-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 28px;
+  border-radius: var(--fhd-radius);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+#fieldhub-app .fh-segmented label.radio-inline span:hover { color: var(--fhd-ink); }
+#fieldhub-app .fh-segmented label.radio-inline input:checked + span {
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  box-shadow: 0 1px 2px var(--fhd-shadow), 0 0 0 1px var(--fhd-line);
+}
+#fieldhub-app .fh-segmented label.radio-inline input:focus-visible + span {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 1px;
+}
+#fieldhub-app .fh-view-menu { position: relative; }
+#fieldhub-app .fh-design .btn.fh-view-menu-toggle {
+  height: 36px;
+  padding: 0 11px;
+  font-size: 13px;
+  border-color: var(--fhd-line);
+}
+#fieldhub-app .fh-design .btn.fh-view-menu-toggle[aria-expanded="true"] {
+  background: var(--fhd-hover);
+  border-color: var(--fhd-ink);
+}
+#fieldhub-app .fh-view-menu-caret { font-size: 10px; transition: transform 0.15s; }
+#fieldhub-app .fh-view-menu-toggle[aria-expanded="true"] .fh-view-menu-caret { transform: rotate(180deg); }
+#fieldhub-app .fh-view-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  display: grid;
+  gap: 12px;
+  width: 264px;
+  max-width: calc(100vw - 48px);
+  padding: 14px;
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line-strong);
+  border-radius: var(--fhd-radius-lg);
+  box-shadow: 0 12px 32px var(--fhd-shadow);
+}
+#fieldhub-app .fh-view-menu-panel[hidden] { display: none; }
+#fieldhub-app .fh-view-menu-panel .shiny-input-container { width: 100%; }
+#fieldhub-app .fh-view-menu-panel .control-label { margin-bottom: 4px; color: var(--fhd-muted); font-weight: 600; }
+#fieldhub-app .fh-design .fh-view-menu-panel select.form-control {
+  height: 36px;
+  padding: 0 8px;
+  line-height: 34px;
+}
+/* Empty state: Shiny's validation message, where the plot will be. */
+#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  color: var(--fhd-muted);
+  font-size: 15px;
+  text-align: center;
+}
+#fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation::before {
+  content: "";
+  width: 68px;
+  height: 46px;
+  border-radius: 3px;
+  /* A small field of plots. */
+  background:
+    linear-gradient(var(--fhd-surface), var(--fhd-surface)) 22px 0 / 2px 100% no-repeat,
+    linear-gradient(var(--fhd-surface), var(--fhd-surface)) 45px 0 / 2px 100% no-repeat,
+    linear-gradient(var(--fhd-surface), var(--fhd-surface)) 0 22px / 100% 2px no-repeat,
+    linear-gradient(var(--fhd-muted), var(--fhd-muted)) 24px 0 / 21px 22px no-repeat,
+    var(--fhd-line-strong);
+  opacity: 0.8;
+}
+
+/* ---------- Summary and field book ---------- */
+#fieldhub-app .fh-design pre {
+  padding: 16px 18px;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+  font-size: 13px;
+}
+#fieldhub-app .fh-design .fieldhub-design-summary { padding-right: 0; }
+#fieldhub-app .fh-design .dataTables_wrapper {
+  margin-top: 14px;
+  color: var(--fhd-ink);
+  font-size: 13.5px;
+}
+#fieldhub-app .fh-design .dataTables_wrapper :is(.dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_paginate),
+#fieldhub-app .fh-design .dataTables_wrapper label {
+  color: var(--fhd-muted) !important;
+  font-weight: 400;
+}
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_length select,
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_filter input {
+  height: 34px;
+  min-height: 34px;
+  padding: 4px 9px;
+  margin: 0 6px;
+}
+/* A scrolling field book is a header table over a body table: frame the pair. */
+#fieldhub-app .fh-design table.dataTable {
+  margin: 0 !important;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+#fieldhub-app .fh-design .dataTables_scroll,
+#fieldhub-app .fh-design .dataTables_wrapper > table.dataTable {
+  margin: 10px 0;
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+  overflow: hidden;
+}
+#fieldhub-app .fh-design .dataTables_scrollBody { border: 0 !important; }
+#fieldhub-app .fh-design table.dataTable thead :is(th, td) {
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border-bottom: 1px solid var(--fhd-line-strong);
+  font-weight: 700;
+}
+#fieldhub-app .fh-design table.dataTable thead td { padding: 6px; border-bottom-color: var(--fhd-line); }
+#fieldhub-app .fh-design table.dataTable thead td input.form-control {
+  height: 30px;
+  min-height: 30px;
+  padding: 3px 8px;
+  font-size: 12.5px;
+}
+#fieldhub-app .fh-design table.dataTable tbody :is(td, th) {
+  color: var(--fhd-ink);
+  border-top: 1px solid var(--fhd-line);
+  box-shadow: none;
+}
+#fieldhub-app .fh-design table.dataTable tbody tr { background: transparent; }
+#fieldhub-app .fh-design table.dataTable tbody tr:nth-child(even) > * { background: var(--fhd-bg); }
+#fieldhub-app .fh-design table.dataTable tbody tr:hover > * { background: var(--fhd-hover); }
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_paginate .paginate_button,
+#fieldhub-app .fh-design .pagination > li > a {
+  min-width: 34px;
+  padding: 6px 10px;
+  color: var(--fhd-ink) !important;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--fhd-radius);
+  font-size: 13.5px;
+}
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_paginate .paginate_button:hover,
+#fieldhub-app .fh-design .pagination > li > a:hover {
+  color: var(--fhd-ink) !important;
+  background: var(--fhd-hover);
+  border-color: var(--fhd-line);
+}
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+#fieldhub-app .fh-design .pagination > li.active > a {
+  color: var(--fhd-ink) !important;
+  background: var(--fhd-surface);
+  border-color: var(--fhd-line-strong);
+  font-weight: 700;
+}
+#fieldhub-app .fh-design .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+#fieldhub-app .fh-design .pagination > li.disabled > a {
+  color: var(--fhd-muted) !important;
+  opacity: 0.6;
+}
+#fieldhub-app .fh-design .noUi-target,
+#fieldhub-app .fh-design .noUi-connect { box-shadow: none; }
+
+/* ---------- Busy feedback ---------- */
+#fieldhub-app .fh-design .fieldhub-task-feedback,
+#fieldhub-app .fh-design .fieldhub-output-feedback { color: var(--fhd-muted); }
+#fieldhub-app .fh-design .fieldhub-task-spinner { color: var(--fhd-action); font-size: 34px; }
+#fieldhub-app .fh-design .shiny-output-error { color: var(--fhd-danger); }
+#fieldhub-app .fh-design .shiny-output-error-validation { color: var(--fhd-muted); }
+
+/* ---------- Dialogs (rendered outside #fieldhub-app) ---------- */
+.modal .modal-content {
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: 10px;
+  box-shadow: 0 18px 50px var(--fhd-shadow);
+}
+.modal .modal-header,
+.modal .modal-footer { border-color: var(--fhd-line); }
+.modal .modal-body { padding: 22px 24px 8px; }
+.modal .modal-footer { padding: 14px 24px; }
+.modal :is(h3, h4, h5) {
+  color: var(--fhd-ink);
+  font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.35;
+}
+.modal .modal-body h4 { font-size: 16px; margin-top: 0; }
+.modal .table { color: var(--fhd-ink); }
+.modal .table :is(th, td) { border-color: var(--fhd-line) !important; }
+.modal .table-striped > tbody > tr:nth-of-type(odd) { background: var(--fhd-bg); }
+
+/* ---------- Small screens: the sidebar stacks above the results ---------- */
+@media (max-width: 767px) {
+  #fieldhub-app .fh-design-head { margin: 0 16px; padding: 18px 0 14px; }
+  #fieldhub-app .fh-design-head h2 { font-size: 21px; }
+  #fieldhub-app .fh-design > .row { padding: 16px 1px 32px; }
+  #fieldhub-app .fh-design [role="complementary"] { margin-bottom: 18px; }
+  #fieldhub-app .fh-design .well { padding: 16px; }
+  #fieldhub-app .fh-design .fieldhub-layout-downloads { justify-content: flex-start; }
+  #fieldhub-app .fh-design .fieldhub-plot-toolbar { margin-left: 0; }
+  /* View controls first, downloads under them. */
+  #fieldhub-app .fh-design .fieldhub-plot-header { flex-direction: column-reverse; align-items: flex-start; }
+  #fieldhub-app .fh-design .fieldhub-plot-controls { flex: none; width: 100%; }
+  #fieldhub-app .fh-design .fieldhub-sidebar-controls :is(.fieldhub-input-left, .fieldhub-input-right) {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  #fieldhub-app .fh-design [role="complementary"] > .row > [class*="col-"] + [class*="col-"] { margin-top: 10px; }
+  /* The stacked navbar keeps its links inside the bar. */
+  #fieldhub-app .navbar-default .navbar-header,
+  #fieldhub-app .navbar-default .navbar-nav { margin: 0; }
+  #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 11px 18px; }
+  #fieldhub-app .navbar-default .navbar-nav > .active > a { box-shadow: inset 3px 0 0 var(--fh-gold); }
+  #fieldhub-app .navbar .fieldhub-navbar-logo { float: none; display: block; margin: 8px 18px 14px; }
+  #fieldhub-app .fh-segmented label.radio-inline span { padding: 0 10px; }
+  #fieldhub-app .fh-theme-toggle { position: absolute; top: 0; right: 4px; }
+  #fieldhub-app .fh-look-switch { position: absolute; top: 0; right: 52px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #fieldhub-app .fh-theme-toggle,
+  #fieldhub-app .fh-design *,
+  .modal * { transition: none !important; }
+}

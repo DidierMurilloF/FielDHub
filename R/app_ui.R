@@ -55,14 +55,24 @@ app_ui <- function(request) {
 #' @noRd
 app_add_external_resources <- function(){
   scripts <- c("corner.js", "shinybusy.js", "task-feedback.js", "output-feedback.js", "layout-images.js",
-               "home-links.js")
-  stylesheets <- c("style.css", "mobile.css")
+               "home-links.js", "theme.js", "layout-menu.js")
+  stylesheets <- c("style.css", "mobile.css", "design.css", "look-b.css", "look-c.css")
   
   shiny::addResourcePath(
     'www', app_sys('app/www')
   )
  
   shiny::tags$head(
+    # Set the colour theme before first paint (see theme.js)
+    shiny::tags$script(shiny::HTML(paste0(
+      "(function(){var t;try{t=localStorage.getItem('fieldhub-theme')}catch(e){}",
+      "var q=/[?&]theme=(dark|light)/.exec(location.search);if(q)t=q[1];",
+      "if(t!=='dark'&&t!=='light')t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';",
+      "var r=document.documentElement;r.setAttribute('data-theme',t);",
+      # Prototype only: which of the three looks (a, b or c)
+      "var k;try{k=localStorage.getItem('fieldhub-look')}catch(e){}",
+      "q=/[?&]look=([abc])/.exec(location.search);if(q)k=q[1];",
+      "r.setAttribute('data-look',/^[abc]$/.test(k)?k:'a')})();"))),
     shiny::tags$link(rel = "shortcut icon", href = "www/favicon.ico"),
     htmltools::htmlDependency(
       name = "fieldhub-resources",

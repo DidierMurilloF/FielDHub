@@ -1,0 +1,144 @@
+/* PROTOTYPE, Option C ("?look=c"): compact workbench. Two flush panes
+   instead of cards: a tinted inputs pane with a divider, results on the
+   page itself. Square corners, 32px controls, 13px type, boxed tabs, and a
+   thin gold rule under a slim navbar. Green stays on the primary button,
+   links, focus rings and the active tab. Structure is in design.css. */
+
+html[data-look="c"] {
+  --fhd-nav-bg: var(--fhd-surface);
+  --fhd-nav-ink: var(--fhd-ink);
+  --fhd-nav-line: var(--fhd-line);
+  --fhd-nav-control: var(--fhd-line-strong);
+  --fhd-nav-hover: var(--fhd-hover);
+  --fhd-nav-accent: var(--fhd-action);
+  --fhd-bg: #f0f2f2;
+  --fhd-control: 32px;
+  --fhd-text: 13px;
+  --fhd-label: 12px;
+  --fhd-radius: 2px;
+  --fhd-radius-lg: 2px;
+  --fhd-gap: 11px;
+}
+html[data-look="c"][data-theme="dark"] {
+  --fhd-bg: #121416;
+  --fhd-surface: #1a1d20;
+  --fhd-field: #0f1113;
+}
+
+/* Slim navbar closed by the gold rule */
+html[data-look="c"] #fieldhub-app .navbar-default {
+  min-height: 46px;
+  border-bottom: 3px solid var(--fh-gold);
+}
+html[data-look="c"] #fieldhub-app .navbar-default .navbar-brand {
+  height: 46px;
+  padding: 13px 12px 13px 16px;
+  font-size: 15px;
+  font-weight: 900;
+}
+html[data-look="c"] #fieldhub-app .navbar-default .navbar-nav > li > a {
+  padding: 13px 10px;
+  font-size: 13px !important;
+}
+html[data-look="c"] #fieldhub-app .navbar-default .navbar-nav > .active > a {
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--fhd-ink);
+}
+html[data-look="c"] #fieldhub-app .navbar .fieldhub-navbar-logo { height: 28px; margin: 9px 12px 9px 8px; border-radius: 2px; }
+html[data-look="c"] #fieldhub-app .fh-theme-toggle { width: 30px; height: 30px; margin-top: 8px; border-radius: 2px; }
+html[data-look="c"] #fieldhub-app .fh-look-switch { height: 30px; margin-top: 8px; border-radius: 2px; }
+html[data-look="c"] #fieldhub-app .fh-look-switch button { line-height: 28px; }
+
+/* Two panes under a one-line title bar */
+html[data-look="c"] #fieldhub-app .fh-design {
+  display: flex;
+  flex-direction: column;
+  background: var(--fhd-surface);
+}
+html[data-look="c"] #fieldhub-app .fh-design-head {
+  align-items: baseline;
+  margin: 0;
+  padding: 11px 20px;
+  border-bottom: 1px solid var(--fhd-line);
+}
+html[data-look="c"] #fieldhub-app .fh-design-head-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+}
+html[data-look="c"] #fieldhub-app .fh-design-head h2 { font-size: 18px; font-weight: 900; }
+html[data-look="c"] #fieldhub-app .fh-design-head p { margin: 0; font-size: 13px; }
+html[data-look="c"] #fieldhub-app .fh-design-head a.fh-design-guide { font-size: 13px; }
+
+html[data-look="c"] #fieldhub-app .fh-design > .row {
+  flex: 1;
+  display: flex;
+  padding: 0;
+}
+html[data-look="c"] #fieldhub-app .fh-design > .row::before,
+html[data-look="c"] #fieldhub-app .fh-design > .row::after { display: none; }
+html[data-look="c"] #fieldhub-app .fh-design > .row > .col-sm-4 {
+  padding: 16px 20px 28px;
+  background: var(--fhd-bg);
+  border-right: 1px solid var(--fhd-line);
+}
+html[data-look="c"] #fieldhub-app .fh-design > .row > .col-sm-8 { padding: 8px 20px 32px; }
+html[data-look="c"] #fieldhub-app .fh-design [role="complementary"] {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+html[data-look="c"] #fieldhub-app .fh-design [role="complementary"] > .fieldhub-sidebar-controls {
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+}
+html[data-look="c"] #fieldhub-app .fh-design [role="complementary"] > .row { margin-bottom: 8px; }
+html[data-look="c"] #fieldhub-app .fh-design .control-label,
+html[data-look="c"] .modal .control-label { margin-bottom: 3px; font-weight: 700; }
+html[data-look="c"] #fieldhub-app .fh-design :is(.radio, .checkbox) label,
+html[data-look="c"] #fieldhub-app .fh-design :is(.radio-inline, .checkbox-inline) { font-size: 13px; }
+html[data-look="c"] #fieldhub-app .fh-design .tab-content .well { padding: 12px 4px 0; }
+
+/* Boxed tabs: the active one opens onto the results */
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs {
+  gap: 0;
+  margin-bottom: 0;
+  overflow: visible;
+}
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li { margin-bottom: -1px; }
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li > a,
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li > a:hover {
+  padding: 8px 14px 8px;
+  font-size: 13px !important;
+  border: 1px solid transparent;
+  border-top: 2px solid transparent;
+}
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li.active > a,
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li.active > a:hover,
+html[data-look="c"] #fieldhub-app .fh-design .nav-tabs > li.active > a:focus {
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-top: 2px solid var(--fhd-action);
+  border-bottom-color: var(--fhd-surface);
+}
+
+html[data-look="c"] #fieldhub-app .fh-design .btn,
+html[data-look="c"] .modal .btn { padding: 0 11px; }
+html[data-look="c"] #fieldhub-app .fh-design .fieldhub-layout-downloads .btn { height: 28px; font-size: 12px; }
+html[data-look="c"] #fieldhub-app .fh-design .dataTables_wrapper { font-size: 12.5px; }
+html[data-look="c"] #fieldhub-app .fh-design table.dataTable :is(td, th) { padding: 5px 8px; }
+html[data-look="c"] #fieldhub-app .fh-design pre { font-size: 12px; }
+html[data-look="c"] .modal .modal-content { border-radius: 3px; }
+
+@media (max-width: 767px) {
+  html[data-look="c"] #fieldhub-app .fh-design > .row { display: block; }
+  html[data-look="c"] #fieldhub-app .fh-design > .row > .col-sm-4 {
+    padding: 14px 16px 18px;
+    border-right: 0;
+    border-bottom: 1px solid var(--fhd-line);
+  }
+  html[data-look="c"] #fieldhub-app .fh-design > .row > .col-sm-8 { padding: 8px 16px 28px; }
+  html[data-look="c"] #fieldhub-app .fh-design-head { padding: 11px 16px; }
+  html[data-look="c"] #fieldhub-app .fh-design .nav-tabs { overflow-x: auto; }
+}

@@ -1,0 +1,117 @@
+/* PROTOTYPE, Option B ("?look=b"): cards. A charcoal navbar, a white title
+   band, roomy rounded cards with soft elevation for the inputs and for the
+   results, and segmented tabs. Larger type and 42px controls. Green stays
+   on the primary button, links and focus rings. Structure is in design.css. */
+
+html[data-look="b"] {
+  --fhd-bg: #eceff0;
+  --fhd-line: #e1e5e6;
+  --fhd-control: 42px;
+  --fhd-text: 15px;
+  --fhd-label: 14px;
+  --fhd-radius: 9px;
+  --fhd-radius-lg: 14px;
+  --fhd-gap: 20px;
+  --fhd-nav-bg: #22303c;
+  --fhd-nav-ink: #ffffff;
+  --fhd-nav-line: transparent;
+  --fhd-nav-control: rgba(255, 255, 255, 0.4);
+  --fhd-nav-hover: rgba(255, 255, 255, 0.12);
+  --fhd-nav-accent: #ffc72a;
+  --fhd-lift: 0 1px 2px rgba(20, 28, 34, 0.06), 0 10px 28px rgba(20, 28, 34, 0.08);
+  --fhd-track: #eceff0;
+}
+html[data-look="b"][data-theme="dark"] {
+  --fhd-bg: #101214;
+  --fhd-surface: #1c2024;
+  --fhd-field: #14171a;
+  --fhd-line: #2c3238;
+  --fhd-nav-bg: #1c2024;
+  --fhd-nav-ink: #e8eaec;
+  --fhd-nav-line: #2c3238;
+  --fhd-lift: 0 0 0 1px #2c3238;
+  --fhd-track: #101214;
+}
+
+/* Title band */
+html[data-look="b"] #fieldhub-app .fh-design-head {
+  margin: 0;
+  padding: 30px 32px 26px;
+  background: var(--fhd-surface);
+  border-bottom: 1px solid var(--fhd-line);
+}
+html[data-look="b"] #fieldhub-app .fh-design-head h2 {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+html[data-look="b"] #fieldhub-app .fh-design-head p { margin-top: 8px; font-size: 16px; }
+html[data-look="b"] #fieldhub-app .fh-design-head a.fh-design-guide {
+  padding: 9px 14px;
+  color: var(--fhd-ink);
+  border: 1px solid var(--fhd-line-strong);
+  border-radius: 999px;
+  text-decoration: none;
+}
+html[data-look="b"] #fieldhub-app .fh-design-head a.fh-design-guide:hover { border-color: var(--fhd-ink); }
+
+html[data-look="b"] #fieldhub-app .fh-design > .row { padding: 28px 17px 56px; }
+
+/* Cards */
+html[data-look="b"] #fieldhub-app .fh-design [role="complementary"],
+html[data-look="b"] #fieldhub-app .fh-design [role="main"] > div {
+  background: var(--fhd-surface);
+  border: 0;
+  border-radius: var(--fhd-radius-lg);
+  box-shadow: var(--fhd-lift);
+}
+html[data-look="b"] #fieldhub-app .fh-design [role="complementary"] { padding: 26px 26px 28px; }
+html[data-look="b"] #fieldhub-app .fh-design [role="main"] > div { padding: 18px 22px 24px; }
+html[data-look="b"] #fieldhub-app .fh-design [role="complementary"] > .fieldhub-sidebar-controls { margin-bottom: 22px; }
+html[data-look="b"] #fieldhub-app .fh-design .tab-content .well {
+  margin-top: 16px;
+  padding: 18px 16px 4px;
+  background: var(--fhd-track);
+  border: 0;
+  border-radius: var(--fhd-radius);
+}
+
+/* Segmented tabs */
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs {
+  display: inline-flex;
+  max-width: 100%;
+  gap: 2px;
+  padding: 4px;
+  margin-bottom: 10px;
+  background: var(--fhd-track);
+  border: 0;
+  border-radius: 12px;
+}
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs > li > a,
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs > li > a:hover {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 9px;
+}
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs > li.active > a,
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs > li.active > a:hover,
+html[data-look="b"] #fieldhub-app .fh-design .nav-tabs > li.active > a:focus {
+  background: var(--fhd-surface);
+  border: 0;
+  box-shadow: 0 1px 3px var(--fhd-shadow);
+}
+html[data-look="b"][data-theme="dark"] #fieldhub-app .fh-design .nav-tabs > li.active > a { background: #2d3339; }
+
+html[data-look="b"] #fieldhub-app .fh-design .btn,
+html[data-look="b"] .modal .btn { padding: 0 18px; }
+html[data-look="b"] #fieldhub-app .fh-design .fieldhub-layout-downloads .btn { height: 34px; border-radius: 999px; }
+html[data-look="b"] #fieldhub-app .fh-design .fieldhub-layout-image { border-radius: var(--fhd-radius); }
+html[data-look="b"] #fieldhub-app .fh-design table.dataTable tbody :is(td, th) { padding: 11px 12px; }
+
+@media (max-width: 767px) {
+  html[data-look="b"] #fieldhub-app .fh-design-head { margin: 0; padding: 22px 16px 18px; }
+  html[data-look="b"] #fieldhub-app .fh-design-head h2 { font-size: 25px; }
+  html[data-look="b"] #fieldhub-app .fh-design > .row { padding: 16px 1px 32px; }
+  html[data-look="b"] #fieldhub-app .fh-design [role="complementary"] { padding: 18px; }
+  html[data-look="b"] #fieldhub-app .fh-design [role="main"] > div { padding: 12px 12px 18px; }
+}
