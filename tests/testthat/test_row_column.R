@@ -400,6 +400,20 @@ test_that("onestage reaches the recorded Row optimum", {
   }
 })
 
+test_that("onestage reaches the recorded joint efficiency on a larger nested shape", {
+  # Engine results can differ across platforms and builds.
+  skip_on_cran()
+  # Mean joint D of FielDHub 1.7.0's onestage over 200 seeds at iterations = 20
+  # (SD 0.000135). The one joint search of the call has to get there; ten
+  # passes and five escapes ended 0.0002 to 0.0005 below it on these seeds.
+  for (seed in 1:3) {
+    des <- row_column(t = 100, nrows = 5, reps = 4, seed = seed, iterations = 20)
+    expect_equal(des$infoDesign$optimization, "onestage")
+    bm <- des$blocksModel[[1]]
+    expect_gte(bm$`D-Efficiency`[bm$Level == "Row-by-Column"], 0.7457799)
+  }
+})
+
 test_that("onestage runs where blocksdesign fell back on some seeds", {
   skip_on_cran()
   shapes <- list(list(t = 9, nrows = 3, reps = 2, latinize = FALSE),

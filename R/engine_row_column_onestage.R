@@ -14,7 +14,11 @@
 #' limit at a quarter of the reference machine's speed (phase 1 rule). The
 #' measurements so far are with `onestage_predicted_work()`: at t <= 200 the
 #' largest search used 8.4e9 units, at 4-16e9 units per second on a loaded
-#' machine.
+#' machine. Those measurements predate the joint stage's present effort
+#' (`onestage_joint_passes`); with it (2026-11-22, one search, seed 1) a
+#' nested search uses 4.7e10 units at 200/100/4, 3.2e10 at 200/2/4 and 8.2e10
+#' at 500/10/4, so at `iterations` = 200 the builds of the first two stop on
+#' this cap after about 4 and 6 of their 10 searches.
 #' @noRd
 onestage_work_limit <- 2e11
 
@@ -192,19 +196,49 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_cap = onestag
   list(treatments = as.integer(treat), work = sum(step_work), step_work = step_work)
 }
 
-#' Evaluation budget of one joint-stage search (phase 2 spec 6.1): the default
-#' full-pass budget of one resolvable search over the r v (v - 1) / 2 pairs
-#' inside the replicates. Besides one evaluation per ratio and per accepted
+#' Effort of one joint-stage search (phase 2 spec 6.1): its evaluation budget
+#' in full passes over the r v (v - 1) / 2 pairs inside the replicates, and
+#' the number of failed escapes in a row that ends it.
+#'
+#' Measured 2026-11-22 (root cause of the nested joint D shortfall at t >= 50).
+#' The first values were resolvable mode's, ten passes and five escapes. On
+#' nested shapes with t >= 50 every search then stopped on the budget, before
+#' or just after its first local optimum (100/5/4: 0.7455 after 10 passes,
+#' 0.7458 at the first stale stop after 39), and five escapes of three
+#' row-preserving jumps rarely leave an optimum of that size: one search
+#' reached 0.7462 with 20 escapes and 0.7465 with 40, against the 1.7.0 mean
+#' of 0.74619 (SD 8.8e-5). More searches did not help, because each one ended
+#' as short as the first. Mean joint D less the 1.7.0 mean, in 1.7.0 SDs
+#' (rule: at least -0.5), 8 seeds, `iterations` = 200:
+#'
+#' | Nested shape | 10 passes, 5 | 200, 20 | 400, 40 | 800, 80 |
+#' |---|---|---|---|---|
+#' | 50/5/2 | -0.83 | +0.73 | +0.80 | +0.81 |
+#' | 100/5/2 | -1.62 | +1.51 | +1.92 | +3.06 |
+#' | 50/5/4 | -2.01 | +2.60 | +3.45 | +4.18 |
+#' | 100/5/4 | -5.71 | +2.04 | +3.20 | +4.96 |
+#'
+#' 400 passes and 40 escapes cost 3.1 s per call at 100/5/4, where 1.7.0 took
+#' 46 s. Small shapes end stale long before the budget, as before.
+#' @noRd
+onestage_joint_passes <- 400
+#' @noRd
+onestage_joint_stale_escapes <- 40L
+
+#' Evaluation budget of one joint-stage search (phase 2 spec 6.1):
+#' `onestage_joint_passes` full passes over the r v (v - 1) / 2 pairs inside
+#' the replicates, at least 5000 evaluations and at most
+#' `.Machine$integer.max`. Besides one evaluation per ratio and per accepted
 #' escape jump, every drift check charges n + B evaluations to it (as in
-#' resolvable mode), so on small shapes the budget, not staleness, can end a
-#' search (the Task 6 review saw it at 24/6/2 on some seeds). The joint stage's effort
-#' is set by the number of searches (`onestage_joint_searches()`), not by this
-#' budget. The work model of mode 3 (evaluation work, swap and refresh costs)
+#' resolvable mode). A search ends on it or after
+#' `onestage_joint_stale_escapes` failed escapes in a row, whichever comes
+#' first. The work model of mode 3 (evaluation work, swap and refresh costs)
 #' is resolvable mode's, copied rather than measured; the work cap and the
 #' admission fit above rest on measured work, not on that model.
 #' @noRd
 crossed_default_budget <- function(v, r) {
-  blocks_engine_default_budget(v * r, 1L, pairs = r * v * (v - 1) / 2, full_passes = TRUE)
+  pairs <- as.double(r) * v * (v - 1) / 2
+  min(max(onestage_joint_passes * pairs, 5000), .Machine$integer.max)
 }
 
 #' Joint stage of the onestage search (block engine mode 3, phase 2 spec 6.1)
@@ -214,7 +248,9 @@ crossed_default_budget <- function(v, r) {
 #' log det of rows and columns, under the Row D and Row A floors (running
 #' values against the fixed values of `start`), with escapes from
 #' row-preserving pairs. Rows and columns are nested in the replicates, or
-#' `shared` across them. Draws from R's generator.
+#' `shared` across them. The search ends on `budget` or after
+#' `max_stale_escapes` failed escapes in a row (`onestage_joint_passes`,
+#' `onestage_joint_stale_escapes`). Draws from R's generator.
 #'
 #' A start that fails the full-rank test of spec 5.1b is first repaired
 #' (spec 6.1 stage 2): first improvement on log det(C / r + eps P), eps =
@@ -241,7 +277,8 @@ crossed_default_budget <- function(v, r) {
 #'   `work_capped`, `debug_max_error`.
 #' @noRd
 crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_default_budget(v, r),
-                           work_cap, jumps_per_escape = 3L, max_stale_escapes = 5L) {
+                           work_cap, jumps_per_escape = 3L,
+                           max_stale_escapes = onestage_joint_stale_escapes) {
   v <- as.integer(v)
   r <- as.integer(r)
   nrows <- as.integer(nrows)
@@ -363,6 +400,16 @@ onestage_row_step_admitted <- function(v, r, nrows, work_cap) {
 #' shape is predicted below 3e10, far below 0.8 of the cap. Not measured:
 #' t >= 300, where the budget term E overstates the work (searches end stale
 #' long before the budget: median 0.36 of the row step's E at t <= 200).
+#'
+#' STALE FOR THE JOINT TERM (2026-11-22): the measurement above was taken with
+#' a joint budget of 10 passes and 5 escapes. With `onestage_joint_passes` =
+#' 400 the joint E is 40 times larger, and a long joint search accepts far
+#' more than n swaps, which S does not count: one nested search (seed 1)
+#' measured 1.57 of this prediction at 200/2/4, 1.24 at 200/2/3, 1.23 at
+#' 100/50/4, 1.19 at 200/100/4, and 0.51-0.72 at 200/8/4, 500/10/4 and the
+#' latinized 200/100/4 and 500/10/4. Every `os` shape is still admitted
+#' (largest prediction 0.60 of the cap, 500/10/4 latinized). Task 8 Step 5
+#' refits the joint term with tools/measure-onestage-work.R.
 #' @noRd
 onestage_predicted_work <- function(v, r, nrows, ncols, latinize) {
   v <- as.double(v)
