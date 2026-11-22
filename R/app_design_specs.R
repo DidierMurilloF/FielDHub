@@ -194,14 +194,40 @@ build_design_specs <- function() {
          planter = controls$planter, plot_start = controls$plot_start, l = controls$l,
          location_names = controls$location_names, seed = controls$seed)
   }
+  # Prototype: the lattice pages name their controls in the words of the
+  # Summary. A control's label is its field's label and the name its
+  # messages use, so the page says "Treatments cannot be blank."
+  plain_labels <- function(controls) {
+    labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
+      planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
+      seed = "Random seed")
+    lapply(controls, function(control) {
+      if (!control$id %in% names(labels)) return(control)
+      control <- control_relabel(control, labels[[control$id]])
+      if (identical(control$type, "number") && !is.null(control$min)) {
+        # The engines refuse a count below one in their own words (`reps`
+        # must be ...): say it in the page's
+        read <- control$parse
+        label <- control$label
+        control$parse <- function(value, values) {
+          count <- read(value, values)
+          if (is.numeric(count) && length(count) == 1L && !is.na(count) && count < 1) {
+            control_abort(label, " must be 1 or more.")
+          }
+          count
+        }
+      }
+      control
+    })
+  }
   lattice <- function(module, title, engine, design, upload, treatments) {
     classic(module, title, engine, upload = upload, upload_columns = c("ENTRY", "NAME"),
       summary = TRUE, values = incomplete_block_values, long_running = TRUE,
       busy_message = "Optimizing layout...",
-      controls = list(
+      controls = plain_labels(list(
         ctl_count("t", treatments, generated_only = TRUE), ctl_reps(3), block_sizes(design),
         ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
-      ))
+      )))
   }
   split_types <- function(name) {
     stats::setNames(c("2", "1"), paste(name, c("in a RCBD", "in a CRD")))

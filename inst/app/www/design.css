@@ -1,8 +1,6 @@
 /* PROTOTYPE (spike/lattice-ui-prototype): the modernized design pages.
-   This file is the shared structure and the chosen look ("?look=a", the
-   default): Option A, neutral and clean, with Option B's charcoal navbar.
-   Options B and C are kept for reference in look-b.css and look-c.css;
-   Option D is this look with a slimmer navbar (look-d.css).
+   Neutral surfaces, a slim charcoal navbar, a compact page header, a
+   slightly dense sidebar and a compact Summary.
    Everything is scoped to the navbar, to .fh-design (the three Lattice
    pages, see mod_design_ui()) and to modal dialogs. The content of the
    Welcome, Help and About pages (.fh-page) is not touched and stays light.
@@ -28,14 +26,14 @@ html[data-theme="light"] {
   --fhd-danger: #b00020;
   --fhd-paper: #ffffff;
   --fhd-shadow: rgba(20, 28, 34, 0.16);
-  /* The navbar is a charcoal bar (the maintainer's pick, from Option B). */
+  /* The navbar is a charcoal bar. */
   --fhd-nav-bg: #22303c;
   --fhd-nav-ink: #ffffff;
   --fhd-nav-line: transparent;
   --fhd-nav-control: rgba(255, 255, 255, 0.4);
   --fhd-nav-hover: rgba(255, 255, 255, 0.12);
   --fhd-nav-accent: #ffc72a;
-  /* Density and shape: each look sets its own (look-b.css, look-c.css). */
+  /* Density and shape. The sidebar sets its own, denser ones. */
   --fhd-control: 38px;
   --fhd-text: 14px;
   --fhd-label: 13px;
@@ -71,21 +69,22 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 
 /* ---------- Navbar (every page): a neutral bar on one row ---------- */
 #fieldhub-app .navbar-default {
-  min-height: 56px;
+  min-height: 46px;
   background: var(--fhd-nav-bg);
   border: 0;
   border-bottom: 1px solid var(--fhd-nav-line);
 }
 #fieldhub-app .navbar-default .navbar-brand {
-  height: 56px;
-  padding: 18px 14px 18px 18px;
+  height: 46px;
+  padding: 13px 12px 13px 16px;
   color: var(--fhd-nav-ink);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
 }
 #fieldhub-app .navbar-default .navbar-nav > li > a {
-  padding: 18px 11px;
+  padding: 13px 10px;
   color: var(--fhd-nav-ink);
+  font-size: 13px !important;
   line-height: 20px;
 }
 #fieldhub-app .navbar-default .navbar-nav > li > a:hover,
@@ -133,19 +132,13 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   outline: 2px solid var(--fhd-focus);
   outline-offset: -2px;
 }
+/* The NDSU wordmark stands on the bar itself: ndsulogo-transparent.png is
+   ndsulogo.jpg without its green plate. */
 #fieldhub-app .navbar .fieldhub-navbar-logo {
-  width: auto;
-  height: 32px;
-  margin: 12px 14px 12px 8px;
-  border-radius: 4px;
-}
-/* On the charcoal bar the wordmark stands on its own, without the green
-   plate of ndsulogo.jpg (Option C keeps the plate on its white bar). */
-html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   content: url("ndsulogo-transparent.png");
-  height: 21px;
-  margin: 18px 12px 17px 8px;
-  border-radius: 0;
+  width: auto;
+  height: 22px;
+  margin: 12px 14px 12px 10px;
 }
 
 #fieldhub-app .fh-theme-toggle {
@@ -153,9 +146,9 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin: 10px 6px 0;
+  width: 30px;
+  height: 30px;
+  margin: 8px 6px 0;
   padding: 0;
   color: var(--fhd-nav-ink);
   background: transparent;
@@ -171,37 +164,6 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 #fieldhub-app .fh-theme-toggle:focus-visible {
   outline: 2px solid var(--fhd-focus);
   outline-offset: 2px;
-}
-
-/* Prototype only: pick one of the looks (theme.js). */
-#fieldhub-app .fh-look-switch {
-  float: right;
-  display: inline-flex;
-  height: 28px;
-  margin: 14px 6px 0;
-  border: 1px solid var(--fhd-nav-control);
-  border-radius: 14px;
-  overflow: hidden;
-}
-#fieldhub-app .fh-look-switch button {
-  width: 24px;
-  padding: 0;
-  color: var(--fhd-nav-ink);
-  background: transparent;
-  border: 0;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 26px;
-  cursor: pointer;
-}
-#fieldhub-app .fh-look-switch button:hover { background: var(--fhd-nav-hover); }
-#fieldhub-app .fh-look-switch button[aria-pressed="true"] {
-  color: var(--fhd-nav-bg);
-  background: var(--fhd-nav-ink);
-}
-#fieldhub-app .fh-look-switch button:focus-visible {
-  outline: 2px solid var(--fhd-focus);
-  outline-offset: -2px;
 }
 
 /* ---------- Page ---------- */
@@ -220,29 +182,37 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   justify-content: space-between;
   gap: 8px 32px;
   margin: 0 28px;
-  padding: 24px 0 16px;
+  padding: 12px 0 10px;
   border-bottom: 1px solid var(--fhd-line);
 }
 #fieldhub-app .fh-design-head h2 {
   margin: 0;
   padding: 0;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--fhd-ink);
 }
+/* The guide link is a quiet aside: body size and weight, muted, and
+   underlined only when pointed at or focused. */
 #fieldhub-app .fh-design-head a.fh-design-guide {
   flex: none;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: underline;
+  color: var(--fhd-muted);
+  font-size: var(--fhd-text);
+  font-weight: 400;
+  text-decoration: none;
   text-underline-offset: 3px;
+}
+#fieldhub-app .fh-design-head a.fh-design-guide:hover,
+#fieldhub-app .fh-design-head a.fh-design-guide:focus-visible {
+  color: var(--fhd-ink);
+  text-decoration: underline;
 }
 #fieldhub-app .fh-design-head a.fh-design-guide::after {
   content: "\2197";
   display: inline-block;
   margin-left: 4px;
-  font-size: 0.85em;
+  font-size: 0.75em;
   text-decoration: none;
 }
 #fieldhub-app .fh-design-head a:focus-visible {
@@ -253,7 +223,7 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 
 #fieldhub-app .fh-design > .row {
   margin: 0;
-  padding: 22px 13px 48px;
+  padding: 14px 13px 48px;
 }
 #fieldhub-app .fh-design [role="main"] > div > .row { margin: 0; }
 #fieldhub-app .fh-design h3,
@@ -270,16 +240,15 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   border-radius: var(--fhd-radius-lg);
   box-shadow: none;
 }
-/* Plot type and layout options: a quiet strip under the plot. */
-#fieldhub-app .fh-design .tab-content .well {
-  margin-top: 4px;
-  padding: 16px 12px 4px;
-  background: transparent;
-  border-width: 1px 0 0;
-  border-radius: 0;
+/* A slightly denser sidebar, not a cramped one: 34px input boxes, 36px
+   buttons and 12px between the fields (the results side has 38px and 16px). */
+#fieldhub-app .fh-design [role="complementary"] {
+  --fhd-control: 34px;
+  --fhd-gap: 12px;
 }
-#fieldhub-app .fh-design .tab-content .well .container-fluid { padding: 0; }
-#fieldhub-app .fh-design .tab-content .col-sm-12 { padding: 0; }
+#fieldhub-app .fh-design [role="complementary"] .control-label { margin-bottom: 5px; }
+#fieldhub-app .fh-design [role="complementary"] .btn { height: 36px; }
+#fieldhub-app .fh-design [role="complementary"] .input-group .btn-file { height: 34px; }
 
 /* The action group closes the sidebar. */
 #fieldhub-app .fh-design [role="complementary"] > .fieldhub-sidebar-controls {
@@ -675,14 +644,15 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 }
 
 /* ---------- Summary (app_design_summary()) ----------
-   A grid of figures, the seed as a quiet line, then two tables.
+   A compact page that ends about where the sidebar does: a grid of
+   figures, the seed as a quiet line, then two tables with 30px rows.
    Explanations are tooltips on the dotted terms. */
-#fieldhub-app .fh-summary { display: grid; gap: 26px; padding: 22px 0 8px; }
-#fieldhub-app .fh-summary section { display: grid; gap: 10px; min-width: 0; }
+#fieldhub-app .fh-summary { display: grid; gap: 24px; padding: 18px 0 8px; }
+#fieldhub-app .fh-summary section { display: grid; gap: 8px; min-width: 0; }
 #fieldhub-app .fh-design .fh-summary h3 {
   margin: 0;
   padding: 0;
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -701,39 +671,39 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   background: var(--fhd-surface);
   border: 1px solid var(--fhd-line);
-  border-radius: var(--fhd-radius-lg);
+  border-radius: var(--fhd-radius);
   overflow: hidden;
 }
 #fieldhub-app .fh-stats > div {
   margin: 0 -1px -1px 0;
-  padding: 13px 16px 14px;
+  padding: 8px 14px 9px;
   border-right: 1px solid var(--fhd-line);
   border-bottom: 1px solid var(--fhd-line);
 }
-#fieldhub-app .fh-stats dt { color: var(--fhd-muted); font-size: 12.5px; font-weight: 400; line-height: 1.35; }
+#fieldhub-app .fh-stats dt { color: var(--fhd-muted); font-size: 12px; font-weight: 400; line-height: 1.35; }
 #fieldhub-app .fh-stats dd {
-  margin-top: 3px;
+  margin-top: 1px;
   color: var(--fhd-ink);
   font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
-#fieldhub-app .fh-stats small { display: block; margin-top: 2px; color: var(--fhd-muted); font-size: 12px; overflow-wrap: anywhere; }
+#fieldhub-app .fh-stats small { display: block; color: var(--fhd-muted); font-size: 11.5px; overflow-wrap: anywhere; }
 
 #fieldhub-app .fh-seed-line {
   margin: 0;
   padding: 0 2px;
   color: var(--fhd-muted);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 #fieldhub-app .fh-design .fh-seed-line code {
   margin-left: 8px;
   padding: 0;
   color: var(--fhd-muted);
   background: transparent;
-  font-size: 13px;
+  font-size: 12.5px;
   user-select: all;
 }
 #fieldhub-app .fh-copy {
@@ -757,14 +727,14 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 .fh-clipboard { position: fixed; top: 0; left: -9999px; }
 
 #fieldhub-app .fh-summary-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
-#fieldhub-app .fh-summary-head span { color: var(--fhd-muted); font-size: 13px; }
+#fieldhub-app .fh-summary-head span { color: var(--fhd-muted); font-size: 12.5px; }
 #fieldhub-app .fh-summary-link {
   margin-left: auto;
   padding: 2px 0;
   color: var(--fhd-action);
   background: transparent;
   border: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -774,7 +744,7 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   overflow-x: auto;
   background: var(--fhd-surface);
   border: 1px solid var(--fhd-line);
-  border-radius: var(--fhd-radius-lg);
+  border-radius: var(--fhd-radius);
 }
 #fieldhub-app .fh-table {
   width: 100%;
@@ -784,15 +754,15 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   border-collapse: collapse;
 }
 #fieldhub-app .fh-table th {
-  padding: 9px 14px;
+  padding: 6px 12px;
   color: var(--fhd-muted);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   text-align: left;
   white-space: nowrap;
-  border-bottom: 1px solid var(--fhd-line-strong);
+  border-bottom: 1px solid var(--fhd-line);
 }
-#fieldhub-app .fh-table td { padding: 8px 14px; border-bottom: 1px solid var(--fhd-line); }
+#fieldhub-app .fh-table td { padding: 5px 12px; border-bottom: 1px solid var(--fhd-line); }
 #fieldhub-app .fh-table tr:last-child td { border-bottom: 0; }
 #fieldhub-app .fh-table .fh-num-cell { text-align: right; }
 
@@ -899,6 +869,17 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 #fieldhub-app .fh-design .fieldhub-task-spinner { color: var(--fhd-action); font-size: 34px; }
 #fieldhub-app .fh-design .shiny-output-error { color: var(--fhd-danger); }
 #fieldhub-app .fh-design .shiny-output-error-validation { color: var(--fhd-muted); }
+/* What stopped a run, where its result would be: a quiet note, not an alarm. */
+#fieldhub-app .fh-design :is(.shiny-html-output, .datatables, .shiny-text-output).shiny-output-error-validation {
+  margin-top: 16px;
+  padding: 11px 14px;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-left: 3px solid var(--fhd-danger);
+  border-radius: var(--fhd-radius);
+  font-size: var(--fhd-text);
+}
 
 /* ---------- Dialogs (rendered outside #fieldhub-app) ---------- */
 .modal .modal-content {
@@ -924,9 +905,13 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
 
 /* ---------- Small screens: the sidebar stacks above the results ---------- */
 @media (max-width: 767px) {
-  #fieldhub-app .fh-design-head { margin: 0 16px; padding: 18px 0 14px; }
-  #fieldhub-app .fh-design-head h2 { font-size: 21px; }
-  #fieldhub-app .fh-design > .row { padding: 16px 1px 32px; }
+  #fieldhub-app .fh-design-head { margin: 0 16px; padding: 10px 0 8px; }
+  #fieldhub-app .fh-design-head h2 { font-size: 19px; }
+  #fieldhub-app .fh-design > .row { padding: 12px 1px 32px; }
+  /* Touch screens keep full-size targets. */
+  #fieldhub-app .fh-design [role="complementary"] { --fhd-control: 44px; --fhd-gap: 16px; }
+  #fieldhub-app .fh-design [role="complementary"] .btn,
+  #fieldhub-app .fh-design [role="complementary"] .input-group .btn-file { height: 44px; }
   #fieldhub-app .fh-design [role="complementary"] { margin-bottom: 18px; }
   #fieldhub-app .fh-design .well { padding: 16px; }
   #fieldhub-app .fh-design .fieldhub-layout-downloads { justify-content: flex-start; }
@@ -943,12 +928,11 @@ html:not([data-look="c"]) #fieldhub-app .navbar .fieldhub-navbar-logo {
   /* The stacked navbar keeps its links inside the bar. */
   #fieldhub-app .navbar-default .navbar-header,
   #fieldhub-app .navbar-default .navbar-nav { margin: 0; }
-  #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 11px 18px; }
+  #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 8px 16px; }
   #fieldhub-app .navbar-default .navbar-nav > .active > a { box-shadow: inset 3px 0 0 var(--fh-gold); }
-  #fieldhub-app .navbar .fieldhub-navbar-logo { float: none; display: block; margin: 8px 18px 14px; }
+  #fieldhub-app .navbar .fieldhub-navbar-logo { float: none; display: block; margin: 8px 16px 14px; }
   #fieldhub-app .fh-segmented label.radio-inline span { padding: 0 10px; }
   #fieldhub-app .fh-theme-toggle { position: absolute; top: 0; right: 4px; }
-  #fieldhub-app .fh-look-switch { position: absolute; top: 0; right: 52px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

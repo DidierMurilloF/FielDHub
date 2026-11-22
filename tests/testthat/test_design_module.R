@@ -15,6 +15,9 @@ all_modules <- c(classic_modules, spatial_modules)
 # The one label of each concept, written out here so a label changed in
 # fieldhub_control_concepts() fails this test instead of passing by
 # construction
+plain_lattice_labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
+  planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
+  seed = "Random seed")
 canonical_labels <- c(
   type = "Select Design Type:",
   t = "Input # of Treatments:",
@@ -664,8 +667,11 @@ test_that("the same concept has the same label, default and minimum on every pag
       info <- paste(module, control$id)
       key <- paste(module, control$id, sep = ".")
       expect_false(is.null(concept), info = info)
-      expect_identical(control$label, if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]],
-                       info = info)
+      # the lattice pages name their controls in plain words
+      expected_label <- if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) {
+        plain_lattice_labels[[control$id]]
+      } else if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]]
+      expect_identical(control$label, expected_label, info = info)
       if (key %in% names(page_values)) {
         expect_identical(control$value, page_values[[key]], info = info)
         seen <- c(seen, key)

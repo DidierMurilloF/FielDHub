@@ -81,12 +81,9 @@ app_sidebar_control <- function(control, module) {
   if (module %in% c("Optim", "multi_loc_preps")) labels["rep_checks"] <- "Input # Check's Reps:"
   if (module == "multi_loc_preps") labels["use_checks"] <- "Include checks?"
   if (module == "RCBD_augmented") labels["checks"] <- "Checks per Block:"
-  # Prototype: plain labels on the lattice pages, in the words of the Summary
-  if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) {
-    labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
-      planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
-      seed = "Random seed")
-  }
+  # Prototype: the lattice pages show the labels of their own controls
+  # (design_app_spec()), which their messages use too
+  if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) return(control)
   if (control$id %in% names(labels)) control$label <- unname(labels[control$id])
   control
 }

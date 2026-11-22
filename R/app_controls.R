@@ -107,6 +107,24 @@ design_control <- function(id, type, parse, value = NULL, min = NULL, max = NULL
        options = options, preview = preview, stage = stage)
 }
 
+#' The same control under another label
+#'
+#' @description The label of a control names it in its field and in its
+#' messages (the parser reads it), so both change together.
+#' @param control A control (\code{design_control()}).
+#' @param label Its label on this page.
+#' @noRd
+control_relabel <- function(control, label) {
+  control$label <- label
+  if (!is.null(control$parse)) {
+    # The parser finds `label` where it was built: give it this one instead
+    relabelled <- new.env(parent = environment(control$parse))
+    relabelled$label <- label
+    environment(control$parse) <- relabelled
+  }
+  control
+}
+
 #' Default of a concept, unless the design overrides it
 #' @noRd
 concept_value <- function(id, value = NULL) {

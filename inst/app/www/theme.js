@@ -21,7 +21,7 @@
     button.setAttribute("title", dark ? "Light theme" : "Dark theme");
     button.setAttribute("aria-pressed", String(dark));
   }
-  // A saved choice replaces a ?theme= or ?look= in the address.
+  // A saved choice replaces a ?theme= in the address.
   function forget(name) {
     if (!window.history.replaceState || !window.URL) return;
     var url = new URL(window.location.href);
@@ -37,41 +37,6 @@
     }
     if (button) paint(button);
   }
-  // Prototype only: switch between the looks (design.css, look-b.css, look-c.css, look-d.css).
-  function lookSwitch() {
-    var names = {a: "Option A: neutral", b: "Option B: cards", c: "Option C: compact",
-                 d: "Option D: A with a slim navbar"};
-    var group = document.createElement("div");
-    group.className = "fh-look-switch";
-    group.setAttribute("role", "group");
-    group.setAttribute("aria-label", "Prototype look");
-    var paintLooks = function() {
-      var look = root.getAttribute("data-look") || "a";
-      group.querySelectorAll("button").forEach(function(button) {
-        button.setAttribute("aria-pressed", String(button.value === look));
-      });
-    };
-    Object.keys(names).forEach(function(look) {
-      var button = document.createElement("button");
-      button.type = "button";
-      button.value = look;
-      button.textContent = look.toUpperCase();
-      button.title = names[look];
-      button.setAttribute("aria-label", names[look]);
-      button.addEventListener("click", function() {
-        root.setAttribute("data-look", look);
-        try { window.localStorage.setItem("fieldhub-look", look); } catch (e) {}
-        forget("look");
-        paintLooks();
-        // Plots are sized to their panel, which each look frames differently.
-        window.dispatchEvent(new Event("resize"));
-      });
-      group.appendChild(button);
-    });
-    paintLooks();
-    return group;
-  }
-
   $(function() {
     var navbar = document.querySelector("#fieldhub-app .navbar .container-fluid");
     if (!navbar || navbar.querySelector(".fh-theme-toggle")) return;
@@ -83,7 +48,6 @@
       set(current() === "dark" ? "light" : "dark", button, true);
     });
     navbar.appendChild(button);
-    navbar.appendChild(lookSwitch());
     // Follow the system only until the user has chosen.
     if (window.matchMedia) {
       var media = window.matchMedia("(prefers-color-scheme: dark)");
