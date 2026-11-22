@@ -221,6 +221,14 @@
 #   the seventh decimal.
 # It also times the function at 2000/2/4 nested on a random complete design
 # and prints the seconds; the QR report took 158 s there (spec 6.1 W7).
+# Then the Row and Column reports (block_incidence_efficiency(); ruling
+# R10.4) from the Gram matrix of the smaller side against the singular value
+# decomposition, on random complete designs of 24/6/2, 9/3/2, 100/2/4,
+# 100/50/3, 200/100/4, 600/300/3 and 1002/2/3, nested and shared, seeds 1:2:
+# unrounded D and A equal to 1e-10, rounded values identical (same boundary
+# exception), and the default form is the Gram matrix exactly where the
+# smaller of treatments and blocks is above 500. It prints the seconds of
+# report_efficiency() at 2000/1000/4 nested.
 #
 # truncation: the work cap cuts, it never refuses (spec 6.1 W1-W6; phase 2
 # Task 8 Step 3b). [baseline], seeds= and tmax= are ignored.
@@ -380,13 +388,67 @@ if (check == "report") {
   seconds <- system.time(big <- fast(design))[["elapsed"]]
   report(!is.na(big$Aeffic), sprintf("report 2000/2/4 nested, random complete design: D %.7f, A %.7f", big$Deffic, big$Aeffic))
   cat(sprintf("  time 2000/2/4 nested: %.1f s (the QR report: 158 s, spec 6.1 W7)\n", seconds))
+
+  # The Row and Column reports from the Gram matrix of the smaller side
+  # (block_incidence_efficiency(gram = TRUE); ruling R10.4) against the
+  # singular value decomposition.
+  if (!"gram" %in% names(formals(ns$block_incidence_efficiency))) {
+    report(FALSE, "block_incidence_efficiency() has the argument `gram`")
+  } else {
+    one_way <- ns$block_incidence_efficiency
+    incidence <- ns$block_incidence
+    worst <- 0
+    compare <- function(design, default_is_gram) {
+      out <- character()
+      for (factor_name in c("Level_3", "Level_2")) {
+        inc <- incidence(design$treatments, design[[factor_name]])
+        a <- one_way(inc, digits = NULL, gram = TRUE)
+        b <- one_way(inc, digits = NULL, gram = FALSE)
+        err <- max(abs(a$Deffic - b$Deffic), abs(a$Aeffic - b$Aeffic))
+        worst <<- max(worst, err)
+        if (!(err <= 1e-10)) out <- c(out, sprintf("%s: D %.13f against %.13f, A %.13f against %.13f", factor_name, a$Deffic, b$Deffic, a$Aeffic, b$Aeffic))
+        ra <- one_way(inc, gram = TRUE)
+        rb <- one_way(inc, gram = FALSE)
+        if (!(identical(ra$Deffic, rb$Deffic) || on_boundary(b$Deffic)) || !(identical(ra$Aeffic, rb$Aeffic) || on_boundary(b$Aeffic))) {
+          out <- c(out, sprintf("%s: rounded values differ", factor_name))
+        }
+        default <- one_way(inc)
+        if (!identical(default, if (default_is_gram && min(dim(inc)) > 500) ra else rb)) out <- c(out, sprintf("%s: the default is not the expected form", factor_name))
+      }
+      out
+    }
+    for (shape in list(c(24, 6, 2), c(9, 3, 2), c(100, 2, 4), c(100, 50, 3), c(200, 100, 4), c(600, 300, 3), c(1002, 2, 3))) {
+      v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+      for (shared in c(FALSE, TRUE)) {
+        problems <- character()
+        for (seed in 1:2) {
+          set.seed(seed)
+          design <- frame(as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v))), v, nrows, ncols, r, shared)
+          # A disconnected factor gives 0 by either form; the comparison holds.
+          problems <- c(problems, compare(design, TRUE))
+        }
+        report(length(problems) == 0L,
+               sprintf("report, Gram form of the Row and Column reports, %d/%d/%d %s%s", v, nrows, r,
+                       if (shared) "latinized" else "nested", if (length(problems)) paste0(": ", problems[1]) else ""))
+      }
+    }
+    cat(sprintf("  largest |D or A, Gram form - decomposition|: %.2e\n", worst))
+    set.seed(1)
+    v <- 2000; nrows <- 1000; r <- 4
+    design <- frame(as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v))), v, nrows, v / nrows, r, FALSE)
+    seconds <- system.time(big <- ns$report_efficiency(design, nested = TRUE, joint = list(Deffic = NA_real_, Aeffic = NA_real_)))[["elapsed"]]
+    report(nrow(big) == 4L && !anyNA(big$`A-Efficiency`[1:3]),
+           sprintf("report 2000/1000/4 nested, random complete design: Row A %.7f, Column A %.7f", big$`A-Efficiency`[2], big$`A-Efficiency`[3]))
+    cat(sprintf("  time of report_efficiency() at 2000/1000/4 nested: %.1f s (by the decomposition: 14.6 s)\n", seconds))
+  }
   cat(failures, "FAIL(s)\n")
   quit(status = if (failures > 0L) 1 else 0)
 }
 
 if (check == "truncation") {
   ns <- asNamespace("FielDHub")
-  needed <- c("onestage_call_work", "onestage_work_weight", "onestage_startable", "onestage_limits",
+  needed <- c("onestage_call_work", "onestage_work_weight", "onestage_engine_limit", "onestage_weighted_work",
+              "onestage_startable", "onestage_limits",
               "onestage_stage1", "crossed_search", "segmented_blocks", "onestage_joint_efficiency")
   absent <- needed[!vapply(needed, exists, logical(1), envir = ns, inherits = FALSE)]
   if (length(absent)) {

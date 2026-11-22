@@ -41,26 +41,90 @@ blockEstEffics <- function(TF, BF) {
   block_incidence_efficiency(block_incidence(TF, BF))
 }
 
-#' Efficiency worker reusing the validated report incidence table
+#' Treatments or blocks (the smaller count) above which the efficiency worker
+#' reads the canonical efficiencies from the Gram matrix of the smaller side
+#' (`block_incidence_gram_values()`). Up to this size the singular value
+#' decomposition is kept, so every report of a design with at most 500
+#' treatments or at most 500 blocks is computed as before.
 #' @noRd
-block_incidence_efficiency <- function(incidence) {
+block_gram_limit <- 500
+
+#' Squared singular values of the association matrix of an incidence table,
+#' largest first, from the Gram matrix of its smaller side
+#'
+#' With X = D_r^(-1/2) N D_k^(-1/2), rho = sqrt(r / n) and kappa =
+#' sqrt(k / n), the association matrix is A = X - rho kappa'. X kappa = rho
+#' and X' rho = kappa, so A A' = X X' - rho rho' and A' A = X' X - kappa
+#' kappa'. The product of the smaller order is summed over the nonzero
+#' counts that share a block (or a treatment): a block of q distinct
+#' treatments gives q^2 terms, so no dense v x b product is formed. The
+#' eigenvalues of that symmetric matrix are the squared singular values of
+#' A. Returns NULL when the terms are too many (more than 2e7); the caller
+#' then uses the singular value decomposition.
+#'
+#' Measured 2026-11-22 (Task 8 Step 5, ruling R10.4): the Row report of a
+#' nested 2000/1000/4 onestage design (2000 treatments, 4000 blocks of two)
+#' took 14.2 s by the decomposition of the 2000 x 4000 matrix, of a
+#' `row_column()` call of 33 s.
+#' @noRd
+block_incidence_gram_values <- function(incidence, replication, block_size, total) {
+  by_treatment <- nrow(incidence) <= ncol(incidence)
+  cells <- which(incidence > 0)
+  treatment <- row(incidence)[cells]
+  block <- col(incidence)[cells]
+  own <- if (by_treatment) treatment else block
+  group <- if (by_treatment) block else treatment
+  value <- as.vector(incidence)[cells] / sqrt(unname(replication)[treatment] * unname(block_size)[block])
+  in_order <- order(group)
+  own <- own[in_order]
+  value <- value[in_order]
+  group <- group[in_order]
+  size <- tabulate(group)
+  if (sum(as.double(size)^2) > 2e7) return(NULL)
+  first <- cumsum(c(1L, size))[group]
+  left <- rep(seq_along(own), size[group])
+  right <- sequence(size[group], from = first)
+  order_of <- min(dim(incidence))
+  terms <- rowsum(value[left] * value[right], (own[left] - 1) * order_of + own[right])
+  gram <- numeric(order_of * order_of)
+  gram[as.numeric(rownames(terms))] <- as.vector(terms)
+  mean_direction <- sqrt((if (by_treatment) replication else block_size) / total)
+  gram <- matrix(gram, order_of, order_of) - tcrossprod(mean_direction)
+  sort(eigen(gram, symmetric = TRUE, only.values = TRUE)$values, decreasing = TRUE)
+}
+
+#' Efficiency worker reusing the validated report incidence table
+#'
+#' `digits = NULL` returns the unrounded values. `gram` chooses how the
+#' squared singular values are computed: TRUE from the Gram matrix of the
+#' smaller side, FALSE from the singular value decomposition, NULL (the
+#' default) the Gram matrix above `block_gram_limit` treatments and blocks.
+#' Both give the same values (checked to 1e-10 unrounded by
+#' `tools/check-onestage-engine.R report`).
+#' @noRd
+block_incidence_efficiency <- function(incidence, digits = 7, gram = NULL) {
   if (!block_model_connected(incidence)) return(list(Deffic = 0, Aeffic = 0))
   replication <- rowSums(incidence)
   block_size <- colSums(incidence)
   total <- sum(replication)
-  association <- incidence / sqrt(outer(replication, block_size)) -
-    outer(sqrt(replication / total), sqrt(block_size / total))
-  singular <- svd(association, nu = 0L, nv = 0L)$d
+  if (is.null(gram)) gram <- min(dim(incidence)) > block_gram_limit
+  squared <- if (gram) block_incidence_gram_values(incidence, replication, block_size, total)
+  if (is.null(squared)) {
+    association <- incidence / sqrt(outer(replication, block_size)) -
+      outer(sqrt(replication / total), sqrt(block_size / total))
+    squared <- svd(association, nu = 0L, nv = 0L)$d^2
+  }
   # Drop the zero singular direction for the mean. Additional treatment
   # directions outside the smaller system have efficiency one.
-  efficiencies <- c(1 - singular[seq_len(length(singular) - 1L)]^2,
+  efficiencies <- c(1 - squared[seq_len(length(squared) - 1L)],
                      rep(1, nrow(incidence) - min(dim(incidence))))
   if (any(!is.finite(efficiencies)) || any(efficiencies <= 0)) {
     fieldhub_abort("The connected block model is numerically singular.",
                    class = "fieldhub_numerical_error")
   }
-  list(Deffic = round(exp(mean(log(efficiencies))), 7),
-       Aeffic = round(length(efficiencies) / sum(1 / efficiencies), 7))
+  D <- exp(mean(log(efficiencies)))
+  A <- length(efficiencies) / sum(1 / efficiencies)
+  if (is.null(digits)) list(Deffic = D, Aeffic = A) else list(Deffic = round(D, digits), Aeffic = round(A, digits))
 }
 
 #' Convexity upper bound for the A-efficiency of an equireplicate one-way design
