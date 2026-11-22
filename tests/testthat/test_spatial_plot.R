@@ -48,8 +48,9 @@ test_that("randomized plot controls share the header without hiding with downloa
     steps <- Filter(function(step) identical(step$stage, "randomize"), spec$steps)
     controls <- ui$find(".fieldhub-plot-controls")
     # a classic page has its view controls (the layout toolbar) in the header
+    # and a page with a report has the button that opens it
     classic <- identical(spec$kind, "classic")
-    expect_equal(controls$length(), as.integer(classic || length(steps) > 0L))
+    expect_equal(controls$length(), as.integer(classic || length(steps) > 0L || !is.null(spec$report)))
     if (!length(steps)) next
     expect_equal(controls$parents(".fieldhub-plot-header")$length(), 1L)
     expect_equal(controls$parents(".fieldhub-plot-toolbar")$length(), 0L)

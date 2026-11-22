@@ -22,7 +22,8 @@ page_labels <- c(Augmented_RowCol.advanced = "Advanced settings",
   diagonal_multiple.spread_checks = "Optimize check spacing",
   sparse_allocation.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
   FD.type = "Factorial design type", SPD.type = "Split-plot design type",
-  SSPD.type = "Split-split-plot design type", multi_loc_preps.use_checks = "Include checks",
+  SSPD.type = "Split-split-plot design type", pREPS.repGens = "Entries per group",
+  pREPS.repUnits = "Replicates per group", multi_loc_preps.use_checks = "Include checks",
   RCBD_augmented.checks = "Checks per block")
 canonical_labels <- c(
   type = "Design type",
@@ -161,7 +162,7 @@ test_that("there is one page spec per design, in the registry's workflow order",
       expect_null(spec$layout)
       expect_identical(spec$long_running, long_running[[spec$module]], info = entry$id)
       expect_true(all(vapply(spec$steps, function(step) step$stage %in% c("run", "randomize"), TRUE)))
-      expect_true(spec$setup$type %in% c("summary", "table"), info = entry$id)
+      expect_true(spec$setup$type %in% c("summary", "table", "none"), info = entry$id)
       expect_true(length(spec$entries) %in% 1:2, info = entry$id)
       expect_true(all(c("field_layout", "plot_numbers") %in% vapply(spec$panels, `[[`, "", "id")))
       if (!is.null(spec$optim)) {
@@ -606,7 +607,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
         spec$layout$output)
     } else {
       c(spec$workflow$ids[c("simulate", "download", "table", "heatmap", "tabset")], "randomize",
-        "status", "setup", paste0("entries_", seq_along(spec$entries)),
+        "status", if (!identical(spec$setup$type, "none")) "setup",
+        paste0("entries_", seq_along(spec$entries)),
         vapply(spec$panels, `[[`, "", "id"),
         if (length(spec$steps) > 0L) paste0(vapply(spec$steps, `[[`, "", "id"), "_step"))
     }

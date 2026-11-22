@@ -132,6 +132,8 @@ build_design_specs <- function() {
                     colours = spatial_highlight_colours("checks", length(checks)))
   }
   summary_setup <- list(type = "summary")
+  # A page whose Field setup holds the steps of the field and nothing else
+  steps_setup <- list(type = "none")
   # The diagonal pages: the percentages of checks of the field, and each
   # location's entries and checks
   percent_setup <- list(
@@ -147,8 +149,8 @@ build_design_specs <- function() {
   # The allocation pages (sparse, multi-location p-rep): the allocation of
   # Run!, the copies per entry the locations allow, and each location's
   # entries
-  allocation_setup <- function(caption, into, average = FALSE) {
-    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L,
+  allocation_setup <- function(caption, into, average = FALSE, tab = NULL) {
+    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L, tab = tab,
          view = function(values, choices) {
            allocation <- values[[into]]
            names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
@@ -424,7 +426,7 @@ build_design_specs <- function() {
     # A new choice of filler plots offers other field sizes without a new Run!
     pREPS = spatial("pREPS", "Single and Multi-Location P-rep Design", partially_replicated,
       upload = "prep", upload_columns = c("ENTRY", "NAME", "REPS"),
-      upload_check = check_reps_upload, file_tag = "pREP_",
+      upload_check = check_reps_upload, file_tag = "pREP_", report = "replicate_spacing",
       randomizing = "Running p-rep optimization ...",
       controls = c(
         list(ctl_text_list("repGens", "75,150", generated_only = TRUE),
@@ -446,7 +448,7 @@ build_design_specs <- function() {
       steps = list(ctl_dimensions(function(values, data) {
         prep_field_choices(values$plots, values$allow_fillers)
       }, depends_on = "allow_fillers")),
-      setup = summary_setup,
+      setup = steps_setup,
       entries = list(function(design, location, values) {
         entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
@@ -702,7 +704,7 @@ build_design_specs <- function() {
     # location may get a field size of its own
     multi_loc_preps = spatial("multi_loc_preps", "Optimized Multi-Location P-rep Design",
       multi_location_prep, upload = "multi_loc_prep", upload_columns = c("ENTRY", "NAME"),
-      upload_check = check_numeric_entries_upload, file_tag = "pREP_",
+      upload_check = check_numeric_entries_upload, file_tag = "pREP_", report = "replicate_spacing",
       randomizing = "Running p-rep optimization ...",
       optim = list(engine = do_optim, args = design_args_multi_loc_preps_optim, into = "optim_list"),
       controls = c(
@@ -736,8 +738,9 @@ build_design_specs <- function() {
           prep_location_field_choices(prep_location_plots(values), values$allow_fillers)
         }, enabled_by = "multi_dimension", show_if = "input.multi_dimension == true")
       ),
-      setup = allocation_setup("Table 1: Genotype Allocation Across Environments.", "optim_list",
-                               average = TRUE),
+      # The allocation is not needed to choose a field: it has a tab of its own
+      setup = allocation_setup("Copies of each entry at each location.", "optim_list",
+                               average = TRUE, tab = "Allocation"),
       entries = list(function(design, location, values) {
         entry_table(location_entries_view(design$list_locs, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
@@ -783,6 +786,7 @@ design_page_labels <- function(module) {
     FD = c(type = "Factorial design type"),
     SPD = c(type = "Split-plot design type"),
     SSPD = c(type = "Split-split-plot design type"),
+    pREPS = c(repGens = "Entries per group", repUnits = "Replicates per group"),
     multi_loc_preps = c(use_checks = "Include checks"),
     RCBD_augmented = c(checks = "Checks per block"),
     Augmented_RowCol = c(advanced = "Advanced settings", budget = "Search budget per location",

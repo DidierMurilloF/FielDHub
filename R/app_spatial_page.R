@@ -19,7 +19,9 @@ app_spatial_tabs <- function(ns, spec) {
     shinyjs::hidden(shiny::div(id = ns(paste0(step$id, "_step")), app_control_ui(step, ns)))
   }
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
-  setup <- if (identical(spec$setup$type, "summary")) {
+  setup <- if (identical(spec$setup$type, "none")) {
+    NULL  # the tab holds the steps of the field and nothing else
+  } else if (identical(spec$setup$type, "summary")) {
     shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
     app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
@@ -51,10 +53,12 @@ app_spatial_tabs <- function(ns, spec) {
                                             busy_message = spec$busy_message, results_id = ns("results"))),
             shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
-          setup,
-          tasks = setup_tasks)),
-      shiny::tabPanel("Entries", feedback(entries))
+          if (is.null(spec$setup$tab)) setup,
+          tasks = setup_tasks))
     ),
+    # A setup view with a tab of its own (the allocation of the entries)
+    if (!is.null(spec$setup$tab)) list(shiny::tabPanel(spec$setup$tab, feedback(setup, tasks = setup_tasks))),
+    list(shiny::tabPanel("Entries", feedback(entries))),
     panels,
     list(
       shiny::tabPanel("Field Book",
@@ -299,7 +303,9 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   })
   # Validation must be ready when Run returns from another result tab.
   shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
-  if (identical(spec$setup$type, "summary")) {
+  if (identical(spec$setup$type, "none")) {
+    NULL
+  } else if (identical(spec$setup$type, "summary")) {
     output$setup <- shiny::renderUI({
       if (!randomized()) return(NULL)
       app_design_summary(settled(design), tabset = session$ns(ids[["tabset"]]))
@@ -329,7 +335,8 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     # so the open panel is not replaced under the reader
     output$design_report <- shiny::renderUI({
       if (!randomized()) return(NULL)
-      app_check_spacing(settled(design), shiny::isolate(location()), session$ns("design_report_panel"))
+      app_design_report(spec$report, settled(design), shiny::isolate(location()),
+                        session$ns("design_report_panel"))
     })
   }
   for (i in seq_along(spec$entries)) local({

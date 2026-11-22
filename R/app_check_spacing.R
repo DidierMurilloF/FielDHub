@@ -33,50 +33,62 @@ check_spacing_args <- function(values) {
        dist_method = values[["dist_method"]] %||% "euclidean")
 }
 
-#' The check spacing of a design with diagonal checks, behind a button on its plot
+#' The report of a spatial page, behind a button on its plot
 #'
-#' @description What \code{print_diagonal_spacing()} prints, as a small
-#' structured view built from the design's own record
-#' (\code{x$check_spacing}): the settings as facts, the four measures as a
-#' table (before and after the search when the spacing was optimized), and
-#' the notes as one tooltip. It opens from a "Check spacing" button
-#' (layout-menu.js). A design at several locations shows one at a time, with
-#' a small select to change it.
-#'
-#' @param x A design with \code{check_spacing}, or one without (\code{NULL}).
+#' @param kind The spec's \code{report}: \code{"check_spacing"} or
+#'   \code{"replicate_spacing"}.
+#' @param x The design.
 #' @param selected The location shown first.
 #' @param id The id of the panel, for \code{aria-controls}.
-#' @return A \code{shiny::div()}, or \code{NULL}.
+#' @return A \code{shiny::div()}, or \code{NULL} for a design without it.
 #' @noRd
-app_check_spacing <- function(x, selected = 1L, id = "check_spacing") {
-  reports <- x$check_spacing
-  if (is.null(reports) || !length(reports)) return(NULL)
-  sites <- seq_along(reports)
+app_design_report <- function(kind, x, selected = 1L, id = "design_report") {
+  switch(kind,
+    check_spacing = app_check_spacing(x, selected, id),
+    replicate_spacing = app_replicate_spacing(x, selected, id))
+}
+
+#' A spacing report: a button on the plot's toolbar and the panel it opens
+#'
+#' @description The one view of the spacing reports (layout-menu.js): a
+#' header with the title, the notes as one tooltip and the location; the
+#' settings of each location as facts and its measures as a table. A design
+#' at several locations shows one at a time, with a small select to change
+#' it.
+#'
+#' @param title The name of the button and of the panel.
+#' @param sections One \code{list(facts = , table = )} for each location:
+#'   facts as \code{list(label = , value = )}, the table a data frame.
+#' @param names The names of the locations.
+#' @param notes What the measures mean, as sentences.
+#' @param selected The location shown first.
+#' @param id The id of the panel, for \code{aria-controls}.
+#' @param icon The icon of the button.
+#' @return A \code{shiny::div()}, or \code{NULL} without sections.
+#' @noRd
+app_spacing_report <- function(title, sections, names, notes, selected = 1L, id = "design_report",
+                               icon = "ruler-horizontal") {
+  if (!length(sections)) return(NULL)
+  sites <- seq_along(sections)
   if (!selected %in% sites) selected <- 1L
-  names <- unique(as.character(x$fieldBook$LOCATION))
-  names <- if (length(names) == length(sites)) names else as.character(sites)
-  notes <- paste(
-    "Distance averages give equal weight to checks with repeated occurrences.",
-    "Minimum distance is the smallest across checks.",
-    "Neighbor percentage includes all check occurrences.",
-    "A dash means that a same-check distance cannot be calculated.",
-    "Spacing metrics do not measure statistical precision.")
+  names <- if (length(names) == length(sites)) as.character(names) else as.character(sites)
+  notes <- paste(notes, collapse = " ")
   section <- function(site) {
     shiny::div(class = "fh-spacing-site", `data-fh-section` = site, hidden = if (site != selected) NA,
-      shiny::tags$dl(class = "fh-facts", lapply(app_check_spacing_facts(x, site), function(fact) {
+      shiny::tags$dl(class = "fh-facts", lapply(sections[[site]]$facts, function(fact) {
         shiny::div(shiny::tags$dt(fact$label), shiny::tags$dd(fact$value))
       })),
-      app_summary_table(app_check_spacing_table(reports[[site]])))
+      app_summary_table(sections[[site]]$table))
   }
   shiny::div(class = "fh-view-menu",
     shiny::tags$button(type = "button", class = "btn fh-view-menu-toggle",
       `aria-haspopup` = "true", `aria-expanded` = "false", `aria-controls` = id,
-      shiny::icon("ruler-horizontal", verify_fa = FALSE), shiny::span("Check spacing"),
+      shiny::icon(icon, verify_fa = FALSE), shiny::span(title),
       shiny::icon("chevron-down", class = "fh-view-menu-caret", verify_fa = FALSE)),
     shiny::div(id = id, class = "fh-view-menu-panel fh-spacing", role = "group",
-      `aria-label` = "Check spacing", hidden = NA,
+      `aria-label` = title, hidden = NA,
       shiny::div(class = "fh-spacing-head",
-        shiny::h3("Check spacing"),
+        shiny::h3(title),
         shiny::span(class = "fh-tip fh-info", tabindex = "0", role = "img", `data-fh-tip` = NA,
                     title = notes, `aria-label` = paste("About these measures.", notes),
                     shiny::icon("circle-info", verify_fa = FALSE)),
@@ -88,6 +100,108 @@ app_check_spacing <- function(x, selected = 1L, id = "check_spacing") {
             }))
         } else shiny::span(class = "fh-spacing-where", names[[1L]])),
       lapply(sites, section)))
+}
+
+#' The check spacing of a design with diagonal checks
+#'
+#' @description What \code{print_diagonal_spacing()} prints, built from the
+#' design's own record (\code{x$check_spacing}): the settings as facts and
+#' the four measures as a table (before and after the search when the
+#' spacing was optimized).
+#'
+#' @param x A design with \code{check_spacing}, or one without (\code{NULL}).
+#' @param selected The location shown first.
+#' @param id The id of the panel, for \code{aria-controls}.
+#' @return A \code{shiny::div()}, or \code{NULL}.
+#' @noRd
+app_check_spacing <- function(x, selected = 1L, id = "check_spacing") {
+  reports <- x$check_spacing
+  if (is.null(reports) || !length(reports)) return(NULL)
+  app_spacing_report("Check spacing",
+    sections = lapply(seq_along(reports), function(site) {
+      list(facts = app_check_spacing_facts(x, site), table = app_check_spacing_table(reports[[site]]))
+    }),
+    names = unique(as.character(x$fieldBook$LOCATION)),
+    notes = c("Distance averages give equal weight to checks with repeated occurrences.",
+              "Minimum distance is the smallest across checks.",
+              "Neighbor percentage includes all check occurrences.",
+              "A dash means that a same-check distance cannot be calculated.",
+              "Spacing metrics do not measure statistical precision."),
+    selected = selected, id = id)
+}
+
+#' The spacing of the copies of the replicated entries of a p-rep design
+#'
+#' @description Built from the design itself: the distance between every
+#' pair of copies of an entry (\code{x$pairsDistance}), the entries of each
+#' location (\code{x$reps_info}), its field (\code{x$infoDesign}) and the
+#' recorded settings of the search (\code{x$metadata$parameters}). The
+#' engine keeps the final placement only, so the measures have one value.
+#' The parameters the page no longer lists under Field setup (the field,
+#' its plots, the entries and the seed) are facts here.
+#'
+#' @param x A p-rep design (\code{partially_replicated()},
+#'   \code{multi_location_prep()}).
+#' @param selected The location shown first.
+#' @param id The id of the panel, for \code{aria-controls}.
+#' @return A \code{shiny::div()}, or \code{NULL} for a design without pairs.
+#' @noRd
+app_replicate_spacing <- function(x, selected = 1L, id = "replicate_spacing") {
+  pairs <- x$pairsDistance
+  if (is.null(pairs) || !length(pairs)) return(NULL)
+  app_spacing_report("Replicate spacing",
+    sections = lapply(seq_along(pairs), function(site) {
+      list(facts = app_replicate_spacing_facts(x, site), table = app_replicate_spacing_table(pairs[[site]]))
+    }),
+    names = x$reps_info$LOCATION,
+    notes = c("Distances are between the plots of two copies of the same entry, in grid steps.",
+              "An entry with more than two copies counts once for each pair of its copies.",
+              "Minimum distance is the smallest across all pairs.",
+              "A pair shares a row or column when both copies lie in the same row or the same column.",
+              "Spacing metrics do not measure statistical precision."),
+    selected = selected, id = id)
+}
+
+#' The settings and the size of a p-rep design at one location, as label and value
+#' @noRd
+app_replicate_spacing_facts <- function(x, site) {
+  info <- x$infoDesign
+  settings <- x$metadata$parameters
+  at <- function(values) if (length(values) >= site) values[[site]] else values[[1L]]
+  count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
+  fillers <- at(info$fillers)
+  facts <- list(
+    list(label = "Optimization", value = if (isFALSE(settings$spread_reps)) "Off" else "On"),
+    list(label = "Distance",
+         value = paste0(if (identical(settings$dist_method, "manhattan")) "Manhattan" else "Euclidean",
+                        ", in grid steps")),
+    list(label = "Distinct rows and columns",
+         value = if (isTRUE(settings$rowcol_penalty > 0)) "Required" else "Not required"),
+    list(label = "Field", value = paste(at(info$rows), "×", at(info$columns))),
+    list(label = "Plots", value = paste0(count(at(info$experimental_plots)),
+      if (isTRUE(fillers > 0)) paste0(" and ", count(fillers), if (fillers == 1) " filler" else " fillers"))),
+    list(label = "Replicated entries", value = count(x$reps_info$Replicated[[site]])),
+    list(label = "Unreplicated entries", value = count(x$reps_info$Unreplicated[[site]])))
+  if (!is.null(info$seed)) {
+    facts <- c(facts, list(list(label = "Seed", value = format(info$seed, scientific = FALSE, trim = TRUE))))
+  }
+  facts
+}
+
+#' The spacing measures of one location of a p-rep design, formatted
+#' @noRd
+app_replicate_spacing_table <- function(pairs) {
+  distance <- pairs$DIST
+  shared <- pairs$rA == pairs$rB | pairs$cA == pairs$cB
+  none <- !length(distance)
+  data.frame(
+    Measure = c("Minimum same-entry distance", "Mean same-entry distance",
+                "Pairs of copies", "Pairs sharing a row or column"),
+    Value = c(if (none) "–" else sprintf("%.2f", min(distance)),
+              if (none) "–" else sprintf("%.2f", mean(distance)),
+              format(length(distance), big.mark = ",", trim = TRUE),
+              if (none) "–" else sprintf("%.1f%%", 100 * mean(shared))),
+    stringsAsFactors = FALSE)
 }
 
 #' The settings of the spacing at one location, as label and value

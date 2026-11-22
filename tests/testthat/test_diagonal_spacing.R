@@ -86,3 +86,54 @@ test_that("spacing reports use each location and the existing generic app page",
     expect_identical(design_app_spec(module)$report, "check_spacing")
   }
 })
+
+test_that("the p-rep pages report the spacing of their replicated entries, and keep Field setup to its steps", {
+  design <- partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
+                                 l = 2, locationNames = c("North", "South"), seed = 7,
+                                 rowcol_penalty = Inf)
+  for (site in 1:2) {
+    pairs <- design$pairsDistance[[site]]
+    table <- app_replicate_spacing_table(pairs)
+    expect_identical(names(table), c("Measure", "Value"))
+    expect_identical(table$Value[1:3], c(sprintf("%.2f", min(pairs$DIST)), sprintf("%.2f", mean(pairs$DIST)),
+                                         as.character(nrow(pairs))))
+    # the engine's own minimum, and its rule of distinct rows and columns
+    expect_equal(min(pairs$DIST), design$infoDesign$min_distance[[site]])
+    expect_identical(table$Value[4], sprintf("%.1f%%", 100 * design$infoDesign$shared_pairs[[site]] / nrow(pairs)))
+    facts <- app_replicate_spacing_facts(design, site)
+    values <- stats::setNames(vapply(facts, `[[`, "", "value"), vapply(facts, `[[`, "", "label"))
+    expect_identical(unname(values[c("Optimization", "Distance", "Distinct rows and columns", "Field",
+                                     "Plots", "Replicated entries", "Unreplicated entries", "Seed")]),
+                     c("On", "Euclidean, in grid steps", "Required", "15 \u00d7 20", "300", "75", "150", "7"))
+  }
+  report <- as.character(app_design_report("replicate_spacing", design, 2))
+  expect_match(report, "Replicate spacing", fixed = TRUE)
+  expect_match(report, '<option value="2" selected>South</option>', fixed = TRUE)
+  expect_match(report, 'data-fh-section="1" hidden', fixed = TRUE)
+  expect_false(grepl("style=", report, fixed = TRUE))
+  off <- partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
+                              seed = 7, spread_reps = FALSE, dist_method = "manhattan")
+  facts <- app_replicate_spacing_facts(off, 1L)
+  expect_identical(vapply(facts[1:3], `[[`, "", "value"),
+                   c("Off", "Manhattan, in grid steps", "Not required"))
+  expect_false(grepl("<select", as.character(app_replicate_spacing(off)), fixed = TRUE))
+  # the same view as the check spacing of the diagonal pages
+  checks <- as.character(app_design_report("check_spacing",
+    diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 8)))
+  expect_match(checks, "fh-spacing-head", fixed = TRUE)
+  expect_match(report, "fh-spacing-head", fixed = TRUE)
+  for (module in c("pREPS", "multi_loc_preps")) {
+    spec <- design_app_spec(module)
+    expect_identical(spec$report, "replicate_spacing")
+    ui <- as.character(mod_design_ui("prep_test", spec))
+    expect_match(ui, "prep_test-design_report", fixed = TRUE)
+  }
+  # Field setup holds the steps only: no summary on one page, the allocation in its own tab on the other
+  expect_identical(design_app_spec("pREPS")$setup$type, "none")
+  expect_false(grepl("prep_test-setup\"", as.character(mod_design_ui("prep_test", design_app_spec("pREPS")))))
+  multi <- design_app_spec("multi_loc_preps")
+  expect_identical(multi$setup$tab, "Allocation")
+  ui <- as.character(mod_design_ui("prep_test", multi))
+  expect_match(ui, 'data-value="Allocation"', fixed = TRUE)
+  expect_null(design_app_spec("sparse_allocation")$setup$tab)
+})

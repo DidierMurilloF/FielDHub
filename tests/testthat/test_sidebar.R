@@ -19,7 +19,7 @@ original_sidebar_rows <- list(
   Rectangular_Lattice = c("t", "reps", "k", "l", "planter", "plot_start/location_names", "seed"),
   Optim = c("checks", "rep_checks", "lines", "planter", "l/location_view",
     "plot_start/expt_name", "seed/location_names"),
-  pREPS = c("repGens", "repUnits", "allow_fillers", "rowcol_distinct", "l/location_view", "planter",
+  pREPS = c("repGens/repUnits", "allow_fillers", "rowcol_distinct", "l/location_view", "planter",
     "plot_start/expt_name", "seed/location_names"),
   RCBD_augmented = c("repsExpt/random", "random_note", "repsStack", "lines", "checks/b",
     "l/location_view", "planter", "plot_by_block", "plot_increment",
@@ -35,8 +35,8 @@ original_sidebar_rows <- list(
   sparse_allocation = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
     "copies_per_entry", "planter",
     "plot_start/expt_name", "seed/location_names"),
-  multi_loc_preps = c("lines", "use_checks", "checks/rep_checks", "l/location_view", "copies_per_entry",
-    "planter", "allow_fillers", "rowcol_distinct", "plot_start/expt_name", "seed/location_names")
+  multi_loc_preps = c("lines", "use_checks", "checks/rep_checks", "l/location_view",
+    "copies_per_entry/planter", "allow_fillers", "rowcol_distinct", "plot_start/expt_name", "seed/location_names")
 )
 
 test_that("each original input panel retains its own rows and every control exactly once", {
