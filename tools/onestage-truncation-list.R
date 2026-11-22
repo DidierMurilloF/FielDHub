@@ -48,12 +48,18 @@
 # busy; repeat on a quieter machine before deciding); or when an os shape has
 # row_step or column_step equal to "cut".
 #
-# Backstop row (outside the exit rules; backstop=no skips it; only shard 1
-# runs it): through row_column(), the first of the nested shapes 2500/2/3,
-# 3000/2/3, 4000/2/3 and 6000/2/3 whose joint stage is not startable. Its row
-# has outcome "backstop", the warning text in `warning`, the stage statuses
-# read from the warning's design (`row_step` holds infoDesign$optimization)
-# and the seconds of the call.
+# Backstop rows (outside the exit rules; backstop=no skips them; only shard 1
+# runs them), both with outcome "backstop":
+# - through row_column(), the first of the nested shapes 2500/2/3, 3000/2/3,
+#   4000/2/3 and 6000/2/3 whose joint stage is not startable. Its row has the
+#   warning text in `warning`, `row_step` holds infoDesign$optimization, and
+#   the seconds are those of the call;
+# - 2500/2/3 nested through build_row_column_onestage() (seed 1, `iterations`
+#   20): beyond the universe a step of stage 1 can be the one that cannot
+#   start while the joint stage can (spec 6.1 W3). The row has the stage
+#   statuses of the build, so it reports the step that was not started, and
+#   any warning caught (none is expected: the warning of rule W8 is for a
+#   joint stage that cannot start).
 #
 # [library] defaults to ~/fieldhub-libs/dev; install with
 # `R CMD INSTALL . --preclean` first. It stops if FielDHub is loaded from a
@@ -259,6 +265,22 @@ if (backstop == "yes" && shard[1] == 1L) {
       as.data.frame(as.list(empty)))
     break
   }
+  # A stage 1 step that cannot start where the joint stage can.
+  x <- one_build(2500L, 2L, 3L, FALSE, 20L, 1L, FALSE)
+  s <- x$search
+  rows[[length(rows) + 1L]] <- cbind(
+    data.frame(t = 2500L, nrows = 2L, r = 3L, latinize = FALSE, iterations = 20L, in_os_grid = FALSE,
+               requested = field(s, "requested", NA_integer_), started = field(s, "started", NA_integer_),
+               complete = field(s, "complete", NA_integer_),
+               row_step = field(s, "row_step", x$outcome), column_step = field(s, "column_step", ""),
+               joint_stage = field(s, "joint_stage", ""), repair = field(s, "repair", ""),
+               winner = field(s, "winner", NA_integer_), winner_cut = field(s, "winner_cut", NA),
+               blocks = field(s, "blocks", NA_real_), work = field(s, "work", NA_real_),
+               joint_swaps_1 = of_search(s, "joint_swaps", 1L), joint_gain_1 = of_search(s, "joint_gain", 1L),
+               joint_swaps_winner = of_search(s, "joint_swaps", field(s, "winner", NA_integer_)),
+               joint_gain_winner = of_search(s, "joint_gain", field(s, "winner", NA_integer_)),
+               seconds = x$seconds, outcome = "backstop", warning = x$warning, stringsAsFactors = FALSE),
+    as.data.frame(as.list(empty)))
 }
 
 columns <- c("t", "nrows", "r", "latinize", "iterations", "in_os_grid", "requested", "started", "complete",
