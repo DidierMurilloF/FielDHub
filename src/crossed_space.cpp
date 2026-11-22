@@ -8,6 +8,8 @@
 namespace {
 
 const double kFullRank = 1e-7;  // spec 5.1b: smallest canonical efficiency
+// tr(M) at or below this proves the full-rank test (1 / kFullRank; spec 6.1 W3).
+const double kTraceFullRank = 1e7;
 
 // True if the symmetric n x n matrix a (column-major) is positive definite:
 // a Cholesky factorisation, in place, with every pivot positive.
@@ -39,8 +41,9 @@ bool cholesky_log_det(std::vector<double>& a, int n, double& log_det) {
 }  // namespace
 
 CrossedSpace::CrossedSpace(int v, int r, int B, int F, const std::vector<int>& plot_block,
-                           const std::vector<int>& treat, double ridge)
-    : v_(v), r_(r), B_(B), F_(F), n_(v * r), ridge_(ridge), plot_block_(plot_block), wt_(B, 0.0), sq_(B, 0.0),
+                           const std::vector<int>& treat, double ridge, bool treatment_form)
+    : v_(v), r_(r), B_(B), F_(F), n_(v * r), ridge_(ridge), form_(treatment_form && v < B),
+      off_(static_cast<size_t>(B) + 1, 0), sum_k2_(0.0), plot_block_(plot_block), wt_(B, 0.0), sq_(B, 0.0),
       treat_(treat), lists_(static_cast<size_t>(v) * F * r, 0),
       m_(static_cast<size_t>(B) * B, 0.0), g_(static_cast<size_t>(B) * v, 0.0),
       mu_(B, 0.0), mg_(B, 0.0), log_det_(std::numeric_limits<double>::quiet_NaN()) {
@@ -50,6 +53,8 @@ CrossedSpace::CrossedSpace(int v, int r, int B, int F, const std::vector<int>& p
   for (int j = 0; j < B_; ++j) {
     sq_[j] = std::sqrt(static_cast<double>(size[j]));
     wt_[j] = size[j] > 0 ? 1.0 / sq_[j] : 0.0;
+    off_[j + 1] = off_[j] + size[j];
+    sum_k2_ += static_cast<double>(size[j]) * size[j];
   }
   const int len = F_ * r_;
   std::vector<int> fill(v_, 0);
@@ -71,7 +76,144 @@ void CrossedSpace::build_what(const std::vector<int>& lists, std::vector<double>
   }
 }
 
+void CrossedSpace::build_s(const std::vector<int>& lists, std::vector<double>& s, double diagonal,
+                           std::vector<int>* member_out) const {
+  const size_t v = v_;
+  const int len = F_ * r_;
+  std::vector<int> member(static_cast<size_t>(F_) * n_);
+  {
+    std::vector<int> fill(off_.begin(), off_.end() - 1);
+    for (int i = 0; i < v_; ++i) {
+      const int* li = &lists[static_cast<size_t>(i) * len];
+      for (int x = 0; x < len; ++x) member[fill[li[x]]++] = i;
+    }
+  }
+  s.assign(v * v, static_cast<double>(F_) / v_);
+  for (int i = 0; i < v_; ++i) s[i + v * i] += diagonal;
+  // N N' / r block by block: block j adds 1 / (k_j r) for every pair of its
+  // plots. Entries (a, c) and (c, a) gather the same terms in the same order,
+  // so S is exactly symmetric.
+  for (int j = 0; j < B_; ++j) {
+    const int* mj = &member[off_[j]];
+    const int k = off_[j + 1] - off_[j];
+    // 1 / (k r) from the whole numbers: wt_j^2 carries the rounding of a
+    // square root, which a singular design's ridge criterion would show.
+    const double w = 1.0 / (static_cast<double>(k) * r_);
+    for (int x = 0; x < k; ++x) {
+      double* col = &s[v * mj[x]];
+      for (int y = 0; y < k; ++y) col[mj[y]] -= w;
+    }
+  }
+  if (member_out) member_out->swap(member);
+}
+
+bool CrossedSpace::refresh_treatment_form() {
+  const size_t v = v_, B = B_;
+  const int len = F_ * r_;
+  std::vector<double> s;
+  std::vector<int> member;
+  build_s(lists_, s, 1.0 + ridge_, &member);
+  double ld = 0.0;
+  if (!spd_inverse8(s, v_, ld)) return false;
+  // T = S^-1 N (v x B): column j is wt_j times the sum of the columns of
+  // S^-1 at the plots of block j.
+  std::vector<double> t(v * B, 0.0);
+  for (int j = 0; j < B_; ++j) {
+    double* tj = &t[v * j];
+    for (int x = off_[j]; x < off_[j + 1]; ++x) {
+      const double* col = &s[v * member[x]];
+      for (size_t i = 0; i < v; ++i) tj[i] += col[i];
+    }
+    const double wj = wt_[j];
+    for (size_t i = 0; i < v; ++i) tj[i] *= wj;
+  }
+  // N' T (B x B), then M = (I + N' T / r - yhat yhat' / (1 + eps)) / (1 + eps),
+  // made exactly symmetric.
+  std::vector<double> m(B * B, 0.0);
+  for (int l = 0; l < B_; ++l) {
+    const double* tl = &t[v * l];
+    double* ml = &m[B * l];
+    for (int i = 0; i < v_; ++i) {
+      const double ti = tl[i];
+      const int* li = &lists_[static_cast<size_t>(i) * len];
+      for (int x = 0; x < len; ++x) ml[li[x]] += wt_[li[x]] * ti;
+    }
+  }
+  const double scale = 1.0 + ridge_;
+  for (int l = 0; l < B_; ++l) {
+    for (int j = 0; j <= l; ++j) {
+      const double value = ((j == l ? 1.0 : 0.0) + 0.5 * (m[j + B * l] + m[l + B * j]) / r_ -
+                            sq_[j] * sq_[l] / (n_ * scale)) / scale;
+      m[j + B * l] = value;
+      m[l + B * j] = value;
+    }
+  }
+  m_.swap(m);
+  log_det_ = ld + (B_ - v_) * std::log(scale);
+  return true;
+}
+
+double CrossedSpace::refresh_work() const {
+  const double n = n_, B = B_, v = v_;
+  if (!form_) return static_cast<double>(B_) * B_ * B_ + static_cast<double>(n_) * F_ * F_ * r_ + static_cast<double>(n_) * F_ * B_;
+  return v * v * v + sum_k2_ + F_ * n * (v + 2.0 * B) + 2.0 * B * B;
+}
+
+double CrossedSpace::factor_work() const {
+  if (!form_) return refresh_work();
+  const double v = v_;
+  return v * v * v / 3.0 + sum_k2_ + v * v;
+}
+
+bool CrossedSpace::log_det_of(const std::vector<int>& lists, double& log_det) const {
+  if (!form_) {
+    std::vector<double> w;
+    build_what(lists, w, 1.0 + ridge_);
+    return cholesky_log_det(w, B_, log_det);
+  }
+  std::vector<double> s;
+  build_s(lists, s, 1.0 + ridge_);
+  double ld = 0.0;
+  if (!spd_cholesky8(s, v_, ld)) return false;
+  log_det = ld + (B_ - v_) * std::log(1.0 + ridge_);
+  return true;
+}
+
+bool CrossedSpace::full_rank_of(const std::vector<int>& lists) const {
+  if (!form_) {
+    std::vector<double> w;
+    build_what(lists, w, 1.0);
+    for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
+    return cholesky_pd(w, B_);
+  }
+  std::vector<double> s;
+  build_s(lists, s, 1.0);
+  for (int i = 0; i < v_; ++i) s[i + static_cast<size_t>(v_) * i] -= kFullRank;
+  double ld = 0.0;
+  return spd_cholesky8(s, v_, ld);
+}
+
+bool CrossedSpace::full_rank_refreshed(bool& exact) const {
+  exact = !(ridge_ == 0.0 && trace() <= kTraceFullRank);
+  return exact ? full_rank() : true;
+}
+
 bool CrossedSpace::refresh() {
+  if (form_) {
+    if (!refresh_treatment_form()) return false;
+    std::fill(g_.begin(), g_.end(), 0.0);
+    const int len = F_ * r_;
+    for (int i = 0; i < v_; ++i) {
+      double* gi = &g_[static_cast<size_t>(B_) * i];
+      const int* li = &lists_[static_cast<size_t>(i) * len];
+      for (int x = 0; x < len; ++x) {
+        const double* mj = &m_[static_cast<size_t>(B_) * li[x]];
+        const double wj = wt_[li[x]];
+        for (int j = 0; j < B_; ++j) gi[j] += wj * mj[j];
+      }
+    }
+    return true;
+  }
   std::vector<double> w;
   build_what(lists_, w, 1.0 + ridge_);
   double ld = 0.0;
@@ -92,31 +234,15 @@ bool CrossedSpace::refresh() {
   return true;
 }
 
-bool CrossedSpace::full_rank() const {
-  std::vector<double> w;
-  build_what(lists_, w, 1.0);
-  for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
-  return cholesky_pd(w, B_);
-}
+bool CrossedSpace::full_rank() const { return full_rank_of(lists_); }
 
-bool CrossedSpace::log_det_fresh(double& log_det) const {
-  std::vector<double> w;
-  build_what(lists_, w, 1.0 + ridge_);
-  return cholesky_log_det(w, B_, log_det);
-}
+bool CrossedSpace::log_det_fresh(double& log_det) const { return log_det_of(lists_, log_det); }
 
 bool CrossedSpace::log_det_after(int p, int q, double& log_det) const {
-  std::vector<double> w;
-  build_what(lists_after(p, q), w, 1.0 + ridge_);
-  return cholesky_log_det(w, B_, log_det);
+  return log_det_of(lists_after(p, q), log_det);
 }
 
-bool CrossedSpace::full_rank_after(int p, int q) const {
-  std::vector<double> w;
-  build_what(lists_after(p, q), w, 1.0);
-  for (int j = 0; j < B_; ++j) w[j + static_cast<size_t>(B_) * j] -= kFullRank;
-  return cholesky_pd(w, B_);
-}
+bool CrossedSpace::full_rank_after(int p, int q) const { return full_rank_of(lists_after(p, q)); }
 
 std::vector<int> CrossedSpace::lists_after(int p, int q) const {
   std::vector<int> lists = lists_;

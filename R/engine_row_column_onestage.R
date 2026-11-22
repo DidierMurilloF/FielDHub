@@ -22,6 +22,13 @@
 #' @noRd
 onestage_work_limit <- 2e11
 
+#' Block columns above which mode 3 builds its dense state from the treatment
+#' space (phase 2 spec 5.1c, 6.1 W3), when there are fewer treatments than
+#' block columns. Every `os` shape has at most 408 block columns, so their
+#' arithmetic is the block-space form's, unchanged.
+#' @noRd
+onestage_form_blocks <- 500
+
 #' Blocks that span segments (block engine mode 4, phase 2 spec 6.1)
 #'
 #' A one-way block design search in which the `blocks` blocks, of n / blocks
@@ -33,7 +40,9 @@ onestage_work_limit <- 2e11
 #' start is repaired with in-segment swaps charged to the work cap only (phase
 #' 1 fix I-1). The evaluation budget is the default full-pass budget over the
 #' pairs inside the segments; every evaluation is charged to `work_cap` as in
-#' resolvable mode.
+#' resolvable mode. With fewer treatments than blocks and more blocks than
+#' `resolvable_block_limit` the dense state is built from the treatment space
+#' (phase 2 spec 5.1c).
 #'
 #' @param start n = treatments * replicates 1-based treatments by plot, each
 #'   treatment `replicates` times.
@@ -64,10 +73,10 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
   evaluation_work <- resolvable_evaluation_work(v, r, blocks)
   time_limit <- 60
   out <- blocks_engine_cpp(as.integer(v), as.integer(r), as.integer(blocks), as.integer(searches),
-                           3L, 5L, as.double(budget), time_limit,
-                           identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
+                           3L, 5L, as.double(budget), time_limit, engine_debug("1"),
                            as.integer(start), as.double(work_cap), 256L, as.double(evaluation_work),
-                           4L, integer(), as.integer(block_of) - 1L, as.integer(segment_of) - 1L)
+                           4L, integer(), as.integer(block_of) - 1L, as.integer(segment_of) - 1L,
+                           engine_form_option(TRUE, v, blocks, resolvable_block_limit))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (identical(stop_reason, "time_limit")) {
     fieldhub_warn("The block search stopped at its time limit of ", time_limit,
@@ -75,11 +84,16 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
                   class = "fieldhub_design_warning", call = NULL)
   }
   found <- !anyNA(out$treatments) && !is.na(out$a_efficiency)
+  search <- list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
+                 work_capped = out$work_capped)
+  # For the checks: the largest error of an accepted ratio, and whether the
+  # dense state was built from the treatment space.
+  if (engine_debug("1")) search$debug_max_error <- out$debug_max_error
+  if (engine_debug("treatment_form")) search$treatment_form <- out$treatment_form
   list(treatments = if (found) out$treatments else as.integer(start),
        d_efficiency = if (found) out$d_efficiency else NA_real_,
        a_efficiency = if (found) out$a_efficiency else NA_real_,
-       search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
-                     work_capped = out$work_capped))
+       search = search)
 }
 
 #' Stage 1 of the onestage search: rows first (phase 2 spec 6.1)
@@ -263,6 +277,12 @@ crossed_default_budget <- function(v, r) {
 #' Row D and Row A of the result are never below those of `start`, compared
 #' exactly as the unrounded values returned here.
 #'
+#' With fewer treatments than block columns and more than
+#' `onestage_form_blocks` block columns the engine builds its dense states
+#' from the treatment space and scores the start and the result with fewer
+#' factorisations (phase 2 spec 5.1c, 6.1 W3; src/crossed_engine.cpp). The
+#' check hook FIELDHUB_ENGINE_DEBUG=treatment_form forces that at any size.
+#'
 #' @return A list with `treatments` (1-based, plot order as `start`),
 #'   `full_rank`, unrounded `row_d`, `row_a`, `joint_d`, `joint_a`,
 #'   `joint_log_det` of the result (joint values NA when not full rank), the
@@ -300,30 +320,48 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   time_limit <- 60
   # Check hook (tools/check-onestage-engine.R): 2L skips the exact Row
   # confirmation of each swap, so the end-of-search comparison can be reached.
-  hook <- if (identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "slack_floors")) 2L else 1L
+  hook <- if (engine_debug("slack_floors")) 2L else 1L
   out <- blocks_engine_cpp(v, r, as.integer(b_rows), hook, as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget), time_limit,
-                           identical(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), "1"),
+                           engine_debug("1"),
                            as.integer(start), as.double(work_cap), 256L,
                            as.double(resolvable_evaluation_work(v, r, B)), 3L,
-                           as.integer(col_block), as.integer(row_block), integer())
+                           as.integer(col_block), as.integer(row_block), integer(),
+                           engine_form_option(TRUE, v, B, onestage_form_blocks))
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (identical(stop_reason, "time_limit")) {
     fieldhub_warn("The joint row-column search stopped at its time limit of ", time_limit,
                   " seconds; the result may not be reproducible from the seed.",
                   class = "fieldhub_design_warning", call = NULL)
   }
-  list(treatments = out$treatments, full_rank = out$full_rank,
-       row_d = out$row_d, row_a = out$row_a, joint_d = out$joint_d, joint_a = out$joint_a,
-       joint_log_det = out$joint_log_det,
-       stage1_row_d = out$stage1_row_d, stage1_row_a = out$stage1_row_a,
-       search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
-                     repair_swaps = out$repair_swaps, repair_evaluations = out$repair_evaluations,
-                     repair_log_det = c(out$repair_log_det_start, out$repair_log_det),
-                     repair_score_error = out$repair_score_error,
-                     floor_fallback = out$floor_fallback,
-                     refreshes = out$refreshes, drift_events = out$drift_events,
-                     work_capped = out$work_capped, debug_max_error = out$debug_max_error))
+  result <- list(
+    treatments = out$treatments, full_rank = out$full_rank,
+    row_d = out$row_d, row_a = out$row_a, joint_d = out$joint_d, joint_a = out$joint_a,
+    joint_log_det = out$joint_log_det,
+    stage1_row_d = out$stage1_row_d, stage1_row_a = out$stage1_row_a,
+    search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
+                  repair_swaps = out$repair_swaps, repair_evaluations = out$repair_evaluations,
+                  repair_log_det = c(out$repair_log_det_start, out$repair_log_det),
+                  repair_score_error = out$repair_score_error,
+                  floor_fallback = out$floor_fallback,
+                  refreshes = out$refreshes, drift_events = out$drift_events,
+                  work_capped = out$work_capped, debug_max_error = out$debug_max_error)
+  )
+  # For the checks (tools/check-onestage-engine.R), with any check hook set:
+  # whether the treatment-space form was used, the engine's classification of
+  # the start (and tr(M) of its joint state, NA when it could not be built),
+  # the swaps the joint stage applied, the refreshes that scored the start,
+  # the repaired design and the result (joint state, Row state), and whether
+  # the end-of-search drift check alarmed.
+  if (nzchar(Sys.getenv("FIELDHUB_ENGINE_DEBUG"))) {
+    result$search$check <- list(treatment_form = out$treatment_form,
+                                start_full_rank = out$start_full_rank,
+                                start_trace = out$start_trace, accepted = out$accepted,
+                                scoring_refreshes = c(joint = out$scoring_joint,
+                                                      row = out$scoring_row),
+                                end_alarm = out$end_alarm)
+  }
+  result
 }
 
 #' Whether the joint row-column model can estimate every treatment contrast

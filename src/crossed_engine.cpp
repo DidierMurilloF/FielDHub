@@ -75,6 +75,25 @@
 // - The returned design is tested again from scratch; a design that failed
 //   the full-rank test would be replaced by the design the joint stage
 //   started from.
+// - Treatment-space form (spec 5.1c, 6.1 W3; `treatment_form`). The joint
+//   state, the ridge state and the Row state are each built from the
+//   treatment space when they have more block columns than treatments
+//   (crossed_space.h). Where the joint state is, the call also scores less
+//   ("cheap" below), because a factorisation of order 2000 is seconds:
+//   - the start is tested for full rank from the trace of its fresh M
+//     (CrossedSpace::full_rank_refreshed()), with the exact test only when
+//     tr(M) > 1e7;
+//   - after a repair the Row state is kept (it was rebuilt after its last
+//     change, and the exact Row floors never read it), and the repair's
+//     output is not scored again for the Row floors, which every accepted
+//     repair swap has already met exactly;
+//   - at the end of the search, however it ended, the running joint state
+//     gets one drift check; its log det is used unless the check alarms, and
+//     only then is the current design refreshed from scratch;
+//   - the returned design is scored once: one refresh of the joint state
+//     (full rank from its trace as above) and one Row value, which is both
+//     the exact Row comparison and the reported value.
+//   None of this runs in the block-space form, whose arithmetic is unchanged.
 #include <cpp11.hpp>
 #include <R_ext/Random.h>
 #include <algorithm>
@@ -104,6 +123,7 @@ const double kRepairGain = 1e-8;
 
 struct Crossed {
   int v, r, n, B, Br;             // B joint block columns, Br row blocks
+  bool form = false;              // treatment-space form where v < block columns
   std::vector<int> joint_block;   // n x 2: row block, Br + column block
   std::vector<int> row_block;     // n x 1
   std::vector<int> row_of;        // the row block of each plot
@@ -113,6 +133,11 @@ struct Crossed {
 
 struct CrossedOut {
   double refreshes = 0, drift_events = 0;
+  // Refreshes of the plain joint state and from-scratch Row values that
+  // score the start, the repaired design and the result (not those of the
+  // search and the repair loops).
+  double scoring_joint = 0, scoring_row = 0;
+  double accepted = 0;            // swaps the joint stage applied (escape jumps included)
   bool debug = false;
   double debug_max_error = 0;
   double repair_swaps = 0, repair_evaluations = 0, repair_score_error = 0;
@@ -127,7 +152,7 @@ struct RowValue {
 };
 RowValue row_value(const Crossed& lay, const std::vector<int>& treat) {
   RowValue x;
-  CrossedSpace row(lay.v, lay.r, lay.Br, 1, lay.row_block, treat);
+  CrossedSpace row(lay.v, lay.r, lay.Br, 1, lay.row_block, treat, 0.0, lay.form);
   x.ok = row.refresh();
   if (x.ok) { x.d = row.d_efficiency(); x.a = row.a_efficiency(); }
   return x;
@@ -153,11 +178,16 @@ class Engine {
 
   // The stage 1 Row D and Row A, the exact floors of every design kept.
   void set_floors(double d, double a) { floor_d_ = d; floor_a_ = a; }
+  // Work of a refresh and of a factorisation of the joint state, and of a
+  // refresh of the Row state (CrossedSpace::refresh_work(), factor_work()).
+  void set_work(double joint_refresh, double joint_factor, double row_refresh) {
+    joint_refresh_ = joint_refresh; joint_factor_ = joint_factor; row_refresh_ = row_refresh;
+  }
 
   // True if `treat` meets the Row floors exactly (Row D and Row A from
   // scratch, as reported, not below the stage 1 values).
   bool meets_floors(const std::vector<int>& treat) {
-    if (!budget_.work(refresh_work(lay_.Br, lay_.n, 1, lay_.r) + lay_.n)) return false;
+    if (!budget_.work(row_refresh_ + lay_.n)) return false;
     const RowValue x = row_value(lay_, treat);
     return x.ok && x.d >= floor_d_ && x.a >= floor_a_;
   }
@@ -169,8 +199,8 @@ class Engine {
     return meets_floors(scratch_);
   }
 
-  bool refresh(CrossedSpace& s, int F) {
-    if (!budget_.work(refresh_work(s.blocks(), lay_.n, F, lay_.r))) return false;
+  bool refresh(CrossedSpace& s) {
+    if (!budget_.work(s.refresh_work())) return false;
     if (!s.refresh()) return false;
     out_.refreshes += 1;
     return true;
@@ -182,7 +212,7 @@ class Engine {
     if (accurate(joint) && accurate(row)) return true;
     out_.drift_events += 1;
     interval_ = std::max(kRefreshMin, interval_ / 2);
-    return refresh(joint, 2) && refresh(row, 1);
+    return refresh(joint) && refresh(row);
   }
 
   static bool accurate(const CrossedSpace& s) {
@@ -206,8 +236,9 @@ class Engine {
       if (rows_differ) note_error(row_ratio, row_before, fresh_log_det(row, 1));
     }
     if (!budget_.work(swap_work(lay_.B, lay_.v, lay_.r) + (rows_differ ? swap_work(lay_.Br, lay_.v, lay_.r) : 0.0))) return false;
-    if (joint_scale > kRefreshScale && !refresh(joint, 2)) return false;
-    if (rows_differ && row_scale > kRefreshScale && !refresh(row, 1)) return false;
+    out_.accepted += 1;
+    if (joint_scale > kRefreshScale && !refresh(joint)) return false;
+    if (rows_differ && row_scale > kRefreshScale && !refresh(row)) return false;
     if (++accepted_ % interval_ == 0) {
       if (!budget_.spend(static_cast<double>(lay_.n + lay_.B))) return true;
       return check(joint, row);
@@ -274,13 +305,13 @@ class Engine {
       const double ratio = joint.ratio(x, y);
       const double scale = joint.last_scale();
       if (ratio <= kDisconnectRel * scale) continue;
-      if (!budget_.work(refresh_work(lay_.B, lay_.n, 2, lay_.r))) return false;
+      if (!budget_.work(joint_factor_)) return false;
       if (!joint.full_rank_after(x, y)) continue;
       if (!budget_.spend(1.0)) break;
       // A jump from the ambiguous zone is refreshed at once, as in the other
       // modes (a scale above kRefreshScale already refreshes inside apply()).
       if (!apply(joint, row, x, y, ratio, 1.0, scale, 1.0)) return false;
-      if (ratio <= kJumpSafe * scale && scale <= kRefreshScale && !refresh(joint, 2)) return false;
+      if (ratio <= kJumpSafe * scale && scale <= kRefreshScale && !refresh(joint)) return false;
       ++done;
     }
     return true;
@@ -300,10 +331,12 @@ class Engine {
     }
     const double total = lay_.r * static_cast<double>(v) * (v - 1) / 2.0;
     const double allowance = kRepairMaxPasses * total;
-    const double fresh = refresh_work(lay_.B, lay_.n, 2, lay_.r);
-    double current = 0.0;
+    const double fresh = joint_factor_;
+    double& current = repair_log_det_;
+    current = NAN;
     if (!budget_.work(fresh)) return false;
-    if (!eps.log_det_fresh(current)) return true;
+    if (!eps.log_det_fresh(current)) { current = NAN; return true; }
+    repair_log_det_start_ = current;
     double since = 0.0;
     for (;;) {
       for (int m = 0; m < lay_.r; ++m) {
@@ -340,8 +373,8 @@ class Engine {
             eps.apply(x, y, ratio);
             row.apply(x, y, rows_differ ? row_ratio : 1.0);
             if (!budget_.work(swap_work(lay_.B, lay_.v, lay_.r) + (rows_differ ? swap_work(lay_.Br, lay_.v, lay_.r) : 0.0))) return false;
-            if (!refresh(eps, 2)) return !budget_.stopped();
-            if (rows_differ && !refresh(row, 1)) return !budget_.stopped();
+            if (!refresh(eps)) return !budget_.stopped();
+            if (rows_differ && !refresh(row)) return !budget_.stopped();
             current = after;
             out_.repair_swaps += 1;
             since = 0.0;
@@ -354,7 +387,8 @@ class Engine {
   }
 
   double fresh_log_det(const CrossedSpace& s, int F) const {
-    CrossedSpace fresh(lay_.v, lay_.r, s.blocks(), F, F == 2 ? lay_.joint_block : lay_.row_block, s.treatments());
+    CrossedSpace fresh(lay_.v, lay_.r, s.blocks(), F, F == 2 ? lay_.joint_block : lay_.row_block, s.treatments(),
+                       0.0, lay_.form);
     return fresh.refresh() ? fresh.log_det() : NAN;
   }
 
@@ -365,6 +399,10 @@ class Engine {
   }
 
   std::vector<int> order_;
+  // The repair criterion (log det of the ridge matrix, by a factorisation
+  // from the counts) of the design the repair started from and of the one it
+  // holds; NaN when it could not be computed.
+  double repair_log_det_start_ = NAN, repair_log_det_ = NAN;
 
  private:
   const Crossed& lay_;
@@ -375,6 +413,7 @@ class Engine {
   double evaluation_work_;
   bool exact_floors_;
   double floor_d_ = 0.0, floor_a_ = 0.0;
+  double joint_refresh_ = 0.0, joint_factor_ = 0.0, row_refresh_ = 0.0;
   std::vector<int> scratch_;
 };
 
@@ -442,8 +481,9 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, bool slack_floors) {
+                           double evaluation_work, bool slack_floors, bool treatment_form) {
   Crossed lay = make_crossed(v, r, b, row_of, col_of);
+  lay.form = treatment_form;
   for (int m = 0; m < r; ++m) {
     std::vector<int> seen(v, 0);
     for (int p = m * v; p < (m + 1) * v; ++p) {
@@ -458,13 +498,36 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   Engine eng(lay, budget, out, std::max(1, refresh_every), evaluation_work, !slack_floors);
   eng.order_.assign(lay.n, 0);
 
-  CrossedSpace joint(v, r, lay.B, 2, lay.joint_block, start);
-  CrossedSpace row(v, r, lay.Br, 1, lay.row_block, start);
-  budget.work(2.0 * refresh_work(lay.B, lay.n, 2, r) + refresh_work(lay.Br, lay.n, 1, r));
-  const bool joint_ok = joint.refresh();
-  const bool start_full = joint_ok && joint.full_rank();
-  const bool row_ok = row.refresh();
+  CrossedSpace joint(v, r, lay.B, 2, lay.joint_block, start, 0.0, lay.form);
+  CrossedSpace row(v, r, lay.Br, 1, lay.row_block, start, 0.0, lay.form);
+  // The cheaper scoring of the header comment, where the joint state is built
+  // from the treatment space.
+  const bool cheap = joint.treatment_form();
+  eng.set_work(joint.refresh_work(), joint.factor_work(), row.refresh_work());
+  // Full rank of a plain joint state that has just been refreshed.
+  auto fresh_full = [&](const CrossedSpace& s) {
+    if (!cheap) return s.full_rank();
+    bool exact = false;
+    const bool full = s.full_rank_refreshed(exact);
+    if (exact) budget.work(s.factor_work());
+    return full;
+  };
+  bool joint_ok = false, start_full = false, row_ok = false;
+  if (!cheap) {
+    budget.work(2.0 * refresh_work(lay.B, lay.n, 2, r) + refresh_work(lay.Br, lay.n, 1, r));
+    joint_ok = joint.refresh();
+    start_full = joint_ok && joint.full_rank();
+    row_ok = row.refresh();
+  } else {
+    budget.work(joint.refresh_work() + row.refresh_work());
+    joint_ok = joint.refresh();
+    start_full = joint_ok && fresh_full(joint);
+    row_ok = row.refresh();
+  }
   out.refreshes += (joint_ok ? 1 : 0) + (row_ok ? 1 : 0);
+  out.scoring_joint += 1;
+  out.scoring_row += 1;
+  const double start_trace = joint_ok ? joint.trace() : NA_REAL;
   const double stage1_row_d = row_ok ? row.d_efficiency() : NA_REAL;
   const double stage1_row_a = row_ok ? row.a_efficiency() : NA_REAL;
   const double floor_ld = row_ok ? row.log_det() : 0.0;
@@ -480,29 +543,47 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   bool rng = false;
   if (!start_full && row_ok && !budget.stopped()) {
     // Joint-rank repair, charged to the work cap only.
-    CrossedSpace eps(v, r, lay.B, 2, lay.joint_block, start, kRepairEpsilon);
-    if (budget.work(refresh_work(lay.B, lay.n, 2, r)) && eps.refresh()) {
+    CrossedSpace eps(v, r, lay.B, 2, lay.joint_block, start, kRepairEpsilon, lay.form);
+    if (budget.work(eps.refresh_work()) && eps.refresh()) {
       out.refreshes += 1;
       double ld = 0.0;
-      if (eps.log_det_fresh(ld)) repair_log_det_start = ld;
+      if (!cheap && eps.log_det_fresh(ld)) repair_log_det_start = ld;
       GetRNGstate();
       rng = true;
       bool repaired = false;
       eng.repair(eps, row, floor_ld, floor_sum, repaired);
-      if (eps.log_det_fresh(ld)) repair_log_det = ld;
+      if (!cheap) {
+        if (eps.log_det_fresh(ld)) repair_log_det = ld;
+      } else {
+        // The repair's own factorisations: the same arithmetic as a fresh one.
+        if (std::isfinite(eng.repair_log_det_start_)) repair_log_det_start = eng.repair_log_det_start_;
+        if (std::isfinite(eng.repair_log_det_)) repair_log_det = eng.repair_log_det_;
+      }
       // The repair's output must meet the Row floors exactly; its last design
-      // is returned when the repair failed and the design meets them.
-      const bool meets = !budget.stopped() && eng.meets_floors(eps.treatments());
+      // is returned when the repair failed and the design meets them. In the
+      // cheap form every accepted repair swap was confirmed against them from
+      // scratch, and a value from scratch depends on the design alone, so the
+      // output is not scored again (the check hook has no such confirmation).
+      const bool meets = !budget.stopped() && ((cheap && !slack_floors) || eng.meets_floors(eps.treatments()));
       if (repaired && !meets && !budget.stopped()) floor_fallback = 2;
       if (meets) {
         result = eps.treatments();
         if (repaired) {
           // States built anew from the repaired design: the joint stage then
           // runs exactly as from a start equal to it.
-          joint = CrossedSpace(v, r, lay.B, 2, lay.joint_block, result);
-          row = CrossedSpace(v, r, lay.Br, 1, lay.row_block, result);
-          budget.work(2.0 * refresh_work(lay.B, lay.n, 2, r) + refresh_work(lay.Br, lay.n, 1, r));
-          if (joint.refresh() && joint.full_rank() && row.refresh()) {
+          joint = CrossedSpace(v, r, lay.B, 2, lay.joint_block, result, 0.0, lay.form);
+          bool again = false;
+          if (!cheap) {
+            row = CrossedSpace(v, r, lay.Br, 1, lay.row_block, result, 0.0, lay.form);
+            budget.work(2.0 * refresh_work(lay.B, lay.n, 2, r) + refresh_work(lay.Br, lay.n, 1, r));
+            again = joint.refresh() && joint.full_rank() && row.refresh();
+          } else {
+            // The Row state of the repair is kept (header comment).
+            budget.work(joint.refresh_work());
+            again = joint.refresh() && fresh_full(joint);
+            out.scoring_joint += 1;
+          }
+          if (again) {
             out.refreshes += 2;
             entry = result;
             entry_full = true;
@@ -512,6 +593,10 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     }
   }
   bool searched = false;
+  bool end_alarm = false;
+  // Row D and Row A of `result` from scratch, when they have been computed.
+  RowValue result_row;
+  bool result_row_known = false;
   if (entry_full && row_ok && !budget.stopped()) {
     searched = true;
     // A budget below one evaluation runs no search and draws nothing.
@@ -557,9 +642,17 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     // Neither is below the entry design: descents only raise the joint log
     // det, and escapes are followed by a descent before any optimum is
     // recorded. Without a recorded optimum the current design has seen no
-    // escape.
-    CrossedSpace current(v, r, lay.B, 2, lay.joint_block, joint.treatments());
-    const double current_ld = current.refresh() ? current.log_det() : -INFINITY;
+    // escape. In the cheap form the running log det stands for the score
+    // from scratch when the running state passes one drift check.
+    double current_ld = -INFINITY;
+    if (cheap && Engine::accurate(joint)) {
+      current_ld = joint.log_det();
+    } else {
+      end_alarm = cheap;
+      CrossedSpace current(v, r, lay.B, 2, lay.joint_block, joint.treatments(), 0.0, lay.form);
+      current_ld = current.refresh() ? current.log_det() : -INFINITY;
+      out.scoring_joint += 1;
+    }
     if (!local_treat.empty() && !(current_ld > local_best)) {
       result = local_treat;
     } else if (std::isfinite(current_ld)) {
@@ -569,24 +662,55 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     // are not below the stage 1 values. On a breach: the best recorded
     // optimum that meets them exactly, else the entry design (it meets them).
     const RowValue rv = row_value(lay, result);
+    out.scoring_row += 1;
+    result_row = rv;
+    result_row_known = true;
     if (!(rv.ok && rv.d >= stage1_row_d && rv.a >= stage1_row_a)) {
       floor_fallback = 1;
       result = exact_treat.empty() ? entry : exact_treat;
       const RowValue again = row_value(lay, result);
-      if (!(again.ok && again.d >= stage1_row_d && again.a >= stage1_row_a)) result = entry;
+      out.scoring_row += 1;
+      result_row = again;
+      if (!(again.ok && again.d >= stage1_row_d && again.a >= stage1_row_a)) {
+        result = entry;
+        result_row_known = false;
+      }
     }
   }
   if (rng) PutRNGstate();
   // Final values from scratch; a result that fails the full-rank test is
   // replaced by the entry design (which passed it).
-  CrossedSpace fin(v, r, lay.B, 2, lay.joint_block, result);
-  bool fin_full = fin.refresh() && fin.full_rank();
+  CrossedSpace fin(v, r, lay.B, 2, lay.joint_block, result, 0.0, lay.form);
+  bool fin_full = false;
+  if (!cheap) {
+    fin_full = fin.refresh() && fin.full_rank();
+  } else {
+    bool exact = false;
+    fin_full = fin.refresh() && fin.full_rank_refreshed(exact);
+  }
+  out.scoring_joint += 1;
   if (searched && !fin_full) {
     result = entry;
-    fin = CrossedSpace(v, r, lay.B, 2, lay.joint_block, result);
-    fin_full = fin.refresh() && fin.full_rank();
+    result_row_known = false;
+    fin = CrossedSpace(v, r, lay.B, 2, lay.joint_block, result, 0.0, lay.form);
+    if (!cheap) {
+      fin_full = fin.refresh() && fin.full_rank();
+    } else {
+      bool exact = false;
+      fin_full = fin.refresh() && fin.full_rank_refreshed(exact);
+    }
+    out.scoring_joint += 1;
   }
-  const RowValue fin_row = row_value(lay, result);
+  // The Row values reported: in the cheap form those of the exact comparison
+  // above when they are of this design, else (and always in the block-space
+  // form) computed now.
+  RowValue fin_row;
+  if (cheap && result_row_known) {
+    fin_row = result_row;
+  } else {
+    fin_row = row_value(lay, result);
+    out.scoring_row += 1;
+  }
   const double joint_ld = fin_full ? fin.log_det() : NA_REAL;
   const double joint_d = fin_full ? fin.d_efficiency() : NA_REAL;
   const double joint_a = fin_full ? fin.a_efficiency() : NA_REAL;
@@ -609,5 +733,8 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       "full_rank"_nm = fin_full, "repair_swaps"_nm = out.repair_swaps,
       "repair_evaluations"_nm = out.repair_evaluations,
       "repair_log_det_start"_nm = repair_log_det_start, "repair_log_det"_nm = repair_log_det,
-      "repair_score_error"_nm = out.repair_score_error, "floor_fallback"_nm = floor_fallback});
+      "repair_score_error"_nm = out.repair_score_error, "floor_fallback"_nm = floor_fallback,
+      "treatment_form"_nm = cheap, "start_full_rank"_nm = start_full, "start_trace"_nm = start_trace,
+      "accepted"_nm = out.accepted, "scoring_joint"_nm = out.scoring_joint,
+      "scoring_row"_nm = out.scoring_row, "end_alarm"_nm = end_alarm});
 }

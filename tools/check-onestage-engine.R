@@ -1,8 +1,8 @@
 # Engine checks of the staged onestage row-column search (phase 2 spec 6.1).
 # Engine correctness is verified here, not by testthat (constraints: Tests).
 #
-#   Rscript tools/check-onestage-engine.R <stage1|crossed|repair> [baseline] [library]
-#           [seeds=20] [tmax=100]
+#   Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form>
+#           [baseline] [library] [seeds=20] [tmax=100]
 #
 # One PASS / FAIL line per check; exit status 1 on any FAIL. [library]
 # defaults to ~/fieldhub-libs/dev; install first with
@@ -106,14 +106,67 @@
 #   sum_i log(e_i + eps) + (B - v + 1) log(1 + eps), eps = 1e-6, of the start
 #   and of B's design to 1e-7 (the e_i from qr.resid(), as the report).
 # At least one start must be singular, or the check has tested no repair.
+#
+# treatment_form: the treatment-space form of the dense state (spec 5.1c, 6.1
+# W3; phase 2 Task 8 Step 3b). [baseline], seeds= and tmax= are ignored. The
+# engine uses the form only above 500 block columns (mode 3) or 2000 blocks
+# (modes 1, 2 and 4); the check hook FIELDHUB_ENGINE_DEBUG=treatment_form
+# forces it wherever there are fewer treatments than block columns, so it can
+# be compared with dense references on small shapes. Every call below runs
+# with FIELDHUB_ENGINE_DEBUG=1,treatment_form and must report that it used
+# the form.
+# (a) mode 3 on 9/3/2, 12/2/4, 12/6/3, 24/2/3 and 30/15/4 nested (a shared
+#     design never has fewer treatments than block columns), seeds 1:4, and
+#     on 12/2/3 (seeds 8, 9, 23, 1) and 8/4/3 (seeds 4, 9, 14, 1) nested, from
+#     onestage_stage1() starts and from random complete starts. The stage 1
+#     design of 12/2/4 was full rank on seeds 1:30 (measured 2026-11-22), so
+#     12/2/3 and 8/4/3, whose stage 1 design is singular on the first three
+#     seeds named, stand in for it as singular stage 1 starts:
+#     - the engine's classification of the start equals the dense full-rank
+#       test; the starts must include both sides of the trace shortcut (tr(M)
+#       <= 1e7, and no usable trace: a singular start, among them stage 1
+#       designs of 9/3/2 and of at least two other shapes);
+#     - a budget of one evaluation and a full search: `full_rank` equals the
+#       dense test of the returned design; where full rank, `joint_log_det`,
+#       `joint_d`, `row_d`, `row_a` equal the dense references of `crossed` to
+#       1e-9; the Row floors hold; debug_max_error <= 1e-8; and the refreshes
+#       that score the start, the repaired design and the result number at
+#       most 3 of the joint state and 2 Row values when the end-of-search
+#       drift check does not alarm;
+#     - the repair (singular starts): full rank after it, by the dense test
+#       (the repair's ridge state has a small trace, which must not pass for
+#       full rank), and the repair criterion before and after equals the
+#       dense eigenvalue value sum_i log(e_i + eps) + (B - v + 1) log(1 + eps)
+#       to 1e-9. The e_i are the eigenvalues of C / r built from the counts
+#       (the v x v form of spec 5.1); one below 1e-9 in size is taken as the
+#       exact zero it is (a singular design of whole counts), because its
+#       computed value, near 1e-16, would otherwise move the log by 1e-10
+#       against eps = 1e-6. The engine's own value carries the same rounding
+#       (measured: at most 6.2e-10 from the reference).
+# (b) a search cut in the middle of a descent: on 24/2/3 and 30/15/4 nested
+#     from random complete starts (seeds 1:2), the smallest work limits that
+#     let the joint stage apply at least 1, 10 and 100 swaps (found by
+#     bisection; the same seed gives the same prefix of the search). Each
+#     such call stops on its work limit and returns a complete design whose
+#     reported values equal the dense references to 1e-9, full rank, with the
+#     Row floors.
+# (c) modes 1, 2 and 4 with the admission switched off: blocks_engine(
+#     resolvable = TRUE, admission = FALSE) on 12/6/3, 30/15/4, 8/4/3 and
+#     10/5/4 (t / blocks per replicate / r); rows_within_columns(admission =
+#     FALSE) on the transposed 12/2/4 and 24/2/3 from random complete starts;
+#     segmented_blocks() on blocks that span the replicates (6 treatments, 4
+#     replicates, 12 blocks of 2; 8 treatments, 3 replicates, 12 blocks of
+#     2). Seeds 1:4. D and A of the result equal the one-way eigenvalue
+#     reference to 1e-9 (the first engine check of the one-factor identity
+#     Bhat^-1 = (M + (k - 1) yhat yhat') / k), and debug_max_error <= 1e-8.
 
 arguments <- commandArgs(trailingOnly = TRUE)
 named <- grepl("^[a-z]+=", arguments)
 opts <- arguments[named]
 positional <- arguments[!named]
-usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair> [baseline|-] [library] [seeds=20] [tmax=100]"
+usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form> [baseline|-] [library] [seeds=20] [tmax=100]"
 if (length(positional) < 1L || length(positional) > 3L ||
-    !positional[1] %in% c("stage1", "crossed", "repair")) {
+    !positional[1] %in% c("stage1", "crossed", "repair", "treatment_form")) {
   message(usage)
   quit(status = 1)
 }
@@ -143,7 +196,7 @@ report <- function(ok, label) {
 }
 
 FLOOR <- 1e-12
-if (check %in% c("crossed", "repair")) {
+if (check %in% c("crossed", "repair", "treatment_form")) {
   ns <- asNamespace("FielDHub")
   for (f in c("crossed_search", "crossed_default_budget", "onestage_stage1")) {
     if (!exists(f, envir = ns, inherits = FALSE)) {
@@ -385,6 +438,250 @@ if (check == "crossed") {
   report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 36): floor_fallback %s, %g repair swaps, start returned%s",
                                format(res$search$floor_fallback), res$search$repair_swaps,
                                if (is.null(why)) "" else paste0("; PROBLEM ", why)))
+  Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
+  cat(failures, "FAIL(s)\n")
+  quit(status = if (failures > 0L) 1 else 0)
+}
+
+if (check == "treatment_form") {
+  EPS <- 1e-6
+  Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1,treatment_form")
+  used_form <- function(res) isTRUE(res$search$check$treatment_form)
+  # The repair criterion of the engine from the dense eigenvalues (header).
+  criterion <- function(trt, lay, v, r, B) {
+    counts <- function(block) matrix(tabulate((block - 1L) * v + trt, v * max(block)), v, max(block))
+    Nr <- counts(lay$row); Nc <- counts(lay$col)
+    C <- diag(v) - tcrossprod(Nr) / (r * colSums(Nr)[1]) - tcrossprod(Nc) / (r * colSums(Nc)[1]) + 1 / v
+    e <- sort(eigen(C, symmetric = TRUE, only.values = TRUE)$values, decreasing = TRUE)[seq_len(v - 1L)]
+    e[abs(e) < 1e-9] <- 0
+    sum(log(e + EPS)) + (B - v + 1) * log1p(EPS)
+  }
+  # The values of a result against the dense references: a problem, or NULL.
+  value_problem <- function(res, start, lay, v, r) {
+    trt <- as.integer(res$treatments)
+    if (!used_form(res)) return("the treatment-space form was not used")
+    if (!complete_reps(trt, lay, v, r)) return("a replicate is not complete")
+    ref <- joint_ref(trt, lay, v, r)
+    if (!identical(res$full_rank, ref$full)) return(sprintf("full_rank %s, dense test %s", format(res$full_rank), ref$full))
+    if (!ref$full) return(if (is.na(res$joint_d)) NULL else "joint values of a design that is not full rank")
+    rw <- row_ref(trt, lay$row, v, r)
+    rw0 <- row_ref(start, lay$row, v, r)
+    if (!(close(res$joint_log_det, ref$log_det) && close(res$joint_d, ref$d) &&
+          close(res$row_d, rw[["d"]]) && close(res$row_a, rw[["a"]]) &&
+          close(res$stage1_row_d, rw0[["d"]]) && close(res$stage1_row_a, rw0[["a"]]))) {
+      return(sprintf("values differ from the dense references (joint log det %.12g, ref %.12g)",
+                     res$joint_log_det, ref$log_det))
+    }
+    floor_problem(res, trt, start, lay, v, r)
+  }
+  scoring_problem <- function(res) {
+    ck <- res$search$check
+    if (isTRUE(ck$end_alarm)) return(NULL)
+    if (ck$scoring_refreshes[["joint"]] > 3 || ck$scoring_refreshes[["row"]] > 2) {
+      return(sprintf("%g joint and %g Row scoring refreshes", ck$scoring_refreshes[["joint"]],
+                     ck$scoring_refreshes[["row"]]))
+    }
+    NULL
+  }
+  debug_problem <- function(dbg) {
+    if (!is.numeric(dbg) || length(dbg) != 1L || is.na(dbg) || dbg > 1e-8) sprintf("debug_max_error %s", format(dbg)) else NULL
+  }
+  shapes <- list(c(9, 3, 2), c(12, 2, 4), c(12, 6, 3), c(24, 2, 3), c(30, 15, 4), c(12, 2, 3), c(8, 4, 3))
+  seed_sets <- list("12/2/3" = c(8L, 9L, 23L, 1L), "8/4/3" = c(4L, 9L, 14L, 1L))
+  sides <- c(shortcut = 0L, no_trace = 0L, exact = 0L)
+  singular_stage1 <- character()
+  worst <- c(debug = 0, criterion = 0)
+  repaired_runs <- 0L
+  for (shape in shapes) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    lay <- layout_of(v, r, nrows, FALSE)
+    B <- max(lay$row) + max(lay$col)
+    label <- sprintf("%d/%d/%d nested", v, nrows, r)
+    problems <- character()
+    runs <- 0L
+    seeds <- seed_sets[[sprintf("%d/%d/%d", v, nrows, r)]]
+    if (is.null(seeds)) seeds <- 1:4
+    for (seed in seeds) {
+      for (kind in c("stage 1", "random")) {
+        fail <- function(what) problems <<- c(problems, sprintf("seed %d, %s start: %s", seed, kind, what))
+        set.seed(seed)
+        if (kind == "stage 1") {
+          s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit)
+          start <- as.integer(s1$treatments)
+        } else {
+          start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+        }
+        ref0 <- joint_ref(start, lay, v, r)
+        state <- get(".Random.seed", envir = globalenv())
+        run <- function(...) {
+          assign(".Random.seed", state, envir = globalenv())
+          tryCatch(crossed(start, v, r, nrows, ncols, FALSE, work_cap = work_limit, ...), error = function(e) e)
+        }
+        one <- run(budget = 1)
+        full <- run()
+        none <- run(budget = 0)
+        bad <- Filter(function(x) inherits(x, "error"), list(one, full, none))
+        if (length(bad)) { fail(paste("error:", conditionMessage(bad[[1]]))); next }
+        runs <- runs + 1L
+        # the start: classification and the side of the trace shortcut
+        ck <- one$search$check
+        if (!identical(ck$start_full_rank, ref0$full)) {
+          fail(sprintf("start classified %s, dense test %s (tr(M) %s)", format(ck$start_full_rank), ref0$full,
+                       format(ck$start_trace)))
+        }
+        side <- if (is.na(ck$start_trace)) "no_trace" else if (ck$start_trace <= 1e7) "shortcut" else "exact"
+        sides[[side]] <- sides[[side]] + 1L
+        if (kind == "stage 1" && !ref0$full) singular_stage1 <- c(singular_stage1, sprintf("%d/%d/%d", v, nrows, r))
+        for (res in list(one, full, none)) {
+          vp <- value_problem(res, start, lay, v, r)
+          if (!is.null(vp)) fail(vp)
+          sp <- scoring_problem(res)
+          if (!is.null(sp)) fail(sp)
+        }
+        if (isTRUE(full$full_rank)) {
+          dp <- debug_problem(full$search$debug_max_error)
+          if (!is.null(dp)) fail(dp) else worst[["debug"]] <- max(worst[["debug"]], full$search$debug_max_error)
+        }
+        # the repair, where the rows of a singular start are connected
+        if (!ref0$full && none$search$repair_evaluations > 0) {
+          repaired_runs <- repaired_runs + 1L
+          if (!isTRUE(none$full_rank) || !isTRUE(full$full_rank)) fail("not full rank after the repair")
+          want <- c(criterion(start, lay, v, r, B), criterion(as.integer(none$treatments), lay, v, r, B))
+          got <- none$search$repair_log_det
+          err <- if (length(got) == 2L && !anyNA(got)) max(abs(got - want)) else Inf
+          worst[["criterion"]] <- max(worst[["criterion"]], if (is.finite(err)) err else 0)
+          if (!(err <= 1e-9)) fail(sprintf("repair criterion %s, dense %s", paste(format(got, digits = 14), collapse = " -> "),
+                                           paste(format(want, digits = 14), collapse = " -> ")))
+        }
+      }
+    }
+    report(length(problems) == 0L && runs == 8L,
+           sprintf("treatment form, mode 3 %s: %d starts, each with a budget of 0, of 1 and a full search%s", label, runs,
+                   if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+  report(sides[["shortcut"]] >= 1L && sides[["no_trace"]] >= 1L &&
+           "9/3/2" %in% singular_stage1 && length(unique(singular_stage1)) >= 3L,
+         sprintf("treatment form, start classification: %d starts with tr(M) <= 1e7, %d above, %d without a usable trace; singular stage 1 starts on %s (need 9/3/2 and two other shapes)",
+                 sides[["shortcut"]], sides[["exact"]], sides[["no_trace"]],
+                 if (length(singular_stage1)) paste(unique(singular_stage1), collapse = ", ") else "none"))
+  report(repaired_runs >= 2L, sprintf("treatment form, repair: %d singular starts repaired (need >= 2)", repaired_runs))
+  cat(sprintf("  largest debug error %.2e; largest |repair criterion - dense| %.2e\n", worst[["debug"]], worst[["criterion"]]))
+
+  # (b) a search cut in the middle of a descent
+  for (shape in list(c(24, 2, 3), c(30, 15, 4))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    lay <- layout_of(v, r, nrows, FALSE)
+    label <- sprintf("%d/%d/%d nested", v, nrows, r)
+    problems <- character()
+    found <- character()
+    for (seed in 1:2) {
+      set.seed(seed)
+      start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+      state <- get(".Random.seed", envir = globalenv())
+      run <- function(cap) {
+        assign(".Random.seed", state, envir = globalenv())
+        crossed(start, v, r, nrows, ncols, FALSE, work_cap = cap)
+      }
+      whole <- run(work_limit)
+      if (!joint_ref(start, lay, v, r)$full) { problems <- c(problems, sprintf("seed %d: the random start is singular", seed)); next }
+      for (target in c(1, 10, 100)) {
+        if (whole$search$check$accepted <= target) {
+          problems <- c(problems, sprintf("seed %d: the whole search applied only %g swaps", seed, whole$search$check$accepted))
+          next
+        }
+        lo <- 1; hi <- whole$search$work
+        for (step in 1:60) {
+          mid <- (lo + hi) / 2
+          if (run(mid)$search$check$accepted >= target) hi <- mid else lo <- mid
+          if (hi - lo <= 1) break
+        }
+        res <- run(hi)
+        tag <- sprintf("seed %d, limit for %g swaps", seed, target)
+        vp <- value_problem(res, start, lay, v, r)
+        if (!is.null(vp)) problems <- c(problems, paste0(tag, ": ", vp))
+        else if (!isTRUE(res$search$work_capped) || !isTRUE(res$full_rank)) problems <- c(problems, paste0(tag, ": not cut by the work limit, or not full rank"))
+        else if (res$search$check$accepted < target || res$search$check$accepted >= whole$search$check$accepted) {
+          problems <- c(problems, sprintf("%s: %g swaps applied", tag, res$search$check$accepted))
+        }
+        found <- c(found, sprintf("%g", res$search$check$accepted))
+      }
+    }
+    report(length(problems) == 0L && length(found) == 6L,
+           sprintf("treatment form, mode 3 cut in a descent %s: swaps applied %s%s", label, paste(found, collapse = " "),
+                   if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+
+  # (c) modes 1, 2 and 4 with the admission switched off
+  one_way_problem <- function(d, a, trt, block, v, r, search) {
+    if (!isTRUE(search$treatment_form)) return("the treatment-space form was not used")
+    if (anyNA(trt) || is.na(d) || is.na(a)) return("no scored design")
+    rw <- row_ref(as.integer(trt), as.integer(block), v, r)
+    if (!close(d, rw[["d"]]) || !close(a, rw[["a"]])) {
+      return(sprintf("D %.12f (ref %.12f), A %.12f (ref %.12f)", d, rw[["d"]], a, rw[["a"]]))
+    }
+    debug_problem(search$debug_max_error)
+  }
+  engine <- get("blocks_engine", envir = ns)
+  within <- get("rows_within_columns", envir = ns)
+  segmented <- get("segmented_blocks", envir = ns)
+  for (shape in list(c(12, 6, 3), c(30, 15, 4), c(8, 4, 3), c(10, 5, 4))) {
+    v <- shape[1]; blocks <- shape[2]; r <- shape[3]
+    problems <- character(); searched <- 0L
+    for (seed in 1:4) {
+      set.seed(seed)
+      res <- tryCatch(engine(v, r, blocks, resolvable = TRUE, admission = FALSE), error = function(e) e)
+      if (inherits(res, "error")) { problems <- c(problems, sprintf("seed %d error: %s", seed, conditionMessage(res))); next }
+      if (res$search$stop_reason %in% c("optimal_start", "construction", "closed_form")) next
+      searched <- searched + 1L
+      op <- one_way_problem(res$Blocks_model$`D-Efficiency`[2], res$Blocks_model$`A-Efficiency`[2],
+                            res$Design$treatments, res$Design$Level_2, v, r, res$search)
+      if (!is.null(op)) problems <- c(problems, sprintf("seed %d: %s", seed, op))
+    }
+    report(length(problems) == 0L && searched >= 1L,
+           sprintf("treatment form, mode 1 %d treatments in %d blocks of %d (%d of 4 seeds searched)%s", v, r * blocks,
+                   v / blocks, searched, if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+  for (shape in list(c(12, 2, 4), c(24, 2, 3))) {
+    # The column step of stage 1: the rows of the transposed grid are the
+    # ncols columns of each replicate.
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    problems <- character(); searched <- 0L
+    for (seed in 1:4) {
+      set.seed(seed)
+      start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+      column_of <- rep(seq_len(nrows), ncols * r)
+      res <- tryCatch(within(start, column_of, v, r, ncols, admission = FALSE), error = function(e) e)
+      if (inherits(res, "error")) { problems <- c(problems, sprintf("seed %d error: %s", seed, conditionMessage(res))); next }
+      if (identical(res$search$stop_reason, "optimal_start")) next
+      searched <- searched + 1L
+      op <- one_way_problem(res$d_efficiency, res$a_efficiency, res$treatments,
+                            rep(seq_len(r * ncols), each = nrows), v, r, res$search)
+      if (!is.null(op)) problems <- c(problems, sprintf("seed %d: %s", seed, op))
+    }
+    report(length(problems) == 0L && searched >= 1L,
+           sprintf("treatment form, mode 2 %d treatments in %d rows of %d (%d of 4 seeds searched)%s", v, r * ncols,
+                   nrows, searched, if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+  for (shape in list(c(6, 4, 12), c(8, 3, 12))) {
+    v <- shape[1]; r <- shape[2]; blocks <- shape[3]
+    n <- v * r
+    block_of <- (seq_len(n) - 1L) %% blocks + 1L   # blocks of n / blocks plots that span the replicates
+    segment_of <- rep(seq_len(r), each = v)
+    problems <- character(); searched <- 0L
+    for (seed in 1:4) {
+      set.seed(seed)
+      start <- as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+      res <- tryCatch(segmented(start, block_of, segment_of, v, r, blocks), error = function(e) e)
+      if (inherits(res, "error")) { problems <- c(problems, sprintf("seed %d error: %s", seed, conditionMessage(res))); next }
+      if (is.na(res$a_efficiency)) next
+      searched <- searched + 1L
+      op <- one_way_problem(res$d_efficiency, res$a_efficiency, res$treatments, block_of, v, r, res$search)
+      if (!is.null(op)) problems <- c(problems, sprintf("seed %d: %s", seed, op))
+    }
+    report(length(problems) == 0L && searched >= 1L,
+           sprintf("treatment form, mode 4 %d treatments in %d blocks of %d (%d of 4 seeds searched)%s", v, blocks,
+                   n / blocks, searched, if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
   Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
   cat(failures, "FAIL(s)\n")
   quit(status = if (failures > 0L) 1 else 0)

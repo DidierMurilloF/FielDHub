@@ -90,6 +90,31 @@
 // The check `tools/check-onestage-engine.R crossed` verifies the identity
 // (values against a dense qr.resid() reference) and this update (accepted
 // ratios against fresh refreshes, FIELDHUB_ENGINE_DEBUG=1).
+//
+// Treatment-space form (phase 2 spec 5.1c). Every factorisation above is of
+// order B. With fewer treatments than block columns (v < B) the same state
+// follows from a v x v matrix. Let Nt = N / sqrt(r), e = 1 / sqrt(v) (the unit
+// constant vector), P = I_v - e e' and yhat = y / sqrt(n) = Nt' e. Then
+//   What_eps = (1 + eps) I_B - Nt' P Nt   (Nt' e e' Nt = y y' / n),
+//   S_eps = (1 + eps) I_v - P Nt Nt' P = (1 + eps) I_v - N N' / r + (F / v) J,
+// because N N' 1 = F r 1 (each treatment has r plots in every factor), so
+// Nt Nt' e = F e and P Nt Nt' P = Nt Nt' - F e e'. S_eps is C / r + eps I on
+// the contrasts and 1 + eps along e. By the Woodbury identity on
+// (1 + eps) I_B - A'A with A = P Nt, and P S_eps^-1 P = S_eps^-1 -
+// e e' / (1 + eps) (S_eps e = (1 + eps) e),
+//   M = What_eps^-1
+//     = (I_B + Nt' S_eps^-1 Nt - yhat yhat' / (1 + eps)) / (1 + eps),
+//   log det What_eps = log det S_eps + (B - v) log(1 + eps)
+// (Sylvester's determinant identity), and What and S (eps = 0) have the same
+// smallest eigenvalue, min(1, min_i e_i), so the full-rank test is
+// "S - 1e-7 I is positive definite". A state built with `treatment_form`
+// uses these for refresh(), full_rank(), log_det_fresh(), log_det_after()
+// and full_rank_after() when v < B, and is the block-space state otherwise.
+// N N' is accumulated block by block (sum of k_j^2 terms), S is inverted
+// once (v^3), and Nt' S^-1 Nt and the cache are sparse products of order
+// F n (v + B). M, G, ratio(), after() and apply() are the same in both forms.
+// The check `tools/check-onestage-engine.R treatment_form` verifies the form
+// against the dense references.
 #pragma once
 #include <vector>
 
@@ -98,9 +123,29 @@ class CrossedSpace {
   // plot_block: n x F, plot-major (entry p F + f is the 0-based block column,
   // in 0 .. B - 1, of plot p in factor f); treat: the 0-based treatment of
   // every plot, each treatment r times. Block sizes are read from plot_block.
-  // ridge: eps of What_eps (0 for the plain state).
+  // ridge: eps of What_eps (0 for the plain state). treatment_form: build the
+  // state from the treatment space when v < B (header comment).
   CrossedSpace(int v, int r, int B, int F, const std::vector<int>& plot_block,
-               const std::vector<int>& treat, double ridge = 0.0);
+               const std::vector<int>& treat, double ridge = 0.0, bool treatment_form = false);
+  // True if this state is built from the treatment space.
+  bool treatment_form() const { return form_; }
+  // The full-rank test of spec 5.1b on a state that refresh() has just built
+  // without a ridge. The eigenvalues of M are the 1 / e_i of the nonzero
+  // lambda_i and ones, all positive, so the smallest e_i is at least
+  // 1 / tr(M): when tr(M) <= 1e7 the test passes with no second
+  // factorisation (`exact` false). Otherwise it is full_rank() (`exact`
+  // true). Never valid on a ridge state: tr(M_eps) <= 1e7 only bounds
+  // e_i + eps.
+  bool full_rank_refreshed(bool& exact) const;
+  // Work units (about one per multiply-add) of one refresh() and of one
+  // factorisation from the counts (full_rank(), log_det_fresh() and the two
+  // *_after()). Block-space form: B^3 + n F^2 r + n F B for both, the charge
+  // of the engine before the treatment-space form existed.
+  // Treatment-space form: v^3 + sum_j k_j^2 + F n (v + 2 B) + 2 B^2 for a
+  // refresh (N N', the inverse of S, S^-1 N, N' S^-1 N and the cache) and
+  // v^3 / 3 + sum_j k_j^2 + v^2 for a factorisation (N N' and one Cholesky).
+  double refresh_work() const;
+  double factor_work() const;
   // Rebuild M, the cache G and log det What from the design. False if What is
   // not positive definite (C below rank v - 1); the state is then unchanged.
   bool refresh();
@@ -146,6 +191,14 @@ class CrossedSpace {
   // Dense What from the per-treatment block lists `lists` (v x F r), with
   // `diagonal` in place of the 1 of I_B.
   void build_what(const std::vector<int>& lists, std::vector<double>& w, double diagonal) const;
+  // Dense S = diagonal I_v - N N' / r + (F / v) J from the same lists; the
+  // treatments of each block (with multiplicity) go to `member`.
+  void build_s(const std::vector<int>& lists, std::vector<double>& s, double diagonal,
+               std::vector<int>* member = nullptr) const;
+  bool refresh_treatment_form();
+  // log det What (with the ridge) from the lists, in the state's form.
+  bool log_det_of(const std::vector<int>& lists, double& log_det) const;
+  bool full_rank_of(const std::vector<int>& lists) const;
   // The block lists after swapping plots p and q.
   std::vector<int> lists_after(int p, int q) const;
   // u of the swap of p and q: its entries in u_j_ / u_v_, returns how many.
@@ -153,6 +206,9 @@ class CrossedSpace {
   void mg_of(int a, int c, std::vector<double>& mg) const;  // M g, from M
   int v_, r_, B_, F_, n_;
   double ridge_;
+  bool form_;                     // treatment-space form (v < B)
+  std::vector<int> off_;          // B + 1: block j holds off_[j + 1] - off_[j] plots
+  double sum_k2_;                 // sum_j k_j^2
   std::vector<int> plot_block_;   // n x F
   std::vector<double> wt_;        // 1 / sqrt(k_j)
   std::vector<double> sq_;        // sqrt(k_j)

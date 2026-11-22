@@ -58,6 +58,11 @@ struct Layout {
   // follow the plot order, and may span segments); swaps are drawn as in
   // rows-within-columns mode, a segment first.
   bool segmented;
+  // Treatment-space form (phase 2 spec 5.1c): every BlockSpace of the run is
+  // built from the treatment space (BlockSpace::enable_treatment_form()). Set
+  // only for the stage 1 steps of the onestage search, when there are fewer
+  // treatments than blocks and all blocks have one size.
+  bool form = false;
 };
 
 Layout make_layout(int v, int r, int b, bool resolvable = false) {
@@ -234,8 +239,14 @@ bool draw_swap(const Layout& lay, const std::vector<int>& treat, int& x, int& y)
 }
 
 // Dense work of one refresh or drift check (Cholesky, triangular inverse and
-// product, about b^3 multiply-adds) plus the sparse N'N build.
+// product, about b^3 multiply-adds) plus the sparse N'N build. In the
+// treatment-space form: the v x v inverse, N N' block by block (n k), and
+// the sparse products S^-1 N, N' S^-1 N and the cache (n (v + 2 b)).
 double refresh_work(const Layout& lay) {
+  if (lay.form) {
+    const double v = lay.v, n = lay.n, b = lay.b;
+    return v * v * v + n * (n / b) + n * (v + 2.0 * b) + 2.0 * b * b;
+  }
   return static_cast<double>(lay.b) * lay.b * lay.b + static_cast<double>(lay.n) * lay.r +
          static_cast<double>(lay.n) * lay.b;
 }
@@ -287,12 +298,14 @@ bool apply_swap(BlockSpace& bs, const Layout& lay, std::vector<int>& treat, int 
   double before = 0.0;
   if (out.debug) {
     BlockSpace fresh(lay.v, lay.b, lay.r, bs.counts());
+    if (lay.form) fresh.enable_treatment_form();
     if (fresh.refresh()) before = fresh.log_det();
   }
   bs.apply(treat[x], lay.block_of[x], treat[y], lay.block_of[y], ratio);
   std::swap(treat[x], treat[y]);
   if (out.debug) {
     BlockSpace fresh(lay.v, lay.b, lay.r, bs.counts());
+    if (lay.form) fresh.enable_treatment_form();
     if (fresh.refresh()) {
       double exact = std::exp(fresh.log_det() - before);
       double e = std::fabs(ratio - exact) / std::max(1.0, exact);
@@ -478,6 +491,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
     bs->enable_fast_inverse();
+    if (lay.form) bs->enable_treatment_form();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) return;
   } else if (start && lay.columns) {
     // Rows within columns: the given design is the only start. Its column
@@ -496,6 +510,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
     bs->enable_fast_inverse();
+    if (lay.form) bs->enable_treatment_form();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) return;
   } else if (start) {
     // A lattice start is connected; random starts follow if it can't be
@@ -506,6 +521,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
     if (lay.resolvable) bs->enable_fast_inverse();
+    if (lay.form) bs->enable_treatment_form();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
     if (!bs && lay.resolvable) return;
   }
@@ -524,6 +540,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
     bs.reset(new BlockSpace(lay.v, lay.b, lay.r, counts_of(lay, treat)));
     if (cache) bs->enable_cache();
     if (lay.resolvable) bs->enable_fast_inverse();
+    if (lay.form) bs->enable_treatment_form();
     if (!budget.work(refresh_work(lay)) || !bs->refresh()) bs.reset();
   }
   if (!bs) return;  // no connected start within 10 repaired shuffles
@@ -597,6 +614,7 @@ void run_search(const Layout& lay, int jumps_per_escape, int max_stale_escapes, 
   if (!scored && (budget.stop() != STOP_TIME || local_treat.empty())) {
     BlockSpace fin(lay.v, lay.b, lay.r, counts_of(lay, treat));
     if (lay.resolvable) fin.enable_fast_inverse();
+    if (lay.form) fin.enable_treatment_form();
     if (fin.refresh() && fin.log_det() > local_best) { local_best = fin.log_det(); local_treat = treat; }
   }
   if (!local_treat.empty() && local_best > out.best_log_det) {
@@ -680,7 +698,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, bool slack_floors);
+                           double evaluation_work, bool slack_floors, bool treatment_form);
 
 // Test hook: run the even-up repair on a design given as the treatment of each
 // plot (1-based, plots in block order as in blocks_engine()). Returns the
@@ -734,14 +752,20 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // search from it, after a joint-rank repair when it is not full rank
 // (`segment_of` is ignored; `searches` is 1, or 2 as a check hook that skips
 // the exact Row confirmation of each swap, see crossed_engine.cpp).
+// `options` is a sum of flags, 0 for every caller of phase 1: 1 builds the
+// dense state from the treatment space where there are fewer treatments than
+// block columns (phase 2 spec 5.1c; modes 1-4 only, and in modes 1, 2 and 4
+// only with blocks of one size).
 [[cpp11::register]]
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape,
                               int max_stale_escapes, double budget, double time_limit,
                               bool debug, cpp11::integers start, double work_cap,
                               int refresh_every, double evaluation_work, int mode,
                               cpp11::integers column_of, cpp11::integers block_of,
-                              cpp11::integers segment_of) {
+                              cpp11::integers segment_of, int options) {
   if (mode < 0 || mode > 4) cpp11::stop("`mode` must be 0, 1, 2, 3 or 4.");
+  if (options < 0 || options > 1) cpp11::stop("`options` must be 0 or 1.");
+  const bool treatment_form = (options & 1) != 0;
   if (mode == 3) {
     if (start.size() != static_cast<R_xlen_t>(v) * r) cpp11::stop("Crossed mode needs a `start` of one treatment per plot.");
     std::vector<int> given(start.size());
@@ -749,13 +773,14 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
     return crossed_engine(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
                           std::vector<int>(column_of.begin(), column_of.end()), given, jumps_per_escape,
                           max_stale_escapes, budget, time_limit, debug, work_cap, refresh_every,
-                          evaluation_work, searches == 2);
+                          evaluation_work, searches == 2, treatment_form);
   }
   const bool resolvable = mode != 0;
   Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))
              : mode == 4 ? make_segment_layout(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
                                                std::vector<int>(segment_of.begin(), segment_of.end()))
                          : make_layout(v, r, b, resolvable);
+  lay.form = treatment_form && resolvable && lay.n % lay.b == 0 && lay.v < lay.b;
   if (mode == 2 && start.size() == 0) cpp11::stop("Rows within columns needs a `start`.");
   if (mode == 4 && start.size() == 0) cpp11::stop("Segmented blocks need a `start`.");
   Budget bud(budget, time_limit, work_cap, evaluation_work);
@@ -796,6 +821,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
   if (!out.best_treat.empty()) {
     BlockSpace fin(v, b, r, counts_of(lay, out.best_treat));
     if (resolvable) fin.enable_fast_inverse();
+    if (lay.form) fin.enable_treatment_form();
     if (fin.refresh()) {
       log_det = fin.log_det();
       d_eff = fin.d_efficiency();
@@ -813,7 +839,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
       "evaluations"_nm = bud.used(), "stop_reason"_nm = stop, "searches_done"_nm = done,
       "refreshes"_nm = out.refreshes, "drift_events"_nm = out.drift_events, "repairs"_nm = out.repairs,
       "even_repairs"_nm = even_repairs, "work"_nm = bud.work_used(), "work_capped"_nm = bud.capped(),
-      "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL});
+      "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL, "treatment_form"_nm = lay.form});
 }
 
 // Scores a resolvable design without searching (nested-engine spec 6.2b,
