@@ -32,8 +32,11 @@ app_spatial_tabs <- function(ns, spec) {
   }
   panels <- lapply(seq_along(spec$panels), function(i) {
     panel <- spec$panels[[i]]
+    # The first plot carries the randomize steps and, where the page has
+    # one, the button that opens its report (the check spacing)
     shiny::tabPanel(panel$title, feedback(
-      app_plot_ui(ns, panel, controls = if (i == 1L) steps("randomize"))))
+      app_plot_ui(ns, panel, controls = if (i == 1L) c(steps("randomize"),
+        if (!is.null(spec$report)) list(shiny::uiOutput(ns("design_report"), class = "fh-report"))))))
   })
   tabs <- c(
     list(
@@ -49,8 +52,6 @@ app_spatial_tabs <- function(ns, spec) {
             shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
           setup,
-          if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
-            app_output_feedback(shiny::verbatimTextOutput(ns("design_report"), placeholder = FALSE))),
           tasks = setup_tasks)),
       shiny::tabPanel("Entries", feedback(entries))
     ),
@@ -322,9 +323,11 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
     }, server = is.null(spec$setup$rows))
   }
   if (!is.null(spec$report)) {
-    output$design_report <- shiny::renderPrint({
-      if (!randomized()) return(invisible(NULL))
-      spec$report(settled(design), location())
+    # Drawn once for a design: its own select changes the location shown,
+    # so the open panel is not replaced under the reader
+    output$design_report <- shiny::renderUI({
+      if (!randomized()) return(NULL)
+      app_check_spacing(settled(design), shiny::isolate(location()), session$ns("design_report_panel"))
     })
   }
   for (i in seq_along(spec$entries)) local({

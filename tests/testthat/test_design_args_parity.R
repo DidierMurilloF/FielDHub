@@ -1288,6 +1288,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
   page_helpers <- c(
     "app_design_task",            # worker/sync lifecycle shared by both engine steps
     "app_design_summary",         # the design's summary, built from the finished design
+    "app_check_spacing",          # the check spacing of a diagonal design, from its own record
     "app_report_task_feedback",   # loading feedback while Run prepares field dimensions
     "validate_design", "app_design_state", "app_plot_state", "app_upload_spec",
     "read_design_controls",       # reads again the controls the steps follow (filler plots)

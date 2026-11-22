@@ -157,7 +157,7 @@ app_summary_efficiency <- function(model, block_levels = NULL) {
 #' @noRd
 app_summary_table <- function(data) {
   tips <- app_summary_tips()
-  numeric <- vapply(data, function(v) is.numeric(v) || all(grepl("^[0-9.\u2013]+$", v)), TRUE)
+  numeric <- vapply(data, function(v) is.numeric(v) || all(grepl("^[0-9.%\u2013]+$", v)), TRUE)
   class <- function(i) if (numeric[[i]]) "fh-num-cell"
   shiny::tags$table(class = "fh-table",
     shiny::tags$thead(shiny::tags$tr(lapply(seq_along(data), function(i) {

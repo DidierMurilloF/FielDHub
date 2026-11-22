@@ -32,9 +32,12 @@ app_sidebar_layout <- function(spec) {
     RCBD_augmented = c(list("upload_file", c("repsExpt", "random"), "random_note",
       "repsStack", "lines", c("checks", "b")), location_row,
       list("planter", "plot_by_block", "plot_increment"), spatial_end),
-    Augmented_RowCol = c(list("upload_file", c("nrows", "ncols"), "lines", "checks",
+    # The field and what goes in it in pairs; the search settings folded
+    # into one group at the end. The year is not asked: the design takes
+    # the current one, as it does for a blank year
+    Augmented_RowCol = c(list("upload_file", c("nrows", "ncols"), c("lines", "checks"),
       "check_direction", "objective"), location_row, list("planter"), spatial_end,
-      list("year", "advanced", "budget", "time_limit")),
+      list(c("advanced", "budget", "time_limit"))),
     Diagonal = c(list("upload_file", "lines", "checks", "spread_checks", "dist_method"),
       location_row, list("planter"), spatial_end),
     diagonal_multiple = c(list("sameEntries", "upload_file", "lines", "blocks", "checks"),
@@ -46,7 +49,8 @@ app_sidebar_layout <- function(spec) {
     c(list("upload_file"), as.list(vapply(spec$controls, `[[`, "", "id")))
   )
   if (is.null(spec$upload)) rows <- Filter(function(row) !identical(row, "upload_file"), rows)
-  list(rows = rows, gutters = !spec$module %in% c("pREPS", "multi_loc_preps"),
+  list(rows = rows, omitted = if (spec$module == "Augmented_RowCol") "year",
+    gutters = !spec$module %in% c("pREPS", "multi_loc_preps"),
     upload_width = if (identical(spec$kind, "classic") && spec$module != "CRD") 8L else 7L,
     upload_label = "Import entries list", file_label = "CSV file")
 }
@@ -74,6 +78,13 @@ app_sidebar_ui <- function(spec, ns, toggle = NULL) {
         file_width = layout$upload_width, gutters = layout$gutters,
         file_label = layout$file_label, separator_gutter = spec$module != "sparse_allocation"))
       if (length(row) == 1L) return(render(row))
+      # More than a pair is a group that its first control (a flag) opens
+      if (length(row) > 2L) return(shiny::div(class = "fh-advanced",
+        shiny::span(class = "fh-tip fh-info", tabindex = "0", role = "img", `data-fh-tip` = NA,
+          title = "How long the search for the design may run. The defaults suit most trials.",
+          `aria-label` = "How long the search for the design may run. The defaults suit most trials.",
+          shiny::icon("circle-info", verify_fa = FALSE)),
+        lapply(row, render)))
       shiny::fluidRow(class = "fieldhub-input-row",
         shiny::column(6, class = if (layout$gutters) "fieldhub-input-left", render(row[1L])),
         shiny::column(6, class = if (layout$gutters) "fieldhub-input-right", render(row[2L])))

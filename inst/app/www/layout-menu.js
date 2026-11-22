@@ -1,5 +1,5 @@
-/* Prototype: the "Layout options" menu on the plot toolbar
-   (app_layout_toolbar()). Shiny re-renders the toolbar with each new
+/* Prototype: the menus on the plot toolbar: "Layout options"
+   (app_layout_toolbar()) and "Check spacing" (app_check_spacing()). Shiny re-renders the toolbar with each new
    design, so every handler is delegated from the document. */
 (function() {
   "use strict";
@@ -52,6 +52,18 @@
       event.preventDefault();
       setOpen(toggle, true, true);
     }
+  });
+
+  // A select in a panel that shows one of its sections (the location of the
+  // check spacing).
+  document.addEventListener("change", function(event) {
+    var choice = event.target;
+    if (!choice.hasAttribute || !choice.hasAttribute("data-fh-switch")) return;
+    var panel = choice.closest(".fh-view-menu-panel");
+    if (!panel) return;
+    panel.querySelectorAll("[data-fh-section]").forEach(function(section) {
+      section.hidden = section.getAttribute("data-fh-section") !== choice.value;
+    });
   });
 
   // Tabbing out of the menu closes it.

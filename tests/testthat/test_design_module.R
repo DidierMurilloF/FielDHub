@@ -15,7 +15,10 @@ all_modules <- c(classic_modules, spatial_modules)
 # The one label of each concept, written out here so a label changed in
 # fieldhub_control_concepts() fails this test instead of passing by
 # construction
-page_labels <- c(Diagonal.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
+page_labels <- c(Augmented_RowCol.advanced = "Advanced settings",
+  Augmented_RowCol.budget = "Search budget per location",
+  Augmented_RowCol.time_limit = "Time limit per location (seconds)",
+  Diagonal.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
   FD.type = "Factorial design type", SPD.type = "Split-plot design type",
   SSPD.type = "Split-split-plot design type", multi_loc_preps.use_checks = "Include checks",
   RCBD_augmented.checks = "Checks per block")
@@ -292,7 +295,7 @@ spatial_defaults <- function(module) {
                                             seed = 7),
     Diagonal = diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, l = 1,
                                     plotNumber = 1, kindExpt = "SUDC", seed = 7, exptName = "Expt1",
-                                    locationNames = "FARGO", checksPercent = 11.11),
+                                    locationNames = "FARGO", checksPercent = 11.11, spread_checks = TRUE),
     diagonal_multiple = diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 1,
                                              plotNumber = 1, kindExpt = "DBUDC", splitBy = "row",
                                              seed = 7, blocks = c(100, 120, 80),
@@ -420,7 +423,8 @@ test_that("the diagonal page offers fields and percentages of checks and builds 
                                                          checks_percent = as.character(percents[[1]]))),
     diagonal_arrangement(nrows = size[1], ncols = size[2], lines = 150, checks = 3, l = 2,
                          planter = "cartesian", plotNumber = c(1, 1001), kindExpt = "SUDC", seed = 21,
-                         exptName = "D1", locationNames = c("A", "B"), checksPercent = percents[[1]]))
+                         exptName = "D1", locationNames = c("A", "B"), checksPercent = percents[[1]],
+                         spread_checks = TRUE))  # the page optimizes check spacing by default
   # an uploaded list, its checks first
   entries <- data.frame(ENTRY = 1:154, NAME = c(paste0("CH", 1:4), paste0("G", 5:154)))
   raw <- utils::modifyList(page_defaults("Diagonal"), list(lines = NA))
@@ -428,7 +432,7 @@ test_that("the diagonal page offers fields and percentages of checks and builds 
   expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "13 x 13")),
     diagonal_arrangement(nrows = 13, ncols = 13, checks = 4, l = 1, plotNumber = 1, kindExpt = "SUDC",
                          seed = 7, exptName = "Expt1", locationNames = "FARGO", data = entries,
-                         checksPercent = utils::tail(percents, 1L)))
+                         checksPercent = utils::tail(percents, 1L), spread_checks = TRUE))
   shuffled <- entries[c(2, 1, 5, 3, 4, 6:154), ]
   expect_error(page_design(spec, raw, shuffled), "must have consecutive ENTRY numbers",
                class = "fieldhub_input_error")
@@ -580,6 +584,9 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     html <- as.character(mod_design_ui("x", spec))
     has_id <- function(id) grepl(paste0('id="x-', id, '"'), html, fixed = TRUE)
     display_controls <- lapply(spec$controls, app_sidebar_control, module = module)
+    # a control a page leaves off its panel (app_sidebar_layout()$omitted) is not drawn
+    omitted <- app_sidebar_layout(spec)$omitted
+    display_controls <- Filter(function(control) !control$id %in% omitted, display_controls)
     for (control in c(display_controls, spec$steps)) {
       expect_true(has_id(control$id), info = paste(module, control$id))
       # one select per location is drawn by the server, labelled "<label> <i>"
@@ -646,7 +653,7 @@ test_that("the same concept has the same label, default and minimum on every pag
   page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
                    RCBD_augmented.plot_start = "1", Augmented_RowCol.plot_start = "1",
-                   Diagonal.plot_start = "1", Diagonal.spread_checks = FALSE,
+                   Diagonal.plot_start = "1", Diagonal.spread_checks = TRUE,
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
                    sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
                    multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,

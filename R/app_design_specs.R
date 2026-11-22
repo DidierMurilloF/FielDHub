@@ -563,12 +563,14 @@ build_design_specs <- function() {
     # The field sizes are searched after Run!, the percentages of checks
     # after Randomize!
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
-      report = function(design, location) print_diagonal_spacing(design, location = location),
+      report = "check_spacing",  # the page offers the design's check spacing (app_check_spacing())
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
         list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),
              ctl_locations(),
-             ctl_flag("spread_checks", value = FALSE),
+             # On the page the spacing is optimized unless the user turns it off
+             # (the function's own default stays FALSE)
+             ctl_flag("spread_checks", value = TRUE),
              ctl_select("dist_method", show_if = "input.spread_checks == true")),
         spatial_shared(), list(ctl_seed())
       ),
@@ -781,5 +783,7 @@ design_page_labels <- function(module) {
     SSPD = c(type = "Split-split-plot design type"),
     multi_loc_preps = c(use_checks = "Include checks"),
     RCBD_augmented = c(checks = "Checks per block"),
+    Augmented_RowCol = c(advanced = "Advanced settings", budget = "Search budget per location",
+                         time_limit = "Time limit per location (seconds)"),
     character(0))
 }

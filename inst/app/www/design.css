@@ -355,6 +355,57 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 :is(#fieldhub-app .fh-design, .modal) .help-block { color: var(--fhd-muted); font-size: 13px; }
 .fieldhub-input-error { color: var(--fhd-danger, #b00020); }
 
+/* A group of settings that its first control, a flag, opens: the flag
+   reads as a disclosure, not as one more checkbox. */
+#fieldhub-app .fh-advanced {
+  position: relative;
+  margin: 2px 0 var(--fhd-gap);
+  padding-top: 10px;
+  border-top: 1px solid var(--fhd-line);
+}
+#fieldhub-app .fh-advanced > .fh-info { position: absolute; top: 12px; right: 0; }
+#fieldhub-app .fh-design .fh-advanced > .form-group:first-of-type { margin-bottom: 0; }
+#fieldhub-app .fh-design .fh-advanced .checkbox { margin: 0; }
+#fieldhub-app .fh-design .fh-advanced .checkbox label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: var(--fhd-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+#fieldhub-app .fh-design .fh-advanced .checkbox input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+#fieldhub-app .fh-design .fh-advanced .checkbox label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: 0 3px;
+  border-right: 2px solid var(--fhd-muted);
+  border-bottom: 2px solid var(--fhd-muted);
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+#fieldhub-app .fh-design .fh-advanced .checkbox label:has(input:checked)::before { transform: rotate(45deg); }
+#fieldhub-app .fh-design .fh-advanced .checkbox label:has(input:focus-visible) {
+  outline: 2px solid var(--fhd-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+#fieldhub-app .fh-design .fh-advanced .shiny-panel-conditional { padding-top: 10px; }
+#fieldhub-app .fh-design .fh-advanced .shiny-panel-conditional:last-child .form-group { margin-bottom: 4px; }
+
+/* The steps of a field and the controls on a plot are as tall as the
+   sidebar's inputs. */
+#fieldhub-app .fh-design .fh-setup,
+#fieldhub-app .fh-design .fieldhub-plot-controls { --fhd-control: 34px; }
+
 /* Upload: the file on one line, its separator choices on the next. */
 #fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) > [class*="col-"] {
   float: none;
@@ -570,12 +621,12 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 #fieldhub-app .fh-segmented label.radio-inline span {
   display: block;
-  height: 28px;
+  height: 26px;
   padding: 0 13px;
   color: var(--fhd-muted);
   font-size: 13px;
   font-weight: 600;
-  line-height: 28px;
+  line-height: 26px;
   border-radius: var(--fhd-radius);
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
@@ -592,7 +643,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 #fieldhub-app .fh-view-menu { position: relative; }
 #fieldhub-app .fh-design .btn.fh-view-menu-toggle {
-  height: 36px;
+  height: 34px;
   padding: 0 11px;
   font-size: 13px;
   border-color: var(--fhd-line);
@@ -887,10 +938,10 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 #fieldhub-app .fh-setup {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px 16px;
+  align-items: center;
+  gap: 10px 16px;
   margin: 16px 0 14px;
-  padding: 14px 16px;
+  padding: 10px 12px;
   background: var(--fhd-surface);
   border: 1px solid var(--fhd-line);
   border-radius: var(--fhd-radius-lg);
@@ -898,12 +949,21 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 #fieldhub-app .fh-setup-steps {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px 16px;
   flex: 1 1 260px;
   min-width: 0;
 }
-#fieldhub-app .fh-setup-steps > div { flex: 1 1 220px; max-width: 380px; }
+#fieldhub-app .fh-setup-steps > div { flex: 0 1 auto; max-width: 100%; }
+/* A step is one line: its label, then its box, as tall as a toolbar control. */
+#fieldhub-app .fh-design .fh-setup-steps .form-group:has(> .control-label) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#fieldhub-app .fh-design .fh-setup-steps .control-label { margin: 0; white-space: nowrap; }
+#fieldhub-app .fh-design .fh-setup-steps .form-group > div { flex: 1; min-width: 150px; }
+#fieldhub-app .fh-design .fh-setup > .btn { height: 34px; }
 #fieldhub-app .fh-setup-steps:empty { display: none; }
 #fieldhub-app .fh-setup .form-group { margin-bottom: 0; }
 #fieldhub-app .fh-setup .shiny-input-container { width: 100%; }
@@ -926,6 +986,43 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 #fieldhub-app .fh-design .fieldhub-plot-controls > [id$="_step"] .control-label { margin: 0; white-space: nowrap; }
 #fieldhub-app .fh-design .fieldhub-plot-controls > [id$="_step"] .form-group > div { flex: 1; min-width: 150px; }
+
+/* The controls on a plot share one line: steps, then the report button. */
+#fieldhub-app .fh-design .fieldhub-plot-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+/* An output that is still empty stays in the flow: Shiny does not render
+   an output it cannot see. */
+#fieldhub-app .fh-design .fieldhub-plot-controls > .shiny-html-output:not(.fh-report) { flex: 1 1 100%; }
+
+/* Check spacing (app_check_spacing()): facts, one small table, notes in a tooltip */
+#fieldhub-app .fh-view-menu-panel.fh-spacing { width: 440px; gap: 14px; padding: 16px; }
+#fieldhub-app .fh-spacing-head { display: flex; align-items: center; gap: 8px; }
+#fieldhub-app .fh-design .fh-spacing-head h3 { margin: 0; padding: 0; font-size: 14px; font-weight: 700; }
+#fieldhub-app .fh-info { color: var(--fhd-muted); font-size: 13px; text-decoration: none; }
+#fieldhub-app .fh-spacing-where { margin-left: auto; color: var(--fhd-muted); font-size: 13px; }
+#fieldhub-app .fh-design .fh-spacing select.fh-spacing-location {
+  width: auto;
+  min-width: 120px;
+  height: 30px;
+  min-height: 30px;
+  margin-left: auto;
+  padding: 0 8px;
+  font-size: 13px;
+  line-height: 28px;
+}
+#fieldhub-app .fh-spacing-site { display: grid; gap: 12px; }
+#fieldhub-app .fh-spacing-site[hidden] { display: none; }
+#fieldhub-app .fh-facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; font-size: 13px; }
+#fieldhub-app .fh-facts > div { display: contents; }
+#fieldhub-app .fh-facts dt { color: var(--fhd-muted); font-weight: 400; }
+#fieldhub-app .fh-facts dd { margin: 0; color: var(--fhd-ink); }
+#fieldhub-app .fh-spacing .fh-table { font-size: 13px; }
+#fieldhub-app .fh-spacing .fh-table :is(th, td) { padding-left: 0; padding-right: 0; }
+#fieldhub-app .fh-spacing .fh-table .fh-num-cell { padding-left: 16px; }
 
 /* Tables with export buttons, captions and coloured cells */
 #fieldhub-app .fh-design .dt-buttons { margin: 0 0 8px; }
