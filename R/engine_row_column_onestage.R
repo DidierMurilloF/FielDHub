@@ -510,8 +510,10 @@ crossed_default_budget <- function(v, r) {
 #' @return A list with `treatments` (1-based, plot order as `start`),
 #'   `full_rank`, unrounded `row_d`, `row_a`, `joint_d`, `joint_a`,
 #'   `joint_log_det` of the result (joint values NA when not full rank), the
-#'   Row values of `start` (`stage1_row_d`, `stage1_row_a`) and `search`:
-#'   `evaluations`, `work`, `stop_reason`, `repair`, `start_work` (the work
+#'   Row values of `start` (`stage1_row_d`, `stage1_row_a`), its joint D
+#'   (`stage1_joint_d`, 0 when `start` is not full rank) and `search`:
+#'   `evaluations`, `work`, `stop_reason`, `joint_swaps` (the swaps the joint
+#'   stage applied, escape jumps included), `repair`, `start_work` (the work
 #'   of the start), `finish_charged`, `finish_work` (the work of the finish
 #'   steps actually done), `repair_swaps`,
 #'   `repair_evaluations`, `repair_log_det` (the repair criterion in block
@@ -569,7 +571,9 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
     row_d = out$row_d, row_a = out$row_a, joint_d = out$joint_d, joint_a = out$joint_a,
     joint_log_det = out$joint_log_det,
     stage1_row_d = out$stage1_row_d, stage1_row_a = out$stage1_row_a,
+    stage1_joint_d = out$stage1_joint_d,
     search = list(evaluations = out$evaluations, work = out$work, stop_reason = stop_reason,
+                  joint_swaps = out$accepted,
                   repair = c("none", "complete", "cut", "failed")[out$repair_status + 1L],
                   start_work = out$start_work, finish_charged = out$finish_charged,
                   finish_work = out$finish_work,

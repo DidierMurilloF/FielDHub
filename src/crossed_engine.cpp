@@ -755,6 +755,8 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   const double start_work = budget.work_used();
   const double start_seconds = budget.elapsed();
   const double start_trace = joint_ok ? joint.trace() : NA_REAL;
+  // Joint D of the given design, 0 when it is not full rank.
+  const double stage1_joint_d = start_full ? joint.d_efficiency() : 0.0;
   const double stage1_row_d = row_ok ? row.d_efficiency() : NA_REAL;
   const double stage1_row_a = row_ok ? row.a_efficiency() : NA_REAL;
   const double floor_ld = row_ok ? row.log_det() : 0.0;
@@ -999,7 +1001,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       "repair_log_det_start"_nm = repair_log_det_start, "repair_log_det"_nm = repair_log_det,
       "repair_score_error"_nm = out.repair_score_error, "floor_fallback"_nm = floor_fallback,
       "treatment_form"_nm = cheap, "start_full_rank"_nm = start_full, "start_trace"_nm = start_trace,
-      "accepted"_nm = out.accepted,
+      "accepted"_nm = out.accepted, "stage1_joint_d"_nm = stage1_joint_d,
       "row_swaps"_nm = out.row_swaps, "row_confirmations"_nm = out.row_confirmations,
       "row_checkpoints"_nm = out.row_checkpoints, "row_rollbacks"_nm = out.row_rollbacks,
       "row_drift_ld"_nm = out.row_drift_ld, "row_drift_sum"_nm = out.row_drift_sum,

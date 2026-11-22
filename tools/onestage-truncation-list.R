@@ -24,10 +24,17 @@
 # seed. Columns:
 #   t,nrows,r,latinize,iterations,in_os_grid,requested,started,complete,
 #   row_step,column_step,joint_stage,repair,winner,winner_cut,blocks,work,
+#   joint_swaps_1,joint_gain_1,joint_swaps_winner,joint_gain_winner,
 #   seconds,outcome,warning,
 #   row_D,row_A,col_D,col_A,joint_D,joint_A,z_row_D,...,z_joint_A
-# The search counts, the stage statuses, `winner`, `winner_cut`, `work` and
-# `seconds` are those of seed 1. `outcome` is "onestage", "fallback" (the
+# The search counts, the stage statuses, `winner`, `winner_cut`, `work`, the
+# joint_* columns and `seconds` are those of seed 1. joint_swaps_1 and
+# joint_gain_1 are the swaps the joint stage of search 1 applied (escape
+# jumps included) and the joint D of its result less that of its stage 1
+# design (0 for a stage 1 design that is not full rank), by the engine's
+# unrounded values; joint_*_winner are those of the search returned. They
+# tell a joint stage that the cap cut after a few swaps from one that
+# searched. `outcome` is "onestage", "fallback" (the
 # build raised onestage_infeasible) or "error", the worst over the seeds, and
 # `warning` the first warning caught on any seed. For os shapes with a
 # baseline at that `iterations`, row_D ... joint_A are the means over the
@@ -148,6 +155,11 @@ one_build <- function(t, nrows, r, latinize, iterations, seed, efficiencies) {
   out
 }
 field <- function(search, name, default) if (is.null(search) || is.null(search[[name]])) default else search[[name]]
+# Element `i` of a per-search vector of the search description (NA without one).
+of_search <- function(search, name, i) {
+  x <- field(search, name, numeric())
+  if (is.na(i) || i > length(x)) NA_real_ else x[[i]]
+}
 empty <- stats::setNames(rep(NA_real_, 2L * length(statistics)), c(statistics, paste0("z_", statistics)))
 
 rows <- list()
@@ -203,6 +215,9 @@ for (i in seq_len(nrow(universe))) {
                    joint_stage = field(s, "joint_stage", ""), repair = field(s, "repair", ""),
                    winner = field(s, "winner", NA_integer_), winner_cut = field(s, "winner_cut", NA),
                    blocks = field(s, "blocks", NA_real_), work = field(s, "work", NA_real_),
+                   joint_swaps_1 = of_search(s, "joint_swaps", 1L), joint_gain_1 = of_search(s, "joint_gain", 1L),
+                   joint_swaps_winner = of_search(s, "joint_swaps", field(s, "winner", NA_integer_)),
+                   joint_gain_winner = of_search(s, "joint_gain", field(s, "winner", NA_integer_)),
                    seconds = first$seconds,
                    outcome = if ("error" %in% outcomes) "error" else if ("fallback" %in% outcomes) "fallback" else "onestage",
                    warning = if (length(warnings_caught)) warnings_caught[1] else "",
@@ -235,7 +250,9 @@ if (backstop == "yes" && shard[1] == 1L) {
                  complete = if (inherits(design, "error")) NA_integer_ else design$infoDesign$joint_searches$completed,
                  row_step = if (inherits(design, "error")) "error" else design$infoDesign$optimization,
                  column_step = "", joint_stage = "", repair = "", winner = NA_integer_, winner_cut = NA,
-                 blocks = B, work = NA_real_, seconds = seconds, outcome = "backstop",
+                 blocks = B, work = NA_real_, joint_swaps_1 = NA_real_, joint_gain_1 = NA_real_,
+                 joint_swaps_winner = NA_real_, joint_gain_winner = NA_real_,
+                 seconds = seconds, outcome = "backstop",
                  warning = gsub("[\r\n,]+", " ", if (inherits(design, "error")) conditionMessage(design)
                                                   else paste(warned, collapse = " | ")),
                  stringsAsFactors = FALSE),
@@ -246,6 +263,7 @@ if (backstop == "yes" && shard[1] == 1L) {
 
 columns <- c("t", "nrows", "r", "latinize", "iterations", "in_os_grid", "requested", "started", "complete",
              "row_step", "column_step", "joint_stage", "repair", "winner", "winner_cut", "blocks", "work",
+             "joint_swaps_1", "joint_gain_1", "joint_swaps_winner", "joint_gain_winner",
              "seconds", "outcome", "warning", statistics, paste0("z_", statistics))
 out <- if (length(rows)) do.call(rbind, rows)[columns] else
   stats::setNames(data.frame(matrix(nrow = 0L, ncol = length(columns))), columns)

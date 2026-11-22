@@ -109,8 +109,14 @@ improve_efficiency <- function(design, iterations, seed) {
 # 1: "complete", "cut" or "not_started"), `repair` (search 1: "none",
 # "complete", "cut", or "failed" when it ended on its own without a full-rank
 # design), `winner` (the search returned) and `winner_cut` (whether any of
-# its calls was cut), `blocks` (the joint stage's block columns) and `work`
-# (the weighted work used). An onestage_infeasible abort raised after the
+# its calls was cut), `blocks` (the joint stage's block columns), `work`
+# (the weighted work used), and, with one value per search that entered the
+# return rule, `joint_swaps` (the swaps its joint stage applied, escape jumps
+# included) and `joint_gain` (the engine's joint D of its result less that of
+# its stage 1 design, which counts as 0 when it is not full rank; NA when the
+# result is not full rank). Both are 0 where the joint stage was not started.
+# They tell a joint stage that the cap cut after a few swaps from one that
+# searched. An onestage_infeasible abort raised after the
 # searches carries the same list as its `search` field (`winner` NA).
 #' @noRd
 build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed,
@@ -163,7 +169,8 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
       # stage 1 design, which the return rule tests for full rank.
       if (s == 1L) {
         results <- list(list(treatments = stage1$treatments, full_rank = TRUE,
-                             row_d = 0, row_a = 0, joint_d = 0))
+                             row_d = 0, row_a = 0, joint_d = 0, stage1_joint_d = 0,
+                             search = list(joint_swaps = 0)))
         cut <- TRUE
       }
       break
@@ -192,7 +199,10 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
   info <- function(winner) {
     c(list(requested = requested, started = length(results), complete = sum(!cut)), first,
       list(winner = winner, winner_cut = if (is.na(winner)) NA else cut[winner], blocks = B,
-           work = limits$work - left))
+           work = limits$work - left,
+           joint_swaps = vapply(results, function(x) as.double(x$search$joint_swaps), numeric(1)),
+           joint_gain = vapply(results, function(x) as.double(x$joint_d - x$stage1_joint_d),
+                               numeric(1))))
   }
   value <- function(name) vapply(results, function(x) as.double(x[[name]]), numeric(1))
   row_d <- value("row_d")

@@ -250,7 +250,9 @@
 #   runs in full and the call of search 2 that is aimed at gets a room
 #   between its start plus finish and what it used. Each build returns a
 #   full-rank design, never an error, the same design twice, and reports one
-#   complete search (a call whose work is not above its start plus finish
+#   complete search, and for each search that entered the return rule the
+#   swaps of its joint stage and a joint D gain that is not negative (a
+#   call whose work is not above its start plus finish
 #   cannot be cut and is skipped; each of the three calls must be cut on at
 #   least one seed per shape and coding);
 # - a later search whose row step has room but returns no scored design
@@ -560,6 +562,10 @@ if (check == "truncation") {
           info <- attr(a, "onestage_search")
           if (!identical(a, b)) problems <- c(problems, paste0(tag, ": the same seed gave another design"))
           else if (is.na(attr(a, "joint_efficiency")$Aeffic)) problems <- c(problems, paste0(tag, ": not full rank"))
+          else if (length(info$joint_swaps) != info$started || length(info$joint_gain) != info$started ||
+                   anyNA(info$joint_gain) || any(info$joint_swaps < 0) || any(info$joint_gain < -1e-12)) {
+            problems <- c(problems, paste0(tag, ": joint swaps or joint D gain of the searches missing or negative"))
+          }
           else if (info$complete != 1L || !info$started %in% 1:2 || (target == "joint" && info$started != 2L)) {
             problems <- c(problems, sprintf("%s: %d searches started, %d complete", tag, info$started, info$complete))
           } else hit[[target]] <- hit[[target]] + 1L
