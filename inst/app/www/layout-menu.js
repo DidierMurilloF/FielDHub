@@ -12,27 +12,12 @@
     if (!panel) return;
     panel.hidden = !open;
     toggle.setAttribute("aria-expanded", String(open));
-    syncShift();
     if (!focus) return;
     if (open) {
       var first = panel.querySelector("select, input, button");
       if (first) first.focus();
     } else toggle.focus();
   }
-  // The plot moves down by the height of the open layout options, so they
-  // never cover its title. The image is moved, not resized (layout-images.js
-  // measures it where it rests), so the plot is not drawn again.
-  function syncShift() {
-    document.querySelectorAll("#fieldhub-app .fieldhub-plot-panel").forEach(function(plot) {
-      var open = plot.querySelector(".fh-view-bar .fh-view-menu-panel:not(.fh-spacing):not([hidden])");
-      if (open && open.offsetHeight) plot.style.setProperty("--fh-menu-shift", (open.offsetHeight + 10) + "px");
-      else plot.style.removeProperty("--fh-menu-shift");
-    });
-  }
-  // Shiny draws the toolbar again with each design: a menu that was open is gone.
-  if (window.jQuery) window.jQuery(document).on("shiny:value", function() { window.setTimeout(syncShift, 0); });
-  window.addEventListener("resize", syncShift);
-
   function closeOthers(keep) {
     document.querySelectorAll('.fh-view-menu-toggle[aria-expanded="true"]').forEach(function(toggle) {
       if (toggle.parentElement !== keep) setOpen(toggle, false, false);
