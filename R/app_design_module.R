@@ -2,7 +2,7 @@
 #'
 #' @description The sidebar is the page's upload controls
 #' (\code{app_upload_ui()}), its controls (\code{app_control_ui()}) and the
-#' Run!/Simulate!/Save buttons. The main panel of a classic page shows the
+#' Generate design, Simulate data and download buttons. The main panel of a classic page shows the
 #' field layout and field book (and a design summary where the spec asks
 #' for one), with the output ids of the page's workflow
 #' (\code{classic_workflow_spec()}); a spatial page shows its steps and
@@ -17,9 +17,7 @@ mod_design_ui <- function(id, spec) {
   toggle <- if (!is.null(spec$upload)) app_upload_spec(spec$upload)$toggle
   spatial <- identical(spec$kind, "spatial")
   feedback <- function(...) app_task_feedback(ns("run"), ...)
-  # Prototype: the modernized look and wording, on the lattice pages only
-  modern <- app_design_modern(spec)
-  outline <- if (modern) "btn-block fh-btn-outline" else "btn-block"
+  outline <- "btn-block fh-btn-outline"
   # A spatial page offers its experiment once it is randomized
   save <- if (spatial) {
     shinyjs::hidden(shiny::downloadButton(ns(ids[["download"]]), "Download field book (CSV)",
@@ -30,45 +28,40 @@ mod_design_ui <- function(id, spec) {
   }
   tabs <- if (!spatial) list(
     if (isTRUE(spec$summary)) shiny::tabPanel(
-      if (modern) "Summary" else "Summary Design",
-      feedback(
-        if (!modern) shiny::br(),
-        shiny::div(class = "fieldhub-design-summary",
-          app_output_feedback(if (modern) shiny::uiOutput(ns("summary")) else
-            shiny::verbatimTextOutput(ns("summary"), placeholder = FALSE))))
+      "Summary",
+      feedback(shiny::div(class = "fieldhub-design-summary",
+                          app_output_feedback(shiny::uiOutput(ns("summary")))))
     ),
     shiny::tabPanel(
       "Field Layout",
       feedback(
         shinyjs::useShinyjs(),
-        # Prototype: the view controls sit on the plot, not in a panel below it
+        # The view controls sit on the plot (app_layout_toolbar())
         app_plot_ui(ns, list(id = ids[["plot"]], title = "Field layout or heatmap"),
                     csv_id = ids[["layout_download"]],
-                    controls = if (modern) shiny::uiOutput(ns(spec$layout$output))),
-        if (!modern) shiny::br(),
-        if (!modern) shiny::column(12, shiny::uiOutput(ns(spec$layout$output))))
+                    controls = shiny::uiOutput(ns(spec$layout$output))))
     ),
     shiny::tabPanel(
       "Field Book",
       feedback(app_output_feedback(DT::DTOutput(ns(ids[["table"]]), width = NULL, height = NULL)))
     )
   )
-  page <- shiny::tagList(
-    if (modern) app_design_header(spec) else shiny::h4(spec$title),
+  shiny::div(class = "fh-design",
+    app_design_header(spec),
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
         app_sidebar_ui(spec, ns = ns, toggle = toggle),
         shiny::fluidRow(
           shiny::column(6, app_task_button(
-            ns("run"), if (modern) "Generate design" else "Run!",
+            ns("run"), "Generate design",
             icon = shiny::icon("circle-nodes", verify_fa = FALSE),
-            class = if (modern) "btn-block fh-btn-primary" else "btn-block", results_id = ns("results"),
+            class = "btn-block fh-btn-primary", results_id = ns("results"),
             busy_message = if (!is.null(spec$optim)) "Optimizing allocation..." else
               if (spatial) "Preparing field dimensions..." else spec$busy_message
           )),
           shiny::column(6, shiny::actionButton(
-            ns(ids[["simulate"]]), if (modern) "Simulate data" else "Simulate!",
+            ns(ids[["simulate"]]), "Simulate data",
             icon = shiny::icon("greater-than-equal", verify_fa = FALSE), class = outline
           ))
         ),
@@ -80,23 +73,15 @@ mod_design_ui <- function(id, spec) {
         shiny::div(id = ns("results"), shiny::fluidRow(if (spatial) {
           app_spatial_tabs(ns, spec)
         } else {
-          # Prototype: the tabs have an id, so the summary can open the field book
-          do.call(shiny::tabsetPanel, c(Filter(Negate(is.null), tabs),
-                                        if (modern) list(id = ns("result_tabs"))))
+          # The tabs have an id, so the summary can open the field book
+          do.call(shiny::tabsetPanel, c(Filter(Negate(is.null), tabs), list(id = ns("result_tabs"))))
         }))
       )
     )
   )
-  if (modern) shiny::div(class = "fh-design", page) else page
 }
 
-#' Prototype: the pages that have the modernized look
-#' @noRd
-app_design_modern <- function(spec) {
-  spec$module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")
-}
-
-#' Prototype: a slim page header for a design page (its name and guide)
+#' The slim header of a design page: its name and the link to its guide
 #' @noRd
 app_design_header <- function(spec) {
   modules <- vapply(fieldhub_app_registry(), `[[`, character(1), "spec")
@@ -122,7 +107,6 @@ app_design_header <- function(spec) {
 mod_design_server <- function(id, spec) {
   shiny::moduleServer(id, function(input, output, session) {
     workflow <- spec$workflow
-    if (app_design_modern(spec)) workflow$layout$toolbar <- TRUE
     controls <- Filter(function(control) !is.null(control$parse), spec$controls)
     raw_controls <- function(ids = vapply(controls, `[[`, character(1), "id")) {
       stats::setNames(lapply(ids, function(control_id) input[[control_id]]), ids)
@@ -187,20 +171,13 @@ mod_design_server <- function(id, spec) {
     design <- app_design_task("run", spec$engine, arguments,
       long_running = spec$long_running, busy_message = spec$busy_message)
 
-    if (isTRUE(spec$summary) && app_design_modern(spec)) {
+    if (isTRUE(spec$summary)) {
       output$summary <- shiny::renderUI({
         state <- app_design_state(design)
         if (is.null(state)) {
           return(shiny::p(class = "fh-summary-empty", "Generate the design to see the summary."))
         }
-        app_design_summary(design(), block_levels = c("Replicates", "Incomplete blocks"),
-                           tabset = session$ns("result_tabs"))
-      })
-    } else if (isTRUE(spec$summary)) {
-      output$summary <- shiny::renderPrint({
-        shiny::req(design())
-        cat("Randomization was successful!", "\n", "\n")
-        print(design(), n = 6)
+        app_design_summary(design(), tabset = session$ns("result_tabs"))
       })
     }
 

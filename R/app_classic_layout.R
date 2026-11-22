@@ -1,50 +1,36 @@
 #' Registry-driven classic layout controls without a reactive session
+#'
+#' @description The plot type, and the stacking, layout and location of the
+#' design, as a toolbar on the plot (\code{app_layout_toolbar()}).
 #' @noRd
 app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locations = NULL) {
   layout <- spec$layout
-  # Prototype: the view controls as a toolbar on the plot (app_layout_toolbar())
-  toolbar <- isTRUE(layout$toolbar)
-  # A menu holds plain selects: a selectize list would open a menu inside the menu
-  select <- function(...) shiny::selectInput(..., selectize = !toolbar)
+  # The menu holds plain selects: a selectize list would open a menu inside the menu
+  select <- function(...) shiny::selectInput(..., selectize = FALSE)
   choices <- layout_choices(x, planter = planter, stacked = "vertical")
-  controls <- list(if (toolbar) {
-    shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of plot",
-      c("Entries" = 1, "Plots" = 2, "Heatmap" = 3), inline = TRUE)
-  } else {
-    shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of Plot:",
-      c("Entries/Treatments" = 1, "Plots" = 2, "Heatmap" = 3))
-  })
+  controls <- list(shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of plot",
+    c("Entries" = 1, "Plots" = 2, "Heatmap" = 3), inline = TRUE))
   if ("stacked" %in% names(layout$ids)) {
     stacking <- classic_stacking_choices(length(levels(as.factor(x$fieldBook$REP))), grid = layout$grid)
-    controls <- c(controls, list(select(ns(layout$ids[["stacked"]]), "Reps layout:", stacking)))
+    controls <- c(controls, list(select(ns(layout$ids[["stacked"]]), "Reps layout", stacking)))
   }
-  controls <- c(controls, list(select(ns(layout$ids[["layout"]]), "Layout option:", choices,
+  controls <- c(controls, list(select(ns(layout$ids[["layout"]]), "Layout option", choices,
     selected = if (layout$select_layout) 1 else NULL)))
   if ("location" %in% names(layout$ids)) {
     if (is.null(locations)) locations <- seq_len(length(levels(as.factor(x$fieldBook$LOCATION))))
-    location <- select(ns(layout$ids[["location"]]), "Location:", locations,
+    location <- select(ns(layout$ids[["location"]]), "Location", locations,
       selected = if (layout$select_location) 1 else NULL)
-    # One location is nothing to choose from: the toolbar keeps the input
-    # (the server reads it) but does not show it
-    if (toolbar && length(locations) < 2L) location <- shiny::div(hidden = NA, location)
+    # One location is nothing to choose from: the input stays (the server
+    # reads it) but is not shown
+    if (length(locations) < 2L) location <- shiny::div(hidden = NA, location)
     controls <- c(controls, list(location))
   }
-  if (toolbar) {
-    # The menu is worth a button while it offers a choice
-    useful <- "stacked" %in% names(layout$ids) || length(choices) > 1L || length(locations) > 1L
-    return(app_layout_toolbar(ns(paste0(layout$output, "_menu")), controls, menu = useful))
-  }
-  columns <- Map(function(width, control) shiny::column(width, control), layout$widths, controls)
-  if (layout$container == "page") {
-    shiny::wellPanel(do.call(shiny::fluidPage, columns))
-  } else if (layout$container == "row") {
-    shiny::wellPanel(do.call(shiny::fluidRow, columns))
-  } else {
-    shiny::wellPanel(columns[[1L]], do.call(shiny::fluidRow, columns[-1L]))
-  }
+  # The menu is worth a button while it offers a choice
+  useful <- "stacked" %in% names(layout$ids) || length(choices) > 1L || length(locations) > 1L
+  app_layout_toolbar(ns(paste0(layout$output, "_menu")), controls, menu = useful)
 }
 
-#' Prototype: the view controls on the plot itself
+#' The view controls on the plot itself
 #'
 #' @description A segmented control for the plot type, and a button that
 #' opens a small menu with the layout, stacking and location selects

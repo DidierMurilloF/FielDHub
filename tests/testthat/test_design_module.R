@@ -604,19 +604,17 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     texts <- if (identical(spec$kind, "classic")) {
       c("Field Layout", "Field Book")
     } else {
-      c("Get Random", "Randomize!", "Data Input", vapply(spec$panels, `[[`, "", "title"), "Field Book",
+      c("Field setup", "Randomize field", "Entries", vapply(spec$panels, `[[`, "", "title"), "Field Book",
         "Heatmap")
     }
     presentation <- app_sidebar_layout(spec)
-    modern <- module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")
-    for (text in c(spec$title, if (modern) c("Generate design", "Simulate data") else c("Run!", "Simulate!"),
+    for (text in c(spec$title, "Generate design", "Simulate data",
                    "Download field book (CSV)", presentation$upload_label,
                    presentation$file_label, texts)) {
       expect_true(grepl(text, html, fixed = TRUE), info = paste(module, text))
     }
     expect_false(grepl("ZIP|Save experiment", html), info = module)
-    expect_identical(grepl(if (modern) ">Summary<" else "Summary Design", html, fixed = TRUE), spec$summary,
-                     info = module)
+    expect_identical(grepl(">Summary<", html, fixed = TRUE), spec$summary, info = module)
     expect_identical(has_id("summary"), spec$summary, info = module)
     stripped <- html
     for (pattern in library_styles) stripped <- gsub(pattern, "", stripped, perl = TRUE)

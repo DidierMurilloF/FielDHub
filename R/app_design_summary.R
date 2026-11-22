@@ -1,4 +1,4 @@
-#' Prototype: a design's summary as a page, not as printed text
+#' A design's summary as a page, not as printed text
 #'
 #' @description What \code{print()} shows for a design, built from the
 #' design itself: its parameters (\code{infoDesign}), the seed that
@@ -21,6 +21,10 @@ app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL)
   book <- x$fieldBook
   seed <- if (!is.null(info$seed)) format(info$seed, scientific = FALSE, trim = TRUE)
   preview <- utils::head(book, rows)
+  # A design keeps one efficiency table, or one for each location (alike)
+  efficiency <- x$blocksModel
+  if (!is.data.frame(efficiency) && is.list(efficiency) && length(efficiency)) efficiency <- efficiency[[1L]]
+  if (!is.data.frame(efficiency)) efficiency <- NULL
   shiny::div(class = "fh-summary",
     shiny::tags$section(
       shiny::h3("Design"),
@@ -31,10 +35,10 @@ app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL)
       if (!is.null(seed)) shiny::p(class = "fh-seed-line",
         app_summary_term("Seed", "Enter this seed to get the same randomization again."),
         shiny::tags$code(seed), app_summary_copy(seed))),
-    if (is.data.frame(x$blocksModel)) shiny::tags$section(
+    if (!is.null(efficiency)) shiny::tags$section(
       shiny::h3("Efficiency"),
       shiny::div(class = "fh-table-wrap",
-                 app_summary_table(app_summary_efficiency(x$blocksModel, block_levels)))),
+                 app_summary_table(app_summary_efficiency(efficiency, block_levels)))),
     shiny::tags$section(
       shiny::div(class = "fh-summary-head",
         shiny::h3("Field book"),
@@ -91,21 +95,26 @@ app_summary_copy <- function(value) {
 #' The parameters of a design, with the labels a person would use
 #' @noRd
 app_summary_items <- function(info, book) {
-  labels <- c(NumberTreatments = "Treatments", Reps = "Replicates",
+  # The designs name the same things differently: one label for each
+  labels <- c(NumberTreatments = "Treatments", number.of.treatments = "Treatments", treatments = "Treatments",
+    Reps = "Replicates", reps = "Replicates", blocks = "Blocks",
     iBlocks = "Blocks per replicate", IBlocks = "Blocks per replicate",
-    NumberLocations = "Locations", lambda = "Lambda")
+    rows = "Rows", columns = "Columns",
+    NumberLocations = "Locations", locations = "Locations", lambda = "Lambda",
+    optimization = "Optimization")
   tips <- c(lambda = "How often two treatments share an incomplete block, on average.",
     iBlocks = "Incomplete blocks in each replicate.", IBlocks = "Incomplete blocks in each replicate.")
   # Shown on its own (the seed) or not for people (the design's internal id)
-  skip <- c("seed", "id_design", "Locations")
+  skip <- c("seed", "id_design", "Locations", "locationNames", "location_names", "plotNumber")
   shown <- Filter(function(name) is.atomic(info[[name]]) && length(info[[name]]) == 1L,
                   setdiff(names(info), skip))
   shown <- c(intersect(names(labels), shown), setdiff(shown, names(labels)))
   value <- function(v) if (is.numeric(v)) format(round(v, 3), scientific = FALSE, trim = TRUE) else as.character(v)
+  locations <- c("NumberLocations", "locations")
   items <- lapply(shown, function(name) {
     list(label = if (name %in% names(labels)) labels[[name]] else name,
          tip = if (name %in% names(tips)) tips[[name]], value = value(info[[name]]),
-         names = if (name == "NumberLocations" && "LOCATION" %in% names(book)) {
+         names = if (name %in% locations && "LOCATION" %in% names(book)) {
            unique(as.character(book$LOCATION))
          })
   })
@@ -122,9 +131,16 @@ app_summary_items <- function(info, book) {
 app_summary_efficiency <- function(model, block_levels = NULL) {
   names(model) <- sub("^Level$", "Block level", sub("A-Bound", "A-bound",
     sub("-Efficiency", "-efficiency", names(model))))
+  # Two numbered levels are the replicates and the incomplete blocks in them
+  if (is.null(block_levels) && is.numeric(model[[1L]]) && nrow(model) == 2L) {
+    block_levels <- c("Replicates", "Incomplete blocks")
+  }
   if (length(block_levels) == nrow(model)) model[[1L]] <- block_levels
   numbers <- vapply(model, is.double, TRUE) & names(model) != "Blocks"
-  model[numbers] <- lapply(model[numbers], function(v) formatC(v, digits = 4, format = "f"))
+  model[numbers] <- lapply(model[numbers], function(v) {
+    ifelse(is.na(v), "\u2013", formatC(v, digits = 4, format = "f"))
+  })
+  model[] <- lapply(model, function(v) ifelse(is.na(v), "\u2013", as.character(v)))
   model
 }
 
@@ -132,7 +148,7 @@ app_summary_efficiency <- function(model, block_levels = NULL) {
 #' @noRd
 app_summary_table <- function(data) {
   tips <- app_summary_tips()
-  numeric <- vapply(data, function(v) is.numeric(v) || all(grepl("^[0-9.]+$", v)), TRUE)
+  numeric <- vapply(data, function(v) is.numeric(v) || all(grepl("^[0-9.\u2013]+$", v)), TRUE)
   class <- function(i) if (numeric[[i]]) "fh-num-cell"
   shiny::tags$table(class = "fh-table",
     shiny::tags$thead(shiny::tags$tr(lapply(seq_along(data), function(i) {

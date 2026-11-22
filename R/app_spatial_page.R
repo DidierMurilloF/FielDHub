@@ -39,12 +39,12 @@ app_spatial_tabs <- function(ns, spec) {
   tabs <- c(
     list(
       id = ns(ids[["tabset"]]),
-      shiny::tabPanel("Get Random", value = "setup",
+      shiny::tabPanel("Field setup", value = "setup",
         feedback(
           shinyjs::useShinyjs(),
           shiny::br(),
           steps("run"),
-          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
+          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field",
                                           busy_message = spec$busy_message, results_id = ns("results"))),
           shiny::br(), shiny::br(),
           shiny::uiOutput(ns("status")),
@@ -52,7 +52,7 @@ app_spatial_tabs <- function(ns, spec) {
           if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
             app_output_feedback(shiny::verbatimTextOutput(ns("design_report"), placeholder = FALSE))),
           tasks = setup_tasks)),
-      shiny::tabPanel("Data Input", feedback(entries))
+      shiny::tabPanel("Entries", feedback(entries))
     ),
     panels,
     list(

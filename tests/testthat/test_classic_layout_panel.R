@@ -49,7 +49,7 @@ test_that("shared layout panels retain control labels, namespacing, and options"
     for (id in c(spec$ids[["plot_type"]], spec$layout$ids)) {
       expect_true(grepl(paste0('id="panel-', id, '"'), html, fixed = TRUE), info = module)
     }
-    for (label in c("Type of Plot:", "Entries/Treatments", "Plots", "Heatmap", "Layout option:")) {
+    for (label in c("Type of plot", "Entries", "Plots", "Heatmap", "Layout option")) {
       expect_true(grepl(label, html, fixed = TRUE), info = module)
     }
     expect_identical(grepl("Grid Panel", html, fixed = TRUE), spec$layout$grid)
