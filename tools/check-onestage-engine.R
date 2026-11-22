@@ -1,7 +1,7 @@
 # Engine checks of the staged onestage row-column search (phase 2 spec 6.1).
 # Engine correctness is verified here, not by testthat (constraints: Tests).
 #
-#   Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form>
+#   Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form|report>
 #           [baseline] [library] [seeds=20] [tmax=100]
 #
 # One PASS / FAIL line per check; exit status 1 on any FAIL. [library]
@@ -159,14 +159,29 @@
 #     2). Seeds 1:4. D and A of the result equal the one-way eigenvalue
 #     reference to 1e-9 (the first engine check of the one-factor identity
 #     Bhat^-1 = (M + (k - 1) yhat yhat') / k), and debug_max_error <= 1e-8.
+#
+# report: the joint efficiency of an onestage design from the v x v treatment
+# information (onestage_joint_efficiency(); spec 6.1 W7). [baseline], seeds=
+# and tmax= are ignored. On 24/6/2, 30/5/2, 48/6/3, 9/3/2, 100/2/4, 100/50/3
+# and 200/100/4, nested and shared, three onestage_stage1() designs (seeds
+# 1:3) and three random complete designs each:
+# - the unrounded D and A equal those of the QR reference (the arithmetic of
+#   row_column_joint_efficiency(): qr.resid() of the treatment indicators on
+#   the Rows + Cols model) to 1e-10;
+# - the NA cases agree (smallest efficiency factor below 1e-7);
+# - the rounded values are identical to row_column_joint_efficiency()'s,
+#   except where the reference lies within 1e-10 of a rounding boundary of
+#   the seventh decimal.
+# It also times the function at 2000/2/4 nested on a random complete design
+# and prints the seconds; the QR report took 158 s there (spec 6.1 W7).
 
 arguments <- commandArgs(trailingOnly = TRUE)
 named <- grepl("^[a-z]+=", arguments)
 opts <- arguments[named]
 positional <- arguments[!named]
-usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form> [baseline|-] [library] [seeds=20] [tmax=100]"
+usage <- "Usage: Rscript tools/check-onestage-engine.R <stage1|crossed|repair|treatment_form|report> [baseline|-] [library] [seeds=20] [tmax=100]"
 if (length(positional) < 1L || length(positional) > 3L ||
-    !positional[1] %in% c("stage1", "crossed", "repair", "treatment_form")) {
+    !positional[1] %in% c("stage1", "crossed", "repair", "treatment_form", "report")) {
   message(usage)
   quit(status = 1)
 }
@@ -193,6 +208,87 @@ report <- function(ok, label) {
   cat(if (ok) "PASS" else "FAIL", label, "\n")
   if (!ok) failures <<- failures + 1L
   invisible(ok)
+}
+
+if (check == "report") {
+  ns <- asNamespace("FielDHub")
+  for (f in c("onestage_joint_efficiency", "onestage_stage1", "onestage_design_frame")) {
+    if (!exists(f, envir = ns, inherits = FALSE)) {
+      report(FALSE, paste0(f, "() exists in the installed FielDHub"))
+      cat(failures, "FAIL(s)\n")
+      quit(status = 1)
+    }
+  }
+  fast <- get("onestage_joint_efficiency", envir = ns)
+  slow <- get("row_column_joint_efficiency", envir = ns)
+  frame <- get("onestage_design_frame", envir = ns)
+  stage1 <- get("onestage_stage1", envir = ns)
+  work_limit <- get("onestage_work_limit", envir = ns)
+  # The unrounded efficiency factors by the arithmetic of the QR report.
+  qr_factors <- function(design) {
+    blocks <- data.frame(Rows = factor(design$Level_3), Cols = factor(design$Level_2))
+    TF <- factor(design$treatments)
+    v <- nlevels(TF)
+    resid <- qr.resid(qr(stats::model.matrix(~ Rows + Cols, data = blocks)), stats::model.matrix(~ TF - 1))
+    sort(eigen(crossprod(resid), symmetric = TRUE, only.values = TRUE)$values,
+         decreasing = TRUE)[seq_len(v - 1L)] / mean(table(TF))
+  }
+  on_boundary <- function(x) abs(x * 1e7 - floor(x * 1e7) - 0.5) <= 1e-10 * 1e7
+  worst <- 0
+  n_na <- 0L
+  for (shape in list(c(24, 6, 2), c(30, 5, 2), c(48, 6, 3), c(9, 3, 2), c(100, 2, 4), c(100, 50, 3), c(200, 100, 4))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    for (shared in c(FALSE, TRUE)) {
+      label <- sprintf("%d/%d/%d %s", v, nrows, r, if (shared) "latinized" else "nested")
+      problems <- character()
+      designs <- 0L
+      for (seed in 1:3) {
+        for (kind in c("stage 1", "random")) {
+          fail <- function(what) problems <<- c(problems, sprintf("seed %d, %s design: %s", seed, kind, what))
+          set.seed(seed)
+          trt <- if (kind == "stage 1") {
+            s1 <- tryCatch(suppressWarnings(
+              if ("first" %in% names(formals(stage1))) stage1(v, nrows, ncols, r, shared, work_limit, TRUE)
+              else stage1(v, nrows, ncols, r, shared, work_limit)), error = function(e) e)
+            if (inherits(s1, "error")) { fail(paste("stage 1 error:", conditionMessage(s1))); next }
+            as.integer(s1$treatments)
+          } else as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+          design <- frame(trt, v, nrows, ncols, r, shared)
+          designs <- designs + 1L
+          e <- qr_factors(design)
+          ref_na <- anyNA(e) || min(e) < 1e-7
+          got <- fast(design, digits = NULL)
+          rounded <- fast(design)
+          old <- slow(design)
+          if (!identical(is.na(got$Aeffic), ref_na) || !identical(is.na(rounded$Aeffic), is.na(old$Aeffic))) {
+            fail(sprintf("NA %s, reference NA %s (smallest factor %.3g)", is.na(got$Aeffic), ref_na, min(e)))
+            next
+          }
+          if (ref_na) { n_na <- n_na + 1L; next }
+          ref <- c(D = exp(mean(log(e))), A = (v - 1) / sum(1 / e))
+          err <- max(abs(got$Deffic - ref[["D"]]), abs(got$Aeffic - ref[["A"]]))
+          worst <- max(worst, err)
+          if (!(err <= 1e-10)) fail(sprintf("D %.13f (ref %.13f), A %.13f (ref %.13f)", got$Deffic, ref[["D"]], got$Aeffic, ref[["A"]]))
+          if (!(identical(rounded$Deffic, old$Deffic) || on_boundary(ref[["D"]])) ||
+              !(identical(rounded$Aeffic, old$Aeffic) || on_boundary(ref[["A"]]))) {
+            fail(sprintf("rounded D %.7f A %.7f, report D %.7f A %.7f", rounded$Deffic, rounded$Aeffic, old$Deffic, old$Aeffic))
+          }
+        }
+      }
+      report(length(problems) == 0L && designs == 6L,
+             sprintf("report %s: %d designs%s", label, designs, if (length(problems)) paste0(": ", problems[1]) else ""))
+    }
+  }
+  report(n_na >= 1L, sprintf("report: %d designs with an NA joint efficiency in both (need >= 1)", n_na))
+  cat(sprintf("  largest |D or A - QR reference|: %.2e\n", worst))
+  set.seed(1)
+  v <- 2000; nrows <- 2; r <- 4
+  design <- frame(as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v))), v, nrows, v / nrows, r, FALSE)
+  seconds <- system.time(big <- fast(design))[["elapsed"]]
+  report(!is.na(big$Aeffic), sprintf("report 2000/2/4 nested, random complete design: D %.7f, A %.7f", big$Deffic, big$Aeffic))
+  cat(sprintf("  time 2000/2/4 nested: %.1f s (the QR report: 158 s, spec 6.1 W7)\n", seconds))
+  cat(failures, "FAIL(s)\n")
+  quit(status = if (failures > 0L) 1 else 0)
 }
 
 FLOOR <- 1e-12

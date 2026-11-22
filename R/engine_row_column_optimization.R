@@ -82,10 +82,10 @@ improve_efficiency <- function(design, iterations, seed) {
 #   those within 1.5e-7 of the best Row D, then of the best Row A (the
 #   engine's unrounded values), then take the highest joint D, the earliest
 #   on a tie (onestage_best_search()). This is applied to the searches that
-#   also pass the report's full-rank test (row_column_joint_efficiency() gives
+#   also pass the report's full-rank test (onestage_joint_efficiency() gives
 #   a joint A-efficiency), exactly as if they were filtered first, but that
-#   test is an n x v QR and a v x v eigen problem, so it is run (once per
-#   search, cached) only on the searches the outcome rests on: the one with
+#   test is a v x v eigen problem, so it is run (once per search, cached)
+#   only on the searches the outcome rests on: the one with
 #   the best Row D, the one with the best Row A among those kept for Row D,
 #   and the winner. If one of them fails it is dropped and the rest are
 #   ranked again. If no search is left it aborts with onestage_infeasible
@@ -95,7 +95,7 @@ improve_efficiency <- function(design, iterations, seed) {
 # (tools/reference-onestage.R): Level_1 = Rep, Level_2 = Column, Level_3 = Row,
 # plots, treatments, all factors, in plot order replicate, row, column; rows
 # and columns are labelled "<rep>_<i>" when nested and "<i>" when shared. Its
-# attribute "joint_efficiency" is the row_column_joint_efficiency() of the
+# attribute "joint_efficiency" is the onestage_joint_efficiency() of the
 # design, for report_efficiency().
 #' @noRd
 build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches, seed) {
@@ -157,7 +157,7 @@ build_row_column_onestage <- function(nt, nrows, ncols, reps, latinize, searches
     if (is.null(joint_efficiency[[i]])) {
       designs[[i]] <<- onestage_design_frame(results[[i]]$treatments, nt, nrows, ncols, reps,
                                              latinize)
-      joint_efficiency[[i]] <<- row_column_joint_efficiency(designs[[i]])
+      joint_efficiency[[i]] <<- onestage_joint_efficiency(designs[[i]])
     }
     !is.na(joint_efficiency[[i]]$Aeffic)
   }
@@ -257,13 +257,78 @@ row_column_joint_efficiency <- function(design) {
   )
 }
 
+# sum_j n_j n_j' / k for one block factor with blocks of one size k: the
+# v x v matrix N N' / k of the treatment-by-block counts N, accumulated block
+# by block (phase 2 spec 6.1 W7). A block adds 1 for every ordered pair of its
+# plots, at the pair's treatments. Blocks of at most v plots are taken several
+# at a time as their k^2 plot pairs (about 4e6 pairs per pass); a larger
+# block as the outer product of its count vector. The cost is of order
+# n min(k, v^2 / k) + v^2 per pass, never the v^2 b of a dense product.
+#' @noRd
+onestage_block_products <- function(treatments, block, v) {
+  b <- max(block)
+  k <- length(treatments) %/% b
+  plots <- matrix(treatments[order(block)], nrow = k)  # k x b: the plots of each block
+  total <- numeric(v * v)
+  if (k > v) {
+    for (j in seq_len(b)) {
+      counts <- tabulate(plots[, j], v)
+      total <- total + as.vector(tcrossprod(counts))
+    }
+  } else {
+    first <- rep(seq_len(k), times = k)
+    second <- rep(seq_len(k), each = k)
+    per_pass <- max(1L, as.integer(4e6 %/% (k * k)))
+    for (from in seq.int(1L, b, by = per_pass)) {
+      part <- plots[, from:min(b, from + per_pass - 1L), drop = FALSE]
+      total <- total + tabulate((part[first, ] - 1L) * v + part[second, ], v * v)
+    }
+  }
+  matrix(total, v, v) / k
+}
+
+# Joint row-by-column D- and A-efficiency of an onestage design, as
+# row_column_joint_efficiency() reports it, from the v x v form of the
+# treatment information (phase 2 spec 5.1 and 6.1 W7):
+#   C = r I - N_row N_row' / k_row - N_col N_col' / k_col + (r / v) J,
+# with N_row and N_col the treatment-by-row and treatment-by-column counts
+# (rows and columns as the design codes them, nested in the replicates or
+# shared). It is the C of the QR form because every replicate is a complete
+# nrows x ncols grid holding each treatment once, which every onestage design
+# is and which this function requires; then X' P_rep X = (r / v) J and the
+# rows and columns are orthogonal given the replicates. C 1 = 0, so its
+# v - 1 largest eigenvalues over r are the canonical efficiency factors. NA
+# when the smallest is below 1e-7, the same test; the same rounding to
+# `digits` decimals (NULL: unrounded, for the checks). One symmetric eigen
+# problem of order v replaces the QR of the n x (B - 1) block model, which
+# took 158 s at 2000/2/4 nested.
+#' @noRd
+onestage_joint_efficiency <- function(design, digits = 7) {
+  treatments <- as.integer(factor(design$treatments))
+  v <- max(treatments)
+  r <- length(treatments) / v
+  rows <- as.integer(factor(design$Level_3))
+  cols <- as.integer(factor(design$Level_2))
+  C <- -onestage_block_products(treatments, rows, v) - onestage_block_products(treatments, cols, v) + r / v
+  diag(C) <- diag(C) + r
+  ev <- sort(eigen(C, symmetric = TRUE, only.values = TRUE)$values, decreasing = TRUE)
+  eff <- ev[seq_len(v - 1)] / r
+  if (anyNA(eff) || min(eff) < 1e-7) {
+    return(list(Deffic = NA_real_, Aeffic = NA_real_))
+  }
+  D <- exp(mean(log(eff)))
+  A <- (v - 1) / sum(1 / eff)
+  if (is.null(digits)) list(Deffic = D, Aeffic = A) else list(Deffic = round(D, digits), Aeffic = round(A, digits))
+}
+
 # Function to calculate and return combined BlockEfficiencies. `nested` says
 # whether the reported design's rows and columns are nested in its replicates
 # (Level_1): they are then claimed nested and their class verified
 # (BlockEfficiencies()); otherwise they are shared across replicates and use
 # the general class (spec 6.2). The replicate factor is always claimed. `joint`
-# is the row_column_joint_efficiency() of `design` when the caller already has
-# it (the onestage builder computes it for its return rule); NULL computes it.
+# is the joint efficiency of `design` when the caller already has it (the
+# onestage builder computes it, with onestage_joint_efficiency(), for its
+# return rule); NULL computes it with row_column_joint_efficiency().
 #' @noRd
 report_efficiency <- function(design, nested = TRUE, joint = NULL) {
   # Calculate row block efficiencies
