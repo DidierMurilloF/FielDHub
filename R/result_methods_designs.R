@@ -374,8 +374,13 @@ print.summary.fieldhub_diagonal_arrangement <- function(x, ...) {
 #-----------------------------------------------------------------------
 #' @export
 print.fieldhub_sparse_allocation <- function(x, n = 10, ...) {
-  print_design(x, "Sparse Allocation: Un-replicated Diagonal Arrangement Design",
-               "diagonal_arrangement", n, ...)
+  cat("Sparse Allocation: Un-replicated Diagonal Arrangement Design", "\n\n")
+  print_details(x)
+  cat("Information on the design parameters:", "\n")
+  str_parameters(x)
+  print_diagonal_spacing(x)
+  print_head(x$fieldBook, "the diagonal_arrangement field book:", n, ...)
+  invisible(x)
 }
 
 #' @export
@@ -385,6 +390,10 @@ print.summary.fieldhub_sparse_allocation <- function(x, ...) {
   summary_print("2. Number of lines allocated to each location:", x$size_locations)
   summary_str("3. Structure of the data frame with the data input:", x$data_entry)
   summary_str("4. Structure of the data frame with the sparse_allocation field book:", x$fieldBook)
+  if (!is.null(x$check_spacing)) {
+    cat("\n\n5. Check spacing:\n")
+    print_diagonal_spacing(x, detailed = TRUE)
+  }
   invisible(x)
 }
 

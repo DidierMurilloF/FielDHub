@@ -19,7 +19,9 @@ sparse_allocation(
   seed,
   data = NULL,
   year = NULL,
-  checksPercent = NULL
+  checksPercent = NULL,
+  spread_checks = FALSE,
+  dist_method = "euclidean"
 )
 }
 \arguments{
@@ -57,11 +59,26 @@ By default the current year.}
 
 \item{checksPercent}{(optional) Percentage of checks in each location, one of the
 options available for the field. By default the last (largest) option.}
+
+\item{spread_checks}{Logical. Exchange check identities among the existing
+check plots of each location to increase separation of repeated checks, as
+in \code{\link{diagonal_arrangement}()}. The allocation of entries to
+locations, test entries, filler plots, the check plots themselves and each
+check's replication in a location stay fixed. The default \code{FALSE}
+preserves the original randomization.}
+
+\item{dist_method}{Distance between field coordinates for check optimization:
+\code{"euclidean"} (default) or \code{"manhattan"}. Grid steps have equal scale.}
 }
 \value{
-A list with eight elements.
+A list with nine elements.
 \itemize{
   \item \code{infoDesign} is a list with information on the design parameters.
+  With check optimization enabled, \code{check_optimization} records the
+  search of each location.
+  \item \code{check_spacing} records the same-check spacing of each location
+  (see \code{\link{diagonal_arrangement}()}), before and, with optimization
+  enabled, after the search.
   \item \code{layoutRandom} is a list with the randomization layout of each location.
   \item \code{plotsNumber} is a list with the plot number layout of each location.
   \item \code{data_entry} is a data frame with the data input.
@@ -78,6 +95,10 @@ Unreplicated designs using the sparse allocation approach
 \details{
 The allocation of entries to locations comes from \code{\link{do_optim}()};
 see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
+
+Check optimization is the deterministic local exchange described in
+\code{\link{diagonal_arrangement}()}, run in each location on its own. It
+measures spacing, not statistical precision.
 }
 \section{Reproducibility}{
 

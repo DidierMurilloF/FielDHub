@@ -24,12 +24,29 @@
 #' By default the current year.
 #' @param checksPercent (optional) Percentage of checks in each location, one of the
 #' options available for the field. By default the last (largest) option.
+#' @param spread_checks Logical. Exchange check identities among the existing
+#' check plots of each location to increase separation of repeated checks, as
+#' in \code{\link{diagonal_arrangement}()}. The allocation of entries to
+#' locations, test entries, filler plots, the check plots themselves and each
+#' check's replication in a location stay fixed. The default \code{FALSE}
+#' preserves the original randomization.
+#' @param dist_method Distance between field coordinates for check optimization:
+#' \code{"euclidean"} (default) or \code{"manhattan"}. Grid steps have equal scale.
 #' @details The allocation of entries to locations comes from \code{\link{do_optim}()};
 #' see its Details for the search, and for allocations that changed in FielDHub 1.7.0.
 #'
-#' @return A list with eight elements.
+#' Check optimization is the deterministic local exchange described in
+#' \code{\link{diagonal_arrangement}()}, run in each location on its own. It
+#' measures spacing, not statistical precision.
+#'
+#' @return A list with nine elements.
 #' \itemize{
 #'   \item \code{infoDesign} is a list with information on the design parameters.
+#'   With check optimization enabled, \code{check_optimization} records the
+#'   search of each location.
+#'   \item \code{check_spacing} records the same-check spacing of each location
+#'   (see \code{\link{diagonal_arrangement}()}), before and, with optimization
+#'   enabled, after the search.
 #'   \item \code{layoutRandom} is a list with the randomization layout of each location.
 #'   \item \code{plotsNumber} is a list with the plot number layout of each location.
 #'   \item \code{data_entry} is a data frame with the data input.
@@ -75,8 +92,12 @@ sparse_allocation <- function(
     seed,
     data = NULL,
     year = NULL,
-    checksPercent = NULL) {
+    checksPercent = NULL,
+    spread_checks = FALSE,
+    dist_method = "euclidean") {
     validate_locations(l)
+    validate_flag(spread_checks, "spread_checks")
+    swap_distance_function(dist_method)
     year <- resolve_year(year)
     # set a random seed if it is missing
     if (missing(seed)) seed <- NULL
@@ -169,7 +190,9 @@ sparse_allocation <- function(
         multiLocationData= TRUE,
         data = unrep,
         year = year,
-        checksPercent = checksPercent
+        checksPercent = checksPercent,
+        spread_checks = spread_checks,
+        dist_method = dist_method
     )
     unrep_designs$infoDesign$id_design <- "Sparse"
     output <- list(
@@ -178,11 +201,17 @@ sparse_allocation <- function(
         plotsNumber = unrep_designs$plotsNumber,
         data_entry = unrep_designs$data_entry,
         fieldBook = unrep_designs$fieldBook,
+        check_spacing = unrep_designs$check_spacing,
         list_locs = unrep$list_locs,
         allocation = unrep$allocation,
         size_locations = unrep$size_locations
     )
-    reproduction_parameters <- record_design_parameters(environment())
+    reproduction_parameters <- record_design_parameters(
+        environment(),
+        exclude = if (!spread_checks && identical(dist_method, "euclidean")) {
+            c("spread_checks", "dist_method")
+        } else character()
+    )
     output <- new_fieldhub_design(output, "sparse_allocation", parameters = reproduction_parameters)
     return(invisible(output))
 }

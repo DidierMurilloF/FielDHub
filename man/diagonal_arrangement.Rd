@@ -75,9 +75,11 @@ for the field dimensions. By default the last (largest) option.}
 every block holds the same entries, and all blocks must have the same size.
 By default \code{sameEntries = FALSE}.}
 
-\item{spread_checks}{Logical. For \code{kindExpt = "SUDC"}, exchange check
-identities among the existing check plots to increase separation of repeated
-checks. Test entries, filler plots and each check's replication stay fixed.
+\item{spread_checks}{Logical. Exchange check identities among the existing
+check plots of each location to increase separation of repeated checks, for
+\code{kindExpt = "SUDC"} and \code{"DBUDC"}. Test entries, filler plots, the
+check plots themselves, the experiments (blocks) and each check's
+replication in the location stay fixed.
 The default \code{FALSE} preserves the original randomization.}
 
 \item{dist_method}{Distance between field coordinates for check optimization:
@@ -92,7 +94,7 @@ A \code{FielDHub} design result with the following components.
   optimization for each location.
   \item \code{check_spacing} records per-check minimum, mean nearest and
   mean pairwise distances, and same-check neighbors within 5 grid steps,
-  for Single Diagonal Arrangement. With optimization enabled, both the
+  for each location. With optimization enabled, both the
   original and final assignments are recorded. \code{print()} shows the
   spacing overview and \code{summary()} adds per-check details without
   rerunning the optimizer. Distances use \code{dist_method} and equally
@@ -116,6 +118,9 @@ a deterministic local exchange heuristic, not a statistical-efficiency or
 global-optimality guarantee. Each location stops after a complete scan finds
 no improvement, 100 accepted swaps, or 100,000 candidate evaluations.
 One check identity, or checks occurring only once, leaves the layout unchanged.
+With \code{kindExpt = "DBUDC"} identities are exchanged across the whole
+field of a location, as for a single arrangement: the entries and the plots
+of every experiment stay where they are.
 The selected check percentage and filler count are unchanged. With
 \code{checksPercent = NULL}, Single Diagonal Arrangement still selects the
 valid option with the most check plots and therefore the fewest fillers.

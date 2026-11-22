@@ -29,9 +29,11 @@ original_sidebar_rows <- list(
     "advanced/budget/time_limit"),
   Diagonal = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
     "planter", "plot_start/expt_name", "seed/location_names"),
-  diagonal_multiple = c("sameEntries", "lines", "blocks", "checks", "l/location_view", "stacked/planter",
+  diagonal_multiple = c("sameEntries", "lines", "blocks", "checks", "spread_checks", "dist_method",
+    "l/location_view", "stacked/planter",
     "plot_start/expt_name", "seed/location_names"),
-  sparse_allocation = c("lines", "checks", "l/location_view", "copies_per_entry", "planter",
+  sparse_allocation = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
+    "copies_per_entry", "planter",
     "plot_start/expt_name", "seed/location_names"),
   multi_loc_preps = c("lines", "use_checks", "checks/rep_checks", "l/location_view", "copies_per_entry",
     "planter", "allow_fillers", "rowcol_distinct", "plot_start/expt_name", "seed/location_names")

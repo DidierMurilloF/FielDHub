@@ -567,20 +567,15 @@ build_design_specs <- function() {
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
         list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),
-             ctl_locations(),
-             # On the page the spacing is optimized unless the user turns it off
-             # (the function's own default stays FALSE)
-             ctl_flag("spread_checks", value = TRUE),
-             ctl_select("dist_method", show_if = "input.spread_checks == true")),
-        spatial_shared(), list(ctl_seed())
+             ctl_locations()),
+        check_spacing_controls(), spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, checks = controls$checks, l = controls$l,
-             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
-             expt_name = controls$expt_name, location_names = controls$location_names,
-             entries = diagonal_entries(controls$lines, controls$checks, data),
-             spread_checks = controls$spread_checks,
-             dist_method = if (isTRUE(controls$spread_checks)) controls$dist_method else "euclidean")
+        c(list(lines = controls$lines, checks = controls$checks, l = controls$l,
+               planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+               expt_name = controls$expt_name, location_names = controls$location_names,
+               entries = diagonal_entries(controls$lines, controls$checks, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -602,23 +597,25 @@ build_design_specs <- function() {
     # Experiments (blocks) of entries, laid out by row or column; an
     # uploaded list may repeat its entries across experiments
     diagonal_multiple = spatial("diagonal_multiple", "Unreplicated Multiple Diagonal Arrangement",
-      diagonal_arrangement, upload = "mdiag", upload_columns = c("ENTRY", "NAME"),
+      diagonal_arrangement, report = "check_spacing", upload = "mdiag", upload_columns = c("ENTRY", "NAME"),
       upload_repeats = "sameEntries", file_tag = "Diagonal_Multi",
       controls = c(
         list(ctl_flag("sameEntries"), ctl_count("lines", 300, min = 50, generated_only = TRUE),
              ctl_text_list("blocks", "100,120,80"), ctl_checks(4, max = 20, choices = 1:20), ctl_locations(),
              ctl_select("stacked", selected = "By Row")),
+        check_spacing_controls(),
         spatial_shared(expt_name = ctl_expt_name("Expt1, Expt2, Expt3", trim = TRUE),
                        trim_locations = TRUE),
         list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, blocks = controls$blocks, checks = controls$checks,
-             sameEntries = controls$sameEntries, stacked = controls$stacked, l = controls$l,
-             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
-             expt_name = controls$expt_name, location_names = controls$location_names,
-             entries = multiple_diagonal_entries(controls$lines, controls$blocks, controls$checks,
-                                                 controls$sameEntries, data))
+        c(list(lines = controls$lines, blocks = controls$blocks, checks = controls$checks,
+               sameEntries = controls$sameEntries, stacked = controls$stacked, l = controls$l,
+               planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+               expt_name = controls$expt_name, location_names = controls$location_names,
+               entries = multiple_diagonal_entries(controls$lines, controls$blocks, controls$checks,
+                                                   controls$sameEntries, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -658,20 +655,21 @@ build_design_specs <- function() {
     # Run! allocates the entries to the locations (do_optim()); the field
     # of one location holds its share of the entries and the checks
     sparse_allocation = spatial("sparse_allocation", "Unreplicated Designs: Sparse Allocation",
-      sparse_allocation, upload = "sparse_allocation", upload_columns = c("ENTRY", "NAME"),
-      file_tag = "Diagonal_",
+      sparse_allocation, report = "check_spacing", upload = "sparse_allocation",
+      upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       optim = list(engine = do_optim, args = design_args_sparse_allocation_optim, into = "sparse_list"),
       controls = c(
         list(ctl_count("lines", 380, min = 50), ctl_checks(4, max = 10, choices = 1:10), ctl_locations_from(5, 3),
              ctl_copies_per_entry()),
-        spatial_shared(), list(ctl_seed())
+        check_spacing_controls(), spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, checks = controls$checks, l = controls$l,
-             copies_per_entry = controls$copies_per_entry, planter = controls$planter,
-             plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
-             location_names = controls$location_names,
-             entries = sparse_entries(controls$lines, controls$checks, controls$l, data))
+        c(list(lines = controls$lines, checks = controls$checks, l = controls$l,
+               copies_per_entry = controls$copies_per_entry, planter = controls$planter,
+               plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
+               location_names = controls$location_names,
+               entries = sparse_entries(controls$lines, controls$checks, controls$l, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -776,7 +774,7 @@ design_app_spec <- function(module) {
 #' @noRd
 design_page_labels <- function(module) {
   switch(module,
-    Diagonal = c(spread_checks = "Optimize check spacing"),
+    Diagonal =, diagonal_multiple =, sparse_allocation = c(spread_checks = "Optimize check spacing"),
     LSD = c(reps = "Replicates (squares)"),
     FD = c(type = "Factorial design type"),
     SPD = c(type = "Split-plot design type"),

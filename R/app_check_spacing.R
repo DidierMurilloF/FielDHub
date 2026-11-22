@@ -1,4 +1,39 @@
-#' The check spacing of a diagonal arrangement, behind a button on its plot
+#' Check spacing on a page: its controls, its values and its arguments
+#'
+#' @description The pages whose design places checks on diagonals (Single
+#' and Multiple Diagonal Arrangement, Sparse Allocation) share one
+#' implementation: the two sidebar controls, the values read from them, the
+#' arguments their engines take (\code{spread_checks}, \code{dist_method})
+#' and the report behind the "Check spacing" button
+#' (\code{app_check_spacing()}; a spec asks for it with
+#' \code{report = "check_spacing"}). On a page the spacing is optimized unless
+#' the user turns it off; the functions' own default stays \code{FALSE}.
+#' @return \code{check_spacing_controls()}: the controls, for a spec.
+#' @noRd
+check_spacing_controls <- function() {
+  list(ctl_flag("spread_checks", value = TRUE),
+       ctl_select("dist_method", show_if = "input.spread_checks == true"))
+}
+
+#' @param controls The parsed controls of a page.
+#' @return \code{check_spacing_values()}: the values of the two controls; a
+#'   distance is read only while the optimization is on.
+#' @noRd
+check_spacing_values <- function(controls) {
+  list(spread_checks = controls$spread_checks,
+       dist_method = if (isTRUE(controls$spread_checks)) controls$dist_method else "euclidean")
+}
+
+#' @param values The values of a page.
+#' @return \code{check_spacing_args()}: the engine's arguments, with the
+#'   API defaults for values a caller left out.
+#' @noRd
+check_spacing_args <- function(values) {
+  list(spread_checks = values[["spread_checks"]] %||% FALSE,
+       dist_method = values[["dist_method"]] %||% "euclidean")
+}
+
+#' The check spacing of a design with diagonal checks, behind a button on its plot
 #'
 #' @description What \code{print_diagonal_spacing()} prints, as a small
 #' structured view built from the design's own record

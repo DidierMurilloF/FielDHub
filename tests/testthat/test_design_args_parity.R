@@ -1305,6 +1305,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
   # What the specs run: plain parsers, checks, choice helpers and views
   spec_helpers <- c(
     "shape_design_upload", "check_reps_upload", "optim_total_plots", "optim_field_choices",
+    "check_spacing_values",        # the two check-spacing values the diagonal pages share
     "field_grid_view", "spatial_highlight_colours", "entry_list_view", "location_view_choices",
     "parse_control_number", "parse_control_whole_numbers", "parse_control_names",
     "parse_control_choice", "parse_control_option", "parse_control_flag", "parse_control_seed",

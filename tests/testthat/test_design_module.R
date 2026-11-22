@@ -18,7 +18,9 @@ all_modules <- c(classic_modules, spatial_modules)
 page_labels <- c(Augmented_RowCol.advanced = "Advanced settings",
   Augmented_RowCol.budget = "Search budget per location",
   Augmented_RowCol.time_limit = "Time limit per location (seconds)",
-  Diagonal.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
+  Diagonal.spread_checks = "Optimize check spacing",
+  diagonal_multiple.spread_checks = "Optimize check spacing",
+  sparse_allocation.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
   FD.type = "Factorial design type", SPD.type = "Split-plot design type",
   SSPD.type = "Split-split-plot design type", multi_loc_preps.use_checks = "Include checks",
   RCBD_augmented.checks = "Checks per block")
@@ -300,7 +302,8 @@ spatial_defaults <- function(module) {
                                              plotNumber = 1, kindExpt = "DBUDC", splitBy = "row",
                                              seed = 7, blocks = c(100, 120, 80),
                                              exptName = c("Expt1", "Expt2", "Expt3"),
-                                             locationNames = "FARGO", checksPercent = 12.3),
+                                             locationNames = "FARGO", checksPercent = 12.3,
+                                             spread_checks = TRUE),
     # "FARGO" names one of five locations: the engine's LOC1, ... are used
     sparse_allocation = sparse_allocation(lines = 380, nrows = 19, ncols = 19, l = 5,
                                           plotNumber = c(1, 1001, 2001, 3001, 4001),
@@ -308,7 +311,7 @@ spatial_defaults <- function(module) {
                                           sparse_list = do_optim(design = "sparse", lines = 380, l = 5,
                                                                  copies_per_entry = 4, add_checks = TRUE,
                                                                  checks = 4, seed = 7),
-                                          seed = 7, checksPercent = 14.13),
+                                          seed = 7, checksPercent = 14.13, spread_checks = TRUE),
     multi_loc_preps = multi_location_prep(lines = 312, nrows = rep(26, 6), ncols = rep(16, 6), l = 6,
                                           plotNumber = c(1, 1001, 2001, 3001, 4001, 5001),
                                           copies_per_entry = 8, checks = NULL, rep_checks = NULL,
@@ -457,7 +460,8 @@ test_that("the multiple diagonal page lays out its experiments and builds the AP
                          planter = "cartesian", plotNumber = list(c(1, 101, 201), c(1, 101, 201)),
                          kindExpt = "DBUDC", splitBy = "column", seed = 5, blocks = c(80, 80, 80),
                          exptName = c("A", "B", "C"), locationNames = c("X", "Y"),
-                         checksPercent = utils::tail(percents$choices, 1L), sameEntries = TRUE))
+                         checksPercent = utils::tail(percents$choices, 1L), sameEntries = TRUE,
+                         spread_checks = TRUE))
   # an uploaded list, its checks first
   upload <- data.frame(ENTRY = 1:304, NAME = c(paste0("CH", 1:4), paste0("G", 5:304)))
   raw <- utils::modifyList(page_defaults("diagonal_multiple"), list(lines = NA))
@@ -465,7 +469,7 @@ test_that("the multiple diagonal page lays out its experiments and builds the AP
     diagonal_arrangement(nrows = 19, ncols = 18, checks = 4, l = 1, plotNumber = 1, kindExpt = "DBUDC",
                          splitBy = "row", seed = 7, blocks = c(100, 120, 80),
                          exptName = c("Expt1", "Expt2", "Expt3"), locationNames = "FARGO",
-                         data = upload, checksPercent = 12.3))
+                         data = upload, checksPercent = 12.3, spread_checks = TRUE))
   problems <- list(
     list(list(blocks = "100,120"), "must add up to the number of entries"),
     list(list(lines = 40, blocks = "20,20"), "Larger field size is recommended"),
@@ -500,7 +504,7 @@ test_that("the sparse allocation page allocates at Run! and builds the API's des
     sparse_allocation(lines = 120, nrows = size[1], ncols = size[2], l = 3, planter = "cartesian",
                       plotNumber = c(1, 501, 1001), copies_per_entry = 2, checks = 2, exptName = "S1",
                       locationNames = c("A", "B", "C"), sparse_list = allocation, seed = 9,
-                      checksPercent = percent))
+                      checksPercent = percent, spread_checks = TRUE))
   # the allocation table: one row per entry, the copies and totals
   view <- spec$setup$view(c(values, list(sparse_list = allocation)), list())
   expect_identical(dim(view), c(121L, 4L))
@@ -655,7 +659,9 @@ test_that("the same concept has the same label, default and minimum on every pag
                    RCBD_augmented.plot_start = "1", Augmented_RowCol.plot_start = "1",
                    Diagonal.plot_start = "1", Diagonal.spread_checks = TRUE,
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
+                   diagonal_multiple.spread_checks = TRUE,
                    sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
+                   sparse_allocation.spread_checks = TRUE,
                    multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,
                    multi_loc_preps.checks = 3, multi_loc_preps.rep_checks = "8,8,8")
   seen <- character()

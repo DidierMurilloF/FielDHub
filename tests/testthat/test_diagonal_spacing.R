@@ -82,5 +82,7 @@ test_that("spacing reports use each location and the existing generic app page",
   expect_false(grepl("style=", report, fixed = TRUE))
   single <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 8)
   expect_false(grepl("<select", as.character(app_check_spacing(single)), fixed = TRUE))
-  expect_null(design_app_spec("diagonal_multiple")$report)
+  for (module in c("diagonal_multiple", "sparse_allocation")) {
+    expect_identical(design_app_spec(module)$report, "check_spacing")
+  }
 })
