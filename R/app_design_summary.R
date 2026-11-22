@@ -46,8 +46,15 @@ app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL)
         if (!is.null(tabset)) shiny::tags$button(type = "button", class = "fh-summary-link",
           `data-fh-tabset` = tabset, `data-fh-tab` = "Field Book", "See all")),
       shiny::div(class = "fh-table-wrap",
-                 app_summary_table(preview[setdiff(names(preview), "ID")])))
+                 app_summary_table(preview[setdiff(names(preview), app_summary_repeated(info))])))
   )
+}
+
+#' Field book columns the preview leaves out: the row number, and a column
+#' that repeats one of the design's parameters on every plot
+#' @noRd
+app_summary_repeated <- function(info) {
+  c("ID", if (!is.null(info$check_direction)) "CHECK_DIRECTION")
 }
 
 #' A few names, and how many more there are
@@ -99,7 +106,7 @@ app_summary_items <- function(info, book) {
   labels <- c(NumberTreatments = "Treatments", number.of.treatments = "Treatments", treatments = "Treatments",
     Reps = "Replicates", reps = "Replicates", blocks = "Blocks",
     iBlocks = "Blocks per replicate", IBlocks = "Blocks per replicate",
-    rows = "Rows", columns = "Columns",
+    rows = "Rows", columns = "Columns", nrows = "Rows", ncols = "Columns", entries = "Entries",
     nTrt = "Treatments", nRows = "Rows", checks = "Checks", fillers = "Filler plots",
     NumberLocations = "Locations", locations = "Locations", l = "Locations", lambda = "Lambda",
     planter = "Plot order", percent_checks = "Plots with checks", min_distance = "Minimum distance",
@@ -110,6 +117,12 @@ app_summary_items <- function(info, book) {
     iBlocks = "Incomplete blocks in each replicate.", IBlocks = "Incomplete blocks in each replicate.")
   # Shown on its own (the seed) or not for people (the design's internal id)
   skip <- c("seed", "id_design", "Locations", "locationNames", "location_names", "plotNumber")
+  # The Augmented Row-Column also keeps its mathematical sizes (v, s, k):
+  # the rows, the columns and the number of checks again, each shown once
+  if (identical(info$id_design, "augmented_row_column")) skip <- c(skip, "v", "s", "k")
+  # Checks given by name are counted, and named under the count
+  check_names <- if (is.character(info$checks) && length(info$checks) > 1L) info$checks
+  if (!is.null(check_names)) info$checks <- length(check_names)
   shown <- Filter(function(name) is.atomic(info[[name]]) && length(info[[name]]) == 1L,
                   setdiff(names(info), skip))
   shown <- c(intersect(names(labels), shown), setdiff(shown, names(labels)))
@@ -125,7 +138,7 @@ app_summary_items <- function(info, book) {
          tip = if (name %in% names(tips)) tips[[name]], value = value(info[[name]]),
          names = if (name %in% locations && "LOCATION" %in% names(book)) {
            unique(as.character(book$LOCATION))
-         })
+         } else if (name == "checks") check_names)
   })
   blocks <- c(info$iBlocks, info$IBlocks)
   if (length(blocks) == 1L && !is.null(info$NumberTreatments)) {
