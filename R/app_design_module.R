@@ -96,20 +96,13 @@ app_design_modern <- function(spec) {
   spec$module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")
 }
 
-#' Prototype: a slim page header for a design page (title, purpose, guide)
+#' Prototype: a slim page header for a design page (its name and guide)
 #' @noRd
 app_design_header <- function(spec) {
-  purpose <- c(
-    Square_Lattice = "Resolvable incomplete blocks for a square number of treatments, with blocks as large as the square root of that number.",
-    Rectangular_Lattice = "Resolvable incomplete blocks for k(k + 1) treatments in blocks of k plots.",
-    Alpha_Lattice = "Resolvable incomplete blocks for any number of treatments that splits into equal blocks."
-  )
   modules <- vapply(fieldhub_app_registry(), `[[`, character(1), "spec")
   guide <- fieldhub_help_topics()$guide[match(spec$module, modules)]
   shiny::tags$header(class = "fh-design-head",
-    shiny::div(class = "fh-design-head-copy",
-      shiny::h2(spec$title),
-      shiny::p(purpose[[spec$module]])),
+    shiny::h2(spec$title),
     app_external_link("Design guide", guide, class = "fh-design-guide"))
 }
 

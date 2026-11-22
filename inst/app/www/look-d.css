@@ -1,7 +1,7 @@
-/* PROTOTYPE, Option D ("?look=d"): Option A with Option C's slim navbar.
-   Only the navbar's height changes: its padding, the size of the brand,
-   links, logo, theme toggle and look switcher. Colours and everything
-   below the navbar are design.css (Option A), untouched. */
+/* PROTOTYPE, Option D ("?look=d"): Option A, more compact. Option C's
+   slim navbar (padding and the size of the brand, links, logo, theme
+   toggle and look switcher), a compact page header, a slightly denser
+   sidebar and a compact Summary. Colours and everything else are design.css (Option A). */
 
 html[data-look="d"] #fieldhub-app .navbar-default { min-height: 46px; }
 html[data-look="d"] #fieldhub-app .navbar-default .navbar-brand {
@@ -24,20 +24,13 @@ html[data-look="d"] #fieldhub-app .fh-look-switch button { line-height: 24px; }
   html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { margin: 6px 16px 12px; }
 }
 
-/* A compact page header, like Option C's: the title and its description on
-   one line, the guide link on that line, and less space around them. */
+/* A compact page header, like Option C's: a smaller title with the guide
+   link on its line, and less space around them. */
 html[data-look="d"] #fieldhub-app .fh-design-head {
   align-items: baseline;
   padding: 12px 0 10px;
 }
-html[data-look="d"] #fieldhub-app .fh-design-head-copy {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 16px;
-}
 html[data-look="d"] #fieldhub-app .fh-design-head h2 { font-size: 20px; }
-html[data-look="d"] #fieldhub-app .fh-design-head p { margin: 0; font-size: 13.5px; }
 html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide { font-size: 13px; }
 html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 14px; }
 
@@ -46,3 +39,41 @@ html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 14px; }
   html[data-look="d"] #fieldhub-app .fh-design-head h2 { font-size: 19px; }
   html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 12px; }
 }
+
+/* A slightly denser sidebar, not a cramped one: 34px input boxes instead
+   of 38px, 36px buttons, and a quarter less space between the fields
+   (12px instead of 16px; a label sits 5px above its box instead of 6px). */
+html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] {
+  --fhd-control: 34px;
+  --fhd-gap: 12px;
+}
+html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] .control-label { margin-bottom: 5px; }
+html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] .btn { height: 36px; }
+html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] .input-group .btn-file { height: 34px; }
+
+/* Touch screens keep full-size targets. */
+@media (max-width: 767px) {
+  html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] { --fhd-control: 44px; --fhd-gap: 16px; }
+  html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] .btn,
+  html[data-look="d"] #fieldhub-app .fh-design [role="complementary"] .input-group .btn-file { height: 44px; }
+}
+
+/* A compact Summary that ends about where the sidebar does: smaller
+   figures in a 3x2 grid, tighter sections, 30px table rows and lighter
+   frames. */
+html[data-look="d"] #fieldhub-app .fh-summary { gap: 24px; padding-top: 18px; }
+html[data-look="d"] #fieldhub-app .fh-summary section { gap: 8px; }
+html[data-look="d"] #fieldhub-app .fh-design .fh-summary h3 { font-size: 13.5px; }
+html[data-look="d"] #fieldhub-app .fh-stats { border-radius: var(--fhd-radius); }
+html[data-look="d"] #fieldhub-app .fh-stats > div { padding: 8px 14px 9px; }
+html[data-look="d"] #fieldhub-app .fh-stats dt { font-size: 12px; }
+html[data-look="d"] #fieldhub-app .fh-stats dd { margin-top: 1px; font-size: 18px; }
+html[data-look="d"] #fieldhub-app .fh-stats small { margin-top: 0; font-size: 11.5px; }
+html[data-look="d"] #fieldhub-app .fh-seed-line,
+html[data-look="d"] #fieldhub-app .fh-design .fh-seed-line code,
+html[data-look="d"] #fieldhub-app .fh-summary-head span,
+html[data-look="d"] #fieldhub-app .fh-summary-link { font-size: 12.5px; }
+html[data-look="d"] #fieldhub-app .fh-table-wrap { border-radius: var(--fhd-radius); }
+html[data-look="d"] #fieldhub-app .fh-table th { padding: 6px 12px; font-size: 12px; border-bottom-color: var(--fhd-line); }
+html[data-look="d"] #fieldhub-app .fh-table td { padding: 5px 12px; }
+

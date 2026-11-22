@@ -208,7 +208,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 #fieldhub-app .fh-design-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: baseline;
   justify-content: space-between;
   gap: 8px 32px;
   margin: 0 28px;
@@ -222,13 +222,6 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   font-weight: 700;
   line-height: 1.2;
   color: var(--fhd-ink);
-}
-#fieldhub-app .fh-design-head p {
-  margin: 5px 0 0;
-  max-width: 78ch;
-  font-size: 14.5px;
-  line-height: 1.45;
-  color: var(--fhd-muted);
 }
 #fieldhub-app .fh-design-head a.fh-design-guide {
   flex: none;
@@ -329,6 +322,13 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 :is(#fieldhub-app .fh-design, .modal) .selectize-input {
   align-items: center;
+}
+/* The typing field inside the box is not a box of its own. */
+:is(#fieldhub-app .fh-design, .modal) .selectize-input > input {
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
 }
 :is(#fieldhub-app .fh-design, .modal) .selectize-input > .item,
 :is(#fieldhub-app .fh-design, .modal) .selectize-input > input { color: var(--fhd-ink); }

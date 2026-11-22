@@ -61,14 +61,7 @@ html[data-look="c"] #fieldhub-app .fh-design-head {
   padding: 11px 20px;
   border-bottom: 1px solid var(--fhd-line);
 }
-html[data-look="c"] #fieldhub-app .fh-design-head-copy {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 16px;
-}
 html[data-look="c"] #fieldhub-app .fh-design-head h2 { font-size: 18px; font-weight: 900; }
-html[data-look="c"] #fieldhub-app .fh-design-head p { margin: 0; font-size: 13px; }
 html[data-look="c"] #fieldhub-app .fh-design-head a.fh-design-guide { font-size: 13px; }
 
 html[data-look="c"] #fieldhub-app .fh-design > .row {
