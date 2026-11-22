@@ -1,9 +1,9 @@
 /* PROTOTYPE (spike/lattice-ui-prototype): the modernized design pages.
    Neutral surfaces, a slim charcoal navbar, a compact page header, a
    slightly dense sidebar and a compact Summary.
-   Everything is scoped to the navbar, to .fh-design (the three Lattice
-   pages, see mod_design_ui()) and to modal dialogs. The content of the
-   Welcome, Help and About pages (.fh-page) is not touched and stays light.
+   Everything is scoped to the navbar, to .fh-design (every design page,
+   see mod_design_ui()), to modal dialogs, and to the colours of the
+   Welcome, Help and About pages (.fh-page), which follow the same theme.
    Light and dark are the same rules over two sets of tokens. */
 
 /* Neutral surfaces in both themes. Green is the accent only: the primary
@@ -354,6 +354,24 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 }
 :is(#fieldhub-app .fh-design, .modal) .help-block { color: var(--fhd-muted); font-size: 13px; }
 .fieldhub-input-error { color: var(--fhd-danger, #b00020); }
+
+/* Upload: the file on one line, its separator choices on the next. */
+#fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) > [class*="col-"] {
+  float: none;
+  width: 100%;
+  padding: 0 15px;
+}
+#fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) .shiny-input-radiogroup > .control-label {
+  display: block;
+}
+#fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) .shiny-options-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 6px;
+}
+#fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) .radio { margin: 0; }
+#fieldhub-app .fh-design [role="complementary"] .row:has(input[type="file"]) .form-group { margin-bottom: var(--fhd-gap); }
 
 /* File input: browse button and file name share one outline. */
 #fieldhub-app .fh-design .input-group .btn-file {
@@ -959,6 +977,85 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   border-radius: var(--fhd-radius);
   font-size: var(--fhd-text);
 }
+
+/* ---------- Welcome, Help and About (.fh-page, laid out in style.css) ----------
+   The same theme as the design pages: their tokens take the theme's
+   values, so the toggle switches these pages too. Layout and content are
+   style.css's; only colours, frames and focus are set here. */
+#fieldhub-app .fh-page {
+  --fh-ink: var(--fhd-ink);
+  --fh-muted: var(--fhd-muted);
+  --fh-line: var(--fhd-line);
+  --fh-bg: var(--fhd-bg);
+  --fhp-banner: #0a5640;
+  --fhp-banner-photo: #073d2e;
+  --fhp-footer: #22303c;
+}
+html[data-theme="dark"] #fieldhub-app .fh-page {
+  /* Green is the accent here: lighter, for contrast on charcoal */
+  --fh-green: var(--fhd-action);
+  --fh-green-dark: var(--fhd-action-hover);
+  /* The banner keeps its green, deeper and quieter, under the gold rule */
+  --fhp-banner: #17352c;
+  --fhp-banner-photo: #101c18;
+  --fhp-footer: #1c2024;
+  color-scheme: dark;
+}
+#fieldhub-app .fh-banner { background: var(--fhp-banner); }
+#fieldhub-app .fh-banner-photo { background: var(--fhp-banner-photo); }
+#fieldhub-app .fh-footer { background: var(--fhp-footer); border-top: 1px solid var(--fhd-nav-line); }
+#fieldhub-app .fh-page a { text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+#fieldhub-app .fh-page a:focus-visible,
+#fieldhub-app .fh-page summary:focus-visible { outline-color: var(--fhd-focus); }
+#fieldhub-app .fh-banner a:focus-visible,
+#fieldhub-app .fh-page .fh-footer a:focus-visible { outline-color: var(--fh-gold); }
+
+/* Surfaces, hairlines and frames */
+#fieldhub-app .fh-section-white,
+#fieldhub-app .fh-steps-band,
+#fieldhub-app .fh-family,
+#fieldhub-app .fh-panel,
+#fieldhub-app .fh-teach-list,
+#fieldhub-app .fh-page a.fh-start-card,
+#fieldhub-app .fh-guide-group,
+#fieldhub-app .fh-lead,
+#fieldhub-app .fh-card,
+#fieldhub-app .fh-page .fh-teach-install code { background: var(--fhd-surface); }
+#fieldhub-app .fh-family,
+#fieldhub-app .fh-panel,
+#fieldhub-app .fh-teach-list,
+#fieldhub-app .fh-page a.fh-start-card,
+#fieldhub-app .fh-guide-group,
+#fieldhub-app .fh-lead,
+#fieldhub-app .fh-card { border-radius: var(--fhd-radius-lg); }
+#fieldhub-app .fh-page code { background: var(--fhd-hover); border-radius: var(--fhd-radius); }
+#fieldhub-app .fh-page .fh-family li a,
+#fieldhub-app .fh-book th,
+#fieldhub-app .fh-book td { border-bottom-color: var(--fhd-line); }
+#fieldhub-app .fh-guide-group li + li { border-top-color: var(--fhd-line); }
+#fieldhub-app .fh-page .fh-family li a::after { color: var(--fhd-muted); }
+#fieldhub-app .fh-new { border-color: var(--fhd-line-strong); }
+#fieldhub-app .fh-num,
+#fieldhub-app .fh-steps li::before { font-variant-numeric: tabular-nums; }
+#fieldhub-app .fh-num { color: var(--fhd-on-action); }
+#fieldhub-app .fh-panel-dark .fh-num { color: #1b2a22; }
+#fieldhub-app .fh-book th:last-child,
+#fieldhub-app .fh-book td:last-child { background: var(--fhd-hover); color: var(--fhd-ink); }
+/* Cells coloured as checks keep dark ink on their colour. */
+#fieldhub-app .fh-book :is(.fh-chk-1, .fh-chk-2, .fh-chk-3, .fh-chk-4) { color: #22303c; }
+#fieldhub-app .fh-panel-dark { background: #22303c; border-color: #22303c; }
+
+html[data-theme="dark"] #fieldhub-app .fh-panel-dark { background: #101214; border-color: var(--fhd-line); }
+html[data-theme="dark"] #fieldhub-app .fh-page .fh-pre { background: #101214; }
+html[data-theme="dark"] #fieldhub-app .fh-avatar-mono { background: var(--fhd-hover); }
+/* Photographs keep their colours; a hairline sets them off the dark page. */
+html[data-theme="dark"] #fieldhub-app .fh-page :is(.fh-lead img, .fh-avatar) { outline: 1px solid var(--fhd-line); }
+/* Drawings made for a white page stand on paper. */
+html[data-theme="dark"] #fieldhub-app .fh-page :is(.fh-family-intro img, .fh-panel-body img) {
+  background: var(--fhd-paper);
+  border-radius: var(--fhd-radius);
+}
+html[data-theme="dark"] #fieldhub-app .fh-scale i { background: linear-gradient(90deg, #e8efea, #2f9a75); }
 
 /* ---------- Dialogs (rendered outside #fieldhub-app) ---------- */
 .modal .modal-content {
