@@ -67,3 +67,4 @@ $run_dev.*
 ^AGENTS\.md$
 ^tools/nested-goldens-rc-baseline\.csv\.gz$
 ^tools/nested-goldens-os-baseline\.csv\.gz$
+^tools/onestage-stage-measurements\.csv\.gz$
