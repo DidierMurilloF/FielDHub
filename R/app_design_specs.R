@@ -194,28 +194,19 @@ build_design_specs <- function() {
          planter = controls$planter, plot_start = controls$plot_start, l = controls$l,
          location_names = controls$location_names, seed = controls$seed)
   }
-  # Prototype: the lattice pages name their controls in the words of the
-  # Summary. A control's label is its field's label and the name its
-  # messages use, so the page says "Treatments cannot be blank."
+  # The engines refuse a count below one in their own words (`reps` must
+  # be ...): the lattice pages say it in the page's, with the field's label
   plain_labels <- function(controls) {
-    labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
-      planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
-      seed = "Random seed")
     lapply(controls, function(control) {
-      if (!control$id %in% names(labels)) return(control)
-      control <- control_relabel(control, labels[[control$id]])
-      if (identical(control$type, "number") && !is.null(control$min)) {
-        # The engines refuse a count below one in their own words (`reps`
-        # must be ...): say it in the page's
-        read <- control$parse
-        label <- control$label
-        control$parse <- function(value, values) {
-          count <- read(value, values)
-          if (is.numeric(count) && length(count) == 1L && !is.na(count) && count < 1) {
-            control_abort(label, " must be 1 or more.")
-          }
-          count
+      if (!identical(control$type, "number") || is.null(control$min)) return(control)
+      read <- control$parse
+      label <- control$label
+      control$parse <- function(value, values) {
+        count <- read(value, values)
+        if (is.numeric(count) && length(count) == 1L && !is.na(count) && count < 1) {
+          control_abort(label, " must be 1 or more.")
         }
+        count
       }
       control
     })
@@ -767,5 +758,28 @@ design_app_spec <- function(module) {
       is.na(module) || !module %in% names(specs)) {
     fieldhub_abort("Choose an available design page.", data = list(choices = names(specs)))
   }
-  specs[[module]]
+  spec <- specs[[module]]
+  # A page that names a control in its own way does so in the field and in
+  # the control's messages alike
+  labels <- design_page_labels(module)
+  spec$controls <- lapply(spec$controls, function(control) {
+    if (control$id %in% names(labels)) control_relabel(control, labels[[control$id]]) else control
+  })
+  spec
+}
+
+#' The controls a page names differently from their concept
+#' @param module The page's module.
+#' @return Labels, named by control id.
+#' @noRd
+design_page_labels <- function(module) {
+  switch(module,
+    Diagonal = c(spread_checks = "Optimize check spacing"),
+    LSD = c(reps = "Replicates (squares)"),
+    FD = c(type = "Factorial design type"),
+    SPD = c(type = "Split-plot design type"),
+    SSPD = c(type = "Split-split-plot design type"),
+    multi_loc_preps = c(use_checks = "Include checks"),
+    RCBD_augmented = c(checks = "Checks per block"),
+    character(0))
 }

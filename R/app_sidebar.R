@@ -48,43 +48,15 @@ app_sidebar_layout <- function(spec) {
   if (is.null(spec$upload)) rows <- Filter(function(row) !identical(row, "upload_file"), rows)
   list(rows = rows, gutters = !spec$module %in% c("pREPS", "multi_loc_preps"),
     upload_width = if (identical(spec$kind, "classic") && spec$module != "CRD") 8L else 7L,
-    upload_label = switch(spec$module, Optim = "Import Entries' List?",
-      SSPD = "Do you have your own data?",
-      Square_Lattice = , Rectangular_Lattice = , Alpha_Lattice = "Import entries list",
-      "Import entries' list?"),
-    file_label = if (spec$module %in% c("RowCol", "SPD", "SSPD", "STRIPD")) "Upload a csv File:" else
-      if (spec$module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) "CSV file" else
-        "Upload a CSV File:")
+    upload_label = "Import entries list", file_label = "CSV file")
 }
 
-#' Restore visible labels and widget types without changing validation or defaults
+#' The control as the sidebar shows it
+#'
+#' @description A control's label is the page's own (\code{design_app_spec()}),
+#' the same in its field and in its messages, so there is nothing to change.
 #' @noRd
 app_sidebar_control <- function(control, module) {
-  labels <- c(seed = "Random Seed:", plot_start = "Starting Plot Number:",
-    location_names = "Input Location:", expt_name = "Input Experiment Name:")
-  if (module == "Diagonal") labels["spread_checks"] <- "Optimize check spacing"
-  if (module == "RCBD") labels["plot_start"] <- "Starting Plot Number(s):"
-  if (module == "LSD") labels["reps"] <- "Input # of Full Reps (Squares):"
-  if (module == "FD") labels <- c(labels, type = "Select a Factorial Design Type:",
-    setfactors = "Input # of Entries for Each Factor: (Separated by Comma)")
-  if (module %in% c("SPD", "SSPD")) labels <- c(labels,
-    type = paste0("Select ", module, " Type:"), wp = "Whole-plots:",
-    sp = "Sub-plots Within Whole-plots:", ssp = "Sub-Sub-plots within Sub-plots:")
-  if (module %in% c("SPD", "Diagonal", "diagonal_multiple", "sparse_allocation")) {
-    labels["location_names"] <- "Input the Location:"
-  }
-  if (module %in% c("pREPS", "multi_loc_preps")) labels["location_names"] <- "Input Location Name:"
-  if (module %in% c("Optim", "RCBD_augmented", "Augmented_RowCol", "Diagonal",
-                    "diagonal_multiple")) {
-    labels["location_view"] <- "Choose location to view:"
-  }
-  if (module %in% c("Optim", "multi_loc_preps")) labels["rep_checks"] <- "Input # Check's Reps:"
-  if (module == "multi_loc_preps") labels["use_checks"] <- "Include checks?"
-  if (module == "RCBD_augmented") labels["checks"] <- "Checks per Block:"
-  # Prototype: the lattice pages show the labels of their own controls
-  # (design_app_spec()), which their messages use too
-  if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) return(control)
-  if (control$id %in% names(labels)) control$label <- unname(labels[control$id])
   control
 }
 

@@ -23,7 +23,7 @@ test_that("all app modules use the shared strict plot-number reader", {
                            FielDHub:::design_app_spec(entry$spec)$controls)
       expect_length(plot_start, 1L)
       expect_identical(plot_start[[1L]]$parse("101, 201", list()), c(101, 201))
-      expect_error(plot_start[[1L]]$parse("101,x", list()), "Starting Plot Number",
+      expect_error(plot_start[[1L]]$parse("101,x", list()), "Starting plot number",
                    class = "fieldhub_input_error")
       next
     }

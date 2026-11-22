@@ -15,64 +15,65 @@ all_modules <- c(classic_modules, spatial_modules)
 # The one label of each concept, written out here so a label changed in
 # fieldhub_control_concepts() fails this test instead of passing by
 # construction
-plain_lattice_labels <- c(t = "Treatments", reps = "Replicates", k = "Plots per block", l = "Locations",
-  planter = "Plot order", plot_start = "Starting plot number", location_names = "Location name",
-  seed = "Random seed")
+page_labels <- c(Diagonal.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
+  FD.type = "Factorial design type", SPD.type = "Split-plot design type",
+  SSPD.type = "Split-split-plot design type", multi_loc_preps.use_checks = "Include checks",
+  RCBD_augmented.checks = "Checks per block")
 canonical_labels <- c(
-  type = "Select Design Type:",
-  t = "Input # of Treatments:",
-  setfactors = "Input # of Entries for Each Factor (comma separated):",
-  wp = "Input # of Whole Plots:",
-  sp = "Input # of Sub-plots Within Whole Plots:",
-  ssp = "Input # of Sub-sub-plots Within Sub-plots:",
-  Hplots = "Input # of Horizontal Strips:",
-  Vplots = "Input # of Vertical Strips:",
-  reps = "Input # of Full Reps:",
-  k = "Input # of Plots per IBlock:",
-  nrows = "Input # of Rows:",
-  ncols = "Input # of Columns:",
-  use_checks = "Add repeated checks?",
-  checks = "Input # of Checks:",
-  rep_checks = "Reps per Check:",
+  type = "Design type",
+  t = "Treatments",
+  setfactors = "Levels of each factor (comma separated)",
+  wp = "Whole plots",
+  sp = "Sub-plots per whole plot",
+  ssp = "Sub-sub-plots per sub-plot",
+  Hplots = "Horizontal strips",
+  Vplots = "Vertical strips",
+  reps = "Replicates",
+  k = "Plots per block",
+  nrows = "Rows",
+  ncols = "Columns",
+  use_checks = "Add repeated checks",
+  checks = "Checks",
+  rep_checks = "Replicates per check",
   spread_checks = "Spread checks within each block",
-  dist_method = "Check spacing distance:",
+  dist_method = "Check spacing distance",
   checks_note = NA,
-  l = "Input # of Locations:",
-  planter = "Plot Order Layout:",
-  plot_start = "Starting Plot Number(s):",
+  l = "Locations",
+  planter = "Plot order",
+  plot_start = "Starting plot number",
   plot_by_block = "Number plots by block",
-  plot_increment = "Plot number increment between blocks:",
-  continuous = "Continuous Plot",
-  location_names = "Location Name(s):",
-  randomizeH = "Randomize Horizontal Strips (Across reps)",
-  randomizeV = "Randomize Vertical Strips (Across reps)",
-  seed = "Random Seed (blank = automatic):",
-  lines = "Input # of Entries:",
-  repGens = "# of Entries Per Rep Group:",
-  repUnits = "# of Rep Per Group:",
-  blocks = "Input # Entries per Expt:",
-  b = "Input # of Blocks:",
-  repsExpt = "Input # of Stacked Expts:",
-  repsStack = "Stack experiments:",
-  stacked = "Blocks Layout:",
-  copies_per_entry = "# of Copies Per Entry:",
-  location_view = "Choose Location to View:",
-  expt_name = "Experiment Name(s):",
-  year = "Year (blank = current):",
-  check_direction = "Each check appears once in every:",
-  objective = "Search objective:",
+  plot_increment = "Plot number increment between blocks",
+  continuous = "Continuous plot numbers",
+  location_names = "Location name",
+  randomizeH = "Randomize horizontal strips (across replicates)",
+  randomizeV = "Randomize vertical strips (across replicates)",
+  seed = "Random seed",
+  lines = "Entries",
+  repGens = "Entries per replicate group",
+  repUnits = "Replicates per group",
+  blocks = "Entries per experiment",
+  b = "Blocks",
+  repsExpt = "Stacked experiments",
+  repsStack = "Stack experiments",
+  stacked = "Blocks layout",
+  copies_per_entry = "Copies per entry",
+  location_view = "Location to view",
+  expt_name = "Experiment name",
+  year = "Year (blank = current)",
+  check_direction = "Each check appears once in every",
+  objective = "Search objective",
   advanced = "Show advanced search options",
-  budget = "Search budget per location (blank = default):",
-  time_limit = "Time limit per location in seconds (blank = none):",
-  random = "Randomize Entries?",
+  budget = "Search budget per location (blank = default)",
+  time_limit = "Time limit per location in seconds (blank = none)",
+  random = "Randomize entries",
   random_note = NA,
   sameEntries = "Repeat entries across experiments",
   allow_fillers = "Allow filler plots",
   rowcol_distinct = "Keep copies in distinct rows and columns",
-  dimensions = "Select dimensions of field:",
+  dimensions = "Field dimensions",
   multi_dimension = "Set different dimensions across locations",
-  location_dimensions = "Select dimension for location",
-  checks_percent = "Choose % of Checks:"
+  location_dimensions = "Dimensions for location",
+  checks_percent = "Share of checks"
 )
 
 #' Muffle only the onestage->twostage fallback row_column() may report
@@ -344,7 +345,7 @@ test_that("spatial pages with changed controls, steps or an uploaded file build 
   expect_error(page_design(spec, raw, transform(entries, REPS = as.numeric(REPS))), "'REPS' must be numeric",
                class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "1,2", lines = 280))),
-               "Reps per Check must have 1 value or 4 values", class = "fieldhub_input_error")
+               "Replicates per check must have 1 value or 4 values", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "80", lines = 280))),
                "Number of lines should be greater", class = "fieldhub_input_error")
 })
@@ -366,7 +367,7 @@ test_that("the p-rep page offers filler plots and builds the API's design", {
                          locationNames = "FARGO", data = entries, allow_fillers = TRUE,
                          rowcol_penalty = Inf))
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repUnits = "2"))),
-               "# of Rep Per Group must have one value per group of entries", class = "fieldhub_input_error")
+               "Replicates per group must have one value per group of entries", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"),
                                                    list(repGens = "75,157", allow_fillers = FALSE))),
                "Select 'Allow filler plots'", class = "fieldhub_input_error")
@@ -665,10 +666,9 @@ test_that("the same concept has the same label, default and minimum on every pag
       info <- paste(module, control$id)
       key <- paste(module, control$id, sep = ".")
       expect_false(is.null(concept), info = info)
-      # the lattice pages name their controls in plain words
-      expected_label <- if (module %in% c("Square_Lattice", "Rectangular_Lattice", "Alpha_Lattice")) {
-        plain_lattice_labels[[control$id]]
-      } else if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]]
+      # a page may name a control its own way (design_page_labels())
+      expected_label <- if (key %in% names(page_labels)) page_labels[[key]] else
+        if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]]
       expect_identical(control$label, expected_label, info = info)
       if (key %in% names(page_values)) {
         expect_identical(control$value, page_values[[key]], info = info)

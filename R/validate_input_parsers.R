@@ -34,7 +34,7 @@ parse_whole_numbers <- function(text, label) {
   vals
 }
 
-#' Parse the "Input # of Checks" numeric input
+#' Parse the "Checks" numeric input
 #'
 #' @description
 #' A single, shared validator for the checks-count inputs so the app never
@@ -46,17 +46,17 @@ parse_whole_numbers <- function(text, label) {
 #' @noRd
 parse_n_checks <- function(x) {
   if (length(x) == 0L || (is.atomic(x) && length(x) == 1L && anyNA(x))) {
-    fieldhub_abort("Input # of Checks cannot be blank.")
+    fieldhub_abort("Checks cannot be blank.")
   }
   if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
       x < 1 || x > .Machine$integer.max || x != trunc(x)) {
-    fieldhub_abort("Input # of Checks must be a whole number from 1 to ",
+    fieldhub_abort("Checks must be a whole number from 1 to ",
                    .Machine$integer.max, ".")
   }
   as.integer(x)
 }
 
-#' Parse the "Reps per Check" text input
+#' Parse the "Replicates per check" text input
 #'
 #' @description
 #' Strictly parses a comma-separated list of reps-per-check. A single value is
@@ -67,17 +67,18 @@ parse_n_checks <- function(x) {
 #'
 #' @param text The raw `rep_checks_rcbd` input value.
 #' @param n_checks Number of checks the value must ultimately cover.
+#' @param name What the messages call the input (its label on the page).
 #' @return A numeric vector of length `n_checks`, or a
 #'   \code{fieldhub_input_error} for invalid input.
 #' @noRd
-parse_rep_checks <- function(text, n_checks) {
+parse_rep_checks <- function(text, n_checks, name = "Replicates per check") {
   n_checks <- parse_n_checks(n_checks)
-  vals <- parse_whole_numbers(text, "Reps per Check")
+  vals <- parse_whole_numbers(text, name)
   if (length(vals) == 1) return(rep(vals, n_checks))
   if (length(vals) != n_checks) {
     fieldhub_abort(sprintf(
-      "Reps per Check must have 1 value or %d values (one per check); got %d.",
-      n_checks, length(vals)))
+      "%s must have 1 value or %d values (one per check); got %d.",
+      name, n_checks, length(vals)))
   }
   vals
 }
@@ -95,10 +96,10 @@ parse_rep_checks <- function(text, n_checks) {
 #'   \code{total_plots}, or a \code{fieldhub_input_error}.
 #' @noRd
 parse_rep_groups <- function(entries, reps) {
-  rep_gens <- parse_whole_numbers(entries, "# of Entries Per Rep Group")
-  rep_units <- parse_whole_numbers(reps, "# of Rep Per Group")
+  rep_gens <- parse_whole_numbers(entries, "Entries per replicate group")
+  rep_units <- parse_whole_numbers(reps, "Replicates per group")
   if (length(rep_gens) != length(rep_units)) {
-    fieldhub_abort("# of Entries Per Rep Group and # of Rep Per Group must have the same ",
+    fieldhub_abort("Entries per replicate group and Replicates per group must have the same ",
                    "number of values (one per group); got ", length(rep_gens), " and ",
                    length(rep_units), ".")
   }

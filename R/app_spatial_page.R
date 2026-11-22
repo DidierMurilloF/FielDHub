@@ -1,9 +1,9 @@
 #' Result tabs of a spatial design page
 #'
 #' @description The main panel of a spatial page
-#' (\code{mod_design_ui()} with a \code{kind = "spatial"} spec): "Get
-#' Random" (the steps offered after Run!, Randomize!, what the run found and
-#' the page's \code{setup} view), "Data Input" (the entry tables), the
+#' (\code{mod_design_ui()} with a \code{kind = "spatial"} spec): "Field
+#' setup" (the steps offered after Generate design, Randomize field, what
+#' the run found and the page's \code{setup} view), "Entries" (the entry tables), the
 #' spec's \code{panels} (the randomize steps above the first), "Field Book"
 #' and "Heatmap", with the ids of the page's spatial workflow
 #' (\code{spatial_workflow_spec()}).
@@ -20,8 +20,7 @@ app_spatial_tabs <- function(ns, spec) {
   }
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
   setup <- if (identical(spec$setup$type, "summary")) {
-    shiny::div(class = "fieldhub-design-summary",
-      app_output_feedback(shiny::verbatimTextOutput(ns("setup"), placeholder = FALSE)))
+    shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
     app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
   }
@@ -42,11 +41,12 @@ app_spatial_tabs <- function(ns, spec) {
       shiny::tabPanel("Field setup", value = "setup",
         feedback(
           shinyjs::useShinyjs(),
-          shiny::br(),
-          steps("run"),
-          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field",
-                                          busy_message = spec$busy_message, results_id = ns("results"))),
-          shiny::br(), shiny::br(),
+          # The steps of the field and the button that randomizes it, as one card
+          shiny::div(class = "fh-setup",
+            shiny::div(class = "fh-setup-steps", steps("run")),
+            shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field", class = "fh-btn-primary",
+                                            busy_message = spec$busy_message, results_id = ns("results"))),
+            shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
           setup,
           if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
@@ -299,11 +299,9 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   # Validation must be ready when Run returns from another result tab.
   shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
   if (identical(spec$setup$type, "summary")) {
-    output$setup <- shiny::renderPrint({
-      if (!randomized()) return(invisible(NULL))
-      current <- settled(design)
-      cat("Randomization was successful!", "\n", "\n")
-      print(current, n = 6)
+    output$setup <- shiny::renderUI({
+      if (!randomized()) return(NULL)
+      app_design_summary(settled(design), tabset = session$ns(ids[["tabset"]]))
     })
   } else {
     # Paged allocations stay client-side so copy, Excel and print include every row.

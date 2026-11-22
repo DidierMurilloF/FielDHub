@@ -48,7 +48,7 @@ test_that("styles do not reset every child or impose a heatmap font", {
 })
 
 test_that("empty dimensions do not suggest an already-enabled filler option", {
-  step <- list(label = "Select dimension for location", type = "location_selects")
+  step <- list(label = "Dimensions for location", type = "location_selects")
   error <- tryCatch(FielDHub:::check_step_choices(step, list(character()), allow_fillers = TRUE), error = identity)
   expect_s3_class(error, "fieldhub_input_error")
   expect_match(conditionMessage(error), "Change the entries or checks", fixed = TRUE)

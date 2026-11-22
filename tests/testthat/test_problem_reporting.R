@@ -205,7 +205,7 @@ test_that("validate_design(report = TRUE) also reports unexpected errors, for ob
 
   # FielDHub input problems in an observer keep the selector quiet (Task 13)
   noticed <- list()
-  tryCatch(validate_design(fieldhub_abort("Input # of Checks cannot be blank."),
+  tryCatch(validate_design(fieldhub_abort("Checks cannot be blank."),
                            report = TRUE, notice = notice),
            error = function(e) e)
   expect_length(noticed, 0L)

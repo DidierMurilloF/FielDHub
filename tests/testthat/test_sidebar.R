@@ -79,10 +79,15 @@ test_that("restored labels and widget types do not alter parsers or automatic se
     expect_equal(read_design_controls(spec, raw)$checks, 4)
   }
   seed <- app_sidebar_control(ctl_seed(), "pREPS")
-  expect_identical(seed$label, "Random Seed:")
+  expect_identical(seed$label, "Random seed")
   expect_null(seed$parse("", list()))
-  expect_identical(app_sidebar_control(ctl_reps(1), "LSD")$label, "Input # of Full Reps (Squares):")
-  expect_identical(app_sidebar_control(ctl_checks(4), "RCBD_augmented")$label, "Checks per Block:")
+  # a page names a control its own way in its spec, for the field and its messages
+  page_label <- function(module, id) {
+    Filter(function(control) control$id == id, design_app_spec(module)$controls)[[1]]$label
+  }
+  expect_identical(page_label("LSD", "reps"), "Replicates (squares)")
+  expect_identical(page_label("RCBD_augmented", "checks"), "Checks per block")
+  expect_identical(page_label("CRD", "reps"), "Replicates")
 })
 
 test_that("multi-location Yes/No controls still pass logical flags to the engine", {

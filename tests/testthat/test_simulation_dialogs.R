@@ -23,5 +23,5 @@ test_that("classic simulation dialogs share a component with namespaced controls
   expect_match(html, 'id="example-max"', fixed = TRUE)
   expect_match(html, 'id="example-ok"', fixed = TRUE)
   expect_match(html, 'data-ns-prefix="example-"', fixed = TRUE)
-  expect_match(html, "Trait name:", fixed = TRUE)
+  expect_match(html, "Trait name", fixed = TRUE)
 })

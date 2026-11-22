@@ -90,7 +90,7 @@ test_that("one seed widget shares labels and API bounds while retaining supplied
   skip_if_not_installed("shiny")
   html <- as.character(app_seed_input("trial-seed", value = 123))
   expect_match(html, "trial-seed", fixed = TRUE)
-  expect_match(html, "blank = automatic", fixed = TRUE)
+  expect_match(html, "Random seed", fixed = TRUE)
   expect_match(html, 'value="123"', fixed = TRUE)
   expect_match(html, 'min="-2147483647"', fixed = TRUE)
   expect_match(html, 'max="2147483647"', fixed = TRUE)

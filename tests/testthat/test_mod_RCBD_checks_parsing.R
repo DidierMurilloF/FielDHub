@@ -3,7 +3,7 @@ library(FielDHub)
 
 # Coverage for the core input parsers `parse_n_checks()` and
 # `parse_rep_checks()` (R/validate_input_parsers.R). These are the single source of truth
-# for turning the "Input # of Checks" and "Reps per Check" Shiny inputs into
+# for turning the "Checks" and "Replicates per check" Shiny inputs into
 # validated values, shared by rcbd_inputs() and the block-size preview so
 # both agree on what is valid. Invalid input is a classed
 # fieldhub_input_error the app shows through validate_design().

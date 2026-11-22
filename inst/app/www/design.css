@@ -863,6 +863,85 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
 #fieldhub-app .fh-design .noUi-target,
 #fieldhub-app .fh-design .noUi-connect { box-shadow: none; }
 
+/* ---------- Spatial pages ---------- */
+/* Field setup: the steps of the field and the button that randomizes it,
+   as one card. Before a run there is nothing to choose, and it says so. */
+#fieldhub-app .fh-setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin: 16px 0 14px;
+  padding: 14px 16px;
+  background: var(--fhd-surface);
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius-lg);
+}
+#fieldhub-app .fh-setup-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 16px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+#fieldhub-app .fh-setup-steps > div { flex: 1 1 220px; max-width: 380px; }
+#fieldhub-app .fh-setup-steps:empty { display: none; }
+#fieldhub-app .fh-setup .form-group { margin-bottom: 0; }
+#fieldhub-app .fh-setup .shiny-input-container { width: 100%; }
+#fieldhub-app .fh-setup :is(.checkbox, .radio) { margin: 8px 0; }
+#fieldhub-app .fh-setup-empty { display: none; margin: 0; color: var(--fhd-muted); font-size: 15px; }
+#fieldhub-app .fh-setup:has(> .btn.shinyjs-hide) {
+  justify-content: center;
+  padding: 56px 24px;
+  background: transparent;
+  border: 1px dashed var(--fhd-line-strong);
+}
+#fieldhub-app .fh-setup:has(> .btn.shinyjs-hide) .fh-setup-empty { display: block; }
+/* A step on the plot (the share of checks) sits on one line with its label. */
+#fieldhub-app .fh-design .fieldhub-plot-controls > [id$="_step"] .form-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 380px;
+  margin: 0;
+}
+#fieldhub-app .fh-design .fieldhub-plot-controls > [id$="_step"] .control-label { margin: 0; white-space: nowrap; }
+#fieldhub-app .fh-design .fieldhub-plot-controls > [id$="_step"] .form-group > div { flex: 1; min-width: 150px; }
+
+/* Tables with export buttons, captions and coloured cells */
+#fieldhub-app .fh-design .dt-buttons { margin: 0 0 8px; }
+#fieldhub-app .fh-design .dt-buttons :is(.dt-button, .btn) {
+  height: 30px;
+  margin: 0 6px 0 0;
+  padding: 0 10px;
+  color: var(--fhd-ink);
+  background: var(--fhd-surface);
+  background-image: none;
+  border: 1px solid var(--fhd-line);
+  border-radius: var(--fhd-radius);
+  box-shadow: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+#fieldhub-app .fh-design .dt-buttons :is(.dt-button, .btn):hover {
+  color: var(--fhd-ink);
+  background: var(--fhd-hover);
+  background-image: none;
+  border-color: var(--fhd-ink);
+}
+#fieldhub-app .fh-design table.dataTable caption,
+#fieldhub-app .fh-design .dataTables_wrapper caption {
+  padding: 6px 2px;
+  color: var(--fhd-muted);
+  font-size: 13px;
+  text-align: left;
+  caption-side: top;
+}
+#fieldhub-app .fh-design table.dataTable.cell-border tbody :is(th, td) { border-color: var(--fhd-line); }
+/* A cell coloured by the design (checks, fillers) keeps dark ink on its colour. */
+#fieldhub-app .fh-design table.dataTable tbody td[style*="background-color"] { color: #22303c; }
+
 /* ---------- Busy feedback ---------- */
 #fieldhub-app .fh-design .fieldhub-task-feedback,
 #fieldhub-app .fh-design .fieldhub-output-feedback { color: var(--fhd-muted); }

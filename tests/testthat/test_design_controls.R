@@ -19,10 +19,10 @@ expect_control_error <- function(expr, pattern) {
 page <- function(...) list(controls = list(...))
 
 test_that("control_label_name() drops the trailing colon of a label", {
-  expect_identical(control_label_name("Input # of Treatments:"), "Input # of Treatments")
-  expect_identical(control_label_name("Random Seed (blank = automatic):"),
-                   "Random Seed (blank = automatic)")
-  expect_identical(control_label_name("Add repeated checks?"), "Add repeated checks?")
+  expect_identical(control_label_name("Treatments"), "Treatments")
+  expect_identical(control_label_name("Random seed"),
+                   "Random seed")
+  expect_identical(control_label_name("Add repeated checks"), "Add repeated checks")
 })
 
 test_that("is_blank_control_value() recognises every Shiny blank", {
@@ -51,8 +51,8 @@ test_that("count controls read one whole number and name their label otherwise",
 
 test_that("the error names the control it came from", {
   err <- expect_control_error(read_design_controls(page(ctl_locations()), list(l = NA)),
-                              "Input # of Locations cannot be blank.")
-  expect_identical(err$control, "Input # of Locations:")
+                              "Locations cannot be blank.")
+  expect_identical(err$control, "Locations")
 })
 
 test_that("starting plots read comma-separated whole numbers", {
@@ -61,10 +61,10 @@ test_that("starting plots read comma-separated whole numbers", {
   expect_identical(read_design_controls(spec, list(plot_start = "101, 1001"))$plot_start, c(101, 1001))
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(plot_start = value)),
-                         "Starting Plot Number(s) cannot be blank.")
+                         "Starting plot number cannot be blank.")
   }
   expect_control_error(read_design_controls(spec, list(plot_start = "101,abc")),
-                       "Starting Plot Number(s) could not read \"abc\"")
+                       "Starting plot number could not read \"abc\"")
 })
 
 test_that("factor level counts need two or more factors", {
@@ -85,10 +85,10 @@ test_that("location names split on commas as the design pages always have", {
   expect_identical(read_design_controls(spec, list(location_names = "A, B"))$location_names, c("A", " B"))
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(location_names = value)),
-                         "Location Name(s) cannot be blank.")
+                         "Location name cannot be blank.")
   }
   expect_control_error(read_design_controls(spec, list(location_names = 3)),
-                       "Location Name(s) must be one comma-separated text value.")
+                       "Location name must be one comma-separated text value.")
 })
 
 test_that("selects read one of their choices, converted as the builder needs", {
@@ -97,12 +97,12 @@ test_that("selects read one of their choices, converted as the builder needs", {
   expect_identical(values, list(planter = "cartesian", type = 1))
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(planter = value, type = "2")),
-                         "Plot Order Layout cannot be blank.")
+                         "Plot order cannot be blank.")
   }
   expect_control_error(read_design_controls(spec, list(planter = "spiral", type = "2")),
-                       "Plot Order Layout must be one of: serpentine, cartesian.")
+                       "Plot order must be one of: serpentine, cartesian.")
   expect_control_error(read_design_controls(spec, list(planter = "serpentine", type = 2)),
-                       "Select Design Type must be one of: 2, 1.")
+                       "Design type must be one of: 2, 1.")
 })
 
 test_that("dependent selects read a whole number, or report that nothing fits", {
@@ -113,19 +113,19 @@ test_that("dependent selects read a whole number, or report that nothing fits", 
   expect_identical(read_design_controls(spec, list(t = 12L, k = "4"))$k, 4)
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(t = 12L, k = value)),
-                         "Input # of Plots per IBlock cannot be blank.")
+                         "Plots per block cannot be blank.")
   }
   expect_control_error(read_design_controls(spec, list(t = 13L, k = "No Options Available")),
                        "No options for this combination of treatments!")
   expect_control_error(read_design_controls(spec, list(t = 12L, k = "four")),
-                       "Input # of Plots per IBlock must be one whole number.")
+                       "Plots per block must be one whole number.")
   # choices follow t, or the uploaded entries
   expect_identical(design_control_choices(spec, control, list(t = 12L)),
                    list(choices = c(2L, 3L, 4L, 6L), selected = 3L))
   expect_identical(design_control_choices(spec, control, list(t = NA), data = data.frame(ENTRY = 1:15)),
                    list(choices = c(3L, 5L), selected = 3L))
   expect_control_error(design_control_choices(spec, control, list(t = NA)),
-                       "Input # of Treatments cannot be blank.")
+                       "Treatments cannot be blank.")
 })
 
 test_that("flags read TRUE/FALSE and take their default before they render", {
@@ -137,7 +137,7 @@ test_that("flags read TRUE/FALSE and take their default before they render", {
                      list(continuous = TRUE, use_checks = FALSE))
   }
   expect_control_error(read_design_controls(spec, list(continuous = "yes", use_checks = FALSE)),
-                       "Continuous Plot must be TRUE or FALSE.")
+                       "Continuous plot numbers must be TRUE or FALSE.")
 })
 
 test_that("a blank seed means an automatic seed; anything else must be a number", {
@@ -150,8 +150,8 @@ test_that("a blank seed means an automatic seed; anything else must be a number"
   expect_identical(read_design_controls(spec, list(seed = 17L))$seed, 17)
   expect_identical(read_design_controls(spec, list(seed = -3))$seed, -3)
   expect_control_error(read_design_controls(spec, list(seed = "abc")),
-                       "Random Seed (blank = automatic) must be one number, or blank for an automatic seed.")
-  expect_control_error(read_design_controls(spec, list(seed = c(1, 2))), "Random Seed")
+                       "Random seed must be one number, or blank for an automatic seed.")
+  expect_control_error(read_design_controls(spec, list(seed = c(1, 2))), "Random seed")
 })
 
 test_that("controls for generated entries are not read when entries are uploaded", {
@@ -175,18 +175,18 @@ test_that("controls enabled by a flag take their off value while it is off", {
   expect_identical(read_design_controls(spec, list(use_checks = TRUE, checks = 3L, rep_checks = "2"))$rep_checks,
                    c(2, 2, 2))
   err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = NA, rep_checks = "2")),
-                              "Input # of Checks cannot be blank.")
-  expect_identical(err$control, "Input # of Checks:")
+                              "Checks cannot be blank.")
+  expect_identical(err$control, "Checks")
   err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 0L, rep_checks = "2")),
-                              "Input # of Checks must be a whole number from 1 to")
-  expect_identical(err$control, "Input # of Checks:")
+                              "Checks must be a whole number from 1 to")
+  expect_identical(err$control, "Checks")
   for (value in blanks) {
     expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 2L, rep_checks = value)),
-                         "Reps per Check cannot be blank.")
+                         "Replicates per check cannot be blank.")
   }
   err <- expect_control_error(read_design_controls(spec, list(use_checks = TRUE, checks = 2L, rep_checks = "1,2,3")),
-                              "Reps per Check must have 1 value or 2 values")
-  expect_identical(err$control, "Reps per Check:")
+                              "Replicates per check must have 1 value or 2 values")
+  expect_identical(err$control, "Replicates per check")
 })
 
 test_that("every parser takes (value, label, values) and names its control in errors", {
@@ -200,12 +200,12 @@ test_that("every parser takes (value, label, values) and names its control in er
   expect_identical(read_design_controls(spec, list(repGens = "75,150", repUnits = "2,1", plot_start = "1")),
                    list(repGens = c(75, 150), repUnits = c(2, 1), plot_start = 1))
   cases <- list(
-    list(raw = list(repGens = "75,x", repUnits = "2,1", plot_start = "1"), control = "# of Entries Per Rep Group:",
-         message = "# of Entries Per Rep Group could not read"),
-    list(raw = list(repGens = "75,150", repUnits = "2", plot_start = "1"), control = "# of Rep Per Group:",
-         message = "# of Rep Per Group must have one value per group of entries (2); got 1."),
-    list(raw = list(repGens = "75", repUnits = "2", plot_start = "0"), control = "Starting Plot Number(s):",
-         message = "Starting Plot Number(s) could not read")
+    list(raw = list(repGens = "75,x", repUnits = "2,1", plot_start = "1"), control = "Entries per replicate group",
+         message = "Entries per replicate group could not read"),
+    list(raw = list(repGens = "75,150", repUnits = "2", plot_start = "1"), control = "Replicates per group",
+         message = "Replicates per group must have one value per group of entries (2); got 1."),
+    list(raw = list(repGens = "75", repUnits = "2", plot_start = "0"), control = "Starting plot number",
+         message = "Starting plot number could not read")
   )
   for (case in cases) {
     err <- expect_control_error(read_design_controls(spec, case$raw), case$message)
@@ -218,7 +218,7 @@ test_that("every parser takes (value, label, values) and names its control in er
     value
   }))
   read_design_controls(spec, list(reps = 3L, t = 4L))
-  expect_identical(seen, list(label = "Input # of Treatments:", values = list(reps = 3L)))
+  expect_identical(seen, list(label = "Treatments", values = list(reps = 3L)))
 })
 
 test_that("names split on commas, and may be read whole or trimmed", {
@@ -232,7 +232,7 @@ test_that("names split on commas, and may be read whole or trimmed", {
                                         list(location_names = " X ,Y"))$location_names, c("X", "Y"))
   for (value in blanks) {
     expect_control_error(read_design_controls(page(ctl_expt_name()), list(expt_name = value)),
-                         "Experiment Name(s) cannot be blank.")
+                         "Experiment name cannot be blank.")
   }
 })
 
@@ -288,15 +288,15 @@ test_that("a step with nothing to choose from is explained instead of waited for
   choices <- list(location_dimensions = list(choices = list("8 x 8", character(), character())))
   raw <- list(multi_dimension = TRUE, location_dimensions = list("8 x 8", NULL, NULL))
   err <- expect_error(read_design_steps(steps, raw, list(l = 3), choices), class = "fieldhub_input_error")
-  expect_match(conditionMessage(err), "^Select dimension for location 2: no field size fits this location")
-  expect_identical(err$control, "Select dimension for location 2")
+  expect_match(conditionMessage(err), "^Dimensions for location 2: no field size fits this location")
+  expect_identical(err$control, "Dimensions for location 2")
   # the per-location sizes are not read while their flag is off
   expect_identical(read_design_steps(steps, list(multi_dimension = FALSE), list(l = 3), choices),
                    list(l = 3, multi_dimension = FALSE))
   empty <- ctl_dimensions(function(values, data) NULL)
   expect_error(read_design_steps(list(empty), list(dimensions = ""), list(),
                                  list(dimensions = list(choices = character()))),
-               "Select dimensions of field has no option that fits.", class = "fieldhub_input_error")
+               "Field dimensions has no option that fits.", class = "fieldhub_input_error")
 })
 
 test_that("each Randomize! starts its steps from the choices it selects, as the selects send them", {
@@ -332,14 +332,14 @@ test_that("design_control_defaults() is what the page shows before any change", 
 test_that("control constructors take labels, defaults and minimums from the concept table", {
   concepts <- fieldhub_control_concepts()
   expect_identical(ctl_locations()[c("label", "value", "min")],
-                   list(label = "Input # of Locations:", value = 1, min = 1))
+                   list(label = "Locations", value = 1, min = 1))
   expect_identical(ctl_reps(3)$min, 2)
   expect_identical(ctl_reps(3, min = 1)$min, 1)
   expect_identical(ctl_plot_start()$value, "101")
   expect_identical(ctl_location_names()$value, "FARGO")
   expect_identical(ctl_planter()$value, "serpentine")
   expect_null(ctl_seed()$value)
-  expect_identical(ctl_seed()$label, "Random Seed (blank = automatic):")
+  expect_identical(ctl_seed()$label, "Random seed")
   expect_identical(ctl_flag("use_checks")$value, FALSE)
   expect_identical(ctl_flag("randomizeV", value = FALSE)$value, FALSE)
   for (id in names(concepts)) {
@@ -398,7 +398,7 @@ test_that("app_control_ui() renders each control type with its namespaced id", {
 test_that("the seed widget shows the concept's label", {
   skip_if_not_installed("shiny")
   html <- as.character(app_seed_input("s"))
-  expect_match(html, "Random Seed (blank = automatic):", fixed = TRUE)
+  expect_match(html, "Random seed", fixed = TRUE)
   expect_false(grepl("value=", html, fixed = TRUE))
 })
 

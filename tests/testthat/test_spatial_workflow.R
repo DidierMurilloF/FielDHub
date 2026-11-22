@@ -63,7 +63,7 @@ test_that("shared spatial dialogs preserve controls and use trait terminology", 
       for (id in c(spec$simulation_ids, spec$correlation_ids, spec$heatmap_checkbox)) {
         expect_match(html, paste0('id="example-', id, '"'), fixed = TRUE)
       }
-      expect_match(html, "Trait name:", fixed = TRUE)
+      expect_match(html, "Trait name", fixed = TRUE)
       expect_false(grepl("Input Trial Name:", html, fixed = TRUE))
       expect_identical(grepl("Invalid input of data max and min", html, fixed = TRUE), failed)
     }

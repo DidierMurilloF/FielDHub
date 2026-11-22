@@ -438,5 +438,5 @@ design_control_defaults <- function(spec) {
 #' @noRd
 parse_control_rep_checks <- function(value, label, checks) {
   if (is_blank_control_value(value)) control_abort(label, " cannot be blank.")
-  with_control_label(label, parse_rep_checks(value, checks))
+  with_control_label(label, parse_rep_checks(value, checks, control_label_name(label)))
 }

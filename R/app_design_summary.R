@@ -100,9 +100,13 @@ app_summary_items <- function(info, book) {
     Reps = "Replicates", reps = "Replicates", blocks = "Blocks",
     iBlocks = "Blocks per replicate", IBlocks = "Blocks per replicate",
     rows = "Rows", columns = "Columns",
-    NumberLocations = "Locations", locations = "Locations", lambda = "Lambda",
+    nTrt = "Treatments", nRows = "Rows", checks = "Checks", fillers = "Filler plots",
+    NumberLocations = "Locations", locations = "Locations", l = "Locations", lambda = "Lambda",
+    planter = "Plot order", percent_checks = "Plots with checks", min_distance = "Minimum distance",
     optimization = "Optimization")
   tips <- c(lambda = "How often two treatments share an incomplete block, on average.",
+    min_distance = "The smallest distance between two plots of the same entry.",
+    fillers = "Plots left without an entry so the field is a full rectangle.",
     iBlocks = "Incomplete blocks in each replicate.", IBlocks = "Incomplete blocks in each replicate.")
   # Shown on its own (the seed) or not for people (the design's internal id)
   skip <- c("seed", "id_design", "Locations", "locationNames", "location_names", "plotNumber")
@@ -110,9 +114,14 @@ app_summary_items <- function(info, book) {
                   setdiff(names(info), skip))
   shown <- c(intersect(names(labels), shown), setdiff(shown, names(labels)))
   value <- function(v) if (is.numeric(v)) format(round(v, 3), scientific = FALSE, trim = TRUE) else as.character(v)
-  locations <- c("NumberLocations", "locations")
+  locations <- c("NumberLocations", "locations", "l")
+  # A parameter without a label keeps its name, written as words
+  words <- function(name) {
+    name <- gsub("[._]+", " ", name)
+    paste0(toupper(substr(name, 1L, 1L)), substr(name, 2L, nchar(name)))
+  }
   items <- lapply(shown, function(name) {
-    list(label = if (name %in% names(labels)) labels[[name]] else name,
+    list(label = if (name %in% names(labels)) labels[[name]] else words(name),
          tip = if (name %in% names(tips)) tips[[name]], value = value(info[[name]]),
          names = if (name %in% locations && "LOCATION" %in% names(book)) {
            unique(as.character(book$LOCATION))
