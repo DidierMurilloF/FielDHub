@@ -23,3 +23,26 @@ html[data-look="d"] #fieldhub-app .fh-look-switch button { line-height: 24px; }
   html[data-look="d"] #fieldhub-app .navbar-default .navbar-nav > li > a { padding: 8px 16px; }
   html[data-look="d"] #fieldhub-app .navbar .fieldhub-navbar-logo { margin: 6px 16px 12px; }
 }
+
+/* A compact page header, like Option C's: the title and its description on
+   one line, the guide link on that line, and less space around them. */
+html[data-look="d"] #fieldhub-app .fh-design-head {
+  align-items: baseline;
+  padding: 12px 0 10px;
+}
+html[data-look="d"] #fieldhub-app .fh-design-head-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+}
+html[data-look="d"] #fieldhub-app .fh-design-head h2 { font-size: 20px; }
+html[data-look="d"] #fieldhub-app .fh-design-head p { margin: 0; font-size: 13.5px; }
+html[data-look="d"] #fieldhub-app .fh-design-head a.fh-design-guide { font-size: 13px; }
+html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 14px; }
+
+@media (max-width: 767px) {
+  html[data-look="d"] #fieldhub-app .fh-design-head { padding: 10px 0 8px; }
+  html[data-look="d"] #fieldhub-app .fh-design-head h2 { font-size: 19px; }
+  html[data-look="d"] #fieldhub-app .fh-design > .row { padding-top: 12px; }
+}
