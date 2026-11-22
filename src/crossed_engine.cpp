@@ -71,7 +71,37 @@
 //   the same way; on a breach the repair has failed and the start is
 //   returned (`floor_fallback` 2). `slack_floors` (a check hook) skips the
 //   confirmation of each swap, which is the only way the end comparison can
-//   fail: a value computed from scratch depends on the design alone.
+//   fail in the block-space form: a value computed from scratch depends on
+//   the design alone.
+// - Row confirmation in the treatment-space form (controller ruling R9,
+//   2026-11-22; spec 6.1 W3). A Row value from scratch costs min(v, B_row)^3
+//   there, and confirming every swap between rows left 2000/1000/4 nested 13
+//   swaps inside the work cap. So, in the joint stage of the cheap form
+//   (below) only, a swap between two rows that passes the running floors is
+//   confirmed from scratch only when its running Row value is near a floor:
+//   Row log det below the stage 1 value plus a margin, or the A denominator
+//   above the stage 1 value times (1 - a margin); the margins are
+//   kConfirmLd and kConfirmSum, scaled with the Row design (constants
+//   below). Any other swap is applied unconfirmed. The exact guarantee is
+//   kept by:
+//   - checkpoints: a Row value of the current design from scratch after
+//     every kCheckpointSwaps unconfirmed swaps between rows, and before a
+//     local optimum is recorded as the best. A design that passes is exact,
+//     and the best such design (by its running joint log det) is kept, as is
+//     the design before the first unconfirmed swap after an exact one;
+//   - a breach at a checkpoint (a running value was more than the margin
+//     from the value from scratch): both states are rebuilt from the best
+//     exact design, and from then on every swap is confirmed, as in the
+//     block-space form (`row_rollbacks`);
+//   - the end comparison above, whose replacement is the best exact design
+//     (else the entry design).
+//   At every Row value from scratch the engine records how far the running
+//   value was from it (`row_drift_ld`, absolute; `row_drift_sum`, relative),
+//   and a drift above a quarter of a margin refreshes the Row state at once.
+//   The margins and the period are set from that drift (constants below).
+//   The repair still confirms every swap. Check hooks: `confirm_floors`
+//   confirms every swap as before the ruling; `late_floors` sets the margins
+//   to 0 and the period to 1, so every breach is met at a checkpoint.
 // - The returned design is tested again from scratch; a design that failed
 //   the full-rank test would be replaced by the design the joint stage
 //   started from.
@@ -105,7 +135,9 @@
 //   - cheap form: one drift check, one refresh of the joint state, one
 //     factorisation (the exact full-rank test) and one Row value. A drift
 //     alarm, or a result that fails the full-rank test, adds a refresh that
-//     is not in the charge (spec W7: one dense step).
+//     is not in the charge (spec W7: one dense step), and a result below the
+//     Row floors (ruling R9: only after a running Row value drifted by more
+//     than the margin) adds one Row value.
 //   The repair and the search run under `work_cap` less that charge, with a
 //   strict budget: a step whose charge would pass it is not done, and the
 //   call goes to its finish. So the reported work, start, search and charged
@@ -138,6 +170,49 @@ const int kRepairMaxPasses = 30;     // the repair's allowance, in full passes
 // efficiency factor; a step of rank is worth log(1 + 1e-7 / eps) = 0.095 or
 // more.
 const double kRepairGain = 1e-8;
+// Ruling R9 (header comment): the margins inside which a swap between rows is
+// confirmed from scratch, on the running Row log det (absolute) and on the A
+// denominator (relative), and the unconfirmed swaps between two checkpoints.
+// Engine::set_lazy() scales the margins with the Row design: both by
+// c = max(1, d / 10)^2, d the largest diagonal entry of the Row state's M at
+// the start (its conditioning), and the log det margin also by
+// max(1, |log det| / 1000).
+//
+// Measured 2026-11-22 (`row_drift_ld`, `row_drift_sum` of the calls; logs
+// t8s3c-drift.log, t8s3c-cond.log, t8s3c-after*.log and the check
+// `treatment_form`, in ~/fieldhub-libs/runs/phase2/): the distance of a
+// running Row value from the value from scratch, at every Row value from
+// scratch of
+// - searches that confirm every swap (hook `confirm_floors`; the running Row
+//   state is never refreshed in between) from random complete starts, up to
+//   2960 swaps between rows in one search (300/150/4, 400/200/3, 200/100/3,
+//   1000/500/4, 2000/1000/4), and small ones forced into the form;
+// - the searches of the ruling from stage 1 starts at 1000/500/4,
+//   1500/750/3, 2000/1000/4 and 2000/2/4, with up to 256 unconfirmed swaps
+//   before a checkpoint;
+// - repairs on Row designs of two replicates in rows of two (30/15/2 to
+//   600/300/2), whose Row state is ill-conditioned (d = v / 3).
+// With d <= 7 (three and four replicates) the distance was at most 5.2e-12
+// on the log det (2000/1000/4, |log det| 1723; 3e-15 |log det| at every
+// size: the rounding of the factorisation, not of the updates) and 9.7e-15,
+// relative, on the A denominator, and it did not grow with the number of
+// swaps since the last refresh. On the ill-conditioned Row designs it grew
+// to 1.5e-11 and 5.5e-11 at d = 200 (600/300/2), the A denominator's about
+// as 1.4e-15 d^2 (3.0e-14 at d = 10, 1.3e-13 at 20, 8.4e-13 at 33, 4.6e-12
+// at 67). So the margins are at least 700 times the largest distance
+// measured at every conditioning. They are also below the Row gain of the
+// swaps between rows of the large shapes: from the stage 1 design (seed 1,
+// the joint call seeded 77) none of the 545, 93 and 7 such swaps of
+// 2000/1000/4, 1500/750/3 and 1000/500/4 was confirmed, where margins of
+// 1e-6 confirmed 2 of 497, 31 of 37 and 4 of 7 (at 1500/750/3 that left 466
+// swaps in all, against 1475).
+// The period is the drift-check interval of the running states
+// (`refresh_every`, 256): the drift does not ask for a shorter one, and at
+// 2000/1000/4 one Row value from scratch (8.1e9 units) per 256 swaps (about
+// 4e10 units) costs a fifth more.
+const double kConfirmLd = 1e-8;
+const double kConfirmSum = 1e-10;
+const int kCheckpointSwaps = 256;
 
 struct Crossed {
   int v, r, n, B, Br;             // B joint block columns, Br row blocks
@@ -156,6 +231,13 @@ struct CrossedOut {
   // search and the repair loops).
   double scoring_joint = 0, scoring_row = 0;
   double accepted = 0;            // swaps the joint stage applied (escape jumps included)
+  // Ruling R9: swaps between rows the joint stage applied, Row values from
+  // scratch that confirmed a swap (joint stage and repair), checkpoints,
+  // rollbacks after a breach, and the largest distance of a running Row
+  // value from the value from scratch (log det absolute, A denominator
+  // relative).
+  double row_swaps = 0, row_confirmations = 0, row_checkpoints = 0, row_rollbacks = 0;
+  double row_drift_ld = 0, row_drift_sum = 0;
   bool debug = false;
   double debug_max_error = 0;
   double repair_swaps = 0, repair_evaluations = 0, repair_score_error = 0;
@@ -167,12 +249,18 @@ struct CrossedOut {
 struct RowValue {
   bool ok = false;
   double d = 0.0, a = 0.0;
+  double ld = 0.0, sum = 0.0;  // log det and the A denominator, as the running floors read them
 };
 RowValue row_value(const Crossed& lay, const std::vector<int>& treat) {
   RowValue x;
   CrossedSpace row(lay.v, lay.r, lay.Br, 1, lay.row_block, treat, 0.0, lay.form);
   x.ok = row.refresh();
-  if (x.ok) { x.d = row.d_efficiency(); x.a = row.a_efficiency(); }
+  if (x.ok) {
+    x.d = row.d_efficiency();
+    x.a = row.a_efficiency();
+    x.ld = row.log_det();
+    x.sum = row.trace() - lay.Br + lay.v - 1.0;
+  }
   return x;
 }
 
@@ -201,6 +289,21 @@ class Engine {
   void set_work(double joint_factor, double row_refresh) {
     joint_factor_ = joint_factor; row_refresh_ = row_refresh;
   }
+  // Ruling R9 (header comment): confirm a swap between rows only near a
+  // floor. `entry_log_det` is the joint log det of the design the joint
+  // stage starts from, `row_log_det` and `row_diag` the log det and the
+  // largest diagonal entry of M of the Row state at the start; `late` is the
+  // check hook `late_floors`.
+  void set_lazy(double entry_log_det, double row_log_det, double row_diag, bool late) {
+    lazy_ = true;
+    exact_ld_ = entry_log_det;
+    const double c = std::max(1.0, row_diag / 10.0);
+    margin_ld_ = kConfirmLd * c * c * std::max(1.0, std::fabs(row_log_det) / 1000.0);
+    margin_sum_ = kConfirmSum * c * c;
+    drift_ld_ = 0.25 * margin_ld_;
+    drift_sum_ = 0.25 * margin_sum_;
+    if (late) { margin_ld_ = 0.0; margin_sum_ = 0.0; period_ = 1; }
+  }
 
   // True if `treat` meets the Row floors exactly (Row D and Row A from
   // scratch, as reported, not below the stage 1 values).
@@ -210,12 +313,75 @@ class Engine {
     return x.ok && x.d >= floor_d_ && x.a >= floor_a_;
   }
 
-  // The same for the design after swapping plots x and y of `row`.
-  bool swap_meets_floors(const CrossedSpace& row, int x, int y) {
+  // The same for the design after swapping plots x and y of `row`; `ld` and
+  // `sum` are the running Row log det and A denominator after the swap.
+  bool swap_meets_floors(const CrossedSpace& row, int x, int y, double ld, double sum) {
     scratch_ = row.treatments();
     std::swap(scratch_[x], scratch_[y]);
-    return meets_floors(scratch_);
+    if (!budget_.work(row_refresh_ + lay_.n)) return false;
+    const RowValue value = row_value(lay_, scratch_);
+    out_.row_confirmations += 1;
+    if (value.ok) note_drift(value, ld, sum);
+    return value.ok && value.d >= floor_d_ && value.a >= floor_a_;
   }
+
+  // Records the distance of the running Row values `ld` and `sum` from the
+  // values from scratch; a distance above a quarter of a margin asks for a
+  // refresh of the Row state (ruling R9 only).
+  void note_drift(const RowValue& exact, double ld, double sum) {
+    const double e_ld = std::fabs(ld - exact.ld), e_sum = std::fabs(sum - exact.sum) / exact.sum;
+    if (!(e_ld <= out_.row_drift_ld)) out_.row_drift_ld = e_ld;
+    if (!(e_sum <= out_.row_drift_sum)) out_.row_drift_sum = e_sum;
+    if (lazy_ && !(e_ld <= drift_ld_ && e_sum <= drift_sum_)) row_drifted_ = true;
+  }
+  bool refresh_drifted(CrossedSpace& row) {
+    if (!row_drifted_) return true;
+    row_drifted_ = false;
+    return refresh(row);
+  }
+
+  // The design of `joint` meets the Row floors exactly: keep it if it is the
+  // best such design so far.
+  void note_exact(const CrossedSpace& joint) {
+    if (joint.log_det() > exact_ld_) { exact_ld_ = joint.log_det(); exact_treat_ = joint.treatments(); }
+  }
+
+  // A checkpoint of ruling R9: the Row value of the current design from
+  // scratch, when swaps between rows were applied unconfirmed since the last
+  // one.
+  enum Verdict { kExact, kBreach, kStopped };
+  Verdict checkpoint(const CrossedSpace& joint, CrossedSpace& row) {
+    if (pending_ == 0) return kExact;
+    if (!budget_.work(row_refresh_ + lay_.n)) return kStopped;
+    const RowValue value = row_value(lay_, row.treatments());
+    out_.row_checkpoints += 1;
+    if (!(value.ok && value.d >= floor_d_ && value.a >= floor_a_)) return kBreach;
+    note_drift(value, row.log_det(), row.trace() - lay_.Br + lay_.v - 1.0);
+    pending_ = 0;
+    note_exact(joint);
+    return refresh_drifted(row) ? kExact : kStopped;
+  }
+  // The search went back to a state whose design is exact.
+  void restored() { pending_ = 0; }
+  // True once, after descend() met a breach at a checkpoint.
+  bool take_breach() { const bool b = breach_; breach_ = false; return b; }
+  // After a breach: both states are rebuilt from the best exact design
+  // (`entry` if none was kept) and every later swap is confirmed.
+  bool rollback(CrossedSpace& joint, CrossedSpace& row, const std::vector<int>& entry) {
+    out_.row_rollbacks += 1;
+    lazy_ = false;
+    pending_ = 0;
+    row_drifted_ = false;
+    if (!budget_.work(joint.refresh_work() + row.refresh_work())) return false;
+    const std::vector<int>& to = exact_treat_.empty() ? entry : exact_treat_;
+    joint = CrossedSpace(lay_.v, lay_.r, lay_.B, 2, lay_.joint_block, to, 0.0, lay_.form);
+    row = CrossedSpace(lay_.v, lay_.r, lay_.Br, 1, lay_.row_block, to, 0.0, lay_.form);
+    if (!joint.refresh() || !row.refresh()) return false;
+    out_.refreshes += 2;
+    return true;
+  }
+  // The best design known to meet the Row floors exactly; empty: the entry.
+  const std::vector<int>& exact_treat() const { return exact_treat_; }
 
   bool refresh(CrossedSpace& s) {
     if (!budget_.work(s.refresh_work())) return false;
@@ -297,14 +463,30 @@ class Engine {
               const double ld = row.log_det() + std::log(row_ratio);
               const double sum = tr - lay_.Br + v - 1.0;
               if (ld < floor_ld - kFloorTol || sum > floor_sum * (1.0 + kFloorTol)) continue;
-              if (exact_floors_ && !swap_meets_floors(row, x, y)) {
+              // Ruling R9: with `lazy_`, confirm only near a floor.
+              const bool confirm = exact_floors_ &&
+                  (!lazy_ || ld < floor_ld + margin_ld_ || sum > floor_sum * (1.0 - margin_sum_));
+              if (confirm && !swap_meets_floors(row, x, y, ld, sum)) {
                 if (budget_.stopped()) return false;
                 continue;
+              }
+              out_.row_swaps += 1;
+              if (lazy_ && !confirm) {
+                if (pending_ == 0) note_exact(joint);
+                ++pending_;
               }
             }
             if (!apply(joint, row, x, y, ratio, row_ratio, joint_scale, row_scale)) return false;
             if (budget_.stopped()) return true;
             since = 0.0;
+            if (lazy_) {
+              if (!refresh_drifted(row)) return false;
+              if (pending_ >= period_) {
+                const Verdict verdict = checkpoint(joint, row);
+                if (verdict == kStopped) return false;
+                if (verdict == kBreach) { breach_ = true; return true; }
+              }
+            }
           }
         }
       }
@@ -378,7 +560,7 @@ class Engine {
               const double ld = row.log_det() + std::log(row_ratio);
               const double sum = tr - lay_.Br + v - 1.0;
               if (ld < floor_ld - kFloorTol || sum > floor_sum * (1.0 + kFloorTol)) continue;
-              if (exact_floors_ && !swap_meets_floors(row, x, y)) {
+              if (exact_floors_ && !swap_meets_floors(row, x, y, ld, sum)) {
                 if (budget_.stopped()) return false;
                 continue;
               }
@@ -441,6 +623,15 @@ class Engine {
   double floor_d_ = 0.0, floor_a_ = 0.0;
   double joint_factor_ = 0.0, row_refresh_ = 0.0;
   std::vector<int> scratch_;
+  // Ruling R9 (header comment).
+  bool lazy_ = false;             // confirm a swap between rows only near a floor
+  double margin_ld_ = kConfirmLd, margin_sum_ = kConfirmSum;
+  double drift_ld_ = 0.25 * kConfirmLd, drift_sum_ = 0.25 * kConfirmSum;  // a quarter of the margins
+  int period_ = kCheckpointSwaps;
+  int pending_ = 0;               // unconfirmed swaps between rows since the last exact design
+  bool row_drifted_ = false, breach_ = false;
+  double exact_ld_ = -INFINITY;   // the best exact design and its running joint log det
+  std::vector<int> exact_treat_;
 };
 
 Crossed make_crossed(int v, int r, int b, const std::vector<int>& row_of, const std::vector<int>& col_of) {
@@ -502,12 +693,14 @@ Crossed make_crossed(int v, int r, int b, const std::vector<int>& row_of, const 
 
 // Mode 3 of blocks_engine_cpp() (declared there). `start` is 0-based and
 // checked by the caller for length; every replicate must hold each treatment
-// once. `slack_floors` is the check hook of the header comment.
+// once. `floors` is 1, or a check hook of the header comment: 2 `slack_floors`,
+// 3 `confirm_floors`, 4 `late_floors`.
 cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, bool slack_floors, bool treatment_form, bool strict) {
+                           double evaluation_work, int floors, bool treatment_form, bool strict) {
+  const bool slack_floors = floors == 2;
   Crossed lay = make_crossed(v, r, b, row_of, col_of);
   lay.form = treatment_form;
   for (int m = 0; m < r; ++m) {
@@ -567,6 +760,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   const double floor_ld = row_ok ? row.log_det() : 0.0;
   const double floor_sum = row_ok ? row.trace() - lay.Br + v - 1.0 : 0.0;
   if (row_ok) eng.set_floors(stage1_row_d, stage1_row_a);
+  const double row_diag = row_ok ? row.max_diag() : NA_REAL;
 
   // `entry` is the design the joint stage starts from: the start, or the
   // repaired design. `result` is what the call returns.
@@ -647,6 +841,10 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     if (!(budget_cap >= 1.0)) budget.spend(1.0);
     if (!rng) GetRNGstate();
     rng = true;
+    // Ruling R9: in the cheap form a swap between rows is confirmed from
+    // scratch only near a floor.
+    const bool lazy = cheap && !slack_floors && floors != 3;
+    if (lazy) eng.set_lazy(joint.log_det(), floor_ld, row_diag, floors == 4);
     double local_best = -INFINITY;
     std::vector<int> local_treat, exact_treat;
     std::unique_ptr<CrossedSpace> best_joint, best_row;
@@ -655,9 +853,20 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     while (ok && !budget.stopped()) {
       bool optimum = false;
       if (!eng.descend(joint, row, floor_ld, floor_sum, optimum)) { ok = false; break; }
+      if (eng.take_breach()) {
+        if (!eng.rollback(joint, row, entry)) { ok = false; break; }
+        continue;
+      }
       if (!optimum) continue;
       if (!eng.check(joint, row)) { ok = false; break; }
       if (joint.log_det() > local_best + kTie) {
+        // Ruling R9: an optimum is recorded only when its design is exact.
+        const Engine::Verdict verdict = eng.checkpoint(joint, row);
+        if (verdict == Engine::kStopped) { ok = false; break; }
+        if (verdict == Engine::kBreach) {
+          if (!eng.rollback(joint, row, entry)) { ok = false; break; }
+          continue;
+        }
         local_best = joint.log_det();
         local_treat = joint.treatments();
         best_joint.reset(new CrossedSpace(joint));
@@ -678,6 +887,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
         }
         joint = *best_joint;
         row = *best_row;
+        eng.restored();
       }
       if (!eng.escape(joint, row, jumps_per_escape)) { ok = false; break; }
     }
@@ -707,7 +917,9 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     }
     // The exact Row guarantee: Row D and Row A of the result, from scratch,
     // are not below the stage 1 values. On a breach: the best recorded
-    // optimum that meets them exactly, else the entry design (it meets them).
+    // optimum that meets them exactly (ruling R9: the best exact design),
+    // else the entry design (it meets them).
+    if (lazy) exact_treat = eng.exact_treat();
     const RowValue rv = row_value(lay, result);
     out.scoring_row += 1;
     finish_work += row.refresh_work();
@@ -787,7 +999,12 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       "repair_log_det_start"_nm = repair_log_det_start, "repair_log_det"_nm = repair_log_det,
       "repair_score_error"_nm = out.repair_score_error, "floor_fallback"_nm = floor_fallback,
       "treatment_form"_nm = cheap, "start_full_rank"_nm = start_full, "start_trace"_nm = start_trace,
-      "accepted"_nm = out.accepted, "scoring_joint"_nm = out.scoring_joint,
+      "accepted"_nm = out.accepted,
+      "row_swaps"_nm = out.row_swaps, "row_confirmations"_nm = out.row_confirmations,
+      "row_checkpoints"_nm = out.row_checkpoints, "row_rollbacks"_nm = out.row_rollbacks,
+      "row_drift_ld"_nm = out.row_drift_ld, "row_drift_sum"_nm = out.row_drift_sum,
+      "row_diag"_nm = row_diag,
+      "scoring_joint"_nm = out.scoring_joint,
       "scoring_row"_nm = out.scoring_row, "end_alarm"_nm = end_alarm,
       "start_work"_nm = start_work, "finish_charged"_nm = finish_charged,
       "finish_work"_nm = finish_work, "repair_status"_nm = repair_status,

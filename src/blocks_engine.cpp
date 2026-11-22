@@ -698,7 +698,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, bool slack_floors, bool treatment_form, bool strict);
+                           double evaluation_work, int floors, bool treatment_form, bool strict);
 
 // Test hook: run the even-up repair on a design given as the treatment of each
 // plot (1-based, plots in block order as in blocks_engine()). Returns the
@@ -750,7 +750,7 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // 0-based column block in `column_of`; replicate m holds plots m v .. m v +
 // v - 1, each a complete grid; `start` is required and the call runs one
 // search from it, after a joint-rank repair when it is not full rank
-// (`segment_of` is ignored; `searches` is 1, or 2 as a check hook that skips
+// (`segment_of` is ignored; `searches` is 1, or 2, 3 or 4 as a check hook of
 // the exact Row confirmation of each swap, see crossed_engine.cpp).
 // `options` is a sum of flags, 0 for every caller of phase 1: 1 builds the
 // dense state from the treatment space where there are fewer treatments than
@@ -776,7 +776,7 @@ cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_e
     return crossed_engine(v, r, b, std::vector<int>(block_of.begin(), block_of.end()),
                           std::vector<int>(column_of.begin(), column_of.end()), given, jumps_per_escape,
                           max_stale_escapes, budget, time_limit, debug, work_cap, refresh_every,
-                          evaluation_work, searches == 2, treatment_form, strict);
+                          evaluation_work, searches, treatment_form, strict);
   }
   const bool resolvable = mode != 0;
   Layout lay = mode == 2 ? make_column_layout(v, r, b, std::vector<int>(column_of.begin(), column_of.end()))

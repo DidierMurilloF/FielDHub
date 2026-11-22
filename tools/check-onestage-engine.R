@@ -160,6 +160,52 @@
 #     2). Seeds 1:4. D and A of the result equal the one-way eigenvalue
 #     reference to 1e-9 (the first engine check of the one-factor identity
 #     Bhat^-1 = (M + (k - 1) yhat yhat') / k), and debug_max_error <= 1e-8.
+# (d) the Row confirmation of the treatment-space form (controller ruling R9,
+#     2026-11-22; src/crossed_engine.cpp): a swap between two rows is
+#     confirmed with Row values from scratch only when a running Row value is
+#     near its floor, with checkpoints, and the guarantee is unchanged.
+#     - Same search as with every swap confirmed: on the shapes of (a) and on
+#       16/8/4 nested, stage 1 and random starts, seeds 1:4, a full search
+#       returns the design, the values and the evaluations of the same call
+#       under the hook `confirm_floors` (which confirms every swap, as before
+#       the ruling), with `floor_fallback` 0 and no rollback, and never more
+#       Row values from scratch (confirmations plus checkpoints); over all
+#       runs it needs fewer. The largest distance of a running Row value
+#       from the value from scratch, over both runs, must stay below a
+#       hundredth of the margins (1e-10 on the log det, 1e-12 relative on
+#       the A denominator); it is printed.
+#     - Near-floor states, forced with the hook `slack_floors`: on 16/8/4
+#       nested from stage 1 starts (seeds 1:8) the search without any
+#       confirmation ends one rounding below a Row floor on several seeds
+#       (`floor_fallback` 1; at least two are needed), so those searches
+#       pass through designs whose Row values tie with the floors. On every
+#       such seed the search of the ruling must confirm at least one swap
+#       from scratch, and end with `floor_fallback` 0 and the Row floors
+#       exact.
+#     - The rollback, with the hook `late_floors` (no margin, a checkpoint
+#       after every unconfirmed swap) on the same starts: the Row floors hold
+#       exactly with `floor_fallback` 0, every result is full rank and not
+#       below its start in joint log det, the values equal the dense
+#       references, and at least one run met a breach at a checkpoint and
+#       rolled back.
+#     - At the natural size, with no `treatment_form` hook, from the stage 1
+#       design (seed 1) with the work the stage 1 left of the cap; each call
+#       must use the treatment-space form, end with `floor_fallback` 0 and no
+#       rollback, and keep the Row values at or above those of the start,
+#       exactly and by the one-way eigenvalue reference:
+#       - 300/2/4 nested, near-floor states: the row step ends at a Row
+#         design that no swap can improve, so every swap between rows that
+#         the joint stage applies ties the Row values with their floors.
+#         Each must be confirmed from scratch (at least one such swap, as
+#         many confirmations at least, no checkpoint), and the design is
+#         that of the same call under `confirm_floors`;
+#       - 1000/500/4 nested, away from the floors: the swaps between rows
+#         raise the Row values by more than the margin (measured: none was
+#         confirmed), so the call relies on its checkpoints (at least one)
+#         and applies at least as many swaps as the same call under
+#         `confirm_floors`, which confirms each of its swaps between rows.
+# A build without the hook (before Task 8 Step 3b), or without the counts of
+# the Row confirmation, gives one FAIL line.
 #
 # report: the joint efficiency of an onestage design from the v x v treatment
 # information (onestage_joint_efficiency(); spec 6.1 W7). [baseline], seeds=
@@ -883,6 +929,22 @@ if (check == "treatment_form") {
   EPS <- 1e-6
   Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1,treatment_form")
   used_form <- function(res) isTRUE(res$search$check$treatment_form)
+  # An installed build without the hook (other arguments, no `check` list),
+  # or without the counts of the Row confirmation, fails here with one line
+  # instead of an R error further down.
+  probe <- tryCatch({
+    set.seed(1)
+    s1 <- stage1(12, 2, 6, 3, FALSE, work_limit, TRUE)
+    crossed(s1$treatments, 12, 3, 2, 6, FALSE, budget = 0, work_cap = work_limit)
+  }, error = function(e) e)
+  if (inherits(probe, "error") || !used_form(probe) || is.null(probe$search$check$row_floors) ||
+      !exists("segmented_blocks", envir = ns, inherits = FALSE) ||
+      !"admission" %in% names(formals(get("blocks_engine", envir = ns)))) {
+    report(FALSE, paste0("the installed FielDHub has the treatment_form check hook and reports the Row confirmation",
+                         if (inherits(probe, "error")) paste0(": ", conditionMessage(probe)) else ""))
+    cat(failures, "FAIL(s)\n")
+    quit(status = 1)
+  }
   # The repair criterion of the engine from the dense eigenvalues (header).
   criterion <- function(trt, lay, v, r, B) {
     counts <- function(block) matrix(tabulate((block - 1L) * v + trt, v * max(block)), v, max(block))
@@ -1045,6 +1107,127 @@ if (check == "treatment_form") {
     report(length(problems) == 0L && length(found) == 6L,
            sprintf("treatment form, mode 3 cut in a descent %s: swaps applied %s%s", label, paste(found, collapse = " "),
                    if (length(problems)) paste0(": ", problems[1]) else ""))
+  }
+
+  # (d) the Row confirmation of ruling R9
+  hooked <- function(hook, expr) {
+    Sys.setenv(FIELDHUB_ENGINE_DEBUG = hook)
+    on.exit(Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1,treatment_form"))
+    expr
+  }
+  starts_of <- function(v, nrows, r, seeds, kinds = c("stage 1", "random")) {
+    out <- list()
+    for (seed in seeds) for (kind in kinds) {
+      set.seed(seed)
+      start <- if (kind == "stage 1") as.integer(stage1(v, nrows, v / nrows, r, FALSE, work_limit, TRUE)$treatments)
+               else as.vector(vapply(seq_len(r), function(m) sample.int(v), integer(v)))
+      out[[length(out) + 1L]] <- list(tag = sprintf("%d/%d/%d seed %d, %s start", v, nrows, r, seed, kind),
+                                      start = start, state = get(".Random.seed", envir = globalenv()))
+    }
+    out
+  }
+  search_from <- function(s, v, nrows, r) {
+    assign(".Random.seed", s$state, envir = globalenv())
+    crossed(s$start, v, r, nrows, v / nrows, FALSE, work_cap = work_limit)
+  }
+  floors_of <- function(res) res$search$check$row_floors
+  problems <- character()
+  fresh <- c(lazy = 0, all = 0)
+  drift <- c(ld = 0, sum = 0)
+  runs <- 0L
+  for (shape in c(shapes, list(c(16, 8, 4)))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]
+    lay <- layout_of(v, r, nrows, FALSE)
+    for (s in starts_of(v, nrows, r, 1:4)) {
+      lazy <- search_from(s, v, nrows, r)
+      all <- hooked("1,treatment_form,confirm_floors", search_from(s, v, nrows, r))
+      runs <- runs + 1L
+      fl <- floors_of(lazy); fa <- floors_of(all)
+      same <- c("treatments", "full_rank", "row_d", "row_a", "joint_d", "joint_a", "joint_log_det")
+      vp <- value_problem(lazy, s$start, lay, v, r)
+      if (!is.null(vp)) problems <- c(problems, paste0(s$tag, ": ", vp))
+      else if (!identical(lazy[same], all[same]) || !identical(lazy$search$evaluations, all$search$evaluations)) {
+        problems <- c(problems, paste0(s$tag, ": not the search of `confirm_floors`"))
+      } else if (fl[["rollbacks"]] > 0 || fa[["checkpoints"]] > 0 || fa[["confirmations"]] < fa[["swaps"]] ||
+                 fl[["confirmations"]] + fl[["checkpoints"]] > fa[["confirmations"]]) {
+        problems <- c(problems, sprintf("%s: %g confirmations, %g checkpoints, %g rollbacks; `confirm_floors` %g confirmations of %g swaps",
+                                        s$tag, fl[["confirmations"]], fl[["checkpoints"]], fl[["rollbacks"]],
+                                        fa[["confirmations"]], fa[["swaps"]]))
+      }
+      fresh <- fresh + c(fl[["confirmations"]] + fl[["checkpoints"]], fa[["confirmations"]])
+      drift <- pmax(drift, c(fl[["drift_ld"]], fl[["drift_sum"]]), c(fa[["drift_ld"]], fa[["drift_sum"]]))
+    }
+  }
+  report(length(problems) == 0L && fresh[["lazy"]] < fresh[["all"]] && all(drift <= c(1e-10, 1e-12)),
+         sprintf("treatment form, Row confirmation: %d full searches equal those of `confirm_floors`, with %g Row values from scratch against %g; largest drift of a running Row value %.2e (log det), %.2e (A denominator, relative)%s",
+                 runs, fresh[["lazy"]], fresh[["all"]], drift[["ld"]], drift[["sum"]],
+                 if (length(problems)) paste0(": ", problems[1]) else ""))
+  # Near-floor states (hook `slack_floors`) and the rollback (hook `late_floors`)
+  v <- 16; nrows <- 8; r <- 4
+  lay <- layout_of(v, r, nrows, FALSE)
+  problems <- character()
+  late_problems <- character()
+  below <- 0L; rolled <- 0L
+  for (s in starts_of(v, nrows, r, 1:8, "stage 1")) {
+    slack <- hooked("treatment_form,slack_floors", search_from(s, v, nrows, r))
+    lazy <- search_from(s, v, nrows, r)
+    late <- hooked("1,treatment_form,late_floors", search_from(s, v, nrows, r))
+    if (identical(as.integer(slack$search$floor_fallback), 1L)) {
+      below <- below + 1L
+      vp <- value_problem(lazy, s$start, lay, v, r)
+      if (!is.null(vp)) problems <- c(problems, paste0(s$tag, ": ", vp))
+      else if (!(floors_of(lazy)[["confirmations"]] >= 1)) problems <- c(problems, paste0(s$tag, ": no swap was confirmed"))
+    }
+    vp <- value_problem(late, s$start, lay, v, r)
+    ref0 <- joint_ref(s$start, lay, v, r)
+    if (!is.null(vp)) late_problems <- c(late_problems, paste0(s$tag, ": ", vp))
+    else if (ref0$full && !(isTRUE(late$full_rank) && late$joint_log_det >= ref0$log_det - VAL)) {
+      late_problems <- c(late_problems, paste0(s$tag, ": not a full-rank design at or above the start"))
+    }
+    rolled <- rolled + (floors_of(late)[["rollbacks"]] > 0)
+  }
+  report(length(problems) == 0L && below >= 2L,
+         sprintf("treatment form, Row confirmation near a floor (16/8/4 nested, 8 seeds): %d searches end below a floor without confirmation (need >= 2), each confirmed a swap and kept the floors%s",
+                 below, if (length(problems)) paste0(": ", problems[1]) else ""))
+  report(length(late_problems) == 0L && rolled >= 1L,
+         sprintf("treatment form, rollback after a breach at a checkpoint (hook, 16/8/4 nested, 8 seeds): %d runs rolled back (need >= 1), floors kept%s",
+                 rolled, if (length(late_problems)) paste0(": ", late_problems[1]) else ""))
+  # At the natural size, no `treatment_form` hook
+  for (shape in list(c(300, 2, 4), c(1000, 500, 4))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]
+    near <- nrows == 2
+    lay <- layout_of(v, r, nrows, FALSE)
+    natural <- hooked("seconds", {
+      set.seed(1)
+      s1 <- stage1(v, nrows, v / nrows, r, FALSE, work_limit, TRUE)
+      state <- get(".Random.seed", envir = globalenv())
+      lazy <- crossed(s1$treatments, v, r, nrows, v / nrows, FALSE, work_cap = work_limit - s1$work)
+      list(start = as.integer(s1$treatments), lazy = lazy, all = hooked("seconds,confirm_floors", {
+        assign(".Random.seed", state, envir = globalenv())
+        crossed(s1$treatments, v, r, nrows, v / nrows, FALSE, work_cap = work_limit - s1$work)
+      }))
+    })
+    fl <- floors_of(natural$lazy); fa <- floors_of(natural$all)
+    trt <- as.integer(natural$lazy$treatments)
+    fp <- floor_problem(natural$lazy, trt, natural$start, lay, v, r)
+    why <- if (!used_form(natural$lazy)) "the treatment-space form was not used"
+           else if (!complete_reps(trt, lay, v, r) || !isTRUE(natural$lazy$full_rank)) "not a complete full-rank design"
+           else if (!is.null(fp)) fp
+           else if (fl[["rollbacks"]] > 0) "a rollback"
+           else if (!(fl[["swaps"]] >= 1)) "no swap between rows was applied"
+           else if (fa[["confirmations"]] < fa[["swaps"]]) "`confirm_floors` left a swap unconfirmed"
+           else if (near && !(fl[["confirmations"]] >= fl[["swaps"]] && fl[["checkpoints"]] == 0)) "a swap that ties with the floors was not confirmed"
+           else if (near && !identical(trt, as.integer(natural$all$treatments))) "not the design of `confirm_floors`"
+           else if (!near && !(fl[["checkpoints"]] >= 1 && fl[["confirmations"]] < fl[["swaps"]])) "no checkpoint, or every swap confirmed"
+           else if (!(natural$lazy$search$check$accepted >= natural$all$search$check$accepted)) "fewer swaps than with every swap confirmed"
+           else NULL
+    report(is.null(why),
+           sprintf("treatment form, Row confirmation at %d/%d/%d nested (%s): %g swaps (%g with every swap confirmed), %g between rows, %g confirmed, %g checkpoints; Row D %.3g and Row A %.3g above the floors; drift %.2e, %.2e%s",
+                   v, nrows, r, if (near) "ties with the floors" else "away from the floors",
+                   natural$lazy$search$check$accepted, natural$all$search$check$accepted, fl[["swaps"]],
+                   fl[["confirmations"]], fl[["checkpoints"]], natural$lazy$row_d - natural$lazy$stage1_row_d,
+                   natural$lazy$row_a - natural$lazy$stage1_row_a, fl[["drift_ld"]], fl[["drift_sum"]],
+                   if (is.null(why)) "" else paste0("; PROBLEM ", why)))
   }
 
   # (c) modes 1, 2 and 4 with the admission switched off

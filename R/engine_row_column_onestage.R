@@ -481,7 +481,13 @@ crossed_default_budget <- function(v, r) {
 #' with `full_rank = FALSE` and no joint stage runs.
 #'
 #' Row D and Row A of the result are never below those of `start`, compared
-#' exactly as the unrounded values returned here.
+#' exactly as the unrounded values returned here. In the block-space form
+#' every swap between two rows is confirmed with Row values from scratch. In
+#' the treatment-space form (below) such a value costs min(v, row blocks)^3,
+#' so a swap is confirmed only when a running Row value is near its floor,
+#' the current design is checked from scratch at checkpoints, and a design
+#' found below a floor is replaced by the best one known to meet both
+#' (controller ruling R9, 2026-11-22; src/crossed_engine.cpp).
 #'
 #' Work limit (phase 2 spec 6.1 W2, W3). The start (scoring `start`) is always
 #' done. The finish (scoring the result) is charged as a fixed amount,
@@ -538,9 +544,13 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   b_rows <- if (shared) nrows else r * nrows
   B <- b_rows + (if (shared) ncols else r * ncols)
   time_limit <- 60
-  # Check hook (tools/check-onestage-engine.R): 2L skips the exact Row
-  # confirmation of each swap, so the end-of-search comparison can be reached.
-  hook <- if (engine_debug("slack_floors")) 2L else 1L
+  # Check hooks (tools/check-onestage-engine.R; src/crossed_engine.cpp): 2L
+  # skips the exact Row confirmation of each swap, so the end-of-search
+  # comparison can be reached; 3L confirms every swap between rows also in
+  # the treatment-space form; 4L confirms none there and checks the Row
+  # values after every such swap, so the rollback can be reached.
+  hook <- if (engine_debug("slack_floors")) 2L else if (engine_debug("confirm_floors")) 3L else
+    if (engine_debug("late_floors")) 4L else 1L
   out <- blocks_engine_cpp(v, r, as.integer(b_rows), hook, as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget), time_limit,
                            engine_debug("1"),
@@ -574,15 +584,26 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   # whether the treatment-space form was used, the engine's classification of
   # the start (and tr(M) of its joint state, NA when it could not be built),
   # the swaps the joint stage applied, the refreshes that scored the start,
-  # the repaired design and the result (joint state, Row state), and whether
-  # the end-of-search drift check alarmed.
+  # the repaired design and the result (joint state, Row state), whether
+  # the end-of-search drift check alarmed, and the Row confirmation of ruling
+  # R9 (`row_floors`: the swaps between rows the joint stage applied, the Row
+  # values from scratch that confirmed a swap, the checkpoints, the rollbacks
+  # after a breach, and the largest distance of a running Row value from the
+  # value from scratch: log det, absolute, and A denominator, relative).
   if (nzchar(Sys.getenv("FIELDHUB_ENGINE_DEBUG"))) {
     result$search$check <- list(treatment_form = out$treatment_form,
                                 start_full_rank = out$start_full_rank,
                                 start_trace = out$start_trace, accepted = out$accepted,
                                 scoring_refreshes = c(joint = out$scoring_joint,
                                                       row = out$scoring_row),
-                                end_alarm = out$end_alarm)
+                                end_alarm = out$end_alarm,
+                                row_floors = c(swaps = out$row_swaps,
+                                               confirmations = out$row_confirmations,
+                                               checkpoints = out$row_checkpoints,
+                                               rollbacks = out$row_rollbacks,
+                                               drift_ld = out$row_drift_ld,
+                                               drift_sum = out$row_drift_sum,
+                                               diag = out$row_diag))
   }
   # For tools/measure-onestage-work.R: the seconds of the start and of the
   # finish of the call.
