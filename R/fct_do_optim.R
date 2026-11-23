@@ -186,7 +186,6 @@ do_optim <- function(
         check_plots <- if (design == "sparse") checks else sum(as.double(rep_checks))
         validate_design_size(allocation_plots + check_plots * as.double(l))
     }
-    local_optimizer_options()
     # Allocate the copies to the locations (C++ block engine; a table of counts)
     search <- allocation_blocks(lines, copies_per_entry, l)
     allocation <- search$allocation

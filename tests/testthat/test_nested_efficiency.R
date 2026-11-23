@@ -11,7 +11,6 @@ test_that("lattice and incomplete-block designs are as efficient as the recorded
     }))
   }))
   res <- nested_acceptance(baseline, nested_summary(records), bootstrap = FALSE)
-  failing <- res[!is.na(res$pass) & !res$pass, c("caller", "t", "k", "r")]
   expect_true(all(res$pass %in% c(TRUE, NA)),
-              info = paste(utils::capture.output(print(failing)), collapse = "\n"))
+              info = paste(utils::capture.output(print(res[!is.na(res$pass) & !res$pass, c("caller", "t", "k", "r")])), collapse = "\n"))
 })

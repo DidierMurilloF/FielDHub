@@ -1,8 +1,12 @@
 # Provenance of the compiled block engine
 
 The engine is a clean-room implementation. Nobody working on it read the source
-code of the blocksdesign package; blocksdesign is used only as an installed
-black box in tests and benchmarks, to compare output shape and efficiency.
+code of the blocksdesign package; its output was used only as a black box, to
+compare output shape and efficiency. FielDHub no longer uses blocksdesign, and
+earlier versions did. FielDHub is an independent implementation, and its designs
+were validated against the results of blocksdesign (Edmondson 2021). FielDHub is
+grateful to Rodney N. Edmondson for the package and the optimized designs it
+gave FielDHub for years. No code was ported or derived from it.
 
 | File | Content | Sources |
 |---|---|---|
@@ -35,6 +39,31 @@ black box in tests and benchmarks, to compare output shape and efficiency.
 | `R/engine_blocks.R` (`resolvable_a_bound()`, `unsearched_resolvable_design()`), `blocks_engine.cpp` (`resolvable_score_cpp()`) | Resolvable A-efficiency bound: the r replicates make rank(N) <= r b - r + 1, so at most min(v, r b - r + 1) - 1 efficiencies differ from 1, with the convexity argument of `block_a_bound()`; a start attaining it is scored once and returned without search | Own derivation (controller ruling R18, 2026-11-19); John & Williams (1995) ch. 2 (efficiency factors); nested-engine spec section 6.2b decision 4 |
 | `blocks_engine.cpp` (mode 2, `make_column_layout()`), `R/engine_blocks.R` (`rows_within_columns()`), `R/engine_row_column_optimization.R` (`improve_efficiency()`) | Twostage row step: the rows of a resolvable row-column design are the blocks of a resolvable design, scored by the block-space state unchanged, and a swap exchanges two plots of one column of one replicate, so the column design is kept; one search from the given design, full passes, escapes and budget as in resolvable mode, the budget scaled by `iterations / 1000` | Own derivation, nested-engine spec sections 5 (each replicate is the union of its rows) and 6.8; Edmondson (2020) section 2.2 (conditional swaps); FielDHub's former R row step (swaps inside a column) for the swap set |
 | `R/engine_mols_data.R` (`stored_mols`), `tools/search-mols.R` | Orthogonal Latin square pairs of orders 14, 18 and 26, stored as data, and the seeded tool that found them: a random Latin square by a Jacobson-Matthews walk, then (method 1) its transversals by backtracking and q disjoint ones by Algorithm X, (method 2) cycle-switch local search on the mate, (method 3) backtracking for a pair developed over Z_(q-1) with one fixed point. Each pair is checked (both squares Latin, all q^2 ordered pairs different) before it is written | Own computer search, `tools/search-mols.R`; orthogonal pairs exist by Bose, Shrikhande & Parker (1960), Canad. J. Math. 12:189-203. Algorithms from the literature, no implementation consulted: Jacobson & Matthews (1996), J. Combin. Des. 4:405-437 (random Latin squares); Knuth (2000), "Dancing links" (Algorithm X); Dénes & Keedwell (1974), *Latin Squares and their Applications* (transversals and orthogonal mates, cycle switches); van Lint & Wilson, *A Course in Combinatorics*, ch. 22 (orthogonal arrays developed over a group; the difference conditions of method 3 are our own derivation). No pair was copied from a published table; nested-engine spec section 6.7 |
+| `R/engine_block_efficiency.R` (`fieldhub_a_bound()`, `block_factor_class()`, `a_bound_g()`, `a_bound_side()`; `block_a_bound()` and `resolvable_a_bound()` now its `convexity` component) | A-efficiency bound by design class (general, nested, resolvable): convexity bound, second-moment bound on the squared norms of N N' and N' N, pair bound; `a_bound_g()` is the least sum of squares of integers with a given total, `a_bound_side()` the least squared norm of one side given its diagonal; `block_factor_class()` verifies the class of a block factor from the data | Own derivation, spec sections 5.2 and 5.2b (2026-11-20); John & Williams (1995) ch. 2 for the efficiency factors. Jarrett (1977) was not consulted |
+| `R/engine_block_efficiency.R` (`BlockEfficiencies()` now reports the bound of `fieldhub_a_bound()`), `R/engine_blocks.R` and `R/engine_ibd_randomization.R` (call sites) | Same function as before with a new meaning of `A-Bound` | Spec section 6.2 (2026-11-20) |
+| `R/engine_block_efficiency.R` (`block_incidence_gram_values()`, `block_incidence_efficiency()` now taking the Gram route) | Canonical efficiencies from the Gram matrix of the smaller side of the incidence, A A' = X X' - rho rho' and A' A = X' X - kappa kappa', where min(v, b) exceeds 500; the decomposition stays below | Own derivation (Task 8 Step 5, ruling R10.4, 2026-11-22); the same values as the singular value decomposition, checked to 1e-10 |
+| `src/crossed_space.h`, `src/crossed_space.cpp` (`CrossedSpace`: `refresh()`, `apply()`, `ratio()`, `after()`, `a_efficiency()`, `drift()`, `drift_cache()`, `full_rank_of()`, `log_det_after()`, `lists_after()`, `mg_of()`, `build_what()`, `cholesky_pd()`, `cholesky_log_det()` and the other members) | Block-space information state of F crossed block factors (rows and columns): What = I - N'N / r + y y' / n, its inverse by Cholesky, the exact swap ratio by the matrix determinant lemma and the rank-2 Woodbury update, the full-rank test of spec 5.1b, A and D from it, drift checks | Spec section 5.1 (block-space form) and the Task 6 block-space identity, derived in the header; matrix determinant lemma, Woodbury and Sylvester identities (2026-11-20) |
+| `src/crossed_space.h`, `src/crossed_space.cpp` (`CrossedSpace::refresh_treatment_form()`, `refresh_work()`, `factor_work()`), `src/block_space.h`, `src/block_space.cpp` (`BlockSpace::enable_treatment_form()`, `refresh_treatment_form()`, `spd_cholesky8()`) | Treatment-space form of the same state, used instead of the block-space form when v is smaller than the number of blocks (more than 500 blocks): the v x v matrix is factored in place of the B x B one, with the eight-partial-sum Cholesky; refresh and factorisation work are reported for the work cap | Own derivation, spec section 5.1c (Amendment 1, 2026-11-22) |
+| `src/crossed_engine.cpp` (`make_crossed()`, `improves()`, `row_value()`, the joint search and repair, escapes, floors, checkpoints, rollback) | Mode 3, `crossed_engine()`: first-improvement swaps of the joint state with the Row state held to its floors, a repair of a start without full joint rank, escapes, drift checks and an exact end comparison | Spec sections 5.1, 5.1b and 6.1 (Task 6 block-space identity; repair of spec 6.1; 2026-11-20 to 2026-11-22); Edmondson (2020) section 2.2 and Mitchell (1974) for the exchange search |
+| `src/blocks_engine.cpp` (mode 4; `refresh_work()` in the calls of the work cap), `R/engine_row_column_onestage.R` (`segmented_blocks()`, `onestage_stage1()`) | Stage 1 of onestage: rows and columns searched as one-way blocks that span segments, rows first, shared column step | Own derivation, spec section 6.1 (2026-11-20, Amendment 1 2026-11-22) |
+| `R/engine_row_column_onestage.R` (`crossed_search()`, `crossed_default_budget()`) | Joint stage: one call of mode 3 from a start and its evaluation budget | Spec section 6.1 (2026-11-20) |
+| `R/engine_row_column_onestage.R` (`onestage_limits()`, `onestage_work_weight()`, `onestage_engine_limit()`, `onestage_weighted_work()`, `onestage_dense_work()`, `onestage_call_work()`, `onestage_startable()`) | Work cap of the onestage search: no design is refused for its size; weights of the work of each part by mode and size, the limits of a call, the work of its start and finish, and whether it can start | Spec section 6.1 W1 to W8 and Amendment 1 (2026-11-22); controller rulings R10 and R10.5; own measurements (Task 8 Step 5, `tools/measure-onestage-work.R`) |
+| `R/engine_row_column_optimization.R` (`onestage_feasible()`, `onestage_joint_searches()`, `onestage_best_search()`, `onestage_design_frame()`, `build_row_column_onestage()` now the staged builder, `report_efficiency()`), `R/fct_row_column.R` | Staged onestage builder: feasibility, the number of joint searches requested and completed (`infoDesign$joint_searches`), the best search, the design table, the report | Spec sections 6.1 and 6.2 (2026-11-20, Amendment 1 2026-11-22); `report_efficiency()` existed and now reports the joint efficiency as below |
+| `R/engine_row_column_optimization.R` (`onestage_block_products()`, `onestage_joint_efficiency()`) | Joint row-by-column efficiency of an onestage design from the v x v treatment information, in place of the information matrix of the full model | Own derivation, spec section 5.1c and Amendment 1, sections 6.2 and 13 (2026-11-22) |
+| `R/engine_blocks.R`, `R/engine_row_column_onestage.R` (`engine_form_option()`, `engine_debug()`) | Options that choose the block-space or treatment-space form and switch the engine's debug hooks, for the checks | Own code; spec section 5.1c (2026-11-22) |
+
+## Notes
+
+- The two 12/3/3 information spectra of spec section 5.2b explain why the
+  second-moment bound cannot reach a rectangular lattice with r >= 3 (12
+  entries in blocks of 3, three replicates: A 0.6800618, bound 0.6848249).
+- FielDHub no longer uses blocksdesign, and earlier versions did. The engine is
+  FielDHub's own implementation, written without reading the blocksdesign
+  source and validated against its results as a black box (Edmondson 2021,
+  *blocksdesign: Nested and Crossed Block Designs for Factorial, Fractional
+  Factorial and Unstructured Treatment Sets*, R package). FielDHub is grateful
+  to Rodney N. Edmondson for the package and for the optimized designs it gave
+  FielDHub for years.
 
 ## Exposure records
 
@@ -43,7 +72,7 @@ agent investigating the A-bound saw, in a web-search result summary, a
 paraphrase of two bound formulas ("U1", "U2", for k > v) taken from a hosted
 copy of blocksdesign source. It did not open the page. Its A-bound scratch
 scripts are therefore treated as tainted: none of their code or formulas
-enters the repo, and the phase 2 bound is written fresh from the book. The
+enters the repo, and the phase 2 bound is FielDHub's own derivation (spec sections 5.2 and 5.2b). The
 section 6.5 constructions come from the published sources listed there and
 are re-implemented in the engine, not copied from that agent's scratch files.
 

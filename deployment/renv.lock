@@ -51,12 +51,6 @@
       "Source": "Repository",
       "Repository": "CRAN"
     },
-    "blocksdesign": {
-      "Package": "blocksdesign",
-      "Version": "4.9",
-      "Source": "Repository",
-      "Repository": "CRAN"
-    },
     "bslib": {
       "Package": "bslib",
       "Version": "0.12.0",

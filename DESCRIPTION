@@ -43,7 +43,6 @@ Depends: R (>= 4.1.0)
 License: MIT + file LICENSE
 Imports: 
     dplyr (>= 1.0.0),
-    blocksdesign,
     ggplot2 (>= 3.4.0),
     rlang,
     viridisLite,

@@ -57,12 +57,9 @@ $run_dev.*
 ^mkdocs\.yml$
 ^requirements-docs\.txt$
 ^website$
-^tools/build-site\.R$
 ^\.mkdocs-src$
 ^\.mkdocs-site$
+^tools$
+^tests/testthat/fixtures/phase2-fixtures\.meta\.rds$
 
-^tools/prepare-site\.py$
-^tools/check-site\.py$
-^tools/nested-goldens-baseline\.csv\.gz$
 ^AGENTS\.md$
-^tools/nested-goldens-rc-baseline\.csv\.gz$

@@ -30,10 +30,6 @@
 #' }
 #' 
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#' 
 #' @examples
 #' # Example 1: Generates a rectangular lattice design with 6 full blocks, 4 units per IBlock (k)
 #' # and 20 treatments in one location.

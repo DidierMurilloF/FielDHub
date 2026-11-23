@@ -58,6 +58,24 @@ bool spd_inverse8(std::vector<double>& a, int n, double& log_det) {
   return true;
 }
 
+bool spd_cholesky8(const std::vector<double>& a, int n, double& log_det) {
+  std::vector<double> l(static_cast<size_t>(n) * n, 0.0);  // row-major, as spd_inverse8()
+  log_det = 0.0;
+  for (int j = 0; j < n; ++j) {
+    const double* lj = &l[static_cast<size_t>(j) * n];
+    const double d = a[j + static_cast<size_t>(n) * j] - dot8(lj, lj, j);
+    if (!std::isfinite(d) || d <= 0.0) return false;
+    const double ljj = std::sqrt(d);
+    l[static_cast<size_t>(j) * n + j] = ljj;
+    log_det += 2.0 * std::log(ljj);
+    for (int i = j + 1; i < n; ++i) {
+      const double* li_row = &l[static_cast<size_t>(i) * n];
+      l[static_cast<size_t>(i) * n + j] = (a[i + static_cast<size_t>(n) * j] - dot8(li_row, lj, j)) / ljj;
+    }
+  }
+  return true;
+}
+
 bool spd_inverse(std::vector<double>& a, int n, double& log_det) {
   // L is stored row-major (l[i * n + k] = L_ik) so the inner products run over
   // contiguous memory; the arithmetic and its order are those of the textbook
@@ -138,7 +156,74 @@ void BlockSpace::update_counts(int a, int p, int c, int q) {
 
 
 
+void BlockSpace::enable_treatment_form() {
+  bool equal = true;
+  for (int j = 1; j < b_; ++j) equal = equal && sizes_[j] == sizes_[0];
+  form_ = equal && v_ < b_;
+}
+
+bool BlockSpace::refresh_treatment_form() {
+  const size_t v = v_, b = b_;
+  const double k = sizes_[0];
+  // The treatments of each block, with multiplicity, in treatment order.
+  std::vector<int> off(b + 1, 0), member(v * r_);
+  for (int j = 0; j < b_; ++j) off[j + 1] = off[j] + sizes_[j];
+  {
+    std::vector<int> fill(off.begin(), off.end() - 1);
+    for (int i = 0; i < v_; ++i) {
+      const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+      for (int x = 0; x < r_; ++x) member[fill[bl[x]]++] = i;
+    }
+  }
+  // S = I - N N' / (r k) + J / v, accumulated block by block.
+  std::vector<double> s(v * v, 1.0 / v_);
+  for (int i = 0; i < v_; ++i) s[i + v * i] += 1.0;
+  const double w = 1.0 / (r_ * k);
+  for (int j = 0; j < b_; ++j) {
+    const int* mj = &member[off[j]];
+    const int kj = off[j + 1] - off[j];
+    for (int x = 0; x < kj; ++x) {
+      double* col = &s[v * mj[x]];
+      for (int y = 0; y < kj; ++y) col[mj[y]] -= w;
+    }
+  }
+  double ld = 0.0;
+  if (!spd_inverse8(s, v_, ld)) return false;
+  // T = S^-1 N (v x b), then N' T (b x b).
+  std::vector<double> t(v * b, 0.0);
+  for (int j = 0; j < b_; ++j) {
+    double* tj = &t[v * j];
+    for (int x = off[j]; x < off[j + 1]; ++x) {
+      const double* col = &s[v * member[x]];
+      for (size_t i = 0; i < v; ++i) tj[i] += col[i];
+    }
+  }
+  std::vector<double> m(b * b, 0.0);
+  for (int l = 0; l < b_; ++l) {
+    const double* tl = &t[v * l];
+    double* ml = &m[b * l];
+    for (int i = 0; i < v_; ++i) {
+      const double ti = tl[i];
+      const int* bl = &blocks_of_[static_cast<size_t>(i) * r_];
+      for (int x = 0; x < r_; ++x) ml[bl[x]] += ti;
+    }
+  }
+  const double c = (k - 2.0) / b_;
+  for (int l = 0; l < b_; ++l) {
+    for (int j = 0; j <= l; ++j) {
+      const double value = ((j == l ? 1.0 : 0.0) + 0.5 * (m[j + b * l] + m[l + b * j]) * w + c) / k;
+      m[j + b * l] = value;
+      m[l + b * j] = value;
+    }
+  }
+  minv_.swap(m);
+  log_det_ = (b_ - 1.0) * std::log(k) + ld;
+  if (cached_) rebuild_g();
+  return true;
+}
+
 bool BlockSpace::refresh() {
+  if (form_) return refresh_treatment_form();
   // Build and invert into scratch; the state changes only on success.
   std::vector<double> bh;
   cross_counts(bh);

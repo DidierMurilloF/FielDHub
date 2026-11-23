@@ -14,9 +14,7 @@ alloc_is_even <- function(x, copies, l) {
     diff(range(colSums(N))) <= 1
 }
 
-test_that("sparse and p-rep allocations never call blocksdesign", {
-  local_mocked_bindings(blocks = function(...) stop("blocksdesign::blocks() was called"),
-                        .package = "blocksdesign")
+test_that("sparse and p-rep allocations build with the block engine", {
   data_sparse <- data.frame(ENTRY = 1:64, NAME = c(paste0("CH", 1:4), paste0("L", 1:60)))
   data_prep <- data.frame(ENTRY = 1:60, NAME = paste0("L", 1:60))
   expect_s3_class(do_optim("sparse", 60, 4, 3, add_checks = TRUE, checks = 4, seed = 1), "Sparse")

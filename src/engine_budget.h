@@ -14,10 +14,15 @@ class Budget {
   // fixed by the seed.
   // evaluation_work: work units charged for every evaluation spent (default
   // none), so that the work cap also bounds the evaluations of a run.
-  Budget(double cap, double time_limit, double work_cap = INFINITY, double evaluation_work = 0.0)
+  // strict (the onestage search, phase 2 spec 6.1 W2 and W3; default off):
+  // a charge that would take the work past the cap is refused and not
+  // counted, so the recorded work never exceeds the cap (except by force()).
+  // Without it the charge that passes the cap is counted, as in phase 1.
+  Budget(double cap, double time_limit, double work_cap = INFINITY, double evaluation_work = 0.0,
+         bool strict = false)
       : cap_(cap), used_(0.0), limit_(time_limit), next_check_(10000.0),
         work_(0.0), next_work_check_(kWorkPerCheck), work_cap_(work_cap),
-        evaluation_work_(evaluation_work), capped_(false),
+        evaluation_work_(evaluation_work), capped_(false), strict_(strict),
         stop_(STOP_NONE), start_(std::chrono::steady_clock::now()) {}
 
   // Spend n evaluations. Returns false, and spends nothing, once the budget or
@@ -25,6 +30,9 @@ class Budget {
   bool spend(double n) {
     if (stop_ != STOP_NONE) return false;
     if (used_ + n > cap_) { stop_ = STOP_BUDGET; return false; }
+    if (strict_ && evaluation_work_ > 0.0 && work_ + evaluation_work_ * (used_ + n) > work_cap_) {
+      stop_ = STOP_BUDGET; capped_ = true; return false;
+    }
     used_ += n;
     if (evaluation_work_ > 0.0 && work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     if (used_ >= next_check_) {
@@ -42,6 +50,7 @@ class Budget {
   // once the time limit or the work cap is reached.
   bool work(double units) {
     if (stop_ != STOP_NONE) return false;
+    if (strict_ && work_used() + units > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     work_ += units;
     if (work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     if (work_ >= next_work_check_) {
@@ -49,6 +58,15 @@ class Budget {
       cpp11::check_user_interrupt();
       if (elapsed() > limit_) { stop_ = STOP_TIME; return false; }
     }
+    return true;
+  }
+  // Record work that is done whatever the cap (the start of a call): it is
+  // always counted, and the run stops if it took the work past the cap.
+  // Returns false once the run has stopped.
+  bool force(double units) {
+    if (stop_ != STOP_NONE) { work_ += units; return false; }
+    work_ += units;
+    if (work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     return true;
   }
   double elapsed() const {
@@ -63,7 +81,7 @@ class Budget {
  private:
   static constexpr double kWorkPerCheck = 2e7;
   double cap_, used_, limit_, next_check_, work_, next_work_check_, work_cap_, evaluation_work_;
-  bool capped_;
+  bool capped_, strict_;
   int stop_;
   std::chrono::steady_clock::time_point start_;
 };

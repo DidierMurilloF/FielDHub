@@ -104,11 +104,8 @@ if comparisons within one connected component are estimable. A connected model
 whose numerical information cannot be resolved raises a structured numerical
 error instead of reporting a misleading positive efficiency.
 
-For onestage row-column designs, the underlying optimization package documents
-its
-[block models and efficiency reports](https://search.r-project.org/CRAN/refmans/blocksdesign/html/blocks.html).
-Incomplete-block, lattice and twostage row-column designs, and sparse and p-rep
-allocation across locations, use FielDHub's own compiled block search instead;
+Incomplete-block, lattice, onestage and twostage row-column designs, and sparse and p-rep
+allocation across locations, use FielDHub's own compiled block search;
 its efficiencies are checked against the same eigenvalue definitions
 (`test_blocks_engine_designs.R` for a single level of blocks, and
 `test_square_lattice.R` and `test_alpha_lattice.R` for resolvable designs,
@@ -137,15 +134,15 @@ biological experiment.
 | Repeated-check placement in RCBD | At most 100 attempts per block; warns and falls back to unrestricted placement if stratification cannot be completed |
 | Single diagonal check optimization | At most 100 accepted exchanges or 100,000 candidate evaluations per location; an interrupted scan is never reported as a local optimum |
 | Pair-swap optimization | A finite geometry-dependent threshold range, at most `stop_iter` sweeps per threshold, and bounded sampled candidates per swap; diagnostics distinguish exhaustion, completion, and an empty range |
-| Row-column search | Positive finite whole-number `iterations`; onestage passes it as the number of external searches (default 200); twostage uses it as the effort of the row search, scaling the row search's evaluation budget by `iterations / 1000` (default 1,000, the full search) |
+| Row-column search | Positive finite whole-number `iterations`; onestage uses it to set the number of joint searches requested (the default 200 requests 10; `max(1, round(10 * iterations / 200))`), fewer when the work cap stops the run (`infoDesign$joint_searches`); twostage uses it as the effort of the row search, scaling the row search's evaluation budget by `iterations / 1000` (default 1,000, the full search) |
 | Resolvable block search (incomplete-block, lattice and twostage row-column designs) | 20 searches (fewer above 1,000 blocks; one from a lattice construction) under an evaluation budget and a fixed work cap, so a run stops at a point set by the seed and inputs; a 60-second wall-clock limit remains as a safeguard and warns if it stops a run; shapes above 2,000 blocks or whose predicted work exceeds the cap get an unoptimized connected design with a warning, except a lattice with an algebraic construction (returned from the construction, A-optimal, no warning) and two replicates of blocks of two (built in closed form, no warning); twostage rows above the same kind of limit are left as the column design gave them, with a warning |
 | Allocation block search | 20 searches under an evaluation budget, with full swap passes up to 632 plots and a lattice start for square-lattice shapes, with interrupts checked; a 60-second wall-clock limit warns and records the stop; a final even-up step leaves each entry with at most one copy more at any location than at another |
 | Allocation balancing | At most one upward pass through the allocation rows; warns if no eligible entry can complete the balancing |
 | Dimension cache | At most 64 retained queries and 4 MiB of retained keys and results; temporary search memory is outside this bound |
 
 Finite iteration counts are not wall-clock or memory guarantees. Work still
-grows with field size, and the search internals of onestage row-column designs
-are controlled by `blocksdesign`. Forced allocation balancing can add entry copies to fill
+grows with field size, and the work of a onestage row-column search is capped, so
+on large designs the cap sets the number of joint searches. Forced allocation balancing can add entry copies to fill
 smaller locations; inspect the returned allocation rather than assuming every
 input copy budget is unchanged under that option. Pair-swap diagnostics
 describe the retained result separately from an unsuccessful final attempt.
@@ -165,3 +162,18 @@ measurements. Largest observed R allocation is not peak resident memory.
 Compare results on the same host with comparable load, investigate changes,
 and follow `RELEASING.md`; a successful local check does not establish that the
 remote CI matrix or a deployment has passed.
+
+## Acknowledgment
+
+Earlier versions of FielDHub used the `blocksdesign` package (Edmondson 2021)
+to optimize block and row-column designs. FielDHub's block engine is an
+independent implementation, written without reading the source of
+`blocksdesign`; its designs were validated against the results of
+`blocksdesign` as a black box, on 90,200 onestage row-column designs and on the
+incomplete-block, lattice and twostage row-column grids. FielDHub is grateful
+to Rodney N. Edmondson for the package and for the optimized designs it gave
+FielDHub for years.
+
+Edmondson, R. N. (2021). *blocksdesign: Nested and Crossed Block Designs for
+Factorial, Fractional Factorial and Unstructured Treatment Sets*. R package.
+<https://CRAN.R-project.org/package=blocksdesign>
