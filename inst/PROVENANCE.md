@@ -80,5 +80,5 @@ Second entry: on 2026-11-18 the audit agent made a malformed black-box call,
 and R's error message printed one line of blocksdesign's argument check on
 `replicates`. It was not sought and is not used.
 
-(Section numbers refer to the nested-engine spec,
-`docs/superpowers/specs/2026-11-18-nested-blocks-engine-design.md`.)
+(Section numbers refer to the nested-engine design specification, kept
+with the maintainer's development notes.)

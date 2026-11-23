@@ -10,7 +10,8 @@
 #
 # One PASS / FAIL line per check; exit status 1 on any FAIL. [library]
 # defaults to ~/fieldhub-libs/dev; install first with
-# `R CMD INSTALL . --preclean` (AGENTS.md). [baseline] is either a per-seed
+# `R CMD INSTALL . --preclean` (never a
+# devtools::load_all() build). [baseline] is either a per-seed
 # golden recording (.csv or .csv.gz, as tools/generate-nested-goldens.R
 # writes it, e.g. tools/nested-goldens-os-baseline.csv.gz) or a summary
 # data frame (.rds, as tests/testthat/fixtures/nested-goldens-ci.rds); pass

@@ -14,7 +14,8 @@
 # `compare` reruns the cases of the set the file was recorded with and prints
 # one PASS / FAIL line each; it exits 1 on any mismatch or missing case.
 # [library] defaults to ~/fieldhub-libs/dev. Install first with
-# `R CMD INSTALL . --preclean` (AGENTS.md).
+# `R CMD INSTALL . --preclean` (never time a
+# devtools::load_all() build: it compiles without optimisation).
 #
 # Cases of set 012:
 # - blocks_engine() single-level (mode 0): 3 shapes x 3 seeds, one of them in
