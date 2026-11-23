@@ -111,6 +111,10 @@
 #       invariant still holds (the state error before every accepted swap is
 #       judged against 1e-8 at 24/6/2). Without the periodic check there is
 #       no alarm and the disturbed state stays, and this fails.
+#     Known limit (re-review of RC4, M-2): a relative error of 1e-10 on a
+#     term of the update of M of the Row state passes every check here (1e-9
+#     fails them); the Row floors do not rest on it, since every Row value
+#     that decides is computed from scratch.
 #     `debug_max_error`, the largest error relative to max(1, ratio), is
 #     printed. Its limit of 1e-8 was a measured value, not a derived one: the
 #     error of a ratio is proportional to the size of its two terms and to
@@ -124,10 +128,12 @@
 #     confirmation of each swap (the search of the 1e-10 running floors
 #     alone), so a final design can lie one rounding below stage 1 and the
 #     end-of-search comparison must replace it. On 24/6/2, 48/6/3 and 16/8/4
-#     nested, seeds 1:8 (24 runs): the Row floors hold on every seed, every
-#     result is full rank and not below the start in joint log det, and at
-#     least two seeds took the replacement (`floor_fallback` 1; 16/8/4 takes
-#     it on several seeds, so the path does not hang on one rounding).
+#     nested, seeds 1:32 (96 runs; 1:8 until the re-review of RC4, when the
+#     stage 1 starts of that day left exactly the two replacements needed):
+#     the Row floors hold on every seed, every result is full rank and not
+#     below the start in joint log det, and at least two seeds took the
+#     replacement (`floor_fallback` 1; 16/8/4 takes it on several seeds, so
+#     the path does not hang on one rounding).
 #     The repair's output gets the same comparison: on 8/4/3 nested seed 22
 #     (a singular stage 1 start) the hook lets the repair reach a full-rank
 #     design one rounding below the Row floors, which must be rejected:
@@ -1109,7 +1115,7 @@ if (check == "crossed") {
   for (shape in list(c(24, 6, 2), c(48, 6, 3), c(16, 8, 4))) {
     v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
     lay <- layout_of(v, r, nrows, FALSE)
-    for (seed in 1:8) {
+    for (seed in 1:32) {
       set.seed(seed)
       s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
       res <- crossed(s1$treatments, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
