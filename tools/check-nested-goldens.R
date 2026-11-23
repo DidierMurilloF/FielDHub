@@ -10,7 +10,8 @@
 # median + 0.05 s fails. accepted-loss.csv lists caller,t,k,r of the shapes
 # whose loss the owner accepted (spec 10): they are reported with their
 # shortfall and do not fail the run.
-# Onestage callers (phase 2 spec 7, owner decision 2026-11-22): the list is
+# Onestage callers, nested and latinized (phase 2 spec 7, owner decisions
+# 2026-11-22): the list is
 # keyed by caller,t,k,r,iterations, and a listed row is an accepted loss only
 # when nested_acceptance() finds it eligible (accepted_loss_eligible) and its
 # speed rule passes. The list gives a row no exemption beyond that rule: a

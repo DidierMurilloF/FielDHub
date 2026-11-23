@@ -415,8 +415,9 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # 2026-11-22). `noninferior_failed` names the statistics among row_D, row_A,
 # col_D, col_A, joint_D, joint_A whose bootstrap rule fails, comma-separated
 # (D and A of these callers are Column D and Column A, and are named so).
-# `accepted_loss_eligible` is TRUE when the caller is "onestage_nested",
-# `noninferior_failed` is not empty and names only col_D, col_A or joint_A, the
+# `accepted_loss_eligible` is TRUE when the caller is an onestage caller,
+# "onestage_nested" or "onestage_latinized" (owner decision 2026-11-22, which
+# replaces the earlier nested-only scope), `noninferior_failed` is not empty and names only col_D, col_A or joint_A, the
 # candidate's mean joint D is at least the baseline's (no tolerance), and
 # worst_ok, constant_ok, optimum_ok, errors_ok, fallback_ok and clash_ok are
 # all TRUE. A listed onestage row gets pass = NA only when it is eligible.
@@ -539,7 +540,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
       failed[failed == "A"] <- "col_A"
       failed <- intersect(c("row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A"), failed)
       row$noninferior_failed <- paste(failed, collapse = ",")
-      row$accepted_loss_eligible <- b$caller == "onestage_nested" && length(failed) > 0L &&
+      row$accepted_loss_eligible <- length(failed) > 0L &&
         all(failed %in% c("col_D", "col_A", "joint_A")) &&
         isTRUE(cand$joint_D_mean >= b$joint_D_mean) &&
         isTRUE(row$worst_ok) && isTRUE(row$constant_ok) && isTRUE(row$optimum_ok) &&
