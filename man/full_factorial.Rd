@@ -15,10 +15,16 @@ full_factorial(
   seed = NULL,
   locationNames = NULL,
   factorLabels = TRUE,
-  data = NULL
+  data = NULL,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
+\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
+the other. See \code{\link{field_layout}} for placement rules. When supplied,
+the field book includes \code{ROW} and \code{COLUMN}.}
+
 \item{setfactors}{Numeric vector with levels of each factor.}
 
 \item{reps}{Number of replicates (full blocks).}

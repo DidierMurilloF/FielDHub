@@ -11,10 +11,16 @@ latin_square(
   planter = "serpentine",
   seed = NULL,
   locationNames = NULL,
-  data = NULL
+  data = NULL,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
+\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
+the other. See \code{\link{field_layout}} for placement rules. When supplied,
+the field book includes \code{ROW} and \code{COLUMN}.}
+
 \item{t}{Number of treatments.}
 
 \item{reps}{Number of full resolvable squares. By default \code{reps = 1}.}

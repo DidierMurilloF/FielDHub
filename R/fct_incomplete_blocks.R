@@ -3,6 +3,9 @@
 #' @description Randomly generates a resolvable incomplete block design (IBD) of characteristics (t, k, r).
 #' The randomization can be done across locations.
 #'
+#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
+#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
+#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param t Number of treatments, or a character vector with the treatment labels.
 #' @param r Deprecated alias for \code{reps}; positional calls remain supported.
 #' @param reps Number of full resolvable replicates per location.
@@ -66,7 +69,8 @@
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
                               locationNames = NULL, seed = NULL, data = NULL,
-                              reps = NULL) {
+                              reps = NULL,
+                              nrows = NULL, ncols = NULL) {
   reps <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)
@@ -74,7 +78,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   build_incomplete_blocks(
     t = t, k = k, l = l, plotNumber = plotNumber, locationNames = locationNames,
     seed = seed, data = data, reps = reps, caller = "incomplete_blocks",
-    plotNumber_supplied = !missing(plotNumber)
+    plotNumber_supplied = !missing(plotNumber), nrows = nrows, ncols = ncols
   )
 }
 
@@ -100,7 +104,7 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
 build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
                                     locationNames = NULL, seed = NULL, data = NULL,
                                     reps = NULL, caller = "incomplete_blocks",
-                                    plotNumber_supplied = TRUE) {
+                                    plotNumber_supplied = TRUE, nrows = NULL, ncols = NULL) {
   validate_locations(l)
   r <- reps
   seed <- resolve_seed(seed)
@@ -214,7 +218,11 @@ build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
   reproduction_parameters <- record_design_parameters(
     environment(), exclude = c("caller", "plotNumber_supplied")
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols")] <- NULL
+  }
   output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols)
   return(invisible(output))
 }
 

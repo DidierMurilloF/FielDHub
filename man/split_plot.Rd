@@ -14,10 +14,16 @@ split_plot(
   seed = NULL,
   locationNames = NULL,
   factorLabels = TRUE,
-  data = NULL
+  data = NULL,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
+\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
+the other. See \code{\link{field_layout}} for placement rules. When supplied,
+the field book includes \code{ROW} and \code{COLUMN}.}
+
 \item{wp}{Number of whole plots, as an integer or a vector.}
 
 \item{sp}{Number of sub plots per whole plot, as an integer or a vector.}

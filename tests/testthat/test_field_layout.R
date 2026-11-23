@@ -177,3 +177,35 @@ test_that("plot() explains that a stacking is not available", {
     NA
   )
 })
+test_that("RCBD dimensions place complete blocks in a rectangular grid", {
+  args <- list(t = 4, checks = 1, rep_checks = 2, reps = 6, l = 2,
+               plotNumber = c(101, 1001), seed = 42)
+  original <- do.call(RCBD, args)
+  spatial <- do.call(RCBD, c(args, list(nrows = 4, ncols = 9)))
+  book <- spatial$fieldBook
+  expect_identical(book, field_layout(original, nrows = 4, ncols = 9))
+  expect_identical(book, field_layout(original, ncols = 9))
+  expect_identical(book, field_layout(spatial))
+  expect_identical(book, plot_layout(spatial)$allSitesFieldbook)
+  expect_identical(spatial, reproduce_design(spatial))
+  expect_identical(book$TREATMENT, original$fieldBook$TREATMENT)
+  expect_true(all(table(book$LOCATION, book$ROW, book$COLUMN) == 1L))
+  expect_equal(as.numeric(table(book$LOCATION, book$REP, book$CHECKS)[, , "1"]),
+               rep(2, 12))
+  first <- book[book$LOCATION == book$LOCATION[1] & book$REP == 1, ]
+  expect_equal(first$ROW, rep(1:2, each = 3))
+  expect_equal(first$COLUMN, rep(1:3, 2))
+  expect_equal(first$PLOT, c(101:103, 106:104))
+  expect_equal(unname(spatial$plotNumber[[1]][1:2, 1:3]),
+               matrix(first$PLOT, nrow = 2, byrow = TRUE))
+})
+
+test_that("RCBD dimension errors suggest valid field grids", {
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(field_layout(x, nrows = 5, ncols = 7), "36 plots.*4 x 9",
+               class = "fieldhub_input_error")
+  expect_error(RCBD(t = 6, reps = 6, nrows = 5), "Valid dimensions",
+               class = "fieldhub_input_error")
+  expect_error(field_layout(x, nrows = 1.5), "whole number",
+               class = "fieldhub_input_error")
+})

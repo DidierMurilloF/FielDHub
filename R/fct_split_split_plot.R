@@ -2,6 +2,9 @@
 #'
 #' @description It randomly generates a split split plot design (SSPD) across locations.
 #'
+#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
+#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
+#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param wp Number of whole plots, as an integer or a vector.
 #' @param sp Number of sub plots per whole plot, as an integer or a vector.
 #' @param ssp Number of sub-sub plots, as an integer or a vector.
@@ -79,7 +82,8 @@
 #' @export
 split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
                              seed = NULL, locationNames = NULL, factorLabels = TRUE,
-                             data = NULL) {
+                             data = NULL,
+                             nrows = NULL, ncols = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(factorLabels, "factorLabels")
@@ -242,6 +246,10 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     environment(), overrides = list(wp = args1[[1]], sp = args1[[2]], ssp = args1[[3]],
                                     type = if (crd) 1 else 2)
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols")] <- NULL
+  }
   output <- new_fieldhub_design(output, "split_split_plot", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols)
   return(invisible(output))
 }

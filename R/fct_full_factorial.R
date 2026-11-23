@@ -2,6 +2,9 @@
 #'
 #' @description It randomly generates a full factorial design across locations.
 #'
+#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
+#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
+#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param setfactors Numeric vector with levels of each factor.
 #' @param reps Number of replicates (full blocks).
 #' @param l Number of locations. By default \code{l = 1}.
@@ -82,7 +85,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            type = 2, plotNumber = 101, continuous = FALSE,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
-                           data = NULL) {
+                           data = NULL,
+                           nrows = NULL, ncols = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
@@ -233,7 +237,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(data = if (generated_data) NULL else data)
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols")] <- NULL
+  }
   output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter)
   return(invisible(output))
 }
 

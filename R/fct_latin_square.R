@@ -8,6 +8,9 @@
 #' No incomplete design is returned; try a different seed. Designs completed
 #' within the limit retain their existing seeded output.
 #'
+#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
+#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
+#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param t Number of treatments.
 #' @param reps Number of full resolvable squares. By default \code{reps = 1}.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
@@ -77,7 +80,8 @@
 #'
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
-                         seed = NULL, locationNames = NULL, data = NULL) {
+                         seed = NULL, locationNames = NULL, data = NULL,
+                         nrows = NULL, ncols = NULL) {
 
   seed <- resolve_seed(seed)
   local_design_seed(seed)
@@ -205,7 +209,11 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
   reproduction_parameters <- record_design_parameters(environment())
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols")] <- NULL
+  }
   output <- new_fieldhub_design(output, "latin_square", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter)
   return(invisible(output))
 }
 

@@ -11,10 +11,16 @@ CRD(
   locationName = NULL,
   seed = NULL,
   data = NULL,
-  locationNames = NULL
+  locationNames = NULL,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
+\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
+the other. See \code{\link{field_layout}} for placement rules. When supplied,
+the field book includes \code{ROW} and \code{COLUMN}.}
+
 \item{t}{An integer number with total number of treatments or a vector of dimension t with labels.}
 
 \item{reps}{One positive whole-number count of replicates per treatment.}

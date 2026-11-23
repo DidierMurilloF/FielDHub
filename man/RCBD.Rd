@@ -16,7 +16,9 @@ RCBD(
   data = NULL,
   checks = NULL,
   rep_checks = NULL,
-  spread_checks = TRUE
+  spread_checks = TRUE,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
@@ -58,6 +60,11 @@ for every check.}
 repeated copies of each check are spread across the block by placing one
 copy in each of \code{rep_checks} contiguous strata. When \code{FALSE}, the
 whole block is randomized without restriction.}
+
+\item{nrows, ncols}{Optional positive whole numbers specifying the field
+dimensions per location. If only one is given, the other is inferred
+from the plot count, including repeated checks. See \code{\link{field_layout}}
+for how complete blocks are placed and numbered.}
 }
 \value{
 A list with five elements.
@@ -72,6 +79,8 @@ A list with five elements.
   \code{TREATMENT}. When \code{checks} is supplied it gains \code{ENTRY} and
   \code{CHECKS} columns, ordered \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP},
   \code{ENTRY}, \code{CHECKS}, \code{TREATMENT}.
+  When field dimensions are supplied, it also includes \code{ROW} and
+  \code{COLUMN} after \code{PLOT}.
 }
 }
 \description{

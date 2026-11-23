@@ -17,10 +17,16 @@ strip_plot(
   randomizeH = TRUE,
   randomizeV = FALSE,
   data = NULL,
-  reps = 1
+  reps = 1,
+  nrows = NULL,
+  ncols = NULL
 )
 }
 \arguments{
+\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
+the other. See \code{\link{field_layout}} for placement rules. When supplied,
+the field book includes \code{ROW} and \code{COLUMN}.}
+
 \item{Hplots}{Number of horizontal factors, as an integer or a vector.}
 
 \item{Vplots}{Number of vertical factors, as an integer or a vector.}

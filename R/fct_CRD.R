@@ -8,6 +8,9 @@
 #'   \code{do.call(CRD, x$metadata$parameters)}. Data inputs are recorded after
 #'   the existing column selection and normalization.
 #'
+#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
+#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
+#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param t An integer number with total number of treatments or a vector of dimension t with labels.
 #' @param reps One positive whole-number count of replicates per treatment.
 #' @param plotNumber Starting plot number. By default \code{plotNumber = 101}.
@@ -84,7 +87,8 @@
 #'
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
-                seed = NULL, data = NULL, locationNames = NULL) {
+                seed = NULL, data = NULL, locationNames = NULL,
+                nrows = NULL, ncols = NULL) {
   locationName <- resolve_argument_alias(
     locationNames, locationName, new = "locationNames", old = "locationName",
     new_supplied = !missing(locationNames), old_supplied = !missing(locationName)
@@ -170,6 +174,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(locationNames = locationName), exclude = "locationName"
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols")] <- NULL
+  }
   output <- new_fieldhub_design(output, "crd", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols)
   return(invisible(output))
 }
