@@ -48,15 +48,20 @@
 # busy; repeat on a quieter machine before deciding); or when an os shape has
 # row_step or column_step equal to "cut".
 #
-# Backstop rows (outside the exit rules; backstop=no skips them; only shard 1
-# runs them), both with outcome "backstop":
+# Backstop rows (outside the exit rules, but for the test named at the second
+# one; backstop=no skips them; only shard 1 runs them), both with outcome
+# "backstop":
 # - through row_column(), the first of the nested shapes 2500/2/3, 3000/2/3,
 #   4000/2/3 and 6000/2/3 whose joint stage is not startable. Its row has the
 #   warning text in `warning`, `row_step` holds infoDesign$optimization, and
 #   the seconds are those of the call;
-# - 2500/2/3 nested through build_row_column_onestage() (seed 1, `iterations`
+# - 2400/2/3 nested through build_row_column_onestage() (seed 1, `iterations`
 #   20): beyond the universe a step of stage 1 can be the one that cannot
-#   start while the joint stage can (spec 6.1 W3). The row has the stage
+#   start while the joint stage can (spec 6.1 W3). With the limits of Task 8
+#   Step 5 its column step needs 4.19e10 weighted units against the 4e10 it
+#   is sure of, and its joint call 5.47e10 against the start-up limit of
+#   5.6e10 (at 2500/2/3, the shape used before, neither can start now). The
+#   tool fails if that is no longer so. The row has the stage
 #   statuses of the build, so it reports the step that was not started, and
 #   any warning caught (none is expected: the warning of rule W8 is for a
 #   joint stage that cannot start).
@@ -266,10 +271,14 @@ if (backstop == "yes" && shard[1] == 1L) {
     break
   }
   # A stage 1 step that cannot start where the joint stage can.
-  x <- one_build(2500L, 2L, 3L, FALSE, 20L, 1L, FALSE)
+  if (ns$onestage_startable(2L, 2400L, 3L, 3600L, stage = "column") ||
+      !ns$onestage_startable(3L, 2400L, 3L, 3606L, B_row = 6L)) {
+    failures <- c(failures, "backstop 2400/2/3 nested: not the case of a column step that cannot start where the joint call can")
+  }
+  x <- one_build(2400L, 2L, 3L, FALSE, 20L, 1L, FALSE)
   s <- x$search
   rows[[length(rows) + 1L]] <- cbind(
-    data.frame(t = 2500L, nrows = 2L, r = 3L, latinize = FALSE, iterations = 20L, in_os_grid = FALSE,
+    data.frame(t = 2400L, nrows = 2L, r = 3L, latinize = FALSE, iterations = 20L, in_os_grid = FALSE,
                requested = field(s, "requested", NA_integer_), started = field(s, "started", NA_integer_),
                complete = field(s, "complete", NA_integer_),
                row_step = field(s, "row_step", x$outcome), column_step = field(s, "column_step", ""),

@@ -59,8 +59,10 @@ block_gram_limit <- 500
 #' counts that share a block (or a treatment): a block of q distinct
 #' treatments gives q^2 terms, so no dense v x b product is formed. The
 #' eigenvalues of that symmetric matrix are the squared singular values of
-#' A. Returns NULL when the terms are too many (more than 2e7); the caller
-#' then uses the singular value decomposition.
+#' A. Returns NULL when the terms are more than the v b cells of the
+#' incidence table (large blocks: summing them is then slower than the
+#' decomposition, 1.34 s against 0.19 s at 600 treatments in 601 blocks of
+#' 150); the caller then uses the singular value decomposition.
 #'
 #' Measured 2026-11-22 (Task 8 Step 5, ruling R10.4): the Row report of a
 #' nested 2000/1000/4 onestage design (2000 treatments, 4000 blocks of two)
@@ -80,7 +82,7 @@ block_incidence_gram_values <- function(incidence, replication, block_size, tota
   value <- value[in_order]
   group <- group[in_order]
   size <- tabulate(group)
-  if (sum(as.double(size)^2) > 2e7) return(NULL)
+  if (sum(as.double(size)^2) > as.double(nrow(incidence)) * ncol(incidence)) return(NULL)
   first <- cumsum(c(1L, size))[group]
   left <- rep(seq_along(own), size[group])
   right <- sequence(size[group], from = first)
@@ -97,8 +99,9 @@ block_incidence_gram_values <- function(incidence, replication, block_size, tota
 #'
 #' `digits = NULL` returns the unrounded values. `gram` chooses how the
 #' squared singular values are computed: TRUE from the Gram matrix of the
-#' smaller side, FALSE from the singular value decomposition, NULL (the
-#' default) the Gram matrix above `block_gram_limit` treatments and blocks.
+#' smaller side (the decomposition where that function declines), FALSE
+#' from the singular value decomposition, NULL (the default) the Gram matrix
+#' above `block_gram_limit` treatments and blocks.
 #' Both give the same values (checked to 1e-10 unrounded by
 #' `tools/check-onestage-engine.R report`).
 #' @noRd

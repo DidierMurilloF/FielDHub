@@ -50,8 +50,12 @@ onestage_form_blocks <- 500
 #' held, took 14.3 s in `what=stages`). So W stays 2e11. Three builds with larger calls broke the
 #' rule at weight 1: nested 1000/500/4 15.5 s, nested 1500/750/3 15.2 s and
 #' latinized 2000/1000/3 15.5 and 14.7 s (two seeds). The weights below are
-#' for them; the builds have to be timed again with the weights (the
-#' `confirm` run of Task 8 Step 5).
+#' for them. Timed again with the weights and these limits (commit d7d544c,
+#' same machine and runs, `~/fieldhub-libs/runs/phase2/t8s5/confirm/`): the
+#' longest of 102 builds takes 14.16 s (`os` 200/2/4 nested; 200/100/4
+#' nested 14.1 s), and the three builds above take 13.7 s, 12.1 s and 10.9
+#' to 11.0 s. No `os` step of stage 1 and no repair is cut in search 1 there
+#' either.
 #'
 #' Start and finish (`what=startup`): the slowest are the joint call of
 #' nested 2000/1000/4, 2.23 s for 3.57e10 units (4008 block columns), and
@@ -89,14 +93,18 @@ onestage_form_blocks <- 500
 #' two digits that holds the universe: 6.5 x 1.926e8 = 1.25e9 bytes. A whole
 #' `row_column()` call at that size peaked at 1.65e9 bytes.
 #'
-#' Whole `row_column(iterations = 200)` calls (`what=call`), seconds: 14.3
-#' (latinized 2000/20/4), 14.6 (nested 1000/2/4), 17.2 (nested 2000/20/4),
-#' 18.9 (latinized 2000/2/4), 23.1 (nested 2000/2/4), 33.7 (nested
-#' 2000/1000/4). None is inside 15 s (60 s at a quarter of the speed), so
-#' the documentation says that the work of the search is capped, not that
-#' the call ends in a bounded time. Of the 33.7 s, 14.2 s were the singular
-#' value decomposition of the Row report, which is now read from a Gram
-#' matrix (`block_incidence_gram_values()`).
+#' Whole `row_column(iterations = 200)` calls (`what=call`), seconds, at
+#' weight 1 and then in the confirm run: latinized 2000/20/4 14.3 and 14.3,
+#' nested 1000/2/4 14.6 and 12.7, nested 2000/20/4 17.2 and 17.0, latinized
+#' 2000/2/4 18.9 and 15.8, nested 2000/2/4 23.1 and 15.7, nested 2000/1000/4
+#' 33.7 and 18.7. The twelve calls of the confirm run (t = 200 to 2000) take
+#' 12.1 to 18.7 s. Not all are inside 15 s (60 s at a quarter of the speed),
+#' so the documentation says that the work of the search is capped, not
+#' that the call ends in a bounded time. Of the 33.7 s, 14.2 s were the
+#' singular value decomposition of the Row report, which is now read from a
+#' Gram matrix (`block_incidence_gram_values()`); in the confirm run that
+#' call spends 11.0 s in the engine, 1.5 s on the joint efficiency, 3.2 s on
+#' the report and 3.0 s on the concurrence tables.
 #' @noRd
 onestage_work_limit <- 2e11
 #' @noRd
@@ -155,7 +163,8 @@ onestage_limits <- function() {
 #' | 3 start, finish, treatment form | | .075 | .061-.062 | .058-.069 | .058-.065 | .057-.064 | .060-.063 |
 #'
 #' - The baseline of mode 4 leaves out the column steps of a design with two
-#'   columns (2 blocks), .085-.162: they use at most 8e8 units of a build.
+#'   columns (2 blocks), .085-.162: they use at most 1.06e9 units of a
+#'   build (latinized 2000/1000/4, 0.13 s; confirm run).
 #' - Steps with less than 5 ms of work are left out (the clock of the steps
 #'   has 1 ms).
 #' - The search of a call depends on r and on the coding as much as on its
