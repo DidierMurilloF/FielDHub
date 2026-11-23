@@ -332,7 +332,6 @@ row_column <- function(t = NULL, nrows = NULL, r = NULL, l = 1, plotNumber= 101,
   N <- nt * r
   out_row_col_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
-  local_optimizer_options()
   searches_requested <- NULL
   searches_completed <- integer()
   joint_warned <- FALSE

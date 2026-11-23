@@ -89,17 +89,16 @@ test_that("debug mode checks every accepted swap against a fresh computation", {
 })
 
 test_that("output has the blocksdesign::blocks() shape", {
+  ref <- readRDS(test_path("fixtures", "blocksdesign-references.rds"))
   set.seed(6)
   d <- blocks_engine(10, 2, 4)
   expect_named(d$Design, c("Level_1", "plots", "treatments"))
   expect_identical(levels(d$Design$Level_1), paste0("B", 1:4))
   expect_identical(levels(d$Design$treatments), as.character(1:10))
   expect_named(d$Blocks_model, c("Level", "Blocks", "D-Efficiency", "A-Efficiency", "A-Bound"))
-  skip_if_not_installed("blocksdesign")
-  ref <- blocksdesign::blocks(treatments = 10, replicates = 2, blocks = 4, searches = 1, seed = 1)
-  expect_identical(vapply(d$Design, class, ""), vapply(ref$Design, class, ""))
-  expect_identical(levels(d$Design$Level_1), levels(ref$Design$Level_1))
-  expect_identical(vapply(d$Blocks_model, class, ""), vapply(ref$Blocks_model, class, ""))
+  expect_identical(vapply(d$Design, class, ""), ref$shape$design)
+  expect_identical(levels(d$Design$Level_1), ref$shape$level_1)
+  expect_identical(vapply(d$Blocks_model, class, ""), ref$shape$blocks_model)
 })
 
 test_that("the smallest accepted sizes (n = 2b) always give a connected design", {
@@ -147,15 +146,13 @@ test_that("known optima are reached in at least 95 of 100 seeds", {
 
 test_that("efficiency definitions agree with blocksdesign on known optima", {
   skip_on_cran()
-  skip_if_not_installed("blocksdesign")
-  for (case in list(c(7, 3, 7), c(13, 4, 13))) {
+  optima <- readRDS(test_path("fixtures", "blocksdesign-references.rds"))$optima
+  for (i in seq_len(nrow(optima))) {
     set.seed(1)
-    ours <- blocks_engine(case[1], case[2], case[3])$Blocks_model
-    theirs <- blocksdesign::blocks(treatments = case[1], replicates = case[2], blocks = case[3],
-                                   searches = 20, seed = 1)$Blocks_model
-    # blocksdesign reports efficiencies rounded to 7 decimals.
-    expect_identical(round(ours[["D-Efficiency"]], 7), theirs[["D-Efficiency"]])
-    expect_identical(round(ours[["A-Efficiency"]], 7), theirs[["A-Efficiency"]])
+    ours <- blocks_engine(optima$v[i], optima$r[i], optima$b[i])$Blocks_model
+    # The recorded efficiencies are blocksdesign's, rounded to 7 decimals.
+    expect_identical(round(ours[["D-Efficiency"]], 7), round(optima$D[i], 7))
+    expect_identical(round(ours[["A-Efficiency"]], 7), round(optima$A[i], 7))
   }
 })
 

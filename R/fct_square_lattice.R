@@ -28,10 +28,6 @@
 #'   \item \code{fieldBook} is a data frame with the square lattice design field book.
 #' }
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#' 
 #' @examples
 #' # Example 1: Generates a square lattice design with 5 full blocks, 8 units per IBlock,
 #' # 8 IBlocks for a square number of treatmens of 64 in two locations.

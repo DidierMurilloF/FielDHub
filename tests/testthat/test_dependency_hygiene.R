@@ -23,36 +23,17 @@ test_that("the lightweight viridis scale preserves the existing heatmap palette"
   expect_identical(fieldhub_viridis_scale()$palette(points), expected)
 })
 
-test_that("blocksdesign is used only from the allow-listed functions", {
+test_that("FielDHub has no dependency on blocksdesign", {
   root <- testthat::test_path("..", "..")
   r_dir <- file.path(root, "R")
   skip_if_not(file.exists(file.path(r_dir, "fct_CRD.R")), "The R/ sources are not available.")
-  allowed_functions <- c("build_row_column_onestage", "BlockEfficiencies")
-  allowed_files <- "engine_optimizer_options.R"
 
-  offenders <- character()
-  for (path in list.files(r_dir, pattern = "[.][Rr]$", full.names = TRUE)) {
-    if (basename(path) %in% allowed_files) next
-    parsed <- parse(path, keep.source = TRUE)
-    data <- utils::getParseData(parsed, includeText = TRUE)
-    hits <- data[(data$token == "SYMBOL_PACKAGE" & data$text == "blocksdesign") |
-                   (data$token == "STR_CONST" &
-                      data$text %in% c("\"blocksdesign\"", "'blocksdesign'")), ]
-    if (nrow(hits) == 0L) next
-    # The enclosing top-level expression of each hit, named by its assignment.
-    top <- data[data$parent == 0L, ]
-    for (h in seq_len(nrow(hits))) {
-      expr <- top[top$line1 <= hits$line1[h] & top$line2 >= hits$line1[h], ]
-      expr_id <- expr$id[1L]
-      first <- utils::head(data[data$parent == expr_id, ], 1L)
-      name <- utils::getParseText(data, first$id)
-      name <- sub("^`(.*)`$", "\\1", name)
-      if (!name %in% allowed_functions) {
-        offenders <- c(offenders, paste0(basename(path), ":", hits$line1[h], " in ", name))
-      }
-    }
+  description <- read.dcf(file.path(root, "DESCRIPTION"))
+  for (field in c("Depends", "Imports", "Suggests", "LinkingTo", "Enhances")) {
+    if (!field %in% colnames(description)) next
+    declared <- trimws(sub("\\s*\\(.*$", "", strsplit(description[1L, field], ",")[[1L]]))
+    expect_false("blocksdesign" %in% declared, info = field)
   }
-  expect_identical(offenders, character(), info = paste(offenders, collapse = "\n"))
 
   namespace <- readLines(file.path(root, "NAMESPACE"))
   expect_false(any(grepl("^\\s*import(From)?\\(\\s*blocksdesign\\b", namespace)))
@@ -66,4 +47,58 @@ test_that("blocksdesign is used only from the allow-listed functions", {
     if (length(hit) > 0L) src_hits <- c(src_hits, paste0(basename(path), ":", hit))
   }
   expect_identical(src_hits, character())
+
+  quotes <- c("\"blocksdesign\"", "'blocksdesign'")
+  offenders <- character()
+  for (path in list.files(r_dir, pattern = "[.][Rr]$", full.names = TRUE)) {
+    data <- utils::getParseData(parse(path, keep.source = TRUE), includeText = TRUE)
+    hits <- data[(data$token == "SYMBOL_PACKAGE" & data$text == "blocksdesign") |
+                   (data$token == "STR_CONST" & data$text %in% quotes), ]
+    if (nrow(hits) > 0L) {
+      offenders <- c(offenders, paste0(basename(path), ":", hits$line1))
+    }
+  }
+  expect_identical(offenders, character(), info = paste(offenders, collapse = "\n"))
+
+  loaders <- c("requireNamespace", "loadNamespace", "getFromNamespace",
+               "skip_if_not_installed", "library", "require")
+  allowed <- c("test_dependency_hygiene.R", "test_app_dependencies.R",
+               "test_design_args_parity.R")
+  test_offenders <- character()
+  tests <- list.files(testthat::test_path("."), pattern = "[.][Rr]$", full.names = TRUE)
+  for (path in tests[!basename(tests) %in% allowed]) {
+    data <- utils::getParseData(parse(path, keep.source = TRUE), includeText = TRUE)
+    if (is.null(data)) next
+    if (any(data$token == "SYMBOL_PACKAGE" & data$text == "blocksdesign")) {
+      test_offenders <- c(test_offenders, paste0(basename(path), ": blocksdesign::"))
+    }
+    for (h in which(data$token == "STR_CONST" & data$text %in% quotes)) {
+      # The call that holds the string: the function name sits in a child
+      # expression of the call expression, next to the argument.
+      parent <- data$parent[h]
+      call_name <- ""
+      while (parent != 0L) {
+        kids <- data$id[data$parent == parent & data$token == "expr"]
+        fn <- data$text[data$parent %in% kids & data$token == "SYMBOL_FUNCTION_CALL"]
+        if (length(fn) > 0L) {
+          call_name <- fn[1L]
+          break
+        }
+        parent <- data$parent[data$id == parent]
+      }
+      # The value of a `.package =` argument: the string follows `.package`, `=`.
+      before <- data[data$line1 <= data$line1[h] & data$terminal, ]
+      before <- before[order(before$line1, before$col1), ]
+      pos <- which(before$id == data$id[h])
+      is_package_arg <- length(pos) == 1L && pos > 2L &&
+        before$token[pos - 1L] == "EQ_SUB" && before$text[pos - 2L] == ".package"
+      if (call_name %in% loaders || is_package_arg) {
+        test_offenders <- c(test_offenders, paste0(basename(path), ":", data$line1[h]))
+      }
+    }
+  }
+  expect_identical(test_offenders, character(), info = paste(test_offenders, collapse = "\n"))
+
+  ignore <- readLines(file.path(root, ".Rbuildignore"))
+  expect_true("^tools$" %in% ignore)
 })

@@ -16,8 +16,8 @@ maintainers. A clean local check is not evidence that remote CI has passed.
 4. Complete a licensing review with the appropriate copyright holders. Earlier
    releases contained efficiency helpers marked as sourced from the GPL-licensed
    `blocksdesign` package while FielDHub declared MIT. Replacing those helpers
-   does not itself resolve obligations for historical distributions. Record the
-   maintainer's resolution before publishing; do not infer that an unchanged
+   and removing the dependency do not themselves resolve obligations for
+   historical distributions. Record the maintainer's resolution before publishing; do not infer that an unchanged
    package license is sufficient.
 
 ## Required evidence

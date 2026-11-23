@@ -29,10 +29,6 @@
 #'   \item \code{fieldBook} is a data frame with the incomplete block design field book.
 #' }
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#'
 #' @examples
 #' # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
 #' # 1-resolvable IBDs
