@@ -82,10 +82,15 @@ Returns the field book of a design with the \code{ROW} and
 
   Dimensions that do not fit are an error that suggests valid ones.
   \code{layout} and \code{stacked} belong to the numbered layouts: giving
-  either together with dimensions is an error. A design built with
-  dimensions (\code{RCBD(..., nrows = 4)}) has its grid stored in its field
-  book, which is returned as it is whatever the \code{planter} or
-  \code{stacked}; other dimensions are an error.
+  either together with dimensions is an error.
+
+  A design built with dimensions (\code{RCBD(..., nrows = 4)}) has one
+  layout: the grid stored in its field book, numbered along the path of the
+  planter it was built with. \code{field_layout()} returns that field book
+  when it is called with no other argument, with the same \code{planter} or
+  with the same dimensions. Another \code{planter}, a \code{stacked} other
+  than the default or other dimensions are an error: for another layout,
+  build the design again with other dimensions or without them.
 }
 \examples{
 rcbd <- RCBD(t = 6, reps = 3, plotNumber = 101, seed = 1)

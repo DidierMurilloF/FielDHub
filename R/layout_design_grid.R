@@ -18,15 +18,33 @@ validate_field_dimension <- function(value, name) {
   invisible(value)
 }
 
-#' Whether the dimensions asked for are those of the grid a field book
-#' already has; other dimensions are an error
+#' The planter of a design built with field dimensions: its own argument,
+#' or a serpentine for the designs that have none
 #' @noRd
-matches_stored_grid <- function(book, nrows, ncols) {
-  rows <- max(book$ROW)
-  cols <- max(book$COLUMN)
+stored_grid_planter <- function(x) {
+  planter <- x$metadata$parameters$planter
+  if (is.null(planter)) "serpentine" else planter
+}
+
+#' A design built with field dimensions has that one layout
+#' @noRd
+abort_fixed_grid <- function(x) {
+  fieldhub_abort(
+    "This design was built on a fixed ", max(x$fieldBook$ROW), " x ", max(x$fieldBook$COLUMN),
+    " field with a ", stored_grid_planter(x), " planter, and that is its only layout. ",
+    "For another layout, build the design again with other 'nrows' and 'ncols', ",
+    "or without them."
+  )
+}
+
+#' Whether the dimensions asked for are those of the grid the design was
+#' built on; other dimensions are an error
+#' @noRd
+matches_stored_grid <- function(x, nrows, ncols) {
+  rows <- max(x$fieldBook$ROW)
+  cols <- max(x$fieldBook$COLUMN)
   if ((is.null(nrows) || nrows == rows) && (is.null(ncols) || ncols == cols)) return(TRUE)
-  fieldhub_abort("This design already has a stored ", rows, " x ", cols,
-                 " field layout: 'nrows' and 'ncols' must match it.")
+  abort_fixed_grid(x)
 }
 
 #' Number the plots of every location along the planting path of its field
@@ -116,7 +134,7 @@ design_grid_layout <- function(x, spec, nrows, ncols, planter) {
   if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
   if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
   if (has_design_grid(x)) {
-    matches_stored_grid(x$fieldBook, nrows, ncols)
+    matches_stored_grid(x, nrows, ncols)
     return(x$fieldBook)
   }
 
@@ -163,7 +181,7 @@ rcbd_grid_layout <- function(x, nrows, ncols, planter) {
 
   book <- x$fieldBook
   if (all(c("ROW", "COLUMN") %in% names(book))) {
-    matches_stored_grid(book, nrows, ncols)
+    matches_stored_grid(x, nrows, ncols)
     return(book)
   }
 

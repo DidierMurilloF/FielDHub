@@ -50,7 +50,11 @@
   neighbours. The randomization is that of the same call without
   dimensions: only `PLOT`, `ROW` and `COLUMN` differ. Dimensions that do
   not fit are an error that suggests valid ones, and `layout` or
-  `stacked` together with dimensions is an error. See `?field_layout`.
+  `stacked` together with dimensions is an error. A design built with
+  dimensions has that one layout: `field_layout()` returns it, and
+  asking for another planter, a stacking or other dimensions is an error
+  that says to build the design again with other dimensions or without
+  them. See `?field_layout`.
 
 - `RCBD()` with dimensions keeps `plotNumber` as the matrix of blocks by
   plots, adds the field map of the plot numbers as `plotNumberField`,

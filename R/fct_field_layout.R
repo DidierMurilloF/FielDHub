@@ -45,10 +45,15 @@
 #'
 #'   Dimensions that do not fit are an error that suggests valid ones.
 #'   \code{layout} and \code{stacked} belong to the numbered layouts: giving
-#'   either together with dimensions is an error. A design built with
-#'   dimensions (\code{RCBD(..., nrows = 4)}) has its grid stored in its field
-#'   book, which is returned as it is whatever the \code{planter} or
-#'   \code{stacked}; other dimensions are an error.
+#'   either together with dimensions is an error.
+#'
+#'   A design built with dimensions (\code{RCBD(..., nrows = 4)}) has one
+#'   layout: the grid stored in its field book, numbered along the path of the
+#'   planter it was built with. \code{field_layout()} returns that field book
+#'   when it is called with no other argument, with the same \code{planter} or
+#'   with the same dimensions. Another \code{planter}, a \code{stacked} other
+#'   than the default or other dimensions are an error: for another layout,
+#'   build the design again with other dimensions or without them.
 #'
 #' @param x A design created by a FielDHub function.
 #' @param layout Layout option, a whole number. The options depend on the
@@ -86,6 +91,13 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   }
   x <- with_design_class(x)
   check_layout_arguments(planter, stacked)
+  # A design built with dimensions has one layout: its grid, numbered along
+  # the path of the planter it was built with
+  if (stores_design_grid(x) &&
+      ((!missing(planter) && !identical(planter, stored_grid_planter(x))) ||
+         !identical(stacked, "vertical"))) {
+    abort_fixed_grid(x)
+  }
   if (!is.null(nrows) || !is.null(ncols)) {
     if (!missing(layout) || !missing(stacked)) {
       fieldhub_abort("'layout' and 'stacked' select a numbered layout: ",

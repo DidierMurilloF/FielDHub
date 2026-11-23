@@ -60,6 +60,12 @@ has_design_grid <- function(x) {
        all(c("ROW_SQ", "COLUMN_SQ") %in% names(x$fieldBook)))
 }
 
+# A design built with field dimensions: its field book holds the grid
+stores_design_grid <- function(x) {
+  has_design_grid(x) ||
+    (inherits(x, "fieldhub_rcbd") && all(c("ROW", "COLUMN") %in% names(x$fieldBook)))
+}
+
 #' Layout options of a design
 #'
 #' @param x A design result.

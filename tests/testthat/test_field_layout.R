@@ -405,14 +405,33 @@ test_that("field dimensions must be single positive whole numbers", {
                class = "fieldhub_input_error")
 })
 
-test_that("a design with a stored grid accepts only its own dimensions", {
-  for (stored in list(RCBD(t = 6, reps = 6, seed = 1, nrows = 4),
-                      incomplete_blocks(t = 12, k = 4, reps = 3, seed = 1, nrows = 4))) {
-    expect_identical(field_layout(stored, nrows = 4, ncols = 9), stored$fieldBook)
-    expect_identical(field_layout(stored, ncols = 9), stored$fieldBook)
-    expect_error(field_layout(stored, nrows = 6), "already has a stored 4 x 9 field layout",
+test_that("a design built on a field grid returns that grid only", {
+  designs <- list(
+    serpentine = RCBD(t = 6, reps = 6, seed = 1, nrows = 4),
+    cartesian = RCBD(t = 6, reps = 6, seed = 1, nrows = 4, planter = "cartesian"),
+    serpentine = incomplete_blocks(t = 12, k = 4, reps = 3, seed = 1, nrows = 4),
+    cartesian = latin_square(t = 3, reps = 3, seed = 1, ncols = 9, planter = "cartesian")
+  )
+  for (i in seq_along(designs)) {
+    stored <- designs[[i]]
+    built <- names(designs)[i]
+    rows <- max(stored$fieldBook$ROW)
+    other <- setdiff(c("serpentine", "cartesian"), built)
+    # Defaults, the planter of the design and its own dimensions give the grid
+    expect_identical(field_layout(stored), stored$fieldBook)
+    expect_identical(field_layout(stored, planter = built), stored$fieldBook)
+    expect_identical(field_layout(stored, stacked = "vertical"), stored$fieldBook)
+    expect_identical(field_layout(stored, nrows = rows, ncols = 9), stored$fieldBook)
+    expect_identical(field_layout(stored, ncols = 9, planter = built), stored$fieldBook)
+    fixed <- paste0("built on a fixed ", rows, " x 9 field with a ", built,
+                    " planter.*again with other 'nrows' and 'ncols', or without them")
+    expect_error(field_layout(stored, planter = other), fixed, class = "fieldhub_input_error")
+    expect_error(field_layout(stored, ncols = 9, planter = other), fixed,
                  class = "fieldhub_input_error")
-    expect_error(field_layout(stored, nrows = 4, ncols = 6), "already has a stored",
+    expect_error(field_layout(stored, stacked = "horizontal"), fixed,
+                 class = "fieldhub_input_error")
+    expect_error(field_layout(stored, nrows = 6), fixed, class = "fieldhub_input_error")
+    expect_error(field_layout(stored, nrows = rows, ncols = 6), fixed,
                  class = "fieldhub_input_error")
   }
 })

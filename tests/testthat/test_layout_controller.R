@@ -120,3 +120,21 @@ test_that("field grids of every classic design reach the Shiny layout view", {
     })
   }
 })
+
+test_that("a design built on a field grid shows its grid under every Shiny selection", {
+  design <- RCBD(t = 6, reps = 6, l = 2, plotNumber = c(101, 1001), seed = 1, nrows = 4)
+  planter <- "serpentine"
+  server <- function(input, output, session) {
+    view <- app_layout_selection(input, session, function() design, function() planter,
+                                 c(layout = "layout", stacked = "stacked", location = "location"))
+  }
+  for (planter in c("serpentine", "cartesian")) {
+    shiny::testServer(server, {
+      for (stacked in c("vertical", "horizontal")) {
+        session$setInputs(stacked = stacked, layout = "1", location = "2")
+        expect_identical(view()$allSitesFieldbook, design$fieldBook)
+        expect_silent(ggplot2::ggplot_build(view()$out_layout))
+      }
+    })
+  }
+})
