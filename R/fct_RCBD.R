@@ -66,10 +66,14 @@
 #'   repeated copies of each check are spread across the block by placing one
 #'   copy in each of \code{rep_checks} contiguous strata. When \code{FALSE}, the
 #'   whole block is randomized without restriction.
-#' @param nrows,ncols Optional positive whole numbers specifying the field
-#'   dimensions per location. If only one is given, the other is inferred
-#'   from the plot count, including repeated checks. See \code{\link{field_layout}}
-#'   for how complete blocks are placed and numbered.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots, including repeated checks. The complete blocks are then
+#'   equal rectangles of the field, and the plots are numbered along the planting
+#'   path of the whole field (see \code{planter}): the numbering does not restart
+#'   in each block, so with \code{continuous = FALSE} the hundreds of a plot
+#'   number name the block only where the blocks lie one above the other.
+#'   See \code{\link{field_layout}} for how the blocks are placed.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -88,14 +92,22 @@
 #'     random-number settings and effective input parameters.
 #'   \item \code{infoDesign} is a list with information on the design parameters.
 #'   \item \code{layoutRandom} is the RCBD layout randomization for each location.
-#'   \item \code{plotNumber} is the plot number layout for each location.
+#'   \item \code{plotNumber} is the plot number layout for each location: a
+#'   matrix of blocks by plots, whose cells are the plot numbers of the treatments
+#'   of \code{layoutRandom}. It has this shape with and without field dimensions.
+#'   \item \code{plotNumberField}, only when field dimensions are supplied, is the
+#'   field map of the plot numbers for each location: a matrix of \code{nrows} by
+#'   \code{ncols} with the first field row in its last row, as the field maps of
+#'   the other designs. \code{infoDesign} then records \code{nrows} and
+#'   \code{ncols}.
 #'   \item \code{fieldBook} is a data frame with the RCBD field book design. Without
 #'   \code{checks} it has columns \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP} and
 #'   \code{TREATMENT}. When \code{checks} is supplied it gains \code{ENTRY} and
 #'   \code{CHECKS} columns, ordered \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP},
 #'   \code{ENTRY}, \code{CHECKS}, \code{TREATMENT}.
 #'   When field dimensions are supplied, it also includes \code{ROW} and
-#'   \code{COLUMN} after \code{PLOT}.
+#'   \code{COLUMN} after \code{PLOT}; its rows and treatments are those of the
+#'   design without dimensions, and only \code{PLOT} differs.
 #' }
 #' 
 #'
@@ -346,12 +358,22 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
   )
   output <- new_fieldhub_design(output, "rcbd", parameters = reproduction_parameters)
   if (!is.null(nrows) || !is.null(ncols)) {
-    output$fieldBook <- field_layout(output, planter = planter, nrows = nrows, ncols = ncols)
-    output$plotNumber[] <- lapply(location_books(output), function(book) {
-      plots <- matrix(NA_real_, nrow = max(book$ROW), ncol = max(book$COLUMN))
-      plots[cbind(book$ROW, book$COLUMN)] <- book$PLOT
-      plots
-    })
+    output <- store_design_grid(output, nrows, ncols, planter = planter, maps = "plotNumber")
+    books <- location_books(output)
+    # Field maps have the first field row in their last row
+    output$plotNumberField <- stats::setNames(lapply(books, function(book) {
+      map <- matrix(book$PLOT[NA], nrow = max(book$ROW), ncol = max(book$COLUMN))
+      map[cbind(max(book$ROW) + 1L - book$ROW, book$COLUMN)] <- book$PLOT
+      map
+    }), names(output$plotNumber))
+    output$infoDesign <- append(
+      output$infoDesign,
+      list(nrows = max(output$fieldBook$ROW), ncols = max(output$fieldBook$COLUMN)),
+      after = which(names(output$infoDesign) == "locationNames")
+    )
+    classes <- class(output)
+    output <- output[c(setdiff(names(output), c("fieldBook", "metadata")), "fieldBook", "metadata")]
+    class(output) <- classes
   }
   return(invisible(output))
 }

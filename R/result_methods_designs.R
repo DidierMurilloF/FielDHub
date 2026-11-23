@@ -91,7 +91,12 @@ print.summary.fieldhub_rcbd <- function(x, ...) {
   summary_list("1. Information on the design parameters:", x$infoDesign)
   summary_print("2. Layout randomization for each location:", x$layoutRandom)
   summary_print("3. Plot numbers layout:", x$plotNumber)
-  summary_str("4. Structure of the data frame with the RCBD field book:", x$fieldBook)
+  if (is.null(x$plotNumberField)) {
+    summary_str("4. Structure of the data frame with the RCBD field book:", x$fieldBook)
+  } else {
+    summary_print("4. Field map of plot numbers:", x$plotNumberField)
+    summary_str("5. Structure of the data frame with the RCBD field book:", x$fieldBook)
+  }
   invisible(x)
 }
 

@@ -337,6 +337,42 @@ test_that("fields of one row and of one column are valid grids", {
   }
 })
 
+test_that("RCBD with dimensions keeps plotNumber by blocks and adds the field map", {
+  args <- list(t = 4, checks = 1, rep_checks = 2, reps = 6, l = 2,
+               plotNumber = c(101, 1001), seed = 42)
+  original <- do.call(RCBD, args)
+  spatial <- do.call(RCBD, c(args, list(nrows = 4, ncols = 9)))
+  book <- spatial$fieldBook
+  expect_identical(names(original), c("infoDesign", "layoutRandom", "plotNumber",
+                                      "fieldBook", "metadata"))
+  expect_null(original$infoDesign$nrows)
+  expect_identical(spatial$layoutRandom, original$layoutRandom)
+  expect_identical(names(spatial$plotNumber), names(original$plotNumber))
+  expect_identical(names(spatial$plotNumberField), names(original$plotNumber))
+  expect_equal(as.numeric(table(book$LOCATION, book$REP, book$CHECKS)[, , "1"]), rep(2, 12))
+  sites <- split(book, book$LOCATION, drop = TRUE)
+  for (i in seq_along(sites)) {
+    site <- sites[[i]]
+    plots <- spatial$plotNumber[[i]]
+    expect_identical(dim(plots), dim(original$plotNumber[[i]]))
+    expect_type(plots, "integer")
+    # plotNumber still lines up cell for cell with layoutRandom
+    treatments <- do.call(rbind, strsplit(spatial$layoutRandom[[i]][, 2L], " "))
+    expect_identical(site$TREATMENT[match(plots, site$PLOT)], as.vector(treatments))
+    expect_identical(site$REP[match(plots, site$PLOT)], as.vector(row(plots)))
+    # The field map has field row 1 in its last row, as other field maps
+    map <- spatial$plotNumberField[[i]]
+    expect_identical(dim(map), c(4L, 9L))
+    expect_identical(map[cbind(5L - site$ROW, site$COLUMN)], site$PLOT)
+  }
+  expect_identical(spatial$infoDesign[c("nrows", "ncols")], list(nrows = 4L, ncols = 9L))
+  expect_identical(RCBD(t = 6, reps = 6, seed = 1, ncols = 9)$infoDesign[c("nrows", "ncols")],
+                   list(nrows = 4L, ncols = 9L))
+  expect_true(any(grepl("nrows", capture.output(print(spatial)))))
+  expect_true(any(grepl("ncols", capture.output(summary(spatial)))))
+  expect_true(any(grepl("Field map of plot numbers", capture.output(summary(spatial)))))
+})
+
 test_that("invalid field dimensions suggest grids that preserve the design", {
   x <- RCBD(t = 6, reps = 6, seed = 1)
   expect_error(field_layout(x, nrows = 5, ncols = 7), "36 plots.*4 x 9",
