@@ -409,6 +409,42 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
        search = search)
 }
 
+#' Failed escapes in a row that end one search of the nested row step of
+#' stage 1 (`blocks_engine(resolvable = TRUE)`, mode 1; phase 2 spec 6.1).
+#' The evaluation budget of the step is unchanged: resolvable mode's pool of
+#' 20 searches of ten full passes.
+#'
+#' Measured 2026-11-22 (root cause of the nested Row shortfall at t = 200 and
+#' `iterations` = 200; scratch `~/fieldhub-libs/scratch/rc3/d2.R`, logs
+#' `rc3-d2-*.log` in `~/fieldhub-libs/runs/phase2/`). With resolvable mode's
+#' five escapes the step ended on its budget after 2 to 7 of its 20 searches
+#' on every nested shape with t = 200, each search as shallow as the one
+#' before, and `iterations` does not raise the effort of stage 1 (spec 6.2).
+#' So at `iterations` = 200 the Row values of a build were the best of ten
+#' such steps, while the 1.7.0 Row values rise with `iterations`: the mean
+#' Row D and Row A ended 0.1 to 0.4 of a 1.7.0 SD below the 1.7.0 mean at
+#' 200/25/3, 200/100/3, 200/25/4 and 200/100/4. With the same budget and
+#' work, one deeper search does better than several shallow ones. Mean Row D
+#' of the step alone, 12 seeds, less the value with 5 escapes, in units of
+#' 1e-6 (Row A in brackets):
+#'
+#' | Nested shape | 10 | 20 | 40 | 80 |
+#' |---|---|---|---|---|
+#' | 200/25/3 | 2.2 (9) | 2.4 (10) | 4.3 (16) | 4.3 (16) |
+#' | 200/100/3 | 1.1 (9) | 1.3 (11) | 2.2 (19) | 2.1 (19) |
+#' | 200/25/4 | 3.0 (10) | 4.7 (16) | 4.7 (16) | 4.7 (16) |
+#' | 200/100/4 | 1.1 (9) | 1.6 (12) | 1.9 (13) | 1.9 (13) |
+#'
+#' From 40 on the first search uses the whole budget there, so a larger
+#' value changes nothing. Through `row_column()`, `iterations` = 200, 50
+#' seeds, mean Row D less the 1.7.0 mean in 1.7.0 SDs, before and after:
+#' 200/25/3 -0.36 and +0.67; 200/100/3 -0.23 and +0.16; 200/25/4 -0.10 and
+#' +0.52; 200/100/4 -0.10 and +0.12. The shared row step (mode 4) keeps five
+#' escapes: its Row values pass the Row rules on every `os` shape, none
+#' near the margin.
+#' @noRd
+onestage_row_stale_escapes <- 40L
+
 #' Stage 1 of the onestage search: rows first (phase 2 spec 6.1)
 #'
 #' An unconstrained one-way search of the rows, swaps within a replicate, then
@@ -528,7 +564,8 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_left, first,
                    # Plot order of the engine output: replicate, row (block),
                    # plot in row: the canonical order, the plot's position
                    # in its row as its column.
-                   out <- blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = limit, admission = FALSE)
+                   out <- blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = limit, admission = FALSE,
+                                        max_stale_escapes = onestage_row_stale_escapes)
                    list(treatments = out$Design$treatments, scored = TRUE, search = out$search)
                  }
                })

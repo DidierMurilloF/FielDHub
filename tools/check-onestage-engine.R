@@ -70,7 +70,7 @@
 #     result is full rank and not below the start in joint log det, and at
 #     least two seeds took the replacement (`floor_fallback` 1; 16/8/4 takes
 #     it on several seeds, so the path does not hang on one rounding).
-#     The repair's output gets the same comparison: on 8/4/3 nested seed 36
+#     The repair's output gets the same comparison: on 8/4/3 nested seed 16
 #     (a singular stage 1 start) the hook lets the repair reach a full-rank
 #     design one rounding below the Row floors, which must be rejected:
 #     `floor_fallback` 2, the start returned unchanged, `full_rank` FALSE with
@@ -980,7 +980,7 @@ if (check == "crossed") {
   # The repair's output under the hook: full rank, but below the Row floors.
   v <- 8; nrows <- 4; ncols <- 2; r <- 3
   lay <- layout_of(v, r, nrows, FALSE)
-  set.seed(36)
+  set.seed(16)
   s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
   start <- as.integer(s1$treatments)
   res <- crossed(start, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
@@ -992,7 +992,7 @@ if (check == "crossed") {
          else if (!identical(res$full_rank, FALSE) || !is.na(res$joint_d) || !is.na(res$joint_a)) "full_rank or joint values claimed"
          else if (!identical(res$search$evaluations, 0) || !(res$search$repair_swaps > 0)) "evaluations spent, or no repair swap"
          else NULL
-  report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 36): floor_fallback %s, %g repair swaps, start returned%s",
+  report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 16): floor_fallback %s, %g repair swaps, start returned%s",
                                format(res$search$floor_fallback), res$search$repair_swaps,
                                if (is.null(why)) "" else paste0("; PROBLEM ", why)))
   Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
