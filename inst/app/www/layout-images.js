@@ -36,7 +36,8 @@
       // Keep a landscape preview instead of filling a tall sidebar or monitor.
       available = Math.min(available, width * 0.625, 700);
       if (side.right <= main.getBoundingClientRect().left + 1) {
-        available = Math.min(available, side.bottom - rect.top - 4);
+        // Follow a long sidebar, but keep a plot worth reading beside a short one.
+        available = Math.min(available, Math.max(side.bottom - rect.top - 4, Math.min(width * 0.5, 420)));
       }
       var height = Math.max(1, Math.floor(available));
       panel.style.setProperty("--fieldhub-preview-height", height + "px");

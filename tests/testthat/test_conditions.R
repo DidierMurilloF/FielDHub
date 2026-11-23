@@ -196,10 +196,9 @@ test_that("app/module functions do not call cat() or print() outside a rendered 
   # "setup"): renderPrint() captures
   # the cat()/print() output into that text output, it never reaches the R
   # console, so this is the legitimate exception ruling R2 allows.
-  summary_render_servers <- c(
-    "mod_design_server",
-    "app_spatial_page"
-  )
+  # The summaries are pages built from the design now (app_design_summary()),
+  # so nothing prints
+  summary_render_servers <- character(0)
   expect_setequal(direct_cat_or_print, summary_render_servers)
 })
 

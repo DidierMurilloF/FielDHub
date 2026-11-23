@@ -73,7 +73,7 @@ available_percent <- function(n_rows,
                        "Total # of Check Plots", 
                        "Total # of Fillers",
                        "Total # of Experimental Plots",
-                       "Total #r of Plots")
+                       "Total # of Plots")
     }
   } 
   opts <- seq_along(w_map_engage)

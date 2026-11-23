@@ -436,10 +436,8 @@ design_args_Diagonal <- function(values, data = NULL) {
     exptName = values[["expt_name"]],
     locationNames = location_names_or_null(values[["location_names"]], l),
     data = data,
-    checksPercent = as_design_number(values[["checksPercent"]]),
-    spread_checks = values[["spread_checks"]] %||% FALSE,
-    dist_method = values[["dist_method"]] %||% "euclidean"
-  )
+    checksPercent = as_design_number(values[["checksPercent"]])
+  ) |> c(check_spacing_args(values))
 }
 
 #' Build diagonal_arrangement() arguments for the multiple diagonal module
@@ -484,7 +482,7 @@ design_args_diagonal_multiple <- function(values, data = NULL) {
     data = data,
     checksPercent = as_design_number(values[["checksPercent"]]),
     sameEntries = values[["sameEntries"]] %||% FALSE
-  )
+  ) |> c(check_spacing_args(values))
 }
 
 #' Build do_optim() arguments for the sparse allocation module's Run! step
@@ -540,7 +538,7 @@ design_args_sparse_allocation <- function(values, data = NULL) {
     seed = as_design_number(values[["seed"]]),
     data = data,
     checksPercent = as_design_number(values[["checksPercent"]])
-  )
+  ) |> c(check_spacing_args(values))
   drop_null_args(args, c("nrows", "ncols", "exptName", "locationNames", "sparse_list"))
 }
 

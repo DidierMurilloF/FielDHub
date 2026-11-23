@@ -33,7 +33,7 @@ test_that("replication previews require finite positive whole numbers", {
 
 test_that("replication parsing validates the number of checks before recycling", {
   for (n in list(NA_real_, 0, -1, 1.5, "2", c(1, 2))) {
-    expect_error(FielDHub:::parse_rep_checks("2", n), "# of Checks",
+    expect_error(FielDHub:::parse_rep_checks("2", n), "Checks",
                  class = "fieldhub_input_error")
   }
 })
@@ -48,9 +48,9 @@ test_that("p-rep group inputs are read as whole numbers of the same length", {
   # failed with a raw R error from 1:sum(NA).
   err <- expect_error(FielDHub:::parse_rep_groups("75,abc", "2,1"),
                       class = "fieldhub_input_error")
-  expect_match(conditionMessage(err), "# of Entries Per Rep Group could not read \"abc\"",
+  expect_match(conditionMessage(err), "Entries per replicate group could not read \"abc\"",
                fixed = TRUE)
-  expect_error(FielDHub:::parse_rep_groups("75,150", "2,x"), "# of Rep Per Group",
+  expect_error(FielDHub:::parse_rep_groups("75,150", "2,x"), "Replicates per group",
                class = "fieldhub_input_error")
   expect_error(FielDHub:::parse_rep_groups("75,150", "2"), "same number of values",
                class = "fieldhub_input_error")

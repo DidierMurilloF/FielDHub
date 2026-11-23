@@ -74,3 +74,23 @@ test_that("the page names the search while it runs", {
   expect_identical(spec$busy_message, "Searching for a balanced design...")
   expect_identical(design_engine_name(spec$engine), "augmented_row_column")
 })
+
+test_that("the page's summary states each fact of the design once", {
+  design <- augmented_row_column(nrows = 8, ncols = 10, checks = c("CA", "CB", "CC", "CD"),
+                                 check_direction = "rows", budget = 200, l = 2,
+                                 locationNames = c("North", "South"), seed = 3)
+  items <- app_summary_items(design$infoDesign, design$fieldBook)
+  labels <- vapply(items, `[[`, "", "label")
+  expect_identical(anyDuplicated(labels), 0L)
+  # the rows, the columns and the number of checks, not also as v, s and k
+  expect_false(any(c("V", "S", "K") %in% labels))
+  value <- function(label) items[[which(labels == label)]]$value
+  expect_identical(c(value("Rows"), value("Columns"), value("Checks")), c("8", "10", "4"))
+  expect_identical(items[[which(labels == "Checks")]]$names, c("CA", "CB", "CC", "CD"))
+  expect_identical(items[[which(labels == "Locations")]]$names, c("North", "South"))
+  # the check direction is a parameter: the field book preview does not repeat it on every plot
+  page <- as.character(app_design_summary(design))
+  expect_match(page, "Check direction", fixed = TRUE)
+  expect_false(grepl("CHECK_DIRECTION", page, fixed = TRUE))
+  expect_true("CHECK_DIRECTION" %in% names(design$fieldBook))
+})

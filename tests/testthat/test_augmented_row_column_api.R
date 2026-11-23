@@ -1366,7 +1366,7 @@ test_that("field_layout(), plot() and draw_layout() work in both orientations", 
   planters <- c("serpentine", "cartesian")
   for (direction in arc_api_directions) {
     dims <- arc_api_dims(10L, 8L, direction)
-    title <- paste0("Augmented Row-Column Design ", dims[["nrows"]], "X",
+    title <- paste0("Augmented Row-Column Design ", dims[["nrows"]], " \u00d7 ",
                     dims[["ncols"]])
     for (planter in planters) {
       label <- paste(direction, planter)

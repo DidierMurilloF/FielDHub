@@ -160,8 +160,9 @@ app_design_task <- function(id_prefix, engine, args_reactive, on_done = identity
     }
     for (condition in job$warnings) app_report_problem(condition)
     if (!isTRUE(job$ok) && !inherits(job$condition, "shiny.silent.error")) {
+      # The problem is shown once, where the result would be (the design
+      # reactive keeps it as a validation message): no dialog on top of it
       if (!inherits(job$condition, "fieldhub_error")) app_log_problem(job$condition)
-      app_report_problem(job$condition)
     }
     completed(job)
     app_report_task_feedback(session, id_prefix, FALSE)

@@ -7,11 +7,11 @@ spatial_correlation_spec <- function(suffix) {
   }
   list(
     correlation_x = list(
-      inputId = paste0("ROX", suffix), label = "Adjacent columns (within a row):",
+      inputId = paste0("ROX", suffix), label = "Adjacent columns (within a row)",
       choices = seq(0.1, 0.9, 0.1), selected = 0.5
     ),
     correlation_y = list(
-      inputId = paste0("ROY", suffix), label = "Adjacent rows (within a column):",
+      inputId = paste0("ROY", suffix), label = "Adjacent rows (within a column)",
       choices = seq(0.1, 0.9, 0.1), selected = 0.5
     )
   )

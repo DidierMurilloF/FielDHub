@@ -2518,7 +2518,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "list_locs", "allocation", "size_locations", "metadata"]
+              "value": ["infoDesign", "layoutRandom", "plotsNumber", "data_entry", "fieldBook", "check_spacing", "list_locs", "allocation", "size_locations", "metadata"]
             },
             "class": {
               "type": "character",
@@ -3072,6 +3072,360 @@
                   "type": "character",
                   "attributes": {},
                   "value": ["G-70", "G-84", "G-37", "G-36", "G-77", "G-82", "G-22", "G-74", "CH-121", "G-19", "G-89", "G-25", "G-58", "G-65", "CH-122", "G-54", "G-113", "G-60", "G-91", "G-56", "G-76", "G-34", "CH-124", "G-98", "G-119", "G-95", "G-118", "G-83", "G-10", "G-21", "CH-124", "G-42", "G-28", "G-97", "G-75", "G-107", "G-13", "G-102", "G-64", "G-63", "G-72", "G-106", "G-41", "G-53", "G-14", "G-90", "CH-121", "G-26", "G-93", "G-79", "G-33", "G-115", "G-27", "G-116", "G-103", "G-68", "CH-124", "G-7", "G-50", "G-4", "CH-123", "G-104", "G-55", "G-69", "G-59", "G-87", "G-111", "G-85", "G-100", "G-38", "G-73", "G-12", "CH-122", "G-16", "G-48", "G-18", "G-47", "G-105", "G-52", "G-31", "G-20", "G-5", "G-3", "G-46", "CH-122", "G-66", "G-112", "G-39", "G-51", "G-49", "G-57", "G-108", "G-117", "G-44", "G-67", "G-120", "G-11", "G-43", "CH-123", "G-45", "G-51", "G-102", "G-119", "G-21", "G-13", "G-29", "G-103", "G-19", "CH-122", "G-49", "G-108", "G-24", "G-66", "G-58", "CH-122", "G-35", "G-72", "G-79", "G-47", "G-81", "G-61", "G-39", "CH-124", "G-48", "G-3", "G-74", "G-15", "G-1", "G-91", "G-63", "CH-123", "G-85", "G-5", "G-118", "G-86", "G-120", "G-18", "G-32", "G-70", "G-93", "G-2", "G-45", "G-78", "G-41", "G-110", "G-28", "CH-123", "G-9", "G-99", "G-11", "G-62", "G-40", "G-59", "G-37", "G-17", "G-7", "CH-122", "G-109", "G-14", "G-105", "CH-124", "G-26", "G-101", "G-42", "G-84", "G-98", "G-65", "G-23", "G-88", "G-96", "G-68", "G-95", "CH-121", "G-16", "G-12", "G-50", "G-94", "G-46", "G-92", "G-71", "G-44", "G-30", "G-97", "G-75", "CH-121", "G-64", "G-54", "G-25", "G-115", "G-60", "G-73", "G-43", "G-80", "G-8", "G-6", "G-52", "G-114", "G-55", "CH-121", "G-106", "G-112", "G-78", "G-74", "G-119", "G-113", "G-73", "G-90", "G-64", "CH-124", "G-107", "G-98", "G-77", "G-76", "G-19", "CH-121", "G-3", "G-57", "G-87", "G-8", "G-79", "G-69", "G-27", "CH-121", "G-101", "G-31", "G-37", "G-38", "G-96", "G-12", "G-80", "CH-122", "G-30", "G-95", "G-20", "G-32", "G-21", "G-6", "G-11", "G-33", "G-62", "G-114", "G-51", "G-61", "G-53", "G-17", "G-72", "CH-122", "G-100", "G-81", "G-40", "G-24", "G-120", "G-111", "G-86", "G-71", "G-92", "CH-124", "G-116", "G-110", "G-29", "CH-123", "G-84", "G-1", "G-75", "G-2", "G-22", "G-46", "G-104", "G-4", "G-65", "G-48", "G-23", "CH-121", "G-94", "G-83", "G-54", "G-89", "G-109", "G-14", "G-117", "G-60", "G-9", "G-102", "G-34", "CH-124", "G-41", "G-36", "G-35", "G-88", "G-7", "G-25", "G-10", "G-56", "G-82", "G-15", "G-91", "G-99", "G-105", "CH-123", "G-67", "G-36", "G-69", "G-18", "G-33", "G-97", "G-87", "G-118", "G-43", "CH-121", "G-107", "G-94", "G-38", "G-27", "G-61", "CH-122", "G-90", "G-85", "G-15", "G-70", "G-96", "G-4", "G-56", "CH-124", "G-80", "G-78", "G-44", "G-58", "G-50", "G-86", "G-10", "CH-121", "G-71", "G-35", "G-116", "G-13", "G-100", "G-52", "G-32", "G-81", "G-62", "G-1", "G-57", "G-29", "G-31", "G-6", "G-67", "CH-124", "G-104", "G-5", "G-59", "G-20", "G-24", "G-101", "G-112", "G-117", "G-26", "CH-124", "G-108", "G-93", "G-17", "CH-123", "G-47", "G-34", "G-8", "G-115", "G-30", "G-110", "G-2", "G-88", "G-40", "G-68", "G-92", "CH-122", "G-106", "G-45", "G-22", "G-53", "G-42", "G-114", "G-9", "G-109", "G-111", "G-39", "G-99", "CH-123", "G-77", "G-83", "G-28", "G-103", "G-63", "G-89", "G-113", "G-23", "G-55", "G-82", "G-76", "G-49", "G-66", "CH-123", "G-16"]
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "attributes": {},
+              "value": [
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["dist_method", "neighbor_radius", "before", "after"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "TREATMENT", "occurrences", "min_distance", "mean_nearest_distance", "mean_pairwise_distance", "neighboring_occurrences", "close_pairs"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [121, 122, 123, 124]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH-121", "CH-122", "CH-123", "CH-124"]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 3, 2, 3]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [4.47213595, 3.16227766, 3.16227766, 3.16227766]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [4.47213595, 4.21637021, 3.16227766, 4.21637021]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [4.47213595, 5.51930026, 3.16227766, 5.51930026]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 2, 2, 2]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 1, 1, 1]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["dist_method", "neighbor_radius", "before", "after"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "TREATMENT", "occurrences", "min_distance", "mean_nearest_distance", "mean_pairwise_distance", "neighboring_occurrences", "close_pairs"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [121, 122, 123, 124]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH-121", "CH-122", "CH-123", "CH-124"]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [3, 3, 2, 2]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 3.16227766, 3.16227766, 4.47213595]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 3.59889709, 3.16227766, 4.47213595]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [4.21637021, 4.90182714, 3.16227766, 4.47213595]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [3, 3, 2, 2]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 2, 1, 1]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["dist_method", "neighbor_radius", "before", "after"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "TREATMENT", "occurrences", "min_distance", "mean_nearest_distance", "mean_pairwise_distance", "neighboring_occurrences", "close_pairs"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [121, 122, 123, 124]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH-121", "CH-122", "CH-123", "CH-124"]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [3, 2, 2, 3]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 3.16227766, 3.16227766, 3.16227766]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [4.21637021, 3.16227766, 3.16227766, 4.46520771]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [5.51930026, 3.16227766, 3.16227766, 6.39253913]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 2, 2, 2]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 1, 1, 1]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
+                },
+                {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["dist_method", "neighbor_radius", "before", "after"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["euclidean"]
+                    },
+                    {
+                      "type": "double",
+                      "attributes": {},
+                      "value": [5]
+                    },
+                    {
+                      "type": "list",
+                      "attributes": {
+                        "names": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["ENTRY", "TREATMENT", "occurrences", "min_distance", "mean_nearest_distance", "mean_pairwise_distance", "neighboring_occurrences", "close_pairs"]
+                        },
+                        "row.names": {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 2, 3, 4]
+                        },
+                        "class": {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["data.frame"]
+                        }
+                      },
+                      "value": [
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [121, 122, 123, 124]
+                        },
+                        {
+                          "type": "character",
+                          "attributes": {},
+                          "value": ["CH-121", "CH-122", "CH-123", "CH-124"]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 2, 3, 3]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 6.32455532, 3.16227766, 3.16227766]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 6.32455532, 3.16227766, 3.16227766]
+                        },
+                        {
+                          "type": "double",
+                          "attributes": {},
+                          "value": [3.16227766, 6.32455532, 3.59889709, 3.59889709]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [2, 0, 3, 3]
+                        },
+                        {
+                          "type": "integer",
+                          "attributes": {},
+                          "value": [1, 0, 3, 3]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "NULL"
+                    }
+                  ]
                 }
               ]
             },

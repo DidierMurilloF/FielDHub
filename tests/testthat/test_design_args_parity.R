@@ -433,6 +433,7 @@ test_that("classic pages submit only argument-builder snapshots to the shared de
   # them must be a base/shiny/DT/shinyjs call, or is a bug.
   allowed_helpers <- c(
     "validate_design",     # shows any error where the output would be (R/app_conditions.R)
+    "app_design_state", "app_design_summary", # the Summary tab, built from the finished design
     "app_design_seed",     # resolves the optional app seed without touching the shared RNG stream
     "app_read_upload",     # reads/validates the page's upload, reporting a failure itself (R/app_upload.R)
     "app_upload_spec",     # the page's upload ids (the toggle it reads)
@@ -479,6 +480,7 @@ test_that("classic pages submit only argument-builder snapshots to the shared de
   # and choice helpers only
   spec_helpers <- c(
     "shape_design_upload",        # names and completes the uploaded columns
+    "control_abort",              # a lattice count below one, refused in the page's words
     "check_factorial_upload",     # an uploaded factorial list needs two factors
     "block_size_choices",         # block sizes offered for a number of entries
     "rcbd_checks_note",           # RCBD block-size preview
@@ -1285,6 +1287,9 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
                                       unlist(lapply(spatial_engines, names)))), character(0))
   page_helpers <- c(
     "app_design_task",            # worker/sync lifecycle shared by both engine steps
+    "app_design_summary",         # the design's summary, built from the finished design
+    "app_design_report",          # the spacing report of a design, from its own record
+    "app_design_facts",           # what the run holds, shown under the steps of the field
     "app_report_task_feedback",   # loading feedback while Run prepares field dimensions
     "validate_design", "app_design_state", "app_plot_state", "app_upload_spec",
     "read_design_controls",       # reads again the controls the steps follow (filler plots)
@@ -1301,6 +1306,7 @@ test_that("spatial pages submit builder snapshots for allocation and final desig
   # What the specs run: plain parsers, checks, choice helpers and views
   spec_helpers <- c(
     "shape_design_upload", "check_reps_upload", "optim_total_plots", "optim_field_choices",
+    "check_spacing_values",        # the two check-spacing values the diagonal pages share
     "field_grid_view", "spatial_highlight_colours", "entry_list_view", "location_view_choices",
     "parse_control_number", "parse_control_whole_numbers", "parse_control_names",
     "parse_control_choice", "parse_control_option", "parse_control_flag", "parse_control_seed",

@@ -14,7 +14,7 @@ test_that("field_dimensions() proposes non-prime field sizes for a prime-free ra
 })
 
 test_that("field_dimensions() rejects a malformed entry count with a classed error", {
-  # Regression test: typing 0 or a negative "Input # of Entries" and
+  # Regression test: typing 0 or a negative "Entries" and
   # clicking Run reached field_dimensions(lines_within_loc = 0) directly
   # inside an observer-read eventReactive of the diagonal and sparse pages
   # (now diagonal_field_choices(), run by the generic spatial page).

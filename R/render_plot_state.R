@@ -16,8 +16,8 @@ plot_state_message <- function(design, settings, view) {
     fieldhub_abort("view must be \"layout\" or \"heatmap\".")
   }
   if (is.null(design)) {
-    return(if (identical(view, "heatmap")) "Run the design to see the heatmap."
-           else "Run the design to see the field layout.")
+    return(if (identical(view, "heatmap")) "Generate the design to see the heatmap."
+           else "Generate the design to see the field layout.")
   }
   if (inherits(design, "condition")) return(problem_message(design))
   if (identical(view, "heatmap") && is.null(settings)) {

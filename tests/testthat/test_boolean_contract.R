@@ -8,6 +8,7 @@ boolean_controls <- list(
   RCBD_augmented = "random",
   diagonal_arrangement = c("multiLocationData", "sameEntries", "spread_checks"),
   optimized_arrangement = "spread_reps",
+  sparse_allocation = "spread_checks",
   multi_location_prep = c("spread_reps", "allow_fillers"),
   do_optim = c("add_checks", "force_balance")
 )
