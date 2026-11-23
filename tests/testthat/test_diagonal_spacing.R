@@ -128,7 +128,7 @@ test_that("the p-rep pages report the spacing of their replicated entries, and F
     ui <- as.character(mod_design_ui("prep_test", spec))
     expect_match(ui, "prep_test-design_report", fixed = TRUE)
   }
-  # Field setup: the run and the field in the select over the steps of one
+  # Field setup: the run and the field in the select under the steps of one
   # page, the allocation under the steps of the other
   setup <- design_app_spec("pREPS")$setup
   expect_identical(setup$type, "facts")
@@ -159,7 +159,13 @@ test_that("the p-rep pages report the spacing of their replicated entries, and F
   expect_match(block, "fh-stats", fixed = TRUE)
   expect_false(grepl("style=", block, fixed = TRUE))
   ui <- as.character(mod_design_ui("prep_test", design_app_spec("pREPS")))
-  expect_lt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
+  expect_gt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
+  # on every spatial page the steps come first, the summary or the table under them
+  for (page in Filter(function(page) identical(page$kind, "spatial"), fieldhub_design_specs())) {
+    html <- as.character(mod_design_ui("order_test", page))
+    view <- regexpr('id="order_test-setup"', html, fixed = TRUE)
+    if (view > 0) expect_gt(view, regexpr("fh-setup-steps", html, fixed = TRUE), label = page$module)
+  }
   multi <- design_app_spec("multi_loc_preps")
   expect_identical(multi$setup$type, "table")
   expect_false(is.null(multi$setup$tip))

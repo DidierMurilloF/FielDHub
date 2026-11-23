@@ -22,14 +22,13 @@ app_spatial_tabs <- function(ns, spec) {
   setup <- if (identical(spec$setup$type, "none")) {
     NULL  # the tab holds the steps of the field and nothing else
   } else if (identical(spec$setup$type, "facts")) {
-    # what the run holds, over the steps (app_design_facts())
+    # what the run holds, under the steps (app_design_facts())
     shiny::div(class = "fieldhub-design-summary", shiny::uiOutput(ns("setup")))
   } else if (identical(spec$setup$type, "summary")) {
     shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
     app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
   }
-  facts <- identical(spec$setup$type, "facts")
   entries <- lapply(seq_along(spec$entries), function(i) {
     app_output_feedback(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL))
   })
@@ -51,14 +50,14 @@ app_spatial_tabs <- function(ns, spec) {
         feedback(
           shinyjs::useShinyjs(),
           # The steps of the field and the button that randomizes it, as one card
-          if (facts) setup,
           shiny::div(class = "fh-setup",
             shiny::div(class = "fh-setup-steps", steps("run")),
             shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field", class = "fh-btn-primary",
                                             busy_message = spec$busy_message, results_id = ns("results"))),
             shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
-          if (!facts) setup,
+          # every page: the steps first, what they are chosen for under them
+          setup,
           tasks = setup_tasks)),
       shiny::tabPanel("Entries", feedback(entries))
     ),

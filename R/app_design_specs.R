@@ -138,7 +138,7 @@ build_design_specs <- function() {
   summary_setup <- list(type = "summary")
   # A page whose Field setup holds the steps of the field and nothing else
   steps_setup <- list(type = "none")
-  # The p-rep page: what the run holds and the field in the select, over the
+  # The p-rep page: what the run holds and the field in the select, under the
   # steps. The field and its fillers follow the select before Randomize.
   prep_setup <- list(type = "facts", view = function(values, data, size) {
     count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
