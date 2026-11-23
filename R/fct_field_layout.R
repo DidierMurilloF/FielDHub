@@ -89,3 +89,11 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   }
   all_locations_layout(x, options, layout)
 }
+
+# Store the coordinates of a grid chosen when the design is built
+store_design_grid <- function(x, nrows, ncols, planter = "serpentine") {
+  if (!is.null(nrows) || !is.null(ncols)) {
+    x$fieldBook <- field_layout(x, nrows = nrows, ncols = ncols, planter = planter)
+  }
+  x
+}

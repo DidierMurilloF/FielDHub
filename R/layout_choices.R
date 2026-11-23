@@ -83,9 +83,9 @@ additional_layout_choices <- function(x, existing_shapes) {
   }
   grids <- valid_field_grids(x$fieldBook, spec$axes)
   if (!nrow(grids)) return(NULL)
-  grids <- grids[order(abs(grids[, 1L] - grids[, 2L]), grids[, 1L]), , drop = FALSE]
-  labels <- paste(grids[, 1L], "\u00d7", grids[, 2L])
+  grids <- grids[order(abs(grids[, "rows"] - grids[, "cols"]), grids[, "rows"]), , drop = FALSE]
+  labels <- paste(grids[, "rows"], "\u00d7", grids[, "cols"])
   more <- !labels %in% existing_shapes
-  values <- sprintf("grid:%.0f:%.0f", grids[, 1L], grids[, 2L])
+  values <- sprintf("grid:%.0f:%.0f", grids[, "rows"], grids[, "cols"])
   stats::setNames(values[more], labels[more])
 }

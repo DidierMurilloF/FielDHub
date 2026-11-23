@@ -28,6 +28,37 @@ location_books <- function(x) {
   })
 }
 
+# Dimensions of a new field layout preserve the units at each level.
+design_grid_spec <- function(x) {
+  design <- sub("^fieldhub_", "", class(x)[1L])
+  switch(design,
+    crd = list(),
+    full_factorial = list(groups = if (identical(x$infoDesign$kind, "RCBD")) "REP"),
+    incomplete_blocks = ,
+    alpha_lattice = ,
+    square_lattice = ,
+    rectangular_lattice = list(groups = c("REP", "IBLOCK")),
+    split_plot = ,
+    split_split_plot = list(groups = c(
+      if (identical(x$infoDesign$typeDesign, "RCBD")) "REP",
+      # REP and WHOLE_PLOT identify a whole plot even when whole plots
+      # were randomized together across replicates in a CRD.
+      if (identical(x$infoDesign$typeDesign, "RCBD")) "WHOLE_PLOT" else ".WHOLE_UNIT",
+      if (design == "split_split_plot") "SUB_PLOT"
+    )),
+    latin_square = list(groups = "SQUARE", axes = c("ROW", "COLUMN")),
+    strip_plot = list(groups = "REP", axes = c("HSTRIP", "VSTRIP")),
+    NULL
+  )
+}
+
+has_design_grid <- function(x) {
+  all(c("ROW", "COLUMN") %in% names(x$fieldBook)) &&
+    !is.null(design_grid_spec(x)) &&
+    (!inherits(x, "fieldhub_latin_square") ||
+       all(c("ROW_SQ", "COLUMN_SQ") %in% names(x$fieldBook)))
+}
+
 #' Layout options of a design
 #'
 #' @param x A design result.
@@ -265,59 +296,6 @@ rcbd_layouts <- function(x, n_units, n_reps, planter, stacked) {
     )
     lapply(unname(layouts), layout_columns)
   })
-}
-
-# Fit a full field with congruent rectangular complete blocks.
-rcbd_grid_layout <- function(x, nrows, ncols, planter) {
-  if (!is.null(nrows)) validate_iteration_budget(nrows, "nrows")
-  if (!is.null(ncols)) validate_iteration_budget(ncols, "ncols")
-
-  book <- x$fieldBook
-  if (all(c("ROW", "COLUMN") %in% names(book))) {
-    rows <- max(book$ROW)
-    cols <- max(book$COLUMN)
-    if ((is.null(nrows) || nrows == rows) && (is.null(ncols) || ncols == cols)) return(book)
-    fieldhub_abort("This RCBD already has a stored ", rows, " x ", cols, " field layout.")
-  }
-
-  reps <- dplyr::n_distinct(book$REP)
-  plots <- nrow(book) / dplyr::n_distinct(book$LOCATION)
-  rows <- if (is.null(nrows)) plots / ncols else nrows
-  cols <- if (is.null(ncols)) plots / nrows else ncols
-  if (rows > plots || cols > plots || rows %% 1 != 0 || cols %% 1 != 0 ||
-      rows * as.double(cols) != plots) {
-    # Every factor pair of the plot count can be partitioned into complete
-    # blocks by distributing the factors of reps between the two axes.
-    fieldhub_abort(
-      "The RCBD field dimensions must fit exactly ", plots, " plots per location. ",
-      "Valid dimensions (nrows x ncols) include: ",
-      suggest_field_grid(grid_factor_pairs(plots), nrows, ncols), "."
-    )
-  }
-
-  # Prefer a vertical stack, then a horizontal stack, then the most
-  # block rows that fit. Number the blocks across each row of blocks.
-  block_rows <- unique(c(reps, 1L, rev(seq_len(reps))))
-  block_rows <- block_rows[reps %% block_rows == 0]
-  block_cols <- reps / block_rows
-  fit <- which(rows %% block_rows == 0 & cols %% block_cols == 0)[1L]
-  across <- block_cols[fit]
-  height <- rows / block_rows[fit]
-  width <- cols / across
-  path <- planting_path(height, width, "cartesian")
-
-  books <- lapply(location_books(x), function(site) {
-    blocks <- split(site, site$REP)
-    for (i in seq_along(blocks)) {
-      block <- blocks[[i]]
-      block$ROW <- path[, "ROW"] + ((i - 1L) %/% across) * height
-      block$COLUMN <- path[, "COLUMN"] + ((i - 1L) %% across) * width
-      block$PLOT <- plots_along_grid(block$PLOT, width, planter)
-      blocks[[i]] <- block
-    }
-    layout_columns(dplyr::bind_rows(blocks))
-  })
-  dplyr::bind_rows(books)
 }
 
 #' Generate Vertical Layouts for RCBD Designs
