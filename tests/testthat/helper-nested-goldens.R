@@ -409,7 +409,20 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # baseline's recorded one (spec 6.4), never the candidate's own: `b$hits` is
 # the baseline's own count, and a candidate seed hits when its A reaches
 # `b$bound`. `accepted_loss` is NULL or a data.frame of caller, t, k, r
-# that the owner accepted: those shapes get pass = NA and report the shortfall.
+# (and iterations, where the shape key carries it) that the owner accepted:
+# those shapes get pass = NA and report the shortfall.
+# Accepted loss of the onestage callers (phase 2 spec 7, owner decision
+# 2026-11-22). `noninferior_failed` names the statistics among row_D, row_A,
+# col_D, col_A, joint_D, joint_A whose bootstrap rule fails, comma-separated
+# (D and A of these callers are Column D and Column A, and are named so).
+# `accepted_loss_eligible` is TRUE when the caller is "onestage_nested",
+# `noninferior_failed` is not empty and names only col_D, col_A or joint_A, the
+# candidate's mean joint D is at least the baseline's (no tolerance), and
+# worst_ok, constant_ok, optimum_ok, errors_ok, fallback_ok and clash_ok are
+# all TRUE. A listed onestage row gets pass = NA only when it is eligible;
+# otherwise the list changes nothing and the row is judged by the rules, so a
+# failing row fails. The speed rule is not judged here: the check tool fails a
+# listed row that is too slow. For the other callers the list works as before.
 # Onestage callers: `fallback_ok` is the count rule (candidate fallbacks <=
 # baseline fallbacks, and 0 where onestage_rule_holds()). `clash_ok` is the
 # latinization rule and is judged for "onestage_latinized" only; it is TRUE for
@@ -436,6 +449,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
                       optimum_ok = FALSE, errors_ok = FALSE, fallback_ok = TRUE, clash_ok = TRUE,
                       time_ratio = NA_real_,
                       pass = FALSE, accepted_loss = FALSE, shortfall = NA_real_,
+                      noninferior_failed = "", accepted_loss_eligible = FALSE,
                       stringsAsFactors = FALSE)
     if (is.na(j)) return(row)
     cand <- candidate[j, ]
@@ -472,6 +486,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     constant <- TRUE
     run_bootstrap <- bootstrap && b$t < 1000
     noninferior <- TRUE
+    failed <- character(0)
     if (run_bootstrap) set.seed(20261118, kind = "Mersenne-Twister", normal.kind = "Inversion",
                                 sample.kind = "Rejection")
     for (e in nested_golden_efficiencies) {
@@ -491,7 +506,9 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
       }
       if (run_bootstrap && length(bx) > 1L) {
         margin <- max(2e-6, 0.5 * stats::sd(bx))
-        noninferior <- noninferior && nested_bootstrap_lower(bx, cx) >= -margin
+        fine <- nested_bootstrap_lower(bx, cx) >= -margin
+        noninferior <- noninferior && fine
+        if (!isTRUE(fine)) failed <- c(failed, e)
       }
     }
     row$worst_ok <- worst
@@ -516,7 +533,18 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
     }
     row$pass <- all(c(row$noninferior_ok, row$worst_ok, row$constant_ok, row$optimum_ok,
                       row$errors_ok, row$fallback_ok, row$clash_ok), na.rm = TRUE)
-    if (nested_shape_key(b) %in% accepted_key) {
+    if (onestage) {
+      failed[failed == "D"] <- "col_D"
+      failed[failed == "A"] <- "col_A"
+      failed <- intersect(c("row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A"), failed)
+      row$noninferior_failed <- paste(failed, collapse = ",")
+      row$accepted_loss_eligible <- b$caller == "onestage_nested" && length(failed) > 0L &&
+        all(failed %in% c("col_D", "col_A", "joint_A")) &&
+        isTRUE(cand$joint_D_mean >= b$joint_D_mean) &&
+        isTRUE(row$worst_ok) && isTRUE(row$constant_ok) && isTRUE(row$optimum_ok) &&
+        isTRUE(row$errors_ok) && isTRUE(row$fallback_ok) && isTRUE(row$clash_ok)
+    }
+    if (nested_shape_key(b) %in% accepted_key && (!onestage || row$accepted_loss_eligible)) {
       row$pass <- NA
       row$accepted_loss <- TRUE
       row$shortfall <- b$A_mean - cand$A_mean
