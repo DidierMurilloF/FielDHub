@@ -69,3 +69,5 @@ $run_dev.*
 ^tools/nested-goldens-os-baseline\.csv\.gz$
 ^tools/onestage-stage-measurements\.csv\.gz$
 ^tools/onestage-truncation-list\.csv$
+^tools/onestage-accepted-loss\.csv$
+^tools/onestage-fallback-changes\.csv$

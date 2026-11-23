@@ -2193,7 +2193,7 @@
                 "names": {
                   "type": "character",
                   "attributes": {},
-                  "value": ["rows", "columns", "reps", "treatments", "locations", "location_names", "seed", "optimization", "id_design"]
+                  "value": ["rows", "columns", "reps", "treatments", "locations", "location_names", "seed", "optimization", "joint_searches", "id_design"]
                 }
               },
               "value": [
@@ -2238,6 +2238,28 @@
                   "value": ["onestage"]
                 },
                 {
+                  "type": "list",
+                  "attributes": {
+                    "names": {
+                      "type": "character",
+                      "attributes": {},
+                      "value": ["requested", "completed"]
+                    }
+                  },
+                  "value": [
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [10]
+                    },
+                    {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [10]
+                    }
+                  ]
+                },
+                {
                   "type": "double",
                   "attributes": {},
                   "value": [9]
@@ -2251,15 +2273,15 @@
                 {
                   "type": "list",
                   "attributes": {
-                    "row.names": {
-                      "type": "integer",
-                      "attributes": {},
-                      "value": [1, 2, 3, 4]
-                    },
                     "names": {
                       "type": "character",
                       "attributes": {},
                       "value": ["Level", "Blocks", "D-Efficiency", "A-Efficiency", "A-Bound"]
+                    },
+                    "row.names": {
+                      "type": "integer",
+                      "attributes": {},
+                      "value": [1, 2, 3, 4]
                     },
                     "class": {
                       "type": "character",
@@ -2326,7 +2348,7 @@
                           "value": [3, 4]
                         }
                       },
-                      "value": [10, 2, 5, 3, 11, 4, 12, 7, 6, 8, 1, 9]
+                      "value": [9, 6, 4, 5, 11, 12, 10, 2, 7, 1, 8, 3]
                     },
                     {
                       "type": "integer",
@@ -2337,7 +2359,7 @@
                           "value": [3, 4]
                         }
                       },
-                      "value": [7, 10, 6, 8, 11, 5, 2, 9, 3, 4, 12, 1]
+                      "value": [10, 4, 6, 9, 8, 12, 3, 5, 2, 11, 7, 1]
                     }
                   ]
                 }
@@ -2392,7 +2414,7 @@
                 {
                   "type": "double",
                   "attributes": {},
-                  "value": [13, 26, 27, "NA"]
+                  "value": [9, 32, 25, "NA"]
                 }
               ]
             },
@@ -2449,12 +2471,12 @@
                 {
                   "type": "integer",
                   "attributes": {},
-                  "value": [10, 3, 12, 8, 2, 11, 7, 1, 5, 4, 6, 9, 7, 8, 2, 4, 10, 11, 9, 12, 6, 5, 3, 1]
+                  "value": [9, 5, 10, 1, 6, 11, 2, 8, 4, 12, 7, 3, 10, 9, 3, 11, 4, 8, 5, 7, 6, 12, 2, 1]
                 },
                 {
                   "type": "character",
                   "attributes": {},
-                  "value": ["G-10", "G-3", "G-12", "G-8", "G-2", "G-11", "G-7", "G-1", "G-5", "G-4", "G-6", "G-9", "G-7", "G-8", "G-2", "G-4", "G-10", "G-11", "G-9", "G-12", "G-6", "G-5", "G-3", "G-1"]
+                  "value": ["G-9", "G-5", "G-10", "G-1", "G-6", "G-11", "G-2", "G-8", "G-4", "G-12", "G-7", "G-3", "G-10", "G-9", "G-3", "G-11", "G-4", "G-8", "G-5", "G-7", "G-6", "G-12", "G-2", "G-1"]
                 }
               ]
             },
@@ -2558,15 +2580,15 @@
         {
           "type": "list",
           "attributes": {
-            "row.names": {
-              "type": "integer",
-              "attributes": {},
-              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
-            },
             "names": {
               "type": "character",
               "attributes": {},
               "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY", "TREATMENT"]
+            },
+            "row.names": {
+              "type": "integer",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
             },
             "class": {
               "type": "character",
@@ -2608,12 +2630,12 @@
             {
               "type": "integer",
               "attributes": {},
-              "value": [10, 3, 12, 8, 2, 11, 7, 1, 5, 4, 6, 9, 7, 8, 2, 4, 10, 11, 9, 12, 6, 5, 3, 1]
+              "value": [9, 5, 10, 1, 6, 11, 2, 8, 4, 12, 7, 3, 10, 9, 3, 11, 4, 8, 5, 7, 6, 12, 2, 1]
             },
             {
               "type": "character",
               "attributes": {},
-              "value": ["G-10", "G-3", "G-12", "G-8", "G-2", "G-11", "G-7", "G-1", "G-5", "G-4", "G-6", "G-9", "G-7", "G-8", "G-2", "G-4", "G-10", "G-11", "G-9", "G-12", "G-6", "G-5", "G-3", "G-1"]
+              "value": ["G-9", "G-5", "G-10", "G-1", "G-6", "G-11", "G-2", "G-8", "G-4", "G-12", "G-7", "G-3", "G-10", "G-9", "G-3", "G-11", "G-4", "G-8", "G-5", "G-7", "G-6", "G-12", "G-2", "G-1"]
             }
           ]
         }
