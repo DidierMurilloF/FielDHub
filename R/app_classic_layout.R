@@ -7,7 +7,7 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
   layout <- spec$layout
   # The menu holds plain selects: a selectize list would open a menu inside the menu
   select <- function(...) shiny::selectInput(..., selectize = FALSE)
-  choices <- layout_choice_labels(x, planter = planter, stacked = "vertical")
+  choices <- layout_choice_labels(x, planter = planter, stacked = "vertical", include_grids = TRUE)
   controls <- list(shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of plot",
     c("Entries" = 1, "Plots" = 2, "Heatmap" = 3), inline = TRUE))
   if ("stacked" %in% names(layout$ids)) {

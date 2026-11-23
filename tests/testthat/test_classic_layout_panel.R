@@ -63,3 +63,24 @@ test_that("shared layout panels retain control labels, namespacing, and options"
                 class = "fieldhub_input_error")
   expect_identical(.Random.seed, before)
 })
+
+test_that("classic layout menus retain numbered layouts and offer new field grids", {
+  design <- RCBD(t = 6, reps = 6, seed = 1)
+  numbered <- layout_choice_labels(design)
+  choices <- layout_choice_labels(design, include_grids = TRUE)
+  expect_identical(head(choices, length(numbered)),
+                   stats::setNames(as.character(numbered), names(numbered)))
+  expect_identical(unname(choices["4 \u00d7 9"]), "grid:4:9")
+
+  spec <- design_app_spec("RCBD")$workflow
+  html <- as.character(app_classic_layout_panel(identity, spec, design))
+  expect_true(grepl('<option value="grid:4:9">4 \u00d7 9</option>', html, fixed = TRUE))
+
+  squares <- latin_square(t = 4, reps = 2, seed = 1)
+  square_choices <- layout_choice_labels(squares, include_grids = TRUE)
+  expect_true("grid:4:8" %in% square_choices)
+  expect_false("grid:2:16" %in% square_choices)
+
+  stored <- RCBD(t = 6, reps = 6, nrows = 4, ncols = 9, seed = 1)
+  expect_identical(layout_choice_labels(stored, include_grids = TRUE), layout_choice_labels(stored))
+})

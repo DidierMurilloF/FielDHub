@@ -43,6 +43,18 @@ grid_factor_pairs <- function(n) {
   cbind(rows, cols = n / rows)
 }
 
+valid_field_grids <- function(book, axes = NULL) {
+  plots <- unique(tabulate(match(book$LOCATION, unique(book$LOCATION))))
+  if (length(plots) != 1L) return(grid_factor_pairs(0))
+  base <- field_grid_unit(book[book$LOCATION == book$LOCATION[1L], axes, drop = FALSE], axes)
+  sweep(grid_factor_pairs(plots / prod(base)), 2L, base, "*")
+}
+
+field_grid_unit <- function(book, axes) {
+  if (!length(axes)) return(c(1L, 1L))
+  vapply(book[axes], dplyr::n_distinct, integer(1))
+}
+
 suggest_field_grid <- function(grids, nrows, ncols) {
   distance <- numeric(nrow(grids))
   if (!is.null(nrows)) distance <- distance + abs(log(grids[, 1L] / nrows))
@@ -106,10 +118,8 @@ design_grid_layout <- function(x, spec, nrows, ncols, planter) {
   if (length(unique(plot_counts)) != 1L) {
     fieldhub_abort("A common field grid requires the same number of plots at every location.")
   }
-  base <- if (length(spec$axes)) {
-    vapply(book[sites[[1L]], spec$axes, drop = FALSE], dplyr::n_distinct, integer(1))
-  } else c(1L, 1L)
-  grids <- sweep(grid_factor_pairs(plot_counts[1L] / prod(base)), 2L, base, "*")
+  base <- field_grid_unit(book[sites[[1L]], , drop = FALSE], spec$axes)
+  grids <- valid_field_grids(book, spec$axes)
   matches <- rep(TRUE, nrow(grids))
   if (!is.null(nrows)) matches <- matches & grids[, 1L] == nrows
   if (!is.null(ncols)) matches <- matches & grids[, 2L] == ncols

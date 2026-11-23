@@ -50,3 +50,31 @@ test_that("classic modules delegate layout selection and stop swallowing plot er
     expect_identical(names(ids), expected)
   }
 })
+
+test_that("selecting a grid in Shiny sends one field layout to plots and downloads", {
+  design <- RCBD(t = 6, reps = 6, l = 2, plotNumber = c(101, 1001), seed = 1)
+  server <- function(input, output, session) {
+    view <- app_layout_selection(input, session, function() design, function() "cartesian",
+                                 c(layout = "layout", stacked = "stacked", location = "location"))
+  }
+  shiny::testServer(server, {
+    session$setInputs(stacked = "vertical", layout = "1", location = "2")
+    expect_identical(view()$allSitesFieldbook,
+                     field_layout(design, layout = 1, planter = "cartesian"))
+    session$setInputs(layout = "grid:4:9")
+    expect_identical(view()$allSitesFieldbook,
+                     field_layout(design, nrows = 4, ncols = 9, planter = "cartesian"))
+    expect_true(all(as.character(view()$fieldBookXY$LOCATION) == "loc2"))
+    expect_equal(view()$layout_metadata$parameters$nrows, 4)
+    expect_equal(view()$layout_metadata$parameters$ncols, 9)
+    expect_silent(ggplot2::ggplot_build(view()$out_layout))
+    session$setInputs(stacked = "horizontal")
+    expect_identical(view()$allSitesFieldbook,
+                     field_layout(design, layout = as.numeric(layout_choice_labels(
+                       design, planter = "cartesian", stacked = "horizontal")[1L]),
+                       planter = "cartesian", stacked = "horizontal"))
+    session$setInputs(layout = "grid:4:9")
+    expect_identical(view()$allSitesFieldbook,
+                     field_layout(design, nrows = 4, ncols = 9, planter = "cartesian"))
+  })
+})

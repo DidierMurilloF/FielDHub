@@ -5,7 +5,8 @@
 #' Prepare coordinates once and share the same drawing/output constructor.
 #' @noRd
 checked_layout_view <- function(x, layout = 1, planter = "serpentine",
-                                  location = 1, stacked = "vertical", ...) {
+                                  location = 1, stacked = "vertical", ...,
+                                  nrows = NULL, ncols = NULL) {
   if (!inherits(x, "FielDHub")) fieldhub_abort("'x' must be a design created by FielDHub.")
   x <- with_design_class(x)
   check_layout_arguments(planter, stacked)
@@ -13,7 +14,14 @@ checked_layout_view <- function(x, layout = 1, planter = "serpentine",
       length(location) != 1L || !is.finite(location) || location < 1 || location %% 1 != 0) {
     fieldhub_abort("Select one available location for the layout.")
   }
-  options <- layout_options(x, planter = planter, stacked = stacked)
+  dimensioned <- !is.null(nrows) || !is.null(ncols)
+  options <- if (dimensioned) {
+    layout <- 1
+    book <- field_layout(x, planter = planter, nrows = nrows, ncols = ncols)
+    field_book_layouts(list(fieldBook = book))
+  } else {
+    layout_options(x, planter = planter, stacked = stacked)
+  }
   if (location > length(options)) {
     fieldhub_abort("Location ", location, " is not available for this design.",
                    data = list(options = seq_along(options)))
@@ -27,11 +35,17 @@ checked_layout_view <- function(x, layout = 1, planter = "serpentine",
     fieldhub_abort("Select an available layout option: ", paste(available, collapse = ", "), ".",
                    data = list(options = available))
   }
-  tryCatch(
+  view <- tryCatch(
     render_layout_view(x, options, layout, planter, location, stacked, ...),
     error = function(e) fieldhub_abort("Unable to draw the selected layout: ", conditionMessage(e),
                                       class = "fieldhub_render_error", data = list(parent = e))
   )
+  if (dimensioned) {
+    view$allSitesFieldbook <- book
+    view$layout_metadata$parameters$nrows <- max(book$ROW)
+    view$layout_metadata$parameters$ncols <- max(book$COLUMN)
+  }
+  view
 }
 
 #' Draw prepared coordinates and retain the established layout-result fields
