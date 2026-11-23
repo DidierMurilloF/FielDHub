@@ -254,8 +254,9 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
 
 #' Whether `flag` is among the comma-separated values of the environment
 #' variable FIELDHUB_ENGINE_DEBUG, the engine's check hooks: "1" (report the
-#' largest error of an accepted ratio), "slack_floors", "confirm_floors" and
-#' "late_floors" (mode 3, `crossed_search()`), "treatment_form" (below) and
+#' largest error of an accepted ratio), "slack_floors", "confirm_floors",
+#' "late_floors", "drift" and "exact_states" (mode 3, `crossed_search()`, one
+#' of them at a time), "treatment_form" (below) and
 #' "seconds" (mode 3 reports the seconds of its start and of its finish).
 #' @noRd
 engine_debug <- function(flag) {

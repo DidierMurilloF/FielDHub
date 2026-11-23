@@ -41,18 +41,53 @@
 //   swap, and the relative error of an accepted ratio 1.5e-8 (stage 1
 //   starts, seeds 1:400; rc4 logs in ~/fieldhub-libs/runs/phase2/). No
 //   guarantee rests on it: the result, the full-rank test and the Row floors
-//   are computed from scratch. What the search needs is that an accepted swap
-//   of a descent is a real improvement; on those runs (598 000 accepted
-//   swaps of descents) the exact ratio of every one passed the acceptance
-//   rule, the smallest exact gain was 1.3e-8 of the scale and the largest
-//   error 4.7e-11 of it. With FIELDHUB_ENGINE_DEBUG=1 the call reports, over
+//   are computed from scratch. The search needs two things of it. First,
+//   that an accepted swap of a descent is a real improvement; on those runs
+//   (598 000 accepted swaps of descents) the exact ratio of every one passed
+//   the acceptance rule, the smallest exact gain was 1.3e-8 of the scale and
+//   the largest error 4.7e-11 of it. Second, the comparison of a local
+//   optimum with the best one (next paragraph), which the running log det
+//   did not give. With FIELDHUB_ENGINE_DEBUG=1 the call reports, over
 //   its accepted swaps: `debug_max_error` (the largest error relative to
 //   max(1, ratio), a diagnostic), `debug_bound` (the largest error as a
 //   fraction of its bound from the state measured before the swap, plus the
 //   rounding of the two reference factorisations, 2 B^2 (B + 1) u d each;
-//   at most 1 if the ratio formulas are right), `debug_false_accepts` (swaps
-//   of a descent whose exact ratio fails the acceptance rule) and
+//   at most 1 if the ratio formulas are right; infinite if a state is too
+//   far off for the bound, B max|What M - I| >= 1 / 2), `debug_false_accepts`
+//   (swaps of a descent whose exact ratio fails the acceptance rule) and
 //   `debug_state` (the largest alarm quantity of a state before a swap).
+// - Comparison of local optima (review of RC4, I-1; controller ruling R13,
+//   2026-11-23). An optimum is recorded as the best, and the count of failed
+//   escapes starts again, when its joint log det exceeds the best by more
+//   than 1e-10. The running log det is the sum of the logs of the accepted
+//   ratios, so it carries their errors: on 12/4/2 and 9/3/2 nested it ran up
+//   to 2.3e-8 above the value from scratch, optima of one value were
+//   recorded as better one after another, and the search ran to its budget
+//   (12/4/2 nested seed 482: 48 optima recorded, 47 of the same value;
+//   seeds 401:2000: 23 of 1600 searches ended on the budget, none with exact
+//   states). No result was wrong; evaluations were wasted and the stop
+//   reason was wrong. So, when the two running values are within
+//   kOptimumMargin of each other, the joint state is refreshed, and the
+//   state of the best optimum too if its value is still a running one, and
+//   the two values from scratch are compared. Beyond the margin the running
+//   comparison stands. A refresh at every optimum (the other fix measured,
+//   F1 of the review) gives the same searches on the check shapes, but
+//   added 9% and 18% to the work of a joint call at 408 block columns
+//   (200/100/4 and 200/2/4 nested, seed 1: 63 and 80 more refreshes), and a
+//   build of 200/100/4 at 10 searches then completed 3 searches in place of
+//   4; in the treatment-space form a refresh is of order v^3.
+//   The check hook `exact_states` rebuilds both states from scratch after
+//   every accepted swap, so every ratio and every running value is that of
+//   an exact state; the check `crossed` requires the same search with and
+//   without it (evaluations, swaps, stop reason, design and generator
+//   state). The check hook `drift` multiplies one entry of M of the joint
+//   state by 1 + 1e-6 just before each periodic drift check, which must then
+//   alarm and refresh.
+//   With FIELDHUB_ENGINE_DEBUG=1: `debug_false_records` counts the optima
+//   recorded as better whose log det from scratch is not above that of the
+//   record before by more than 1e-10, and `debug_optimum_drift` is the
+//   largest distance of a running log det from the value from scratch at a
+//   local optimum, before any refresh there.
 // - Budget and work: every ratio evaluation costs one evaluation (and the
 //   budget's evaluation work); the drift check costs n + B evaluations as in
 //   resolvable mode; refreshes, rank tests, Row checks and rank-2 updates are
@@ -240,6 +275,13 @@ const double kRepairGain = 1e-8;
 // (`refresh_every`, 256): the drift does not ask for a shorter one, and at
 // 2000/1000/4 one Row value from scratch (8.1e9 units) per 256 swaps (about
 // 4e10 units) costs a fifth more.
+// The margin of the comparison of local optima (header comment).
+// It must exceed the distance of a running joint log det from the value from
+// scratch at an optimum (`debug_optimum_drift`): measured values with the
+// constant's commit and in the check `treatment_form`. Were a drift to pass
+// it, optima of one value could again be recorded as better (wasted
+// evaluations, no wrong result), and `debug_false_records` would count them.
+const double kOptimumMargin = 1e-6;
 const double kConfirmLd = 1e-8;
 const double kConfirmSum = 1e-10;
 const int kCheckpointSwaps = 256;
@@ -272,6 +314,8 @@ struct CrossedOut {
   double debug_max_error = 0;
   // Header comment, "Accuracy of a ratio".
   double debug_bound = 0, debug_false_accepts = 0, debug_state = 0;
+  // Header comment, "Comparison of local optima".
+  double debug_false_records = 0, debug_optimum_drift = 0;
   double repair_swaps = 0, repair_evaluations = 0, repair_score_error = 0;
 };
 
@@ -316,6 +360,8 @@ class Engine {
 
   // The stage 1 Row D and Row A, the exact floors of every design kept.
   void set_floors(double d, double a) { floor_d_ = d; floor_a_ = a; }
+  // The check hook of the call (`floors` of crossed_engine()).
+  void set_hook(int hook) { hook_ = hook; }
   // Work of a factorisation of the joint state and of a refresh of the Row
   // state (CrossedSpace::factor_work(), refresh_work()).
   void set_work(double joint_factor, double row_refresh) {
@@ -466,10 +512,14 @@ class Engine {
       if (rows_differ) note_error(row_ratio, row_before, fresh_log_det(row, 1), row_bound, row_diag + row.max_diag(), lay_.Br);
     }
     out_.accepted += 1;
+    // Check hook `exact_states`: both states from scratch after every swap.
+    if (hook_ == 6 && (!refresh(joint) || (rows_differ && !refresh(row)))) return false;
     if (joint_scale > kRefreshScale && !refresh(joint)) return false;
     if (rows_differ && row_scale > kRefreshScale && !refresh(row)) return false;
     if (++accepted_ % interval_ == 0) {
       if (!budget_.spend(static_cast<double>(lay_.n + lay_.B))) return true;
+      // Check hook `drift`: the state is disturbed just before its check.
+      if (hook_ == 5) joint.disturb(1e-6);
       return check(joint, row);
     }
     return true;
@@ -696,6 +746,7 @@ class Engine {
   CrossedOut& out_;
   int interval_;
   int accepted_ = 0;
+  int hook_ = 1;
   double evaluation_work_;
   bool exact_floors_;
   double floor_d_ = 0.0, floor_a_ = 0.0;
@@ -772,7 +823,7 @@ Crossed make_crossed(int v, int r, int b, const std::vector<int>& row_of, const 
 // Mode 3 of blocks_engine_cpp() (declared there). `start` is 0-based and
 // checked by the caller for length; every replicate must hold each treatment
 // once. `floors` is 1, or a check hook of the header comment: 2 `slack_floors`,
-// 3 `confirm_floors`, 4 `late_floors`. `floor_of` (0-based, empty for none) is
+// 3 `confirm_floors`, 4 `late_floors`, 5 `drift`, 6 `exact_states`. `floor_of` (0-based, empty for none) is
 // the check hook of the repair paragraph.
 cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
@@ -807,6 +858,7 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   out.debug = debug;
   Engine eng(lay, budget, out, std::max(1, refresh_every), evaluation_work, !slack_floors);
   eng.order_.assign(lay.n, 0);
+  eng.set_hook(floors);
 
   eng.set_work(joint.factor_work(), row.refresh_work());
   // Full rank of a plain joint state that has just been refreshed.
@@ -949,6 +1001,8 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
     const bool lazy = cheap && !slack_floors && floors != 3;
     if (lazy) eng.set_lazy(joint.log_det(), floor_ld, row_diag, floors == 4);
     double local_best = -INFINITY;
+    bool best_fresh = false;           // local_best is a value from scratch
+    double debug_record = -INFINITY;   // log det from scratch of the last record
     std::vector<int> local_treat, exact_treat;
     std::unique_ptr<CrossedSpace> best_joint, best_row;
     int stale = 0;
@@ -962,6 +1016,23 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       }
       if (!optimum) continue;
       if (!eng.check(joint, row)) { ok = false; break; }
+      double debug_fresh = NAN;
+      if (debug) {
+        debug_fresh = eng.fresh_log_det(joint, 2);
+        const double drift = std::fabs(joint.log_det() - debug_fresh);
+        if (!(drift <= out.debug_optimum_drift)) out.debug_optimum_drift = drift;
+      }
+      // The comparison with the best optimum, from scratch (header comment).
+      bool fresh = false;
+      if (std::fabs(joint.log_det() - local_best) <= kOptimumMargin) {
+        if (!eng.refresh(joint)) { ok = false; break; }
+        fresh = true;
+        if (!best_fresh) {
+          if (!eng.refresh(*best_joint)) { ok = false; break; }
+          local_best = best_joint->log_det();
+          best_fresh = true;
+        }
+      }
       if (joint.log_det() > local_best + kTie) {
         // Ruling R9: an optimum is recorded only when its design is exact.
         const Engine::Verdict verdict = eng.checkpoint(joint, row);
@@ -970,7 +1041,12 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
           if (!eng.rollback(joint, row, entry)) { ok = false; break; }
           continue;
         }
+        if (debug) {
+          if (!(debug_fresh > debug_record + kTie)) out.debug_false_records += 1;
+          debug_record = debug_fresh;
+        }
         local_best = joint.log_det();
+        best_fresh = fresh;
         local_treat = joint.treatments();
         best_joint.reset(new CrossedSpace(joint));
         best_row.reset(new CrossedSpace(row));
@@ -1096,6 +1172,8 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       "debug_bound"_nm = debug ? out.debug_bound : NA_REAL,
       "debug_false_accepts"_nm = debug ? out.debug_false_accepts : NA_REAL,
       "debug_state"_nm = debug ? out.debug_state : NA_REAL,
+      "debug_false_records"_nm = debug ? out.debug_false_records : NA_REAL,
+      "debug_optimum_drift"_nm = debug ? out.debug_optimum_drift : NA_REAL,
       "stage1_row_d"_nm = stage1_row_d, "stage1_row_a"_nm = stage1_row_a,
       "row_d"_nm = fin_row.ok ? fin_row.d : NA_REAL,
       "row_a"_nm = fin_row.ok ? fin_row.a : NA_REAL,

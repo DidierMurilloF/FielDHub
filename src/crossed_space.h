@@ -214,6 +214,9 @@ class CrossedSpace {
   // computes it from this state, given dM >= max |M - What^-1| and dC >=
   // drift_cache() (header comment). O(r B).
   double ratio_error_bound(int p, int q, bool cache, double dM, double dC) const;
+  // For the check hook `drift` of the crossed search: multiplies M_00 by
+  // 1 + rel, an error the drift check must find.
+  void disturb(double rel) { m_[0] *= 1.0 + rel; }
   int blocks() const { return B_; }
   int treatment(int p) const { return treat_[p]; }
   const std::vector<int>& treatments() const { return treat_; }

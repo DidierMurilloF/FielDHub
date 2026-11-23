@@ -752,9 +752,8 @@ cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
 // v - 1, each a complete grid; `start` is required and the call runs one
 // search from it, after a joint-rank repair when it is not full rank
 // (`segment_of` is empty, or as a check hook a design, 1-based by plot, whose
-// Row values are the floors in place of the start's; `searches` is 1, or 2, 3
-// or 4 as a check hook of the exact Row confirmation of each swap, see
-// crossed_engine.cpp).
+// Row values are the floors in place of the start's; `searches` is 1, or 2 to 6 as a
+// check hook, see crossed_engine.cpp).
 // `options` is a sum of flags, 0 for every caller of phase 1: 1 builds the
 // dense state from the treatment space where there are fewer treatments than
 // block columns (phase 2 spec 5.1c; modes 1-4 only, and in modes 1, 2 and 4

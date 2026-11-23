@@ -810,9 +810,12 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   # skips the exact Row confirmation of each swap, so the end-of-search
   # comparison can be reached; 3L confirms every swap between rows also in
   # the treatment-space form; 4L confirms none there and checks the Row
-  # values after every such swap, so the rollback can be reached.
+  # values after every such swap, so the rollback can be reached; 5L
+  # disturbs the joint state before each periodic drift check; 6L rebuilds
+  # both states after every accepted swap.
   hook <- if (engine_debug("slack_floors")) 2L else if (engine_debug("confirm_floors")) 3L else
-    if (engine_debug("late_floors")) 4L else 1L
+    if (engine_debug("late_floors")) 4L else if (engine_debug("drift")) 5L else
+    if (engine_debug("exact_states")) 6L else 1L
   out <- blocks_engine_cpp(v, r, as.integer(b_rows), hook, as.integer(jumps_per_escape),
                            as.integer(max_stale_escapes), as.double(budget), time_limit,
                            engine_debug("1"),
@@ -854,7 +857,11 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   # ratios (`ratio`, NA without the flag "1": the largest error as a fraction
   # of its bound, the swaps of a descent whose exact ratio fails the
   # acceptance rule, and the largest alarm quantity of a state before a swap;
-  # src/crossed_engine.cpp, "Accuracy of a ratio"), and the Row confirmation of ruling
+  # src/crossed_engine.cpp, "Accuracy of a ratio"), the comparison of local
+  # optima (`optima`, NA without the flag "1": the optima recorded as better
+  # that are not better from scratch, and the largest distance of a running
+  # joint log det from the value from scratch at an optimum; "Comparison of
+  # local optima"), and the Row confirmation of ruling
   # R9 (`row_floors`: the swaps between rows the joint stage applied, the Row
   # values from scratch that confirmed a swap, the checkpoints, the rollbacks
   # after a breach, and the largest distance of a running Row value from the
@@ -869,6 +876,8 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
                                 ratio = c(bound = out$debug_bound,
                                           false_accepts = out$debug_false_accepts,
                                           state = out$debug_state),
+                                optima = c(false_records = out$debug_false_records,
+                                           drift = out$debug_optimum_drift),
                                 row_floors = c(swaps = out$row_swaps,
                                                confirmations = out$row_confirmations,
                                                checkpoints = out$row_checkpoints,
