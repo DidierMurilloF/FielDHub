@@ -204,46 +204,55 @@ knitr::opts_chunk$set(
 ## Onestage row-column designs and the A-Bound
 
 - `row_column(method = "onestage")`, with or without `latinize`, now runs on
-  FielDHub's own compiled block search instead of `blocksdesign::design()`. The
-  search is staged: a first stage on the rows and columns, a repair of the
-  treatment counts, and a joint row-by-column search. `blocksdesign` is no
+  FielDHub's own compiled block search instead of `blocksdesign::design()`.
+  The search is staged: a first stage on the rows and columns, the repair of a
+  singular joint model, and a joint row-by-column search. `blocksdesign` is no
   longer a dependency of FielDHub.
 - Seeded onestage layouts change. The designs are not less efficient: on a
-  validation grid of 90,200 onestage designs (nested and latinized, two seed
-  sets), every shape passed the non-inferiority checks against the previous
-  `blocksdesign` designs, except the 23 shapes below, and the paired timing
-  shows the engine faster than `design()` on all 496 grid shapes (median time
-  ratio 0.025, at most 0.13). The Phase 1 grids pass unchanged (300 of 300 and
-  132 of 132 shapes).
-- Accepted losses. In 23 onestage shapes (22 nested, 1 latinized; listed in
-  `tools/onestage-accepted-loss.csv`) the mean Column D-, Column A- or joint
-  A-efficiency is below the previous mean by more than the margin, while the Row
-  efficiency is equal and the joint D-efficiency is equal or higher. The largest
-  shortfalls are 0.0069 (Column D) and 0.0169 (Column A), at 15 entries in
-  blocks of 5 with four replicates and 20 iterations, and 0.0015 (joint A), at
-  20 entries in blocks of 10 with three replicates. The new search favors the
-  joint D-optimal design, and the shortfall is the price of it.
-- Fewer fallbacks. In 1.6.0, 73 onestage shapes (40 latinized, 33 nested;
-  `tools/onestage-fallback-changes.csv`) fell back to twostage for some seeds
-  (1,204 of 14,450 seed runs). None of these shapes falls back now. Onestage is
-  never replaced by twostage because of its size.
-- `iterations` is the effort of the joint stage, as the number of joint searches
-  requested. `infoDesign$joint_searches` reports the number requested and the
-  number completed. The work of the search is capped (a fixed number of work
-  units, not seconds), so on large designs the cap sets the number of joint
-  searches. The shapes where this happens are listed in
-  `tools/onestage-truncation-list.csv`, which the maintainer reviewed and signed
-  off on 2026-11-22.
+  validation grid of 90,200 onestage designs per seed set (nested and
+  latinized, two seed sets), every shape passed the non-inferiority checks
+  against the previous `blocksdesign` designs, except the 23 rows below, and
+  the paired timing shows the engine faster than `design()` on all 496 grid
+  rows (shape by `iterations`; median time ratio 0.025, at most 0.13). The
+  Phase 1 grids pass unchanged (300 of 300 and 132 of 132 shapes).
+- Seeded onestage layouts can also differ across platforms and BLAS libraries:
+  designs of equal value are decided by tie rules on floating-point values.
+- Accepted losses. In 23 rows of the grid (18 distinct shapes, by `iterations`;
+  22 nested, 1 latinized; listed in `tools/onestage-accepted-loss.csv` in the
+  source repository) the mean Column D-, Column A- or joint A-efficiency is
+  below the previous mean by more than the margin, while the Row efficiency is
+  equal and the joint D-efficiency is equal or higher. The largest shortfalls
+  are 0.0069 (Column D) and 0.0169 (Column A), at 15 entries in 5 rows with
+  four replicates and 20 iterations, and 0.0015 (joint A), at 20 entries in 10
+  rows with three replicates. The new search favors the joint D-optimal
+  design, and the shortfall is the price of it.
+- Fewer fallbacks. In 1.6.0, 73 rows of the grid (41 distinct shapes, by
+  `iterations`; 40 latinized, 33 nested; `tools/onestage-fallback-changes.csv`
+  in the source repository) fell back to twostage for some seeds (1,204 of
+  14,450 seed runs). None of these shapes falls back now. Onestage is never
+  replaced by twostage because of its size.
+- The fallback warning no longer mentions `blocksdesign`, and when a
+  `latinize = TRUE` request returned a design that is not latinized it says
+  so.
+- `iterations` sets the effort of the joint stage: the number of joint
+  searches requested is `max(1, round(10 * iterations / 200))` (10 at the
+  default of 200). `infoDesign$joint_searches` reports the number requested and
+  the number completed. The work of the search is capped (a fixed number of
+  work units, not seconds), so on large designs the cap sets the number of
+  joint searches. The shapes where this happens are listed in
+  `tools/onestage-truncation-list.csv` in the source repository, which the
+  maintainer reviewed and signed off on 2026-11-22.
 - One new warning, of class `fieldhub_design_warning`, for a joint stage that
-  cannot start (beyond about 2,000 treatments). The joint efficiency of an
-  onestage design is computed from the treatment information.
+  cannot start (beyond about 2,000 treatments, fewer with more than four
+  replicates). The joint efficiency of an onestage design is computed from the
+  treatment information.
 - The `A-Bound` numbers change. The new bound combines a convexity bound, a
-  second-moment bound and a pair bound (`tools/a-bound-report.csv`, 344 shapes
-  of incomplete-block, alpha, square and rectangular lattice and row-column
-  designs). It changed in 266 of the 344 shapes (lower in 180, higher in 86; the
-  largest change is -0.0226 and +0.0661), it was never below the best
-  A-efficiency found, and the best design reached it in 156 shapes, against 87
-  for the old bound.
+  second-moment bound and a pair bound (`tools/a-bound-report.csv` in the source
+  repository, 344 shapes of incomplete-block, alpha, square and rectangular
+  lattice and row-column designs). It changed in 266 of the 344 shapes (lower in
+  180, higher in 86; the largest change is -0.0226 and +0.0661), it was never
+  below the best A-efficiency found, and the best design reached it in 156
+  shapes, against 87 for the old bound.
 - Rectangular lattices with three or more replicates can show A slightly below
   the `A-Bound`, because the second-moment bound cannot reach every such lattice
   (see `inst/PROVENANCE.md`). For example, for 12 entries in blocks of 3 with

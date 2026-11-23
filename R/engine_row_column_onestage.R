@@ -806,7 +806,8 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   b_rows <- if (shared) nrows else r * nrows
   B <- b_rows + (if (shared) ncols else r * ncols)
   time_limit <- 60
-  # Check hooks (tools/check-onestage-engine.R; src/crossed_engine.cpp): 2L
+  # Check hooks (tools/check-onestage-engine.R; src/crossed_engine.cpp). They
+  # can change seeded results and are for the tools only. 2L
   # skips the exact Row confirmation of each swap, so the end-of-search
   # comparison can be reached; 3L confirms every swap between rows also in
   # the treatment-space form; 4L confirms none there and checks the Row

@@ -65,7 +65,7 @@
 #' number that ran to their end. The result is still an optimized onestage
 #' design, with the rows and columns coded as requested, and it is
 #' reproducible from the seed; no warning is given for it. Only for designs
-#' beyond about 2000 treatments, whose joint search cannot be started at all,
+#' beyond about 2000 treatments (fewer with more than four replicates), whose joint search cannot be started at all,
 #' does \code{row_column()} give one warning: it then returns an onestage
 #' design in which the rows, and the columns within the rows, were optimized
 #' as far as their own searches could be started, and says which.

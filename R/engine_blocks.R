@@ -258,6 +258,7 @@ blocks_engine <- function(treatments, replicates, blocks, searches = 20L,
 #' "late_floors", "drift" and "exact_states" (mode 3, `crossed_search()`, one
 #' of them at a time), "treatment_form" (below) and
 #' "seconds" (mode 3 reports the seconds of its start and of its finish).
+#' The check hooks can change seeded results and are for the tools only.
 #' @noRd
 engine_debug <- function(flag) {
   flag %in% unlist(strsplit(Sys.getenv("FIELDHUB_ENGINE_DEBUG"), ",", fixed = TRUE))

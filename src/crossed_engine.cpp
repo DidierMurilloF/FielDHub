@@ -109,6 +109,8 @@
 //   fails after a full cycle without an accepted swap or after
 //   kRepairMaxPasses cycles' worth of evaluations; the search then returns
 //   full_rank = FALSE with the repair's last design and runs no joint stage.
+//   A repair stopped by the work cap or the time limit instead keeps the
+//   start, not the repair's last design.
 //   A repair never spends the evaluation budget (phase 1 fix I-1): each of its
 //   evaluations is charged the budget's evaluation work, and its dense steps
 //   their work, to the work cap only; `evaluations` excludes them and

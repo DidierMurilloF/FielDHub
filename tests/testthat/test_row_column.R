@@ -499,10 +499,17 @@ test_that("onestage warns once when its joint search cannot start", {
   skip_on_cran()
   # Beyond the measured universe the joint search may be too large to start.
   # The design is still onestage (never twostage), with one warning.
-  w <- capture_warnings(
-    des <- row_column(t = 2500, nrows = 2, reps = 3, seed = 1, iterations = 20)
+  conds <- list()
+  des <- withCallingHandlers(
+    row_column(t = 2500, nrows = 2, reps = 3, seed = 1, iterations = 20),
+    warning = function(cnd) {
+      conds[[length(conds) + 1L]] <<- cnd
+      invokeRestart("muffleWarning")
+    }
   )
+  w <- vapply(conds, conditionMessage, "")
   expect_length(w, 1)
+  expect_s3_class(conds[[1]], "fieldhub_design_warning")
   expect_match(w, "were not optimized jointly")
   expect_no_match(w, "twostage")
   expect_equal(des$infoDesign$optimization, "onestage")

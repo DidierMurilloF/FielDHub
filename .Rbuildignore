@@ -60,5 +60,6 @@ $run_dev.*
 ^\.mkdocs-src$
 ^\.mkdocs-site$
 ^tools$
+^tests/testthat/fixtures/phase2-fixtures\.meta\.rds$
 
 ^AGENTS\.md$

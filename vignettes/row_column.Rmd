@@ -29,8 +29,8 @@ both rows and columns blocking factors. The randomization can be done across mul
 `row_column()` optimizes both the row and the column blocking factors, and the
 strategy is selected with the `method` argument. By default (`method =
 "onestage"`) the rows and columns are optimized *jointly* by FielDHub's block engine, in a
-staged search: a first search on the rows and columns, a repair of the
-treatment counts and a joint row-by-column search. The alternative, `method = "twostage"`, builds the
+staged search: a first search on the rows and columns, the repair of a
+singular joint model and a joint row-by-column search. The alternative, `method = "twostage"`, builds the
 design in two stages. The first step constructs the blocking factor `Columns`
 using Incomplete Block Units from an incomplete block design that sets the
 number of incomplete blocks as the number of `Columns` in the design, each of
@@ -184,7 +184,7 @@ plot(rcd)
 
 ## Optimization method and latinization
 
-By default, `row_column()` optimizes the rows and columns *jointly* in a single step with FielDHub's block engine (`method = "onestage"`); the `iterations` argument is then the effort of the joint stage, as the number of joint searches requested (`infoDesign$joint_searches` reports the number requested and the number completed), and a small value already captures most of the gain. The alternative `method = "twostage"` constructs the columns first and then improves the rows with FielDHub's block engine while the columns are kept fixed. There, `iterations` is the effort of the row search, and the example below leaves it at its default of 1000, the full search. Seeded two-stage layouts differ from those of earlier versions of FielDHub, which improved the rows with random greedy swaps.
+By default, `row_column()` optimizes the rows and columns *jointly* in a single step with FielDHub's block engine (`method = "onestage"`); the `iterations` argument is then the effort of the joint stage: it sets the number of joint searches requested, which is 10 at the default of 200 and scales with `iterations` (`infoDesign$joint_searches` reports the number requested and the number completed), and a small value already captures most of the gain. The alternative `method = "twostage"` constructs the columns first and then improves the rows with FielDHub's block engine while the columns are kept fixed. There, `iterations` is the effort of the row search, and the example below leaves it at its default of 1000, the full search. Seeded two-stage layouts differ from those of earlier versions of FielDHub, which improved the rows with random greedy swaps.
 
 The per-factor (marginal) `Row` and `Column` A-Efficiencies reported by both methods are usually already close to optimal and change little between the methods. The advantage of `method = "onestage"` shows up in the *joint* row-by-column A-Efficiency of the standard resolvable row-column analysis model, which the efficiency report now includes as the `Row-by-Column` row of `blocksModel`. The default one-stage design above reports:
 
