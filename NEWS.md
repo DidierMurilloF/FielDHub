@@ -35,6 +35,37 @@
 
 ## Enhancements
 
+- Field dimensions for the classic designs. `CRD()`, `RCBD()`,
+  `latin_square()`, `full_factorial()`, `split_plot()`,
+  `split_split_plot()`, `strip_plot()`, `incomplete_blocks()`,
+  `alpha_lattice()`, `square_lattice()` and `rectangular_lattice()` gain
+  `nrows` and `ncols`, the rows and columns of the field at each
+  location; `field_layout()` gains the same two arguments for a design
+  built without them. One dimension is enough: the other follows from
+  the number of plots. The units of the design (complete blocks,
+  replicates and incomplete blocks, whole plots and subplots, Latin
+  squares, strip grids) are equal rectangles of the field, and the plots
+  are numbered along the planting path of the whole field, serpentine or
+  cartesian, so that consecutive plot numbers of a serpentine are
+  neighbours. The randomization is that of the same call without
+  dimensions: only `PLOT`, `ROW` and `COLUMN` differ. Dimensions that do
+  not fit are an error that suggests valid ones, and `layout` or
+  `stacked` together with dimensions is an error. See `?field_layout`.
+
+- `RCBD()` with dimensions keeps `plotNumber` as the matrix of blocks by
+  plots, adds the field map of the plot numbers as `plotNumberField`,
+  and records `nrows` and `ncols` in `infoDesign`, which `print()` and
+  `summary()` show. The plot-number tables of Latin squares, strip plots
+  and split plots (`plotSquares`, `plotLayouts`, `layoutlocations`)
+  carry the numbers of the grid.
+
+- In the app, the layout menu of these designs lists the other valid
+  field sizes in a group of their own, “Field grid”, with labels such as
+  “Grid 4 × 9”. The numbered layout options are unchanged. A grid does
+  not depend on the “Reps layout” select.
+
+- Calls without `nrows` and `ncols` return what they returned before.
+
 - Redesigned Welcome, Help and About pages, in one style: a green banner
   beside a photograph, NDSU green links with accessible contrast, and a
   shared footer. Welcome walks through choosing a design (each linked to
@@ -359,10 +390,10 @@ designs and the `A-Bound` above.
   limits and minimum check distances.
 
 - Multiple Diagonal Arrangement (`kindExpt = "DBUDC"`) and
-  `sparse_allocation()` offer the same opt-in check-spacing
-  optimization (`spread_checks = TRUE`, `dist_method`), in each
-  location on its own, and record `check_spacing` for every location.
-  The default layouts are unchanged.
+  `sparse_allocation()` offer the same opt-in check-spacing optimization
+  (`spread_checks = TRUE`, `dist_method`), in each location on its own,
+  and record `check_spacing` for every location. The default layouts are
+  unchanged.
 
 - The Single Diagonal Arrangement page caches complete results by
   percentage and seeded inputs within each session. Background workers
