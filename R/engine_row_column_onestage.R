@@ -414,6 +414,23 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #' The evaluation budget of the step is unchanged: resolvable mode's pool of
 #' 20 searches of ten full passes.
 #'
+#' Work. Where the step already ended on its budget (21 nested `os` shapes,
+#' among them every t = 200 shape with 25 or 100 rows that is searched,
+#' 300/10/4 and 500/10/4) its work and time are the same as with five
+#' escapes. Elsewhere they are not: with five escapes the step
+#' ended stale below its budget on 86 of the 107 nested `os` shapes it
+#' searches (at 0.03 to 0.97 of the budget), and with 40 it uses the whole
+#' budget on 67 of them, a median of 3.5 times the work (up to 6.7 times on
+#' small shapes, where the step takes milliseconds). The Row values of those
+#' shapes do not change. The largest increases in the share of
+#' `onestage_work_limit` one row step uses: 500/10/2 3.8% to 6.3%, 500/10/3
+#' 7.7% to 9.5%, 200/2/4 0.8% to 2.0%; the largest row step is still 12.9%
+#' (500/10/4), and no step is cut by its share. A build that the work cap
+#' cuts short can therefore lose a joint search: nested 500/10/2 at
+#' `iterations` = 200, seed 1, completes 5 searches where it completed 6,
+#' and 1000/10/2 starts 1 where it started 2 (review of 7160823;
+#' `~/fieldhub-libs/scratch/rv-rc3/rowstep.R`, 2 or 3 seeds a shape).
+#'
 #' Measured 2026-11-22 (root cause of the nested Row shortfall at t = 200 and
 #' `iterations` = 200; scratch `~/fieldhub-libs/scratch/rc3/d2.R`, logs
 #' `rc3-d2-*.log` in `~/fieldhub-libs/runs/phase2/`). With resolvable mode's
@@ -442,6 +459,13 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #' +0.52; 200/100/4 -0.10 and +0.12. The shared row step (mode 4) keeps five
 #' escapes: its Row values pass the Row rules on every `os` shape, none
 #' near the margin.
+#'
+#' Not adopted: one jump per escape instead of three in this step
+#' (`jumps_per_escape`). Measured 2026-11-23 it raises Row further at less
+#' work (Row A at 200/100/3, `iterations` = 200: bootstrap margin -0.37 to
+#' +6.96) and creates no failure outside the accepted-loss rule on 189
+#' nested shape rows, but three checks of `tools/check-onestage-engine.R`
+#' then fail on their fixed seeds, so it waits for a ruling (RC3 report).
 #' @noRd
 onestage_row_stale_escapes <- 40L
 
