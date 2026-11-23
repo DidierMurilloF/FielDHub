@@ -118,11 +118,13 @@
 # the form.
 # (a) mode 3 on 9/3/2, 12/2/4, 12/6/3, 24/2/3 and 30/15/4 nested (a shared
 #     design never has fewer treatments than block columns), seeds 1:4, and
-#     on 12/2/3 (seeds 8, 9, 23, 1) and 8/4/3 (seeds 4, 9, 14, 1) nested, from
+#     on 12/2/3 (seeds 2, 39, 45, 1) and 8/4/3 (seeds 3, 5, 10, 1) nested, from
 #     onestage_stage1() starts and from random complete starts. The stage 1
 #     design of 12/2/4 was full rank on seeds 1:30 (measured 2026-11-22), so
 #     12/2/3 and 8/4/3, whose stage 1 design is singular on the first three
-#     seeds named, stand in for it as singular stage 1 starts:
+#     seeds named, stand in for it as singular stage 1 starts (the seeds
+#     follow the nested row step of stage 1; chosen again on 2026-11-23 for
+#     its 40 escapes, RC3):
 #     - the engine's classification of the start equals the dense full-rank
 #       test; the starts must include both sides of the trace shortcut (tr(M)
 #       <= 1e7, and no usable trace: a singular start, among them stage 1
@@ -1060,7 +1062,7 @@ if (check == "treatment_form") {
     if (!is.numeric(dbg) || length(dbg) != 1L || is.na(dbg) || dbg > 1e-8) sprintf("debug_max_error %s", format(dbg)) else NULL
   }
   shapes <- list(c(9, 3, 2), c(12, 2, 4), c(12, 6, 3), c(24, 2, 3), c(30, 15, 4), c(12, 2, 3), c(8, 4, 3))
-  seed_sets <- list("12/2/3" = c(8L, 9L, 23L, 1L), "8/4/3" = c(4L, 9L, 14L, 1L))
+  seed_sets <- list("12/2/3" = c(2L, 39L, 45L, 1L), "8/4/3" = c(3L, 5L, 10L, 1L))
   sides <- c(shortcut = 0L, no_trace = 0L, exact = 0L)
   singular_stage1 <- character()
   worst <- c(debug = 0, criterion = 0)
