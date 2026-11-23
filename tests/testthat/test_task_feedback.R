@@ -36,8 +36,7 @@ test_that("every result tab contains its own loading state instead of an externa
     expect_equal(query$find("#page-results .fieldhub-task-region")$length(), length(panes))
     for (pane in panes) {
       tasks <- "page-run"
-      # the allocation of Run! and the steps it offers, in one tab or in two
-      allocation_setup <- pane$attribs[["data-value"]] %in% c("setup", spec$setup$tab) &&
+      allocation_setup <- identical(pane$attribs[["data-value"]], "setup") &&
         identical(spec$setup$stage, "run")
       if (identical(spec$kind, "spatial") && !allocation_setup) tasks <- c(tasks, "page-randomize")
       region <- htmltools::tagQuery(pane)$find(".fieldhub-task-region")$selectedTags()

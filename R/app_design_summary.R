@@ -54,6 +54,22 @@ app_design_summary <- function(x, block_levels = NULL, rows = 6L, tabset = NULL,
   )
 }
 
+#' The parameters of a page before its design exists, as the summary shows them
+#'
+#' @param items Lists with a \code{label}, a \code{value} and, where the
+#'   term needs it, a \code{tip}.
+#' @param title The heading of the block.
+#' @return A \code{shiny::div()}, the "Design" section of \code{app_design_summary()}.
+#' @noRd
+app_design_facts <- function(items, title = "Design") {
+  shiny::div(class = "fh-summary fh-summary-facts",
+    shiny::tags$section(
+      shiny::h3(title),
+      shiny::tags$dl(class = "fh-stats", lapply(items, function(item) {
+        shiny::div(shiny::tags$dt(app_summary_term(item$label, item$tip)), shiny::tags$dd(item$value))
+      }))))
+}
+
 #' Field book columns the preview leaves out: the row number, and a column
 #' that repeats one of the design's parameters on every plot
 #' @noRd

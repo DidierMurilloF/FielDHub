@@ -21,11 +21,15 @@ app_spatial_tabs <- function(ns, spec) {
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
   setup <- if (identical(spec$setup$type, "none")) {
     NULL  # the tab holds the steps of the field and nothing else
+  } else if (identical(spec$setup$type, "facts")) {
+    # what the run holds, over the steps (app_design_facts())
+    shiny::div(class = "fieldhub-design-summary", shiny::uiOutput(ns("setup")))
   } else if (identical(spec$setup$type, "summary")) {
     shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
     app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
   }
+  facts <- identical(spec$setup$type, "facts")
   entries <- lapply(seq_along(spec$entries), function(i) {
     app_output_feedback(DT::DTOutput(ns(paste0("entries_", i)), width = NULL, height = NULL))
   })
@@ -47,18 +51,17 @@ app_spatial_tabs <- function(ns, spec) {
         feedback(
           shinyjs::useShinyjs(),
           # The steps of the field and the button that randomizes it, as one card
+          if (facts) setup,
           shiny::div(class = "fh-setup",
             shiny::div(class = "fh-setup-steps", steps("run")),
             shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field", class = "fh-btn-primary",
                                             busy_message = spec$busy_message, results_id = ns("results"))),
             shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
-          if (is.null(spec$setup$tab)) setup,
-          tasks = setup_tasks))
+          if (!facts) setup,
+          tasks = setup_tasks)),
+      shiny::tabPanel("Entries", feedback(entries))
     ),
-    # A setup view with a tab of its own (the allocation of the entries)
-    if (!is.null(spec$setup$tab)) list(shiny::tabPanel(spec$setup$tab, feedback(setup, tasks = setup_tasks))),
-    list(shiny::tabPanel("Entries", feedback(entries))),
     panels,
     list(
       shiny::tabPanel("Field Book",
@@ -305,6 +308,18 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
   if (identical(spec$setup$type, "none")) {
     NULL
+  } else if (identical(spec$setup$type, "facts")) {
+    # The run, and the field in the select as it changes: before Randomize
+    output$setup <- shiny::renderUI({
+      inputs <- settled(staged)
+      # a select still empty, or between two runs, names no field yet
+      chosen <- input$dimensions
+      size <- if (is.character(chosen) && length(chosen) == 1L) {
+        suppressWarnings(as.numeric(strsplit(chosen, " x ", fixed = TRUE)[[1L]]))
+      }
+      if (length(size) != 2L || anyNA(size)) size <- NULL
+      app_design_facts(validate_design(spec$setup$view(inputs$values, inputs$data, size)))
+    })
   } else if (identical(spec$setup$type, "summary")) {
     output$setup <- shiny::renderUI({
       if (!randomized()) return(NULL)

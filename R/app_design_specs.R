@@ -138,6 +138,34 @@ build_design_specs <- function() {
   summary_setup <- list(type = "summary")
   # A page whose Field setup holds the steps of the field and nothing else
   steps_setup <- list(type = "none")
+  # The p-rep page: what the run holds and the field in the select, over the
+  # steps. The field and its fillers follow the select before Randomize.
+  prep_setup <- list(type = "facts", view = function(values, data, size) {
+    count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
+    groups <- if (is.null(data)) {
+      data.frame(entries = values$repGens, copies = values$repUnits)
+    } else {
+      tally <- table(data$REPS)
+      data.frame(entries = as.numeric(tally), copies = as.numeric(names(tally)))
+    }
+    groups <- groups[order(-groups$copies), , drop = FALSE]
+    group <- function(i) {
+      list(label = if (groups$copies[i] > 1) "Replicated" else "Unreplicated",
+           value = paste(count(groups$entries[i]), "\u00d7", groups$copies[i],
+                         if (groups$copies[i] == 1) "copy" else "copies"))
+    }
+    several <- isTRUE(values$l > 1)
+    fits <- length(size) == 2L && prod(size) >= values$plots
+    c(list(list(label = "Entries", value = count(sum(groups$entries)))),
+      lapply(seq_len(nrow(groups)), group),
+      list(list(label = if (several) "Plots per location" else "Plots", value = count(values$plots))),
+      if (fits) list(
+        list(label = "Field", value = paste(size[1L], "\u00d7", size[2L]),
+             tip = "Rows by columns of the field dimensions chosen below."),
+        list(label = "Fillers", value = count(prod(size) - values$plots),
+             tip = "Plots left without an entry so the field is a full rectangle.")),
+      if (several) list(list(label = "Locations", value = count(values$l))))
+  })
   # The diagonal pages: the percentages of checks of the field, and each
   # location's entries and checks
   percent_setup <- list(
@@ -153,8 +181,8 @@ build_design_specs <- function() {
   # The allocation pages (sparse, multi-location p-rep): the allocation of
   # Run!, the copies per entry the locations allow, and each location's
   # entries
-  allocation_setup <- function(caption, into, average = FALSE, tab = NULL) {
-    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L, tab = tab,
+  allocation_setup <- function(caption, into, average = FALSE, tip = NULL) {
+    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L, tip = tip,
          view = function(values, choices) {
            allocation <- values[[into]]
            names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
@@ -452,7 +480,7 @@ build_design_specs <- function() {
       steps = list(ctl_dimensions(function(values, data) {
         prep_field_choices(values$plots, values$allow_fillers)
       }, depends_on = "allow_fillers")),
-      setup = steps_setup,
+      setup = prep_setup,
       entries = list(function(design, location, values) {
         entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
@@ -742,9 +770,10 @@ build_design_specs <- function() {
           prep_location_field_choices(prep_location_plots(values), values$allow_fillers)
         }, enabled_by = "multi_dimension", show_if = "input.multi_dimension == true")
       ),
-      # The allocation is not needed to choose a field: it has a tab of its own
-      setup = allocation_setup("Copies of each entry at each location.", "optim_list",
-                               average = TRUE, tab = "Allocation"),
+      # The allocation of Run!, under the steps of the field
+      setup = allocation_setup("Copies of each entry at each location.", "optim_list", average = TRUE,
+        tip = paste("How the optimization shared the copies of each entry among the locations.",
+                    "Copies is the total of an entry, Avg its mean per location.")),
       entries = list(function(design, location, values) {
         entry_table(location_entries_view(design$list_locs, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),

@@ -87,7 +87,7 @@ test_that("spacing reports use each location and the existing generic app page",
   }
 })
 
-test_that("the p-rep pages report the spacing of their replicated entries, and keep Field setup to its steps", {
+test_that("the p-rep pages report the spacing of their replicated entries, and Field setup holds the rest", {
   design <- partially_replicated(nrows = 15, ncols = 20, repGens = c(75, 150), repUnits = c(2, 1),
                                  l = 2, locationNames = c("North", "South"), seed = 7,
                                  rowcol_penalty = Inf)
@@ -102,9 +102,9 @@ test_that("the p-rep pages report the spacing of their replicated entries, and k
     expect_identical(table$Value[4], sprintf("%.1f%%", 100 * design$infoDesign$shared_pairs[[site]] / nrow(pairs)))
     facts <- app_replicate_spacing_facts(design, site)
     values <- stats::setNames(vapply(facts, `[[`, "", "value"), vapply(facts, `[[`, "", "label"))
-    expect_identical(unname(values[c("Optimization", "Distance", "Distinct rows and columns", "Field",
-                                     "Plots", "Replicated entries", "Unreplicated entries", "Seed")]),
-                     c("On", "Euclidean, in grid steps", "Required", "15 \u00d7 20", "300", "75", "150", "7"))
+    # the spacing alone: the field and its entries are on Field setup
+    expect_identical(values, c(Optimization = "On", Distance = "Euclidean, in grid steps",
+                               `Distinct rows and columns` = "Required", Seed = "7"))
   }
   report <- as.character(app_design_report("replicate_spacing", design, 2))
   expect_match(report, "Replicate spacing", fixed = TRUE)
@@ -128,12 +128,42 @@ test_that("the p-rep pages report the spacing of their replicated entries, and k
     ui <- as.character(mod_design_ui("prep_test", spec))
     expect_match(ui, "prep_test-design_report", fixed = TRUE)
   }
-  # Field setup holds the steps only: no summary on one page, the allocation in its own tab on the other
-  expect_identical(design_app_spec("pREPS")$setup$type, "none")
-  expect_false(grepl("prep_test-setup\"", as.character(mod_design_ui("prep_test", design_app_spec("pREPS")))))
+  # Field setup: the run and the field in the select over the steps of one
+  # page, the allocation under the steps of the other
+  setup <- design_app_spec("pREPS")$setup
+  expect_identical(setup$type, "facts")
+  facts <- function(...) {
+    items <- setup$view(...)
+    stats::setNames(vapply(items, `[[`, "", "value"), vapply(items, `[[`, "", "label"))
+  }
+  values <- list(repGens = c(75, 150), repUnits = c(2, 1), plots = 300, l = 1)
+  expect_identical(facts(values, NULL, c(15, 20)),
+                   c(Entries = "225", Replicated = "75 \u00d7 2 copies", Unreplicated = "150 \u00d7 1 copy",
+                     Plots = "300", Field = "15 \u00d7 20", Fillers = "0"))
+  expect_identical(facts(values, NULL, c(16, 19))[c("Field", "Fillers")],
+                   c(Field = "16 \u00d7 19", Fillers = "4"))
+  # a select that does not hold a field of the run yet shows none
+  expect_identical(names(facts(values, NULL, NULL)), c("Entries", "Replicated", "Unreplicated", "Plots"))
+  expect_false("Field" %in% names(facts(values, NULL, c(10, 10))))
+  # one cell for each group of copies, and the locations where there are several
+  several <- list(repGens = c(20, 30, 100), repUnits = c(3, 2, 1), plots = 220, l = 3)
+  expect_identical(facts(several, NULL, c(11, 20)),
+                   c(Entries = "150", Replicated = "20 \u00d7 3 copies", Replicated = "30 \u00d7 2 copies",
+                     Unreplicated = "100 \u00d7 1 copy", `Plots per location` = "220",
+                     Field = "11 \u00d7 20", Fillers = "0", Locations = "3"))
+  # an uploaded list is counted from its copies
+  upload <- data.frame(ENTRY = 1:6, NAME = letters[1:6], REPS = c(2, 2, 1, 1, 1, 1))
+  expect_identical(facts(list(plots = 8, l = 1), upload, c(2, 4))[1:3],
+                   c(Entries = "6", Replicated = "2 \u00d7 2 copies", Unreplicated = "4 \u00d7 1 copy"))
+  block <- as.character(app_design_facts(setup$view(values, NULL, c(15, 20))))
+  expect_match(block, "fh-stats", fixed = TRUE)
+  expect_false(grepl("style=", block, fixed = TRUE))
+  ui <- as.character(mod_design_ui("prep_test", design_app_spec("pREPS")))
+  expect_lt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
   multi <- design_app_spec("multi_loc_preps")
-  expect_identical(multi$setup$tab, "Allocation")
+  expect_identical(multi$setup$type, "table")
+  expect_false(is.null(multi$setup$tip))
   ui <- as.character(mod_design_ui("prep_test", multi))
-  expect_match(ui, 'data-value="Allocation"', fixed = TRUE)
-  expect_null(design_app_spec("sparse_allocation")$setup$tab)
+  expect_false(grepl('data-value="Allocation"', ui, fixed = TRUE))
+  expect_gt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
 })

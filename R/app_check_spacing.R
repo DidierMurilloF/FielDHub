@@ -162,26 +162,19 @@ app_replicate_spacing <- function(x, selected = 1L, id = "replicate_spacing") {
     selected = selected, id = id)
 }
 
-#' The settings and the size of a p-rep design at one location, as label and value
+#' The spacing settings of a p-rep design, as label and value
 #' @noRd
 app_replicate_spacing_facts <- function(x, site) {
   info <- x$infoDesign
   settings <- x$metadata$parameters
-  at <- function(values) if (length(values) >= site) values[[site]] else values[[1L]]
-  count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
-  fillers <- at(info$fillers)
+  # The field, its plots and its entries are on Field setup: the spacing alone here
   facts <- list(
     list(label = "Optimization", value = if (isFALSE(settings$spread_reps)) "Off" else "On"),
     list(label = "Distance",
          value = paste0(if (identical(settings$dist_method, "manhattan")) "Manhattan" else "Euclidean",
                         ", in grid steps")),
     list(label = "Distinct rows and columns",
-         value = if (isTRUE(settings$rowcol_penalty > 0)) "Required" else "Not required"),
-    list(label = "Field", value = paste(at(info$rows), "×", at(info$columns))),
-    list(label = "Plots", value = paste0(count(at(info$experimental_plots)),
-      if (isTRUE(fillers > 0)) paste0(" and ", count(fillers), if (fillers == 1) " filler" else " fillers"))),
-    list(label = "Replicated entries", value = count(x$reps_info$Replicated[[site]])),
-    list(label = "Unreplicated entries", value = count(x$reps_info$Unreplicated[[site]])))
+         value = if (isTRUE(settings$rowcol_penalty > 0)) "Required" else "Not required"))
   if (!is.null(info$seed)) {
     facts <- c(facts, list(list(label = "Seed", value = format(info$seed, scientific = FALSE, trim = TRUE))))
   }
