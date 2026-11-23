@@ -689,6 +689,11 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   padding: 0 8px;
   line-height: 34px;
 }
+/* A page's own view under the Design block of Field setup: its heading
+   shows with its table. The output stays in the flow while it is empty:
+   Shiny does not render an output it cannot see. */
+#fieldhub-app .fh-setup-view:not(:has(.dataTables_wrapper)) { padding: 0; }
+#fieldhub-app .fh-design .fh-setup-view:not(:has(.dataTables_wrapper)) h3 { display: none; }
 /* Empty state: Shiny's validation message, where the plot will be. */
 #fieldhub-app .fh-design .fieldhub-layout-image .shiny-output-error-validation,
 #fieldhub-app .fh-summary-empty {

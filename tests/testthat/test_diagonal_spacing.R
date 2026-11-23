@@ -131,9 +131,9 @@ test_that("the p-rep pages report the spacing of their replicated entries, and F
   # Field setup: the run and the field in the select under the steps of one
   # page, the allocation under the steps of the other
   setup <- design_app_spec("pREPS")$setup
-  expect_identical(setup$type, "facts")
-  facts <- function(...) {
-    items <- setup$view(...)
+  expect_identical(setup$type, "none")
+  facts <- function(values, data, size, view = setup$facts) {
+    items <- view(values, data, if (is.null(size)) list(NULL) else if (is.list(size)) size else list(size))
     stats::setNames(vapply(items, `[[`, "", "value"), vapply(items, `[[`, "", "label"))
   }
   values <- list(repGens = c(75, 150), repUnits = c(2, 1), plots = 300, l = 1)
@@ -155,21 +155,48 @@ test_that("the p-rep pages report the spacing of their replicated entries, and F
   upload <- data.frame(ENTRY = 1:6, NAME = letters[1:6], REPS = c(2, 2, 1, 1, 1, 1))
   expect_identical(facts(list(plots = 8, l = 1), upload, c(2, 4))[1:3],
                    c(Entries = "6", Replicated = "2 \u00d7 2 copies", Unreplicated = "4 \u00d7 1 copy"))
-  block <- as.character(app_design_facts(setup$view(values, NULL, c(15, 20))))
+  block <- as.character(app_design_facts(setup$facts(values, NULL, list(c(15, 20)))))
   expect_match(block, "fh-stats", fixed = TRUE)
   expect_false(grepl("style=", block, fixed = TRUE))
   ui <- as.character(mod_design_ui("prep_test", design_app_spec("pREPS")))
-  expect_gt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
+  expect_gt(regexpr('id="prep_test-design_facts"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
   # on every spatial page the steps come first, the summary or the table under them
   for (page in Filter(function(page) identical(page$kind, "spatial"), fieldhub_design_specs())) {
     html <- as.character(mod_design_ui("order_test", page))
-    view <- regexpr('id="order_test-setup"', html, fixed = TRUE)
-    if (view > 0) expect_gt(view, regexpr("fh-setup-steps", html, fixed = TRUE), label = page$module)
+    for (id in c("setup", "design_facts")) {
+      view <- regexpr(sprintf('id="order_test-%s"', id), html, fixed = TRUE)
+      if (view > 0) expect_gt(view, regexpr("fh-setup-steps", html, fixed = TRUE), label = page$module)
+    }
   }
   multi <- design_app_spec("multi_loc_preps")
   expect_identical(multi$setup$type, "table")
   expect_false(is.null(multi$setup$tip))
   ui <- as.character(mod_design_ui("prep_test", multi))
   expect_false(grepl('data-value="Allocation"', ui, fixed = TRUE))
-  expect_gt(regexpr('id="prep_test-setup"', ui, fixed = TRUE), regexpr("fh-setup-steps", ui, fixed = TRUE))
+  # one structure on both pages: the steps, the Design block, the page's own table under its heading
+  steps <- regexpr("fh-setup-steps", ui, fixed = TRUE)
+  block <- regexpr('id="prep_test-design_facts"', ui, fixed = TRUE)
+  heading <- regexpr("<h3>Allocation</h3>", ui, fixed = TRUE)
+  table <- regexpr('id="prep_test-setup"', ui, fixed = TRUE)
+  expect_true(steps > 0 && steps < block && block < heading && heading < table)
+  values <- list(lines = 312, rep_checks = NULL, l = 6, copies_per_entry = "8",
+                 optim_list = list(size_locations = rep(416, 6)))
+  expect_identical(facts(values, NULL, c(26, 16), multi$setup$facts),
+                   c(Entries = "312", `Copies per entry` = "8", Locations = "6", `Plots per location` = "416",
+                     Field = "26 \u00d7 16", Fillers = "0"))
+  # a field for each location: alike they read as one, otherwise by location, each in the tooltip
+  same <- rep(list(c(16, 26)), 6)
+  expect_identical(facts(values, NULL, same, multi$setup$facts)[["Field"]], "16 \u00d7 26")
+  mixed <- c(list(c(21, 20)), rep(list(c(26, 16)), 5))
+  items <- multi$setup$facts(values, NULL, mixed)
+  by_label <- stats::setNames(items, vapply(items, `[[`, "", "label"))
+  expect_identical(by_label$Field$value, "By location")
+  expect_match(by_label$Field$tip, "Location 1: 21 \u00d7 20, Location 2: 26 \u00d7 16", fixed = TRUE)
+  expect_identical(by_label$Fillers$value, "0\u20134")
+  expect_match(by_label$Fillers$tip, "Location 1: 4, Location 2: 0", fixed = TRUE)
+  # a location still without a field shows none
+  expect_false("Field" %in% names(facts(values, NULL, c(same[1:5], list(NULL)), multi$setup$facts)))
+  with_checks <- utils::modifyList(values, list(rep_checks = c(8, 8, 8)))
+  expect_identical(facts(with_checks, NULL, c(22, 20), multi$setup$facts)[c("Checks", "Plots per location", "Fillers")],
+                   c(Checks = "3", `Plots per location` = "440", Fillers = "0"))
 })

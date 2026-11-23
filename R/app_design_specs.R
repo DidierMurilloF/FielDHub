@@ -138,10 +138,31 @@ build_design_specs <- function() {
   summary_setup <- list(type = "summary")
   # A page whose Field setup holds the steps of the field and nothing else
   steps_setup <- list(type = "none")
-  # The p-rep page: what the run holds and the field in the select, under the
-  # steps. The field and its fillers follow the select before Randomize.
-  prep_setup <- list(type = "facts", view = function(values, data, size) {
-    count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
+  # The Design block of the p-rep pages, under the steps of Field setup: what
+  # the run holds, and the field in the select as it changes, before
+  # Randomize. `sizes` holds the rows and columns chosen for each location
+  # (one for all where they share a field), `plots` the plots of each.
+  count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
+  field_facts <- function(sizes, plots) {
+    if (!length(sizes) || any(vapply(sizes, length, 1L) != 2L)) return(NULL)
+    sizes <- rep_len(sizes, length(plots))
+    fillers <- vapply(sizes, prod, numeric(1)) - plots
+    # a select between two runs may still hold a field of the last one
+    if (any(fillers < 0)) return(NULL)
+    fields <- vapply(sizes, function(size) paste(size[1L], "\u00d7", size[2L]), "")
+    each <- function(values) paste(paste0("Location ", seq_along(values), ": ", values), collapse = ", ")
+    alike <- length(unique(fields)) == 1L
+    list(
+      list(label = "Field", value = if (alike) unique(fields) else "By location",
+           tip = if (alike) "Rows by columns of the field dimensions chosen above." else each(fields)),
+      list(label = "Fillers",
+           value = if (length(unique(fillers)) == 1L) count(unique(fillers)) else
+             paste0(count(min(fillers)), "\u2013", count(max(fillers))),
+           tip = if (length(unique(fillers)) == 1L) {
+             "Plots left without an entry so the field is a full rectangle."
+           } else each(count(fillers))))
+  }
+  prep_facts <- function(values, data, sizes) {
     groups <- if (is.null(data)) {
       data.frame(entries = values$repGens, copies = values$repUnits)
     } else {
@@ -155,17 +176,25 @@ build_design_specs <- function() {
                          if (groups$copies[i] == 1) "copy" else "copies"))
     }
     several <- isTRUE(values$l > 1)
-    fits <- length(size) == 2L && prod(size) >= values$plots
     c(list(list(label = "Entries", value = count(sum(groups$entries)))),
       lapply(seq_len(nrow(groups)), group),
       list(list(label = if (several) "Plots per location" else "Plots", value = count(values$plots))),
-      if (fits) list(
-        list(label = "Field", value = paste(size[1L], "\u00d7", size[2L]),
-             tip = "Rows by columns of the field dimensions chosen below."),
-        list(label = "Fillers", value = count(prod(size) - values$plots),
-             tip = "Plots left without an entry so the field is a full rectangle.")),
+      field_facts(sizes, values$plots),
       if (several) list(list(label = "Locations", value = count(values$l))))
-  })
+  }
+  multi_prep_facts <- function(values, data, sizes) {
+    plots <- prep_location_plots(values)
+    checks <- length(values$rep_checks)
+    c(list(list(label = "Entries", value = count(values$lines))),
+      if (checks > 0L) list(list(label = "Checks", value = count(checks))),
+      list(list(label = "Copies per entry", value = count(as.numeric(values$copies_per_entry))),
+           list(label = "Locations", value = count(values$l)),
+           list(label = "Plots per location",
+                value = if (length(unique(plots)) == 1L) count(unique(plots)) else
+                  paste0(count(min(plots)), "\u2013", count(max(plots))))),
+      field_facts(sizes, plots))
+  }
+  prep_setup <- list(type = "none", facts = prep_facts)
   # The diagonal pages: the percentages of checks of the field, and each
   # location's entries and checks
   percent_setup <- list(
@@ -181,8 +210,9 @@ build_design_specs <- function() {
   # The allocation pages (sparse, multi-location p-rep): the allocation of
   # Run!, the copies per entry the locations allow, and each location's
   # entries
-  allocation_setup <- function(caption, into, average = FALSE, tip = NULL) {
+  allocation_setup <- function(caption, into, average = FALSE, tip = NULL, facts = NULL, heading = NULL) {
     list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L, tip = tip,
+         facts = facts, heading = heading,
          view = function(values, choices) {
            allocation <- values[[into]]
            names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
@@ -772,6 +802,7 @@ build_design_specs <- function() {
       ),
       # The allocation of Run!, under the steps of the field
       setup = allocation_setup("Copies of each entry at each location.", "optim_list", average = TRUE,
+        facts = multi_prep_facts, heading = "Allocation",
         tip = paste("How the optimization shared the copies of each entry among the locations.",
                     "Copies is the total of an entry, Avg its mean per location.")),
       entries = list(function(design, location, values) {

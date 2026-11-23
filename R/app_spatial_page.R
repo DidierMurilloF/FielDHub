@@ -21,9 +21,6 @@ app_spatial_tabs <- function(ns, spec) {
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
   setup <- if (identical(spec$setup$type, "none")) {
     NULL  # the tab holds the steps of the field and nothing else
-  } else if (identical(spec$setup$type, "facts")) {
-    # what the run holds, under the steps (app_design_facts())
-    shiny::div(class = "fieldhub-design-summary", shiny::uiOutput(ns("setup")))
   } else if (identical(spec$setup$type, "summary")) {
     shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
@@ -56,8 +53,16 @@ app_spatial_tabs <- function(ns, spec) {
                                             busy_message = spec$busy_message, results_id = ns("results"))),
             shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
-          # every page: the steps first, what they are chosen for under them
-          setup,
+          # Every page: the steps first, what they are chosen for under them.
+          # The Design block of the run (app_design_facts()), then the
+          # page's own view, under a heading where the block is over it.
+          if (is.function(spec$setup$facts)) {
+            shiny::div(class = "fieldhub-design-summary", shiny::uiOutput(ns("design_facts")))
+          },
+          if (is.null(spec$setup$heading)) setup else {
+            shiny::div(class = "fh-summary fh-setup-view",
+                       shiny::tags$section(shiny::h3(spec$setup$heading), setup))
+          },
           tasks = setup_tasks)),
       shiny::tabPanel("Entries", feedback(entries))
     ),
@@ -305,20 +310,27 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   })
   # Validation must be ready when Run returns from another result tab.
   shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
+  if (is.function(spec$setup$facts)) {
+    # The run, and the field in the selects as it changes: before Randomize
+    output$design_facts <- shiny::renderUI({
+      inputs <- settled(staged)
+      chosen <- if (isTRUE(input$multi_dimension)) {
+        lapply(seq_len(inputs$values$l), function(i) input[[paste0("location_dimensions_", i)]])
+      } else {
+        list(input$dimensions)
+      }
+      # a select still empty, or between two runs, names no field yet
+      sizes <- lapply(chosen, function(value) {
+        size <- if (is.character(value) && length(value) == 1L) {
+          suppressWarnings(as.numeric(strsplit(value, " x ", fixed = TRUE)[[1L]]))
+        }
+        if (length(size) == 2L && !anyNA(size)) size
+      })
+      app_design_facts(validate_design(spec$setup$facts(inputs$values, inputs$data, sizes)))
+    })
+  }
   if (identical(spec$setup$type, "none")) {
     NULL
-  } else if (identical(spec$setup$type, "facts")) {
-    # The run, and the field in the select as it changes: before Randomize
-    output$setup <- shiny::renderUI({
-      inputs <- settled(staged)
-      # a select still empty, or between two runs, names no field yet
-      chosen <- input$dimensions
-      size <- if (is.character(chosen) && length(chosen) == 1L) {
-        suppressWarnings(as.numeric(strsplit(chosen, " x ", fixed = TRUE)[[1L]]))
-      }
-      if (length(size) != 2L || anyNA(size)) size <- NULL
-      app_design_facts(validate_design(spec$setup$view(inputs$values, inputs$data, size)))
-    })
   } else if (identical(spec$setup$type, "summary")) {
     output$setup <- shiny::renderUI({
       if (!randomized()) return(NULL)

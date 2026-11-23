@@ -162,7 +162,7 @@ test_that("there is one page spec per design, in the registry's workflow order",
       expect_null(spec$layout)
       expect_identical(spec$long_running, long_running[[spec$module]], info = entry$id)
       expect_true(all(vapply(spec$steps, function(step) step$stage %in% c("run", "randomize"), TRUE)))
-      expect_true(spec$setup$type %in% c("summary", "table", "none", "facts"), info = entry$id)
+      expect_true(spec$setup$type %in% c("summary", "table", "none"), info = entry$id)
       expect_true(length(spec$entries) %in% 1:2, info = entry$id)
       expect_true(all(c("field_layout", "plot_numbers") %in% vapply(spec$panels, `[[`, "", "id")))
       if (!is.null(spec$optim)) {
