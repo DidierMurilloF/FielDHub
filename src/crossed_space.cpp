@@ -457,3 +457,45 @@ double CrossedSpace::drift_cache() const {
   }
   return worst;
 }
+
+double CrossedSpace::ratio_error_bound(int p, int q, bool cache, double dM, double dC) const {
+  const int a = treat_[p], c = treat_[q], len = F_ * r_;
+  const int nz = u_sparse(p, q);
+  if (nz == 0) return 0.0;
+  const int* lc = &lists_[static_cast<size_t>(c) * len];
+  const int* la = &lists_[static_cast<size_t>(a) * len];
+  double u1 = 0.0, l1 = 0.0;
+  for (int x = 0; x < nz; ++x) u1 += std::fabs(u_v_[x]);
+  for (int x = 0; x < len; ++x) l1 += wt_[lc[x]] + wt_[la[x]];
+  // alpha, beta and gamma as ratio() or after() computes them.
+  double alpha = 0.0, beta = 0.0, gamma = 0.0;
+  for (int x = 0; x < nz; ++x) {
+    const double* mx = &m_[static_cast<size_t>(B_) * u_j_[x]];
+    for (int y = 0; y < nz; ++y) alpha += u_v_[x] * u_v_[y] * mx[u_j_[y]];
+  }
+  if (cache) {
+    const double* ga = &g_[static_cast<size_t>(B_) * a];
+    const double* gc = &g_[static_cast<size_t>(B_) * c];
+    for (int x = 0; x < nz; ++x) beta += u_v_[x] * (gc[u_j_[x]] - ga[u_j_[x]]);
+    for (int x = 0; x < len; ++x) {
+      gamma += wt_[lc[x]] * (gc[lc[x]] - ga[lc[x]]);
+      gamma -= wt_[la[x]] * (gc[la[x]] - ga[la[x]]);
+    }
+  } else {
+    std::vector<double> mg(B_, 0.0);
+    mg_of(a, c, mg);
+    for (int x = 0; x < nz; ++x) beta += u_v_[x] * mg[u_j_[x]];
+    for (int x = 0; x < len; ++x) gamma += wt_[lc[x]] * mg[lc[x]] - wt_[la[x]] * mg[la[x]];
+  }
+  const double u = 0.5 * std::numeric_limits<double>::epsilon();
+  const double d = std::max(1.0, max_diag());
+  const double rr = r_;
+  const double eta = cache ? 2.0 * (dC + 0.5 * l1 * dM) : l1 * dM;
+  const double A = u1 * u1 * dM + (nz * nz + 1.0) * u * u1 * u1 * d;
+  const double Bb = u1 * eta + (nz + 2.0 * len + 2.0) * u * u1 * l1 * d;
+  const double Gm = l1 * eta + (4.0 * len + 2.0) * u * l1 * l1 * d;
+  const double b = 1.0 - beta / rr;
+  const double X = 2.0 / rr + gamma / (rr * rr);
+  return 2.0 * std::fabs(b) * Bb / rr + Bb * Bb / (rr * rr) + A * std::fabs(X) + std::fabs(alpha) * Gm / (rr * rr) +
+         A * Gm / (rr * rr) + 8.0 * u * std::max(1.0, std::max(b * b, std::fabs(alpha * X)));
+}

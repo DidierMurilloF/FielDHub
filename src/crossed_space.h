@@ -91,6 +91,32 @@
 // (values against a dense qr.resid() reference) and this update (accepted
 // ratios against fresh refreshes, FIELDHUB_ENGINE_DEBUG=1).
 //
+// Error of a ratio (the bound of that check, ratio_error_bound()). Let the
+// state hold M + E in place of M and a cache G + E_G in place of M N', with
+// |E_jl| <= dM and |(E_G)_ji| <= dG for all entries. With |u|_1 the sum of
+// the |u_j| and l_1 = |N_c.|_1 + |N_a.|_1 >= |g|_1:
+//   alpha = u'Mu:           |error| <= A = |u|_1^2 dM;
+//   beta = u'(Mg), gamma = g'(Mg): every entry of Mg = G_.c - G_.a is wrong
+//     by at most eta, eta = 2 dG from the cache (ratio()) and eta = l_1 dM
+//     from M (after()), so |error| <= Bb = |u|_1 eta and Gm = l_1 eta.
+// With b = 1 - beta / r and X = 2 / r + gamma / r^2 as computed, the two
+// terms of the ratio, b^2 and alpha X, are wrong by at most
+//   2 |b| Bb / r + Bb^2 / r^2   and   A |X| + |alpha| Gm / r^2 + A Gm / r^2
+// (exact, not first order: (b + e)^2 - b^2 and (alpha + a)(X + c) - alpha X).
+// So the error of a ratio is proportional to the error of the state and to
+// the size of the ratio's terms, |b| and |alpha| X, which is why acceptance
+// is judged relative to last_scale(); it is not bounded relative to the ratio
+// itself. Entries of M are at most d = max_j M_jj and entries of G at most
+// (l_1 / 2) d, so the rounding of the three sums adds (nz^2 + 1) u |u|_1^2 d
+// to A, (nz + 2 F r + 2) u |u|_1 l_1 d to Bb and (4 F r + 2) u l_1^2 d to Gm
+// (u = 2^-53, nz <= 2 F the entries of u), and the last operations 8 u times
+// the larger term.
+// dM and dG follow from what the sparse checks measure. With rho = drift() =
+// max |What M - I| and M* the true inverse, M - M* = M* (What M - I), so
+// dM <= B max|M*| rho <= B (d + dM) rho, that is dM <= B rho d / (1 - B rho);
+// and G - M* N' = (G - M N') + (M - M*) N', so dG <= drift_cache() +
+// dM l_1 / 2.
+//
 // Treatment-space form (phase 2 spec 5.1c). Every factorisation above is of
 // order B. With fewer treatments than block columns (v < B) the same state
 // follows from a v x v matrix. Let Nt = N / sqrt(r), e = 1 / sqrt(v) (the unit
@@ -183,6 +209,11 @@ class CrossedSpace {
   double max_diag() const;               // max_j M_jj (>= every |M_jl|)
   // max |G - M N'| over the cache, O(B n).
   double drift_cache() const;
+  // For the checks (FIELDHUB_ENGINE_DEBUG=1): a bound on the error of the
+  // ratio of swapping p and q as ratio() (`cache` true) or after() (false)
+  // computes it from this state, given dM >= max |M - What^-1| and dC >=
+  // drift_cache() (header comment). O(r B).
+  double ratio_error_bound(int p, int q, bool cache, double dM, double dC) const;
   int blocks() const { return B_; }
   int treatment(int p) const { return treat_[p]; }
   const std::vector<int>& treatments() const { return treat_; }

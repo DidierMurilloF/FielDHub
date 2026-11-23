@@ -740,6 +740,12 @@ crossed_default_budget <- function(v, r) {
 #' factorisations (phase 2 spec 5.1c, 6.1 W3; src/crossed_engine.cpp). The
 #' check hook FIELDHUB_ENGINE_DEBUG=treatment_form forces that at any size.
 #'
+#' `floor_start` is a check hook (tools/check-onestage-engine.R `repair`): a
+#' design, 1-based by plot as `start`, whose Row D and Row A are the floors in
+#' place of those of `start`, which must meet them; the stage 1 Row values
+#' returned are then its values. NULL, the default, for every caller of the
+#' package.
+#'
 #' @return A list with `treatments` (1-based, plot order as `start`),
 #'   `full_rank`, unrounded `row_d`, `row_a`, `joint_d`, `joint_a`,
 #'   `joint_log_det` of the result (joint values NA when not full rank), the
@@ -759,7 +765,7 @@ crossed_default_budget <- function(v, r) {
 #' @noRd
 crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_default_budget(v, r),
                            work_cap, jumps_per_escape = 3L,
-                           max_stale_escapes = onestage_joint_stale_escapes) {
+                           max_stale_escapes = onestage_joint_stale_escapes, floor_start = NULL) {
   v <- as.integer(v)
   r <- as.integer(r)
   nrows <- as.integer(nrows)
@@ -791,7 +797,8 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
                            engine_debug("1"),
                            as.integer(start), as.double(work_cap), 256L,
                            as.double(resolvable_evaluation_work(v, r, B)), 3L,
-                           as.integer(col_block), as.integer(row_block), integer(),
+                           as.integer(col_block), as.integer(row_block),
+                           if (is.null(floor_start)) integer() else as.integer(floor_start),
                            engine_form_option(TRUE, v, B, onestage_form_blocks) + 2L)
   stop_reason <- c("budget", "stale", "time_limit", "no_start")[out$stop_reason]
   if (identical(stop_reason, "time_limit")) {
@@ -822,7 +829,11 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
   # the start (and tr(M) of its joint state, NA when it could not be built),
   # the swaps the joint stage applied, the refreshes that scored the start,
   # the repaired design and the result (joint state, Row state), whether
-  # the end-of-search drift check alarmed, and the Row confirmation of ruling
+  # the end-of-search drift check alarmed, the accuracy of the accepted
+  # ratios (`ratio`, NA without the flag "1": the largest error as a fraction
+  # of its bound, the swaps of a descent whose exact ratio fails the
+  # acceptance rule, and the largest alarm quantity of a state before a swap;
+  # src/crossed_engine.cpp, "Accuracy of a ratio"), and the Row confirmation of ruling
   # R9 (`row_floors`: the swaps between rows the joint stage applied, the Row
   # values from scratch that confirmed a swap, the checkpoints, the rollbacks
   # after a breach, and the largest distance of a running Row value from the
@@ -834,6 +845,9 @@ crossed_search <- function(start, v, r, nrows, ncols, shared, budget = crossed_d
                                 scoring_refreshes = c(joint = out$scoring_joint,
                                                       row = out$scoring_row),
                                 end_alarm = out$end_alarm,
+                                ratio = c(bound = out$debug_bound,
+                                          false_accepts = out$debug_false_accepts,
+                                          state = out$debug_state),
                                 row_floors = c(swaps = out$row_swaps,
                                                confirmations = out$row_confirmations,
                                                checkpoints = out$row_checkpoints,

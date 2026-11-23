@@ -32,6 +32,27 @@
 //   Measured with FIELDHUB_ENGINE_DEBUG=1 on about 250 random complete starts
 //   (v 8-20, many near-singular): the largest relative error of an accepted
 //   ratio was 6.1e-10 with this refresh and 3.3e-9 without it.
+// - Accuracy of a ratio (root cause RC4, 2026-11-23). The error of a ratio is
+//   bounded by the error of the state times the size of the ratio's terms
+//   (crossed_space.h, "Error of a ratio"), not relative to the ratio itself.
+//   Between two drift checks the state is not bounded by the alarm: on
+//   designs with a small efficiency factor (max_j M_jj above about 40:
+//   9/3/2 and 12/4/2 nested) the alarm quantity reached 2.4e-7 at an accepted
+//   swap, and the relative error of an accepted ratio 1.5e-8 (stage 1
+//   starts, seeds 1:400; rc4 logs in ~/fieldhub-libs/runs/phase2/). No
+//   guarantee rests on it: the result, the full-rank test and the Row floors
+//   are computed from scratch. What the search needs is that an accepted swap
+//   of a descent is a real improvement; on those runs (598 000 accepted
+//   swaps of descents) the exact ratio of every one passed the acceptance
+//   rule, the smallest exact gain was 1.3e-8 of the scale and the largest
+//   error 4.7e-11 of it. With FIELDHUB_ENGINE_DEBUG=1 the call reports, over
+//   its accepted swaps: `debug_max_error` (the largest error relative to
+//   max(1, ratio), a diagnostic), `debug_bound` (the largest error as a
+//   fraction of its bound from the state measured before the swap, plus the
+//   rounding of the two reference factorisations, 2 B^2 (B + 1) u d each;
+//   at most 1 if the ratio formulas are right), `debug_false_accepts` (swaps
+//   of a descent whose exact ratio fails the acceptance rule) and
+//   `debug_state` (the largest alarm quantity of a state before a swap).
 // - Budget and work: every ratio evaluation costs one evaluation (and the
 //   budget's evaluation work); the drift check costs n + B evaluations as in
 //   resolvable mode; refreshes, rank tests, Row checks and rank-2 updates are
@@ -59,6 +80,15 @@
 //   `repair_evaluations` counts them. The joint stage starts from states
 //   built anew from the repaired design, so it runs exactly as a call that
 //   was given the repaired design (with the floors of the stage 1 design).
+//   The floors matter: a repair swap between two rows may leave a Row value
+//   one rounding above the stage 1 value (it is accepted when not below), and
+//   a call given the repaired design alone would then search under its
+//   higher floors and reject swaps this call accepts (root cause RC4: 21 of
+//   132 repaired starts of 8/4/3 nested, seeds 1:400). The check hook
+//   `floor_of` (a design, empty for none) takes the Row floors from that
+//   design instead of the start, which must meet them; the check `repair`
+//   uses it to compare this call with the search from the repaired design
+//   under the stage 1 floors. Its Row state is not charged as work.
 // - Exact Row guarantee (spec 6.1: Row D and Row A never fall below their
 //   stage 1 values). The running floors keep the 1e-10 slack. In addition a
 //   swap between two rows is accepted only if Row D and Row A of the swapped
@@ -240,6 +270,8 @@ struct CrossedOut {
   double row_drift_ld = 0, row_drift_sum = 0;
   bool debug = false;
   double debug_max_error = 0;
+  // Header comment, "Accuracy of a ratio".
+  double debug_bound = 0, debug_false_accepts = 0, debug_state = 0;
   double repair_swaps = 0, repair_evaluations = 0, repair_score_error = 0;
 };
 
@@ -408,21 +440,30 @@ class Engine {
 
   // Apply a swap to both states (the Row state only when the rows differ).
   // joint_scale and row_scale are last_scale() of the two ratios.
+  // `descent`: the swap was accepted by a descent (not an escape jump).
   bool apply(CrossedSpace& joint, CrossedSpace& row, int x, int y, double ratio, double row_ratio,
-             double joint_scale, double row_scale) {
+             double joint_scale, double row_scale, bool descent) {
     const bool rows_differ = lay_.row_of[x] != lay_.row_of[y];
     double before = 0.0, row_before = 0.0;
+    double bound = 0.0, row_bound = 0.0, diag = 0.0, row_diag = 0.0;
     if (out_.debug) {
       before = fresh_log_det(joint, 2);
-      if (rows_differ) row_before = fresh_log_det(row, 1);
+      bound = error_bound(joint, x, y, true);
+      diag = joint.max_diag();
+      if (rows_differ) {
+        row_before = fresh_log_det(row, 1);
+        row_bound = error_bound(row, x, y, false);
+        row_diag = row.max_diag();
+      }
     }
     // Charged before it is done, so a swap the work limit refuses is not made.
     if (!budget_.work(swap_work(lay_.B, lay_.v, lay_.r) + (rows_differ ? swap_work(lay_.Br, lay_.v, lay_.r) : 0.0))) return false;
     joint.apply(x, y, ratio);
     row.apply(x, y, rows_differ ? row_ratio : 1.0);
     if (out_.debug) {
-      note_error(ratio, before, fresh_log_det(joint, 2));
-      if (rows_differ) note_error(row_ratio, row_before, fresh_log_det(row, 1));
+      const double exact = note_error(ratio, before, fresh_log_det(joint, 2), bound, diag + joint.max_diag(), lay_.B);
+      if (descent && !(exact > 1.0 + kTie && exact > 1.0 + kTie * joint_scale)) out_.debug_false_accepts += 1;
+      if (rows_differ) note_error(row_ratio, row_before, fresh_log_det(row, 1), row_bound, row_diag + row.max_diag(), lay_.Br);
     }
     out_.accepted += 1;
     if (joint_scale > kRefreshScale && !refresh(joint)) return false;
@@ -480,7 +521,7 @@ class Engine {
               if (lazy_ && !confirm && pending_ == 0) note_exact(joint);
             }
             const double applied = out_.accepted;
-            const bool went_on = apply(joint, row, x, y, ratio, row_ratio, joint_scale, row_scale);
+            const bool went_on = apply(joint, row, x, y, ratio, row_ratio, joint_scale, row_scale, true);
             // Counted only for a swap that was made (the work limit may
             // refuse it). A confirmed swap proves the whole design exact.
             if (crossing && out_.accepted > applied) {
@@ -522,7 +563,7 @@ class Engine {
       if (!budget_.spend(1.0)) break;
       // A jump from the ambiguous zone is refreshed at once, as in the other
       // modes (a scale above kRefreshScale already refreshes inside apply()).
-      if (!apply(joint, row, x, y, ratio, 1.0, scale, 1.0)) return false;
+      if (!apply(joint, row, x, y, ratio, 1.0, scale, 1.0, false)) return false;
       if (ratio <= kJumpSafe * scale && scale <= kRefreshScale && !refresh(joint)) return false;
       ++done;
     }
@@ -611,10 +652,36 @@ class Engine {
     return fresh.refresh() ? fresh.log_det() : NAN;
   }
 
-  void note_error(double ratio, double before, double after) {
+  // For the checks (header comment, "Accuracy of a ratio"): the bound of
+  // CrossedSpace::ratio_error_bound() on the ratio of swapping x and y from
+  // the state `s` as it is, whose errors the sparse drift checks measure; the
+  // alarm quantity of `s` goes to `debug_state`.
+  double error_bound(const CrossedSpace& s, int x, int y, bool cache) {
+    const double rho = s.drift(), d = s.max_diag(), dc = s.drift_cache();
+    const double state = std::max(rho * std::max(1.0, d), dc);
+    if (!(state <= out_.debug_state)) out_.debug_state = state;
+    const double brho = s.blocks() * rho;
+    if (!(brho < 0.5)) return INFINITY;
+    return s.ratio_error_bound(x, y, cache, brho * d / (1.0 - brho), dc);
+  }
+
+  // Records the error of `ratio` against the exact ratio, exp(after - before)
+  // of two log dets from scratch, and returns the exact ratio. `bound` is
+  // error_bound() before the swap; the two log dets add their rounding: a
+  // Cholesky factorisation of order B is exact for a matrix within
+  // gamma_(B + 1) of What entrywise (its diagonal is at most 2), which moves
+  // log det by at most the sum of |M_jl| times that, 2 B^2 (B + 1) u d, d the
+  // largest diagonal entry of M (`diags`: d before plus d after).
+  double note_error(double ratio, double before, double after, double bound, double diags, int B) {
     const double exact = std::exp(after - before);
-    const double e = std::isfinite(exact) ? std::fabs(ratio - exact) / std::max(1.0, exact) : INFINITY;
+    const double error = std::isfinite(exact) ? std::fabs(ratio - exact) : INFINITY;
+    const double e = error / std::max(1.0, exact);
     if (!(e <= out_.debug_max_error)) out_.debug_max_error = e;
+    const double u = 1.1102230246251565e-16;
+    const double reference = exact * 2.0 * B * B * (B + 1.0) * u * std::max(2.0, diags);
+    const double f = error / (bound + reference);
+    if (!(f <= out_.debug_bound)) out_.debug_bound = f;
+    return exact;
   }
 
   std::vector<int> order_;
@@ -705,12 +772,14 @@ Crossed make_crossed(int v, int r, int b, const std::vector<int>& row_of, const 
 // Mode 3 of blocks_engine_cpp() (declared there). `start` is 0-based and
 // checked by the caller for length; every replicate must hold each treatment
 // once. `floors` is 1, or a check hook of the header comment: 2 `slack_floors`,
-// 3 `confirm_floors`, 4 `late_floors`.
+// 3 `confirm_floors`, 4 `late_floors`. `floor_of` (0-based, empty for none) is
+// the check hook of the repair paragraph.
 cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            const std::vector<int>& col_of, const std::vector<int>& start,
                            int jumps_per_escape, int max_stale_escapes, double budget_cap,
                            double time_limit, bool debug, double work_cap, int refresh_every,
-                           double evaluation_work, int floors, bool treatment_form, bool strict) {
+                           double evaluation_work, int floors, bool treatment_form, bool strict,
+                           const std::vector<int>& floor_of) {
   const bool slack_floors = floors == 2;
   Crossed lay = make_crossed(v, r, b, row_of, col_of);
   lay.form = treatment_form;
@@ -768,12 +837,33 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
   const double start_trace = joint_ok ? joint.trace() : NA_REAL;
   // Joint D of the given design, 0 when it is not full rank.
   const double stage1_joint_d = start_full ? joint.d_efficiency() : 0.0;
-  const double stage1_row_d = row_ok ? row.d_efficiency() : NA_REAL;
-  const double stage1_row_a = row_ok ? row.a_efficiency() : NA_REAL;
-  const double floor_ld = row_ok ? row.log_det() : 0.0;
-  const double floor_sum = row_ok ? row.trace() - lay.Br + v - 1.0 : 0.0;
+  // The design whose Row values are the floors: the start, or the design of
+  // the check hook `floor_of` (header comment; its state is not charged).
+  const CrossedSpace* base = &row;
+  std::unique_ptr<CrossedSpace> given;
+  if (!floor_of.empty()) {
+    if (static_cast<int>(floor_of.size()) != lay.n) cpp11::stop("The floor design must give one treatment per plot.");
+    for (int m = 0; m < r; ++m) {
+      std::vector<int> seen(v, 0);
+      for (int p = m * v; p < (m + 1) * v; ++p) {
+        if (floor_of[p] < 0 || floor_of[p] >= v || seen[floor_of[p]]++ > 0) {
+          cpp11::stop("Every replicate of the floor design must hold each treatment once.");
+        }
+      }
+    }
+    given.reset(new CrossedSpace(v, r, lay.Br, 1, lay.row_block, floor_of, 0.0, treatment_form));
+    if (!given->refresh() || !row_ok || !(row.d_efficiency() >= given->d_efficiency()) ||
+        !(row.a_efficiency() >= given->a_efficiency())) {
+      cpp11::stop("The start must meet the Row floors of the floor design.");
+    }
+    base = given.get();
+  }
+  const double stage1_row_d = row_ok ? base->d_efficiency() : NA_REAL;
+  const double stage1_row_a = row_ok ? base->a_efficiency() : NA_REAL;
+  const double floor_ld = row_ok ? base->log_det() : 0.0;
+  const double floor_sum = row_ok ? base->trace() - lay.Br + v - 1.0 : 0.0;
   if (row_ok) eng.set_floors(stage1_row_d, stage1_row_a);
-  const double row_diag = row_ok ? row.max_diag() : NA_REAL;
+  const double row_diag = row_ok ? base->max_diag() : NA_REAL;
 
   // `entry` is the design the joint stage starts from: the start, or the
   // repaired design. `result` is what the call returns.
@@ -1003,6 +1093,9 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       "refreshes"_nm = out.refreshes, "drift_events"_nm = out.drift_events, "repairs"_nm = 0.0,
       "even_repairs"_nm = 0, "work"_nm = budget.work_used() + finish_charged, "work_capped"_nm = budget.capped(),
       "debug_max_error"_nm = debug ? out.debug_max_error : NA_REAL,
+      "debug_bound"_nm = debug ? out.debug_bound : NA_REAL,
+      "debug_false_accepts"_nm = debug ? out.debug_false_accepts : NA_REAL,
+      "debug_state"_nm = debug ? out.debug_state : NA_REAL,
       "stage1_row_d"_nm = stage1_row_d, "stage1_row_a"_nm = stage1_row_a,
       "row_d"_nm = fin_row.ok ? fin_row.d : NA_REAL,
       "row_a"_nm = fin_row.ok ? fin_row.a : NA_REAL,
