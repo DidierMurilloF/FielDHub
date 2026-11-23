@@ -73,6 +73,7 @@ build_design_specs <- function() {
   classic <- function(module, title, engine, controls, upload, upload_columns,
                       values, omit_na = TRUE, upload_check = identity,
                       data = function(upload, controls) upload, summary = FALSE,
+                      summary_field = FALSE,
                       long_running = FALSE, busy_message = "Randomizing design...") {
     workflow <- classic_workflow_spec(module)
     list(
@@ -82,6 +83,9 @@ build_design_specs <- function() {
       data = data, values = values,
       args = get(paste0("design_args_", module), mode = "function"),
       kind = "classic", workflow = workflow, layout = workflow$layout, summary = summary,
+      # the field book of the design has no rows and columns: the summary
+      # shows the plots and the field of the layout in view
+      summary_field = summary_field,
       long_running = long_running, busy_message = busy_message
     )
   }
@@ -132,19 +136,83 @@ build_design_specs <- function() {
                     colours = spatial_highlight_colours("checks", length(checks)))
   }
   summary_setup <- list(type = "summary")
+  # A page whose Field setup holds the steps of the field and nothing else
+  steps_setup <- list(type = "none")
+  # The Design block of the p-rep pages, under the steps of Field setup: what
+  # the run holds, and the field in the select as it changes, before
+  # Randomize. `sizes` holds the rows and columns chosen for each location
+  # (one for all where they share a field), `plots` the plots of each.
+  count <- function(n) format(n, big.mark = ",", scientific = FALSE, trim = TRUE)
+  field_facts <- function(sizes, plots) {
+    if (!length(sizes) || any(vapply(sizes, length, 1L) != 2L)) return(NULL)
+    sizes <- rep_len(sizes, length(plots))
+    fillers <- vapply(sizes, prod, numeric(1)) - plots
+    # a select between two runs may still hold a field of the last one
+    if (any(fillers < 0)) return(NULL)
+    fields <- vapply(sizes, function(size) paste(size[1L], "\u00d7", size[2L]), "")
+    each <- function(values) paste(paste0("Location ", seq_along(values), ": ", values), collapse = ", ")
+    alike <- length(unique(fields)) == 1L
+    list(
+      list(label = "Field", value = if (alike) unique(fields) else "By location",
+           tip = if (alike) "Rows by columns of the field dimensions chosen above." else each(fields)),
+      list(label = "Fillers",
+           value = if (length(unique(fillers)) == 1L) count(unique(fillers)) else
+             paste0(count(min(fillers)), "\u2013", count(max(fillers))),
+           tip = if (length(unique(fillers)) == 1L) {
+             "Plots left without an entry so the field is a full rectangle."
+           } else each(count(fillers))))
+  }
+  prep_facts <- function(values, data, sizes) {
+    groups <- if (is.null(data)) {
+      data.frame(entries = values$repGens, copies = values$repUnits)
+    } else {
+      tally <- table(data$REPS)
+      data.frame(entries = as.numeric(tally), copies = as.numeric(names(tally)))
+    }
+    groups <- groups[order(-groups$copies), , drop = FALSE]
+    group <- function(i) {
+      list(label = if (groups$copies[i] > 1) "Replicated" else "Unreplicated",
+           value = paste(count(groups$entries[i]), "\u00d7", groups$copies[i],
+                         if (groups$copies[i] == 1) "copy" else "copies"))
+    }
+    several <- isTRUE(values$l > 1)
+    c(list(list(label = "Entries", value = count(sum(groups$entries)))),
+      lapply(seq_len(nrow(groups)), group),
+      list(list(label = if (several) "Plots per location" else "Plots", value = count(values$plots))),
+      field_facts(sizes, values$plots),
+      if (several) list(list(label = "Locations", value = count(values$l))))
+  }
+  multi_prep_facts <- function(values, data, sizes) {
+    plots <- prep_location_plots(values)
+    checks <- length(values$rep_checks)
+    c(list(list(label = "Entries", value = count(values$lines))),
+      if (checks > 0L) list(list(label = "Checks", value = count(checks))),
+      list(list(label = "Copies per entry", value = count(as.numeric(values$copies_per_entry))),
+           list(label = "Locations", value = count(values$l)),
+           list(label = "Plots per location",
+                value = if (length(unique(plots)) == 1L) count(unique(plots)) else
+                  paste0(count(min(plots)), "\u2013", count(max(plots))))),
+      field_facts(sizes, plots))
+  }
+  prep_setup <- list(type = "none", facts = prep_facts)
   # The diagonal pages: the percentages of checks of the field, and each
   # location's entries and checks
   percent_setup <- list(
     type = "table", stage = "randomize",
-    caption = paste("Reference guide to design your experiment. Choose the percentage (%)",
-                    "of checks based on the total number of plots you want to have in the final layout."),
+    # A short line over the table; the full guide is its tooltip. The table
+    # is as tall as its rows, and scrolls past about ten of them.
+    caption = "Choose the share of checks for the plot count you want.",
+    tip = paste("Reference guide to design your experiment. Choose the percentage (%)",
+                "of checks based on the total number of plots you want to have in the final layout."),
+    height = "400px", plain = TRUE,
     view = function(values, choices) choices$checks_percent$table
   )
   # The allocation pages (sparse, multi-location p-rep): the allocation of
   # Run!, the copies per entry the locations allow, and each location's
   # entries
-  allocation_setup <- function(caption, into, average = FALSE) {
-    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L,
+  allocation_setup <- function(caption, into, average = FALSE, tip = NULL, facts = NULL, heading = NULL) {
+    list(type = "table", stage = "run", caption = caption, export = "Allocation", rows = 6L, tip = tip,
+         facts = facts, heading = heading,
          view = function(values, choices) {
            allocation <- values[[into]]
            names <- values$entries$names %||% allocation_entry_names(allocation, values$lines)
@@ -194,14 +262,31 @@ build_design_specs <- function() {
          planter = controls$planter, plot_start = controls$plot_start, l = controls$l,
          location_names = controls$location_names, seed = controls$seed)
   }
+  # The engines refuse a count below one in their own words (`reps` must
+  # be ...): the lattice pages say it in the page's, with the field's label
+  plain_labels <- function(controls) {
+    lapply(controls, function(control) {
+      if (!identical(control$type, "number") || is.null(control$min)) return(control)
+      read <- control$parse
+      label <- control$label
+      control$parse <- function(value, values) {
+        count <- read(value, values)
+        if (is.numeric(count) && length(count) == 1L && !is.na(count) && count < 1) {
+          control_abort(label, " must be 1 or more.")
+        }
+        count
+      }
+      control
+    })
+  }
   lattice <- function(module, title, engine, design, upload, treatments) {
     classic(module, title, engine, upload = upload, upload_columns = c("ENTRY", "NAME"),
       summary = TRUE, values = incomplete_block_values, long_running = TRUE,
       busy_message = "Optimizing layout...",
-      controls = list(
+      controls = plain_labels(list(
         ctl_count("t", treatments, generated_only = TRUE), ctl_reps(3), block_sizes(design),
         ctl_locations(), ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
-      ))
+      )))
   }
   split_types <- function(name) {
     stats::setNames(c("2", "1"), paste(name, c("in a RCBD", "in a CRD")))
@@ -210,11 +295,11 @@ build_design_specs <- function() {
 
   list(
     CRD = classic("CRD", "Completely Randomized Design", CRD, upload = "crd",
-      upload_columns = "TREATMENT",
-      controls = list(
+      upload_columns = "TREATMENT", summary = TRUE, summary_field = TRUE,
+      controls = plain_labels(list(
         ctl_count("t", 15, min = 1, generated_only = TRUE), ctl_reps(4, min = 1),
         ctl_planter(), ctl_plot_start(), ctl_location_names(), ctl_seed()
-      ),
+      )),
       # CRD() reads each treatment's replicates from the file's REP column
       data = function(upload, controls) {
         if (is.null(upload)) return(NULL)
@@ -403,7 +488,7 @@ build_design_specs <- function() {
     # A new choice of filler plots offers other field sizes without a new Run!
     pREPS = spatial("pREPS", "Single and Multi-Location P-rep Design", partially_replicated,
       upload = "prep", upload_columns = c("ENTRY", "NAME", "REPS"),
-      upload_check = check_reps_upload, file_tag = "pREP_",
+      upload_check = check_reps_upload, file_tag = "pREP_", report = "replicate_spacing",
       randomizing = "Running p-rep optimization ...",
       controls = c(
         list(ctl_text_list("repGens", "75,150", generated_only = TRUE),
@@ -425,7 +510,7 @@ build_design_specs <- function() {
       steps = list(ctl_dimensions(function(values, data) {
         prep_field_choices(values$plots, values$allow_fillers)
       }, depends_on = "allow_fillers")),
-      setup = summary_setup,
+      setup = prep_setup,
       entries = list(function(design, location, values) {
         entry_table(entry_list_view(design$dataEntry, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
@@ -546,22 +631,19 @@ build_design_specs <- function() {
     # The field sizes are searched after Run!, the percentages of checks
     # after Randomize!
     Diagonal = spatial("Diagonal", "Unreplicated Single Diagonal Arrangement", diagonal_arrangement,
-      report = function(design, location) print_diagonal_spacing(design, location = location),
+      report = "check_spacing",  # the page offers the design's check spacing (app_check_spacing())
       upload = "sdiag", upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       controls = c(
         list(ctl_count("lines", 287, min = 50, generated_only = TRUE), ctl_checks(4, max = 10, choices = 1:10),
-             ctl_locations(),
-             ctl_flag("spread_checks", value = FALSE),
-             ctl_select("dist_method", show_if = "input.spread_checks == true")),
-        spatial_shared(), list(ctl_seed())
+             ctl_locations()),
+        check_spacing_controls(), spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, checks = controls$checks, l = controls$l,
-             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
-             expt_name = controls$expt_name, location_names = controls$location_names,
-             entries = diagonal_entries(controls$lines, controls$checks, data),
-             spread_checks = controls$spread_checks,
-             dist_method = if (isTRUE(controls$spread_checks)) controls$dist_method else "euclidean")
+        c(list(lines = controls$lines, checks = controls$checks, l = controls$l,
+               planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+               expt_name = controls$expt_name, location_names = controls$location_names,
+               entries = diagonal_entries(controls$lines, controls$checks, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -583,23 +665,25 @@ build_design_specs <- function() {
     # Experiments (blocks) of entries, laid out by row or column; an
     # uploaded list may repeat its entries across experiments
     diagonal_multiple = spatial("diagonal_multiple", "Unreplicated Multiple Diagonal Arrangement",
-      diagonal_arrangement, upload = "mdiag", upload_columns = c("ENTRY", "NAME"),
+      diagonal_arrangement, report = "check_spacing", upload = "mdiag", upload_columns = c("ENTRY", "NAME"),
       upload_repeats = "sameEntries", file_tag = "Diagonal_Multi",
       controls = c(
         list(ctl_flag("sameEntries"), ctl_count("lines", 300, min = 50, generated_only = TRUE),
              ctl_text_list("blocks", "100,120,80"), ctl_checks(4, max = 20, choices = 1:20), ctl_locations(),
              ctl_select("stacked", selected = "By Row")),
+        check_spacing_controls(),
         spatial_shared(expt_name = ctl_expt_name("Expt1, Expt2, Expt3", trim = TRUE),
                        trim_locations = TRUE),
         list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, blocks = controls$blocks, checks = controls$checks,
-             sameEntries = controls$sameEntries, stacked = controls$stacked, l = controls$l,
-             planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
-             expt_name = controls$expt_name, location_names = controls$location_names,
-             entries = multiple_diagonal_entries(controls$lines, controls$blocks, controls$checks,
-                                                 controls$sameEntries, data))
+        c(list(lines = controls$lines, blocks = controls$blocks, checks = controls$checks,
+               sameEntries = controls$sameEntries, stacked = controls$stacked, l = controls$l,
+               planter = controls$planter, plot_start = controls$plot_start, seed = controls$seed,
+               expt_name = controls$expt_name, location_names = controls$location_names,
+               entries = multiple_diagonal_entries(controls$lines, controls$blocks, controls$checks,
+                                                   controls$sameEntries, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -639,20 +723,21 @@ build_design_specs <- function() {
     # Run! allocates the entries to the locations (do_optim()); the field
     # of one location holds its share of the entries and the checks
     sparse_allocation = spatial("sparse_allocation", "Unreplicated Designs: Sparse Allocation",
-      sparse_allocation, upload = "sparse_allocation", upload_columns = c("ENTRY", "NAME"),
-      file_tag = "Diagonal_",
+      sparse_allocation, report = "check_spacing", upload = "sparse_allocation",
+      upload_columns = c("ENTRY", "NAME"), file_tag = "Diagonal_",
       optim = list(engine = do_optim, args = design_args_sparse_allocation_optim, into = "sparse_list"),
       controls = c(
         list(ctl_count("lines", 380, min = 50), ctl_checks(4, max = 10, choices = 1:10), ctl_locations_from(5, 3),
              ctl_copies_per_entry()),
-        spatial_shared(), list(ctl_seed())
+        check_spacing_controls(), spatial_shared(), list(ctl_seed())
       ),
       values = function(controls, data) {
-        list(lines = controls$lines, checks = controls$checks, l = controls$l,
-             copies_per_entry = controls$copies_per_entry, planter = controls$planter,
-             plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
-             location_names = controls$location_names,
-             entries = sparse_entries(controls$lines, controls$checks, controls$l, data))
+        c(list(lines = controls$lines, checks = controls$checks, l = controls$l,
+               copies_per_entry = controls$copies_per_entry, planter = controls$planter,
+               plot_start = controls$plot_start, seed = controls$seed, expt_name = controls$expt_name,
+               location_names = controls$location_names,
+               entries = sparse_entries(controls$lines, controls$checks, controls$l, data)),
+          check_spacing_values(controls))
       },
       steps = list(
         ctl_dimensions(function(values, data) {
@@ -681,7 +766,7 @@ build_design_specs <- function() {
     # location may get a field size of its own
     multi_loc_preps = spatial("multi_loc_preps", "Optimized Multi-Location P-rep Design",
       multi_location_prep, upload = "multi_loc_prep", upload_columns = c("ENTRY", "NAME"),
-      upload_check = check_numeric_entries_upload, file_tag = "pREP_",
+      upload_check = check_numeric_entries_upload, file_tag = "pREP_", report = "replicate_spacing",
       randomizing = "Running p-rep optimization ...",
       optim = list(engine = do_optim, args = design_args_multi_loc_preps_optim, into = "optim_list"),
       controls = c(
@@ -715,8 +800,11 @@ build_design_specs <- function() {
           prep_location_field_choices(prep_location_plots(values), values$allow_fillers)
         }, enabled_by = "multi_dimension", show_if = "input.multi_dimension == true")
       ),
-      setup = allocation_setup("Table 1: Genotype Allocation Across Environments.", "optim_list",
-                               average = TRUE),
+      # The allocation of Run!, under the steps of the field
+      setup = allocation_setup("Copies of each entry at each location.", "optim_list", average = TRUE,
+        facts = multi_prep_facts, heading = "Allocation",
+        tip = paste("How the optimization shared the copies of each entry among the locations.",
+                    "Copies is the total of an entry, Avg its mean per location.")),
       entries = list(function(design, location, values) {
         entry_table(location_entries_view(design$list_locs, c("ENTRY", "NAME", "REPS")), height = "500px")
       }),
@@ -741,5 +829,31 @@ design_app_spec <- function(module) {
       is.na(module) || !module %in% names(specs)) {
     fieldhub_abort("Choose an available design page.", data = list(choices = names(specs)))
   }
-  specs[[module]]
+  spec <- specs[[module]]
+  # A page that names a control in its own way does so in the field and in
+  # the control's messages alike
+  labels <- design_page_labels(module)
+  spec$controls <- lapply(spec$controls, function(control) {
+    if (control$id %in% names(labels)) control_relabel(control, labels[[control$id]]) else control
+  })
+  spec
+}
+
+#' The controls a page names differently from their concept
+#' @param module The page's module.
+#' @return Labels, named by control id.
+#' @noRd
+design_page_labels <- function(module) {
+  switch(module,
+    Diagonal =, diagonal_multiple =, sparse_allocation = c(spread_checks = "Optimize check spacing"),
+    LSD = c(reps = "Replicates (squares)"),
+    FD = c(type = "Factorial design type"),
+    SPD = c(type = "Split-plot design type"),
+    SSPD = c(type = "Split-split-plot design type"),
+    pREPS = c(repGens = "Entries per group", repUnits = "Replicates per group"),
+    multi_loc_preps = c(use_checks = "Include checks"),
+    RCBD_augmented = c(checks = "Checks per block"),
+    Augmented_RowCol = c(advanced = "Advanced settings", budget = "Search budget per location",
+                         time_limit = "Time limit per location (seconds)"),
+    character(0))
 }

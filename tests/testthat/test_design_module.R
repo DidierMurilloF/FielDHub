@@ -15,61 +15,71 @@ all_modules <- c(classic_modules, spatial_modules)
 # The one label of each concept, written out here so a label changed in
 # fieldhub_control_concepts() fails this test instead of passing by
 # construction
+page_labels <- c(Augmented_RowCol.advanced = "Advanced settings",
+  Augmented_RowCol.budget = "Search budget per location",
+  Augmented_RowCol.time_limit = "Time limit per location (seconds)",
+  Diagonal.spread_checks = "Optimize check spacing",
+  diagonal_multiple.spread_checks = "Optimize check spacing",
+  sparse_allocation.spread_checks = "Optimize check spacing", LSD.reps = "Replicates (squares)",
+  FD.type = "Factorial design type", SPD.type = "Split-plot design type",
+  SSPD.type = "Split-split-plot design type", pREPS.repGens = "Entries per group",
+  pREPS.repUnits = "Replicates per group", multi_loc_preps.use_checks = "Include checks",
+  RCBD_augmented.checks = "Checks per block")
 canonical_labels <- c(
-  type = "Select Design Type:",
-  t = "Input # of Treatments:",
-  setfactors = "Input # of Entries for Each Factor (comma separated):",
-  wp = "Input # of Whole Plots:",
-  sp = "Input # of Sub-plots Within Whole Plots:",
-  ssp = "Input # of Sub-sub-plots Within Sub-plots:",
-  Hplots = "Input # of Horizontal Strips:",
-  Vplots = "Input # of Vertical Strips:",
-  reps = "Input # of Full Reps:",
-  k = "Input # of Plots per IBlock:",
-  nrows = "Input # of Rows:",
-  ncols = "Input # of Columns:",
-  use_checks = "Add repeated checks?",
-  checks = "Input # of Checks:",
-  rep_checks = "Reps per Check:",
+  type = "Design type",
+  t = "Treatments",
+  setfactors = "Levels of each factor (comma separated)",
+  wp = "Whole plots",
+  sp = "Sub-plots per whole plot",
+  ssp = "Sub-sub-plots per sub-plot",
+  Hplots = "Horizontal strips",
+  Vplots = "Vertical strips",
+  reps = "Replicates",
+  k = "Plots per block",
+  nrows = "Rows",
+  ncols = "Columns",
+  use_checks = "Add repeated checks",
+  checks = "Checks",
+  rep_checks = "Replicates per check",
   spread_checks = "Spread checks within each block",
-  dist_method = "Check spacing distance:",
+  dist_method = "Check spacing distance",
   checks_note = NA,
-  l = "Input # of Locations:",
-  planter = "Plot Order Layout:",
-  plot_start = "Starting Plot Number(s):",
+  l = "Locations",
+  planter = "Plot order",
+  plot_start = "Starting plot number",
   plot_by_block = "Number plots by block",
-  plot_increment = "Plot number increment between blocks:",
-  continuous = "Continuous Plot",
-  location_names = "Location Name(s):",
-  randomizeH = "Randomize Horizontal Strips (Across reps)",
-  randomizeV = "Randomize Vertical Strips (Across reps)",
-  seed = "Random Seed (blank = automatic):",
-  lines = "Input # of Entries:",
-  repGens = "# of Entries Per Rep Group:",
-  repUnits = "# of Rep Per Group:",
-  blocks = "Input # Entries per Expt:",
-  b = "Input # of Blocks:",
-  repsExpt = "Input # of Stacked Expts:",
-  repsStack = "Stack experiments:",
-  stacked = "Blocks Layout:",
-  copies_per_entry = "# of Copies Per Entry:",
-  location_view = "Choose Location to View:",
-  expt_name = "Experiment Name(s):",
-  year = "Year (blank = current):",
-  check_direction = "Each check appears once in every:",
-  objective = "Search objective:",
+  plot_increment = "Plot number increment between blocks",
+  continuous = "Continuous plot numbers",
+  location_names = "Location name",
+  randomizeH = "Randomize horizontal strips (across replicates)",
+  randomizeV = "Randomize vertical strips (across replicates)",
+  seed = "Random seed",
+  lines = "Entries",
+  repGens = "Entries per replicate group",
+  repUnits = "Replicates per group",
+  blocks = "Entries per experiment",
+  b = "Blocks",
+  repsExpt = "Stacked experiments",
+  repsStack = "Stack experiments",
+  stacked = "Blocks layout",
+  copies_per_entry = "Copies per entry",
+  location_view = "Location to view",
+  expt_name = "Experiment name",
+  year = "Year (blank = current)",
+  check_direction = "Each check appears once in every",
+  objective = "Search objective",
   advanced = "Show advanced search options",
-  budget = "Search budget per location (blank = default):",
-  time_limit = "Time limit per location in seconds (blank = none):",
-  random = "Randomize Entries?",
+  budget = "Search budget per location (blank = default)",
+  time_limit = "Time limit per location in seconds (blank = none)",
+  random = "Randomize entries",
   random_note = NA,
   sameEntries = "Repeat entries across experiments",
   allow_fillers = "Allow filler plots",
   rowcol_distinct = "Keep copies in distinct rows and columns",
-  dimensions = "Select dimensions of field:",
+  dimensions = "Field dimensions",
   multi_dimension = "Set different dimensions across locations",
-  location_dimensions = "Select dimension for location",
-  checks_percent = "Choose % of Checks:"
+  location_dimensions = "Dimensions for location",
+  checks_percent = "Share of checks"
 )
 
 #' Muffle only the onestage->twostage fallback row_column() may report
@@ -152,7 +162,7 @@ test_that("there is one page spec per design, in the registry's workflow order",
       expect_null(spec$layout)
       expect_identical(spec$long_running, long_running[[spec$module]], info = entry$id)
       expect_true(all(vapply(spec$steps, function(step) step$stage %in% c("run", "randomize"), TRUE)))
-      expect_true(spec$setup$type %in% c("summary", "table"), info = entry$id)
+      expect_true(spec$setup$type %in% c("summary", "table", "none"), info = entry$id)
       expect_true(length(spec$entries) %in% 1:2, info = entry$id)
       expect_true(all(c("field_layout", "plot_numbers") %in% vapply(spec$panels, `[[`, "", "id")))
       if (!is.null(spec$optim)) {
@@ -288,12 +298,13 @@ spatial_defaults <- function(module) {
                                             seed = 7),
     Diagonal = diagonal_arrangement(nrows = 18, ncols = 18, lines = 287, checks = 4, l = 1,
                                     plotNumber = 1, kindExpt = "SUDC", seed = 7, exptName = "Expt1",
-                                    locationNames = "FARGO", checksPercent = 11.11),
+                                    locationNames = "FARGO", checksPercent = 11.11, spread_checks = TRUE),
     diagonal_multiple = diagonal_arrangement(nrows = 19, ncols = 18, lines = 300, checks = 4, l = 1,
                                              plotNumber = 1, kindExpt = "DBUDC", splitBy = "row",
                                              seed = 7, blocks = c(100, 120, 80),
                                              exptName = c("Expt1", "Expt2", "Expt3"),
-                                             locationNames = "FARGO", checksPercent = 12.3),
+                                             locationNames = "FARGO", checksPercent = 12.3,
+                                             spread_checks = TRUE),
     # "FARGO" names one of five locations: the engine's LOC1, ... are used
     sparse_allocation = sparse_allocation(lines = 380, nrows = 19, ncols = 19, l = 5,
                                           plotNumber = c(1, 1001, 2001, 3001, 4001),
@@ -301,7 +312,7 @@ spatial_defaults <- function(module) {
                                           sparse_list = do_optim(design = "sparse", lines = 380, l = 5,
                                                                  copies_per_entry = 4, add_checks = TRUE,
                                                                  checks = 4, seed = 7),
-                                          seed = 7, checksPercent = 14.13),
+                                          seed = 7, checksPercent = 14.13, spread_checks = TRUE),
     multi_loc_preps = multi_location_prep(lines = 312, nrows = rep(26, 6), ncols = rep(16, 6), l = 6,
                                           plotNumber = c(1, 1001, 2001, 3001, 4001, 5001),
                                           copies_per_entry = 8, checks = NULL, rep_checks = NULL,
@@ -341,7 +352,7 @@ test_that("spatial pages with changed controls, steps or an uploaded file build 
   expect_error(page_design(spec, raw, transform(entries, REPS = as.numeric(REPS))), "'REPS' must be numeric",
                class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "1,2", lines = 280))),
-               "Reps per Check must have 1 value or 4 values", class = "fieldhub_input_error")
+               "Replicates per check must have 1 value or 4 values", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(raw, list(checks = 4, rep_checks = "80", lines = 280))),
                "Number of lines should be greater", class = "fieldhub_input_error")
 })
@@ -363,7 +374,7 @@ test_that("the p-rep page offers filler plots and builds the API's design", {
                          locationNames = "FARGO", data = entries, allow_fillers = TRUE,
                          rowcol_penalty = Inf))
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"), list(repUnits = "2"))),
-               "# of Rep Per Group must have one value per group of entries", class = "fieldhub_input_error")
+               "Replicates per group must have one value per group of entries", class = "fieldhub_input_error")
   expect_error(page_design(spec, utils::modifyList(page_defaults("pREPS"),
                                                    list(repGens = "75,157", allow_fillers = FALSE))),
                "Select 'Allow filler plots'", class = "fieldhub_input_error")
@@ -416,7 +427,8 @@ test_that("the diagonal page offers fields and percentages of checks and builds 
                                                          checks_percent = as.character(percents[[1]]))),
     diagonal_arrangement(nrows = size[1], ncols = size[2], lines = 150, checks = 3, l = 2,
                          planter = "cartesian", plotNumber = c(1, 1001), kindExpt = "SUDC", seed = 21,
-                         exptName = "D1", locationNames = c("A", "B"), checksPercent = percents[[1]]))
+                         exptName = "D1", locationNames = c("A", "B"), checksPercent = percents[[1]],
+                         spread_checks = TRUE))  # the page optimizes check spacing by default
   # an uploaded list, its checks first
   entries <- data.frame(ENTRY = 1:154, NAME = c(paste0("CH", 1:4), paste0("G", 5:154)))
   raw <- utils::modifyList(page_defaults("Diagonal"), list(lines = NA))
@@ -424,7 +436,7 @@ test_that("the diagonal page offers fields and percentages of checks and builds 
   expect_same_design(page_design(spec, raw, entries, steps = list(dimensions = "13 x 13")),
     diagonal_arrangement(nrows = 13, ncols = 13, checks = 4, l = 1, plotNumber = 1, kindExpt = "SUDC",
                          seed = 7, exptName = "Expt1", locationNames = "FARGO", data = entries,
-                         checksPercent = utils::tail(percents, 1L)))
+                         checksPercent = utils::tail(percents, 1L), spread_checks = TRUE))
   shuffled <- entries[c(2, 1, 5, 3, 4, 6:154), ]
   expect_error(page_design(spec, raw, shuffled), "must have consecutive ENTRY numbers",
                class = "fieldhub_input_error")
@@ -449,7 +461,8 @@ test_that("the multiple diagonal page lays out its experiments and builds the AP
                          planter = "cartesian", plotNumber = list(c(1, 101, 201), c(1, 101, 201)),
                          kindExpt = "DBUDC", splitBy = "column", seed = 5, blocks = c(80, 80, 80),
                          exptName = c("A", "B", "C"), locationNames = c("X", "Y"),
-                         checksPercent = utils::tail(percents$choices, 1L), sameEntries = TRUE))
+                         checksPercent = utils::tail(percents$choices, 1L), sameEntries = TRUE,
+                         spread_checks = TRUE))
   # an uploaded list, its checks first
   upload <- data.frame(ENTRY = 1:304, NAME = c(paste0("CH", 1:4), paste0("G", 5:304)))
   raw <- utils::modifyList(page_defaults("diagonal_multiple"), list(lines = NA))
@@ -457,7 +470,7 @@ test_that("the multiple diagonal page lays out its experiments and builds the AP
     diagonal_arrangement(nrows = 19, ncols = 18, checks = 4, l = 1, plotNumber = 1, kindExpt = "DBUDC",
                          splitBy = "row", seed = 7, blocks = c(100, 120, 80),
                          exptName = c("Expt1", "Expt2", "Expt3"), locationNames = "FARGO",
-                         data = upload, checksPercent = 12.3))
+                         data = upload, checksPercent = 12.3, spread_checks = TRUE))
   problems <- list(
     list(list(blocks = "100,120"), "must add up to the number of entries"),
     list(list(lines = 40, blocks = "20,20"), "Larger field size is recommended"),
@@ -492,7 +505,7 @@ test_that("the sparse allocation page allocates at Run! and builds the API's des
     sparse_allocation(lines = 120, nrows = size[1], ncols = size[2], l = 3, planter = "cartesian",
                       plotNumber = c(1, 501, 1001), copies_per_entry = 2, checks = 2, exptName = "S1",
                       locationNames = c("A", "B", "C"), sparse_list = allocation, seed = 9,
-                      checksPercent = percent))
+                      checksPercent = percent, spread_checks = TRUE))
   # the allocation table: one row per entry, the copies and totals
   view <- spec$setup$view(c(values, list(sparse_list = allocation)), list())
   expect_identical(dim(view), c(121L, 4L))
@@ -576,6 +589,9 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     html <- as.character(mod_design_ui("x", spec))
     has_id <- function(id) grepl(paste0('id="x-', id, '"'), html, fixed = TRUE)
     display_controls <- lapply(spec$controls, app_sidebar_control, module = module)
+    # a control a page leaves off its panel (app_sidebar_layout()$omitted) is not drawn
+    omitted <- app_sidebar_layout(spec)$omitted
+    display_controls <- Filter(function(control) !control$id %in% omitted, display_controls)
     for (control in c(display_controls, spec$steps)) {
       expect_true(has_id(control$id), info = paste(module, control$id))
       # one select per location is drawn by the server, labelled "<label> <i>"
@@ -591,7 +607,8 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
         spec$layout$output)
     } else {
       c(spec$workflow$ids[c("simulate", "download", "table", "heatmap", "tabset")], "randomize",
-        "status", "setup", paste0("entries_", seq_along(spec$entries)),
+        "status", if (!identical(spec$setup$type, "none")) "setup",
+        paste0("entries_", seq_along(spec$entries)),
         vapply(spec$panels, `[[`, "", "id"),
         if (length(spec$steps) > 0L) paste0(vapply(spec$steps, `[[`, "", "id"), "_step"))
     }
@@ -601,16 +618,17 @@ test_that("the page HTML has every control, the shared buttons and no inline sty
     texts <- if (identical(spec$kind, "classic")) {
       c("Field Layout", "Field Book")
     } else {
-      c("Get Random", "Randomize!", "Data Input", vapply(spec$panels, `[[`, "", "title"), "Field Book",
+      c("Field setup", "Randomize field", "Entries", vapply(spec$panels, `[[`, "", "title"), "Field Book",
         "Heatmap")
     }
     presentation <- app_sidebar_layout(spec)
-    for (text in c(spec$title, "Run!", "Simulate!", "Download field book (CSV)", presentation$upload_label,
+    for (text in c(spec$title, "Generate design", "Simulate data",
+                   "Download field book (CSV)", presentation$upload_label,
                    presentation$file_label, texts)) {
       expect_true(grepl(text, html, fixed = TRUE), info = paste(module, text))
     }
     expect_false(grepl("ZIP|Save experiment", html), info = module)
-    expect_identical(grepl("Summary Design", html, fixed = TRUE), spec$summary, info = module)
+    expect_identical(grepl(">Summary<", html, fixed = TRUE), spec$summary, info = module)
     expect_identical(has_id("summary"), spec$summary, info = module)
     stripped <- html
     for (pattern in library_styles) stripped <- gsub(pattern, "", stripped, perl = TRUE)
@@ -641,9 +659,11 @@ test_that("the same concept has the same label, default and minimum on every pag
   page_values <- list(Optim.plot_start = "1", Optim.rep_checks = "8,8,8,8", pREPS.plot_start = "1",
                    pREPS.repGens = "75,150", pREPS.repUnits = "2,1",
                    RCBD_augmented.plot_start = "1", Augmented_RowCol.plot_start = "1",
-                   Diagonal.plot_start = "1", Diagonal.spread_checks = FALSE,
+                   Diagonal.plot_start = "1", Diagonal.spread_checks = TRUE,
                    diagonal_multiple.plot_start = "1", diagonal_multiple.expt_name = "Expt1, Expt2, Expt3",
+                   diagonal_multiple.spread_checks = TRUE,
                    sparse_allocation.plot_start = "1", sparse_allocation.l = 5,
+                   sparse_allocation.spread_checks = TRUE,
                    multi_loc_preps.plot_start = "1", multi_loc_preps.l = 6, multi_loc_preps.lines = 312,
                    multi_loc_preps.checks = 3, multi_loc_preps.rep_checks = "8,8,8")
   seen <- character()
@@ -661,8 +681,10 @@ test_that("the same concept has the same label, default and minimum on every pag
       info <- paste(module, control$id)
       key <- paste(module, control$id, sep = ".")
       expect_false(is.null(concept), info = info)
-      expect_identical(control$label, if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]],
-                       info = info)
+      # a page may name a control its own way (design_page_labels())
+      expected_label <- if (key %in% names(page_labels)) page_labels[[key]] else
+        if (is.na(canonical_labels[[control$id]])) NULL else canonical_labels[[control$id]]
+      expect_identical(control$label, expected_label, info = info)
       if (key %in% names(page_values)) {
         expect_identical(control$value, page_values[[key]], info = info)
         seen <- c(seen, key)

@@ -2,7 +2,7 @@
 # app_sidebar_layout(), with the added diagonal optimization controls. Each
 # slash denotes the original 6/6 Bootstrap columns.
 original_sidebar_rows <- list(
-  CRD = c("t", "reps", "planter", "plot_start/location_names", "seed"),
+  CRD = c("t", "reps", "planter", "plot_start", "location_names", "seed"),
   RCBD = c("t", "reps", "use_checks", "checks/rep_checks", "spread_checks", "checks_note",
     "l", "planter", "plot_start/continuous", "location_names", "seed"),
   LSD = c("t", "reps", "planter", "plot_start/location_names", "seed"),
@@ -19,22 +19,24 @@ original_sidebar_rows <- list(
   Rectangular_Lattice = c("t", "reps", "k", "l", "planter", "plot_start/location_names", "seed"),
   Optim = c("checks", "rep_checks", "lines", "planter", "l/location_view",
     "plot_start/expt_name", "seed/location_names"),
-  pREPS = c("repGens", "repUnits", "allow_fillers", "rowcol_distinct", "l/location_view", "planter",
+  pREPS = c("repGens/repUnits", "allow_fillers", "rowcol_distinct", "l/location_view", "planter",
     "plot_start/expt_name", "seed/location_names"),
   RCBD_augmented = c("repsExpt/random", "random_note", "repsStack", "lines", "checks/b",
     "l/location_view", "planter", "plot_by_block", "plot_increment",
     "plot_start/expt_name", "seed/location_names"),
-  Augmented_RowCol = c("nrows/ncols", "lines", "checks", "check_direction", "objective",
-    "l/location_view", "planter", "plot_start/expt_name", "seed/location_names", "year", "advanced",
-    "budget", "time_limit"),
+  Augmented_RowCol = c("nrows/ncols", "lines/checks", "check_direction", "objective",
+    "l/location_view", "planter", "plot_start/expt_name", "seed/location_names",
+    "advanced/budget/time_limit"),
   Diagonal = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
     "planter", "plot_start/expt_name", "seed/location_names"),
-  diagonal_multiple = c("sameEntries", "lines", "blocks", "checks", "l/location_view", "stacked/planter",
+  diagonal_multiple = c("sameEntries", "lines", "blocks", "checks", "spread_checks", "dist_method",
+    "l/location_view", "stacked/planter",
     "plot_start/expt_name", "seed/location_names"),
-  sparse_allocation = c("lines", "checks", "l/location_view", "copies_per_entry", "planter",
+  sparse_allocation = c("lines", "checks", "spread_checks", "dist_method", "l/location_view",
+    "copies_per_entry", "planter",
     "plot_start/expt_name", "seed/location_names"),
-  multi_loc_preps = c("lines", "use_checks", "checks/rep_checks", "l/location_view", "copies_per_entry",
-    "planter", "allow_fillers", "rowcol_distinct", "plot_start/expt_name", "seed/location_names")
+  multi_loc_preps = c("lines", "use_checks", "checks/rep_checks", "l/location_view",
+    "copies_per_entry/planter", "allow_fillers", "rowcol_distinct", "plot_start/expt_name", "seed/location_names")
 )
 
 test_that("each original input panel retains its own rows and every control exactly once", {
@@ -43,12 +45,16 @@ test_that("each original input panel retains its own rows and every control exac
     layout <- app_sidebar_layout(spec)
     rows <- Filter(function(row) !identical(row, "upload_file"), layout$rows)
     expect_identical(vapply(rows, paste, "", collapse = "/"), original_sidebar_rows[[spec$module]])
-    expect_setequal(unlist(rows), vapply(spec$controls, `[[`, "", "id"))
+    # a page may leave a control off its panel (the year of the augmented row-column design)
+    expect_setequal(c(unlist(rows), layout$omitted), vapply(spec$controls, `[[`, "", "id"))
     expect_false(anyDuplicated(unlist(rows)) > 0L)
     ui <- app_sidebar_ui(spec, shiny::NS("page"), toggle = "upload")
     expect_identical(serialize(spec$controls, NULL), before)
     query <- htmltools::tagQuery(ui)
-    for (control in spec$controls) expect_equal(query$find(paste0("#page-", control$id))$length(), 1L)
+    for (control in spec$controls) {
+      expect_equal(query$find(paste0("#page-", control$id))$length(),
+                   as.integer(!control$id %in% layout$omitted))
+    }
     expect_equal(query$find(".fieldhub-input-row")$length(), sum(lengths(rows) == 2L))
     expect_equal(query$find(".fieldhub-input-row > .col-sm-6")$length(), 2L * sum(lengths(rows) == 2L))
     expect_equal(query$find(".fieldhub-control-row")$length(), 0L)
@@ -79,10 +85,15 @@ test_that("restored labels and widget types do not alter parsers or automatic se
     expect_equal(read_design_controls(spec, raw)$checks, 4)
   }
   seed <- app_sidebar_control(ctl_seed(), "pREPS")
-  expect_identical(seed$label, "Random Seed:")
+  expect_identical(seed$label, "Random seed")
   expect_null(seed$parse("", list()))
-  expect_identical(app_sidebar_control(ctl_reps(1), "LSD")$label, "Input # of Full Reps (Squares):")
-  expect_identical(app_sidebar_control(ctl_checks(4), "RCBD_augmented")$label, "Checks per Block:")
+  # a page names a control its own way in its spec, for the field and its messages
+  page_label <- function(module, id) {
+    Filter(function(control) control$id == id, design_app_spec(module)$controls)[[1]]$label
+  }
+  expect_identical(page_label("LSD", "reps"), "Replicates (squares)")
+  expect_identical(page_label("RCBD_augmented", "checks"), "Checks per block")
+  expect_identical(page_label("CRD", "reps"), "Replicates")
 })
 
 test_that("multi-location Yes/No controls still pass logical flags to the engine", {

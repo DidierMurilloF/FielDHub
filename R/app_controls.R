@@ -17,64 +17,64 @@
 #' @noRd
 fieldhub_control_concepts <- function() {
   list(
-    type = list(label = "Select Design Type:"),
-    t = list(label = "Input # of Treatments:", min = 2),
-    setfactors = list(label = "Input # of Entries for Each Factor (comma separated):"),
-    wp = list(label = "Input # of Whole Plots:", min = 2),
-    sp = list(label = "Input # of Sub-plots Within Whole Plots:", min = 2),
-    ssp = list(label = "Input # of Sub-sub-plots Within Sub-plots:", min = 2),
-    Hplots = list(label = "Input # of Horizontal Strips:", min = 2),
-    Vplots = list(label = "Input # of Vertical Strips:", min = 2),
-    reps = list(label = "Input # of Full Reps:", min = 2),
-    k = list(label = "Input # of Plots per IBlock:"),
-    nrows = list(label = "Input # of Rows:"),
-    ncols = list(label = "Input # of Columns:", min = 2),
-    use_checks = list(label = "Add repeated checks?", value = FALSE),
-    checks = list(label = "Input # of Checks:", min = 1),
-    rep_checks = list(label = "Reps per Check:", value = "2"),
+    type = list(label = "Design type"),
+    t = list(label = "Treatments", min = 2),
+    setfactors = list(label = "Levels of each factor (comma separated)"),
+    wp = list(label = "Whole plots", min = 2),
+    sp = list(label = "Sub-plots per whole plot", min = 2),
+    ssp = list(label = "Sub-sub-plots per sub-plot", min = 2),
+    Hplots = list(label = "Horizontal strips", min = 2),
+    Vplots = list(label = "Vertical strips", min = 2),
+    reps = list(label = "Replicates", min = 2),
+    k = list(label = "Plots per block"),
+    nrows = list(label = "Rows"),
+    ncols = list(label = "Columns", min = 2),
+    use_checks = list(label = "Add repeated checks", value = FALSE),
+    checks = list(label = "Checks", min = 1),
+    rep_checks = list(label = "Replicates per check", value = "2"),
     spread_checks = list(label = "Spread checks within each block", value = TRUE),
-    dist_method = list(label = "Check spacing distance:", value = "euclidean",
+    dist_method = list(label = "Check spacing distance", value = "euclidean",
                        choices = c("Euclidean" = "euclidean", "Manhattan" = "manhattan")),
     checks_note = list(label = NULL),
-    l = list(label = "Input # of Locations:", value = 1, min = 1),
-    planter = list(label = "Plot Order Layout:", value = "serpentine",
+    l = list(label = "Locations", value = 1, min = 1),
+    planter = list(label = "Plot order", value = "serpentine",
                    choices = c("serpentine", "cartesian")),
-    plot_start = list(label = "Starting Plot Number(s):", value = "101"),
+    plot_start = list(label = "Starting plot number", value = "101"),
     plot_by_block = list(label = "Number plots by block", value = FALSE),
-    plot_increment = list(label = "Plot number increment between blocks:", min = 1),
-    continuous = list(label = "Continuous Plot", value = TRUE),
-    location_names = list(label = "Location Name(s):", value = "FARGO"),
-    randomizeH = list(label = "Randomize Horizontal Strips (Across reps)", value = TRUE),
-    randomizeV = list(label = "Randomize Vertical Strips (Across reps)", value = TRUE),
-    seed = list(label = "Random Seed (blank = automatic):", value = NULL),
+    plot_increment = list(label = "Plot number increment between blocks", min = 1),
+    continuous = list(label = "Continuous plot numbers", value = TRUE),
+    location_names = list(label = "Location name", value = "FARGO"),
+    randomizeH = list(label = "Randomize horizontal strips (across replicates)", value = TRUE),
+    randomizeV = list(label = "Randomize vertical strips (across replicates)", value = TRUE),
+    seed = list(label = "Random seed", value = NULL),
     # Spatial designs
-    lines = list(label = "Input # of Entries:", min = 1),
-    repGens = list(label = "# of Entries Per Rep Group:"),
-    repUnits = list(label = "# of Rep Per Group:"),
-    blocks = list(label = "Input # Entries per Expt:"),
-    b = list(label = "Input # of Blocks:"),
-    repsExpt = list(label = "Input # of Stacked Expts:", min = 1),
-    repsStack = list(label = "Stack experiments:", choices = c("vertical", "horizontal")),
-    stacked = list(label = "Blocks Layout:", choices = c("By Column", "By Row")),
-    copies_per_entry = list(label = "# of Copies Per Entry:"),
-    location_view = list(label = "Choose Location to View:"),
-    expt_name = list(label = "Experiment Name(s):", value = "Expt1"),
-    year = list(label = "Year (blank = current):"),
-    check_direction = list(label = "Each check appears once in every:"),
-    objective = list(label = "Search objective:"),
+    lines = list(label = "Entries", min = 1),
+    repGens = list(label = "Entries per replicate group"),
+    repUnits = list(label = "Replicates per group"),
+    blocks = list(label = "Entries per experiment"),
+    b = list(label = "Blocks"),
+    repsExpt = list(label = "Stacked experiments", min = 1),
+    repsStack = list(label = "Stack experiments", choices = c("vertical", "horizontal")),
+    stacked = list(label = "Blocks layout", choices = c("By Column", "By Row")),
+    copies_per_entry = list(label = "Copies per entry"),
+    location_view = list(label = "Location to view"),
+    expt_name = list(label = "Experiment name", value = "Expt1"),
+    year = list(label = "Year (blank = current)"),
+    check_direction = list(label = "Each check appears once in every"),
+    objective = list(label = "Search objective"),
     advanced = list(label = "Show advanced search options", value = FALSE),
-    budget = list(label = "Search budget per location (blank = default):"),
-    time_limit = list(label = "Time limit per location in seconds (blank = none):"),
-    random = list(label = "Randomize Entries?", value = TRUE),
+    budget = list(label = "Search budget per location (blank = default)"),
+    time_limit = list(label = "Time limit per location in seconds (blank = none)"),
+    random = list(label = "Randomize entries", value = TRUE),
     random_note = list(label = NULL),
     sameEntries = list(label = "Repeat entries across experiments", value = FALSE),
     allow_fillers = list(label = "Allow filler plots", value = TRUE),
     rowcol_distinct = list(label = "Keep copies in distinct rows and columns", value = TRUE),
-    # Steps of the spatial pages, offered after Run! or Randomize!
-    dimensions = list(label = "Select dimensions of field:"),
+    # Steps of the spatial pages, offered after Generate design or Randomize field
+    dimensions = list(label = "Field dimensions"),
     multi_dimension = list(label = "Set different dimensions across locations", value = FALSE),
-    location_dimensions = list(label = "Select dimension for location"),
-    checks_percent = list(label = "Choose % of Checks:")
+    location_dimensions = list(label = "Dimensions for location"),
+    checks_percent = list(label = "Share of checks")
   )
 }
 
@@ -105,6 +105,24 @@ design_control <- function(id, type, parse, value = NULL, min = NULL, max = NULL
        generated_only = generated_only, show_if = show_if,
        enabled_by = enabled_by, disabled_value = disabled_value, depends_on = depends_on,
        options = options, preview = preview, stage = stage)
+}
+
+#' The same control under another label
+#'
+#' @description The label of a control names it in its field and in its
+#' messages (the parser reads it), so both change together.
+#' @param control A control (\code{design_control()}).
+#' @param label Its label on this page.
+#' @noRd
+control_relabel <- function(control, label) {
+  control$label <- label
+  if (!is.null(control$parse)) {
+    # The parser finds `label` where it was built: give it this one instead
+    relabelled <- new.env(parent = environment(control$parse))
+    relabelled$label <- label
+    environment(control$parse) <- relabelled
+  }
+  control
 }
 
 #' Default of a concept, unless the design overrides it

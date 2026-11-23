@@ -80,3 +80,23 @@ test_that("allocation tables use six-row pages without truncating their data", {
   }
   expect_identical(app_spatial_table(data)$x$options$pageLength, nrow(data))
 })
+
+test_that("a spatial table is as tall as its rows, and the percentage guide is a quiet caption", {
+  skip_if_not_installed("DT")
+  data <- data.frame(Options = 1:3, Plots = c(10, 20, 30))
+  plain <- app_spatial_table(data)
+  expect_true(plain$x$options$scrollCollapse)     # scrollY is the most it grows to
+  expect_identical(plain$x$options$scrollY, "600px")
+  for (module in c("Diagonal", "diagonal_multiple")) {
+    setup <- design_app_spec(module)$setup
+    table <- app_spatial_table(data, caption = setup$caption, height = setup$height,
+                               tip = setup$tip, plain = setup$plain)
+    expect_identical(table$x$options$scrollY, "400px")
+    expect_true(table$x$options$scrollCollapse)
+    expect_identical(table$x$options$dom, "t")
+    expect_lt(nchar(setup$caption), 60L)
+    expect_match(table$x$caption, setup$caption, fixed = TRUE)
+    expect_match(table$x$caption, "Reference guide to design your experiment", fixed = TRUE)
+    expect_match(table$x$caption, "data-fh-tip", fixed = TRUE)
+  }
+})

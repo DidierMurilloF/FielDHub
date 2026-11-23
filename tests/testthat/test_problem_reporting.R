@@ -205,7 +205,7 @@ test_that("validate_design(report = TRUE) also reports unexpected errors, for ob
 
   # FielDHub input problems in an observer keep the selector quiet (Task 13)
   noticed <- list()
-  tryCatch(validate_design(fieldhub_abort("Input # of Checks cannot be blank."),
+  tryCatch(validate_design(fieldhub_abort("Checks cannot be blank."),
                            report = TRUE, notice = notice),
            error = function(e) e)
   expect_length(noticed, 0L)
@@ -301,9 +301,9 @@ test_that("the p-rep modules share the no-dimensions explanation", {
 test_that("plot_state_message() explains each empty plot state", {
   design <- structure(list(fieldBook = data.frame(PLOT = 1)), class = "FielDHub")
   expect_identical(plot_state_message(NULL, NULL, "layout"),
-                   "Run the design to see the field layout.")
+                   "Generate the design to see the field layout.")
   expect_identical(plot_state_message(NULL, NULL, "heatmap"),
-                   "Run the design to see the heatmap.")
+                   "Generate the design to see the heatmap.")
   expect_null(plot_state_message(design, NULL, "layout"))
   expect_identical(plot_state_message(design, NULL, "heatmap"),
                    "Simulate data to see the heatmap.")
@@ -319,7 +319,7 @@ test_that("app_plot_state() shows the explanation as a validation message", {
   skip_if_not_installed("shiny")
   err <- tryCatch(app_plot_state(NULL, NULL, "layout"), error = function(e) e)
   expect_s3_class(err, "shiny.silent.error")
-  expect_identical(conditionMessage(err), "Run the design to see the field layout.")
+  expect_identical(conditionMessage(err), "Generate the design to see the field layout.")
   design <- structure(list(fieldBook = data.frame(PLOT = 1)), class = "FielDHub")
   expect_null(app_plot_state(design, NULL, "layout"))
 })

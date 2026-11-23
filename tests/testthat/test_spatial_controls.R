@@ -3,11 +3,11 @@ test_that("spatial controls describe the coordinate axis and retain existing def
     fields <- spatial_correlation_spec(suffix)
     expect_named(fields, c("correlation_x", "correlation_y"))
     expect_identical(fields$correlation_x, list(
-      inputId = paste0("ROX", suffix), label = "Adjacent columns (within a row):",
+      inputId = paste0("ROX", suffix), label = "Adjacent columns (within a row)",
       choices = seq(0.1, 0.9, 0.1), selected = 0.5
     ))
     expect_identical(fields$correlation_y, list(
-      inputId = paste0("ROY", suffix), label = "Adjacent rows (within a column):",
+      inputId = paste0("ROY", suffix), label = "Adjacent rows (within a column)",
       choices = seq(0.1, 0.9, 0.1), selected = 0.5
     ))
   }

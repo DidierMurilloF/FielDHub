@@ -47,7 +47,7 @@ app_upload_spec <- function(design) {
 #' @noRd
 app_upload_ui <- function(ns, design, part = c("all", "toggle", "file"),
                           file_width = 7, gutters = FALSE, separator_gutter = TRUE,
-                          toggle_label = "Import entries' list?", file_label = "Upload a CSV File:") {
+                          toggle_label = "Import entries list", file_label = "CSV file") {
   spec <- app_upload_spec(design)
   part <- match.arg(part)
   shiny::tagList(

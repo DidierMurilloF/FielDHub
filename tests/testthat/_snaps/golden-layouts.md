@@ -4,7 +4,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -14,7 +14,7 @@
       101 102 103 104 105
       110 109 108 107 106
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -29,7 +29,7 @@
       112 111 110
       113 114 115
       ## cartesian, vertical
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -39,7 +39,7 @@
       101 102 103 104 105
       106 107 108 109 110
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -54,7 +54,7 @@
       110 111 112
       113 114 115
       ## serpentine, horizontal
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -64,7 +64,7 @@
       101 102 103 104 105
       110 109 108 107 106
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -79,7 +79,7 @@
       112 111 110
       113 114 115
       ## cartesian, horizontal
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -89,7 +89,7 @@
       101 102 103 104 105
       106 107 108 109 110
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -104,7 +104,7 @@
       110 111 112
       113 114 115
       ## serpentine, grid_panel
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -114,7 +114,7 @@
       101 102 103 104 105
       110 109 108 107 106
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -129,7 +129,7 @@
       112 111 110
       113 114 115
       ## cartesian, grid_panel
-      ### Layout 1: Completely Randomized Design 3X5
+      ### Layout 1: Completely Randomized Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3  4  5
@@ -139,7 +139,7 @@
       101 102 103 104 105
       106 107 108 109 110
       111 112 113 114 115
-      ### Layout 2: Completely Randomized Design 5X3
+      ### Layout 2: Completely Randomized Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location FARGO, ID:
        1  2  3
@@ -160,7 +160,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -168,7 +168,7 @@
       PLOT:
       101 102 103 104
       108 107 106 105
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -181,7 +181,7 @@
       105 106
       108 107
       ## cartesian, vertical
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -189,7 +189,7 @@
       PLOT:
       101 102 103 104
       105 106 107 108
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -202,7 +202,7 @@
       105 106
       107 108
       ## serpentine, horizontal
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -210,7 +210,7 @@
       PLOT:
       101 102 103 104
       108 107 106 105
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -223,7 +223,7 @@
       105 106
       108 107
       ## cartesian, horizontal
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -231,7 +231,7 @@
       PLOT:
       101 102 103 104
       105 106 107 108
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -244,7 +244,7 @@
       105 106
       107 108
       ## serpentine, grid_panel
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -252,7 +252,7 @@
       PLOT:
       101 102 103 104
       108 107 106 105
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -265,7 +265,7 @@
       105 106
       108 107
       ## cartesian, grid_panel
-      ### Layout 1: Completely Randomized Design 2X4
+      ### Layout 1: Completely Randomized Design 2 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2 3 4
@@ -273,7 +273,7 @@
       PLOT:
       101 102 103 104
       105 106 107 108
-      ### Layout 2: Completely Randomized Design 4X2
+      ### Layout 2: Completely Randomized Design 4 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
       1 2
@@ -292,7 +292,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -300,7 +300,7 @@
       PLOT:
       101 102 103 104 105
       110 109 108 107 106
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -315,7 +315,7 @@
       108 107
       109 110
       ## cartesian, vertical
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -323,7 +323,7 @@
       PLOT:
       101 102 103 104 105
       106 107 108 109 110
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -338,7 +338,7 @@
       107 108
       109 110
       ## serpentine, horizontal
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -346,7 +346,7 @@
       PLOT:
       101 102 103 104 105
       110 109 108 107 106
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -361,7 +361,7 @@
       108 107
       109 110
       ## cartesian, horizontal
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -369,7 +369,7 @@
       PLOT:
       101 102 103 104 105
       106 107 108 109 110
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -384,7 +384,7 @@
       107 108
       109 110
       ## serpentine, grid_panel
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -392,7 +392,7 @@
       PLOT:
       101 102 103 104 105
       110 109 108 107 106
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -407,7 +407,7 @@
       108 107
       109 110
       ## cartesian, grid_panel
-      ### Layout 1: Completely Randomized Design 2X5
+      ### Layout 1: Completely Randomized Design 2 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -415,7 +415,7 @@
       PLOT:
       101 102 103 104 105
       106 107 108 109 110
-      ### Layout 2: Completely Randomized Design 5X2
+      ### Layout 2: Completely Randomized Design 5 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location 1, ID:
        1  2
@@ -436,7 +436,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Randomized Complete Block Design 3X6
+      ### Layout 1: Randomized Complete Block Design 3 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3  4  5  6
@@ -454,7 +454,7 @@
       1001 1002 1003 1004 1005 1006
       1101 1102 1103 1104 1105 1106
       1201 1202 1203 1204 1205 1206
-      ### Layout 2: Randomized Complete Block Design 9X2
+      ### Layout 2: Randomized Complete Block Design 9 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2
@@ -496,7 +496,7 @@
       1201 1202
       1204 1203
       1205 1206
-      ### Layout 3: Randomized Complete Block Design 6X3
+      ### Layout 3: Randomized Complete Block Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3
@@ -526,7 +526,7 @@
       1106 1105 1104
       1201 1202 1203
       1206 1205 1204
-      ### Layout 4: Randomized Complete Block Design 18X1
+      ### Layout 4: Randomized Complete Block Design 18 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1
@@ -605,7 +605,7 @@
       1205
       1206
       ## cartesian, vertical
-      ### Layout 1: Randomized Complete Block Design 3X6
+      ### Layout 1: Randomized Complete Block Design 3 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3  4  5  6
@@ -623,7 +623,7 @@
       1001 1002 1003 1004 1005 1006
       1101 1102 1103 1104 1105 1106
       1201 1202 1203 1204 1205 1206
-      ### Layout 2: Randomized Complete Block Design 9X2
+      ### Layout 2: Randomized Complete Block Design 9 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2
@@ -665,7 +665,7 @@
       1201 1202
       1203 1204
       1205 1206
-      ### Layout 3: Randomized Complete Block Design 6X3
+      ### Layout 3: Randomized Complete Block Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3
@@ -695,7 +695,7 @@
       1104 1105 1106
       1201 1202 1203
       1204 1205 1206
-      ### Layout 4: Randomized Complete Block Design 18X1
+      ### Layout 4: Randomized Complete Block Design 18 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1
@@ -774,7 +774,7 @@
       1205
       1206
       ## serpentine, horizontal
-      ### Layout 1: Randomized Complete Block Design 6X3
+      ### Layout 1: Randomized Complete Block Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  7 13
@@ -804,7 +804,7 @@
       1004 1104 1204
       1005 1105 1205
       1006 1106 1206
-      ### Layout 2: Randomized Complete Block Design 2X9
+      ### Layout 2: Randomized Complete Block Design 2 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3  7  8  9 13 14 15
@@ -818,7 +818,7 @@
       PLOT:
       1001 1002 1003 1101 1102 1103 1201 1202 1203
       1006 1005 1004 1106 1105 1104 1206 1205 1204
-      ### Layout 3: Randomized Complete Block Design 3X6
+      ### Layout 3: Randomized Complete Block Design 3 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  7  8 13 14
@@ -837,7 +837,7 @@
       1004 1003 1104 1103 1204 1203
       1005 1006 1105 1106 1205 1206
       ## cartesian, horizontal
-      ### Layout 1: Randomized Complete Block Design 6X3
+      ### Layout 1: Randomized Complete Block Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  7 13
@@ -867,7 +867,7 @@
       1004 1104 1204
       1005 1105 1205
       1006 1106 1206
-      ### Layout 2: Randomized Complete Block Design 2X9
+      ### Layout 2: Randomized Complete Block Design 2 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  3  7  8  9 13 14 15
@@ -881,7 +881,7 @@
       PLOT:
       1001 1002 1003 1101 1102 1103 1201 1202 1203
       1004 1005 1006 1104 1105 1106 1204 1205 1206
-      ### Layout 3: Randomized Complete Block Design 3X6
+      ### Layout 3: Randomized Complete Block Design 3 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location A, ID:
        1  2  7  8 13 14
@@ -910,7 +910,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Randomized Complete Block Design 3X12
+      ### Layout 1: Randomized Complete Block Design 3 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -920,7 +920,7 @@
       101 102 103 104 105 106 107 108 109 110 111 112
       201 202 203 204 205 206 207 208 209 210 211 212
       301 302 303 304 305 306 307 308 309 310 311 312
-      ### Layout 2: Randomized Complete Block Design 9X4
+      ### Layout 2: Randomized Complete Block Design 9 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4
@@ -942,7 +942,7 @@
       301 302 303 304
       308 307 306 305
       309 310 311 312
-      ### Layout 3: Randomized Complete Block Design 6X6
+      ### Layout 3: Randomized Complete Block Design 6 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6
@@ -958,7 +958,7 @@
       212 211 210 209 208 207
       301 302 303 304 305 306
       312 311 310 309 308 307
-      ### Layout 4: Randomized Complete Block Design 18X2
+      ### Layout 4: Randomized Complete Block Design 18 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2
@@ -998,7 +998,7 @@
       308 307
       309 310
       312 311
-      ### Layout 5: Randomized Complete Block Design 12X3
+      ### Layout 5: Randomized Complete Block Design 12 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3
@@ -1026,7 +1026,7 @@
       306 305 304
       307 308 309
       312 311 310
-      ### Layout 6: Randomized Complete Block Design 36X1
+      ### Layout 6: Randomized Complete Block Design 36 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1
@@ -1103,7 +1103,7 @@
       311
       312
       ## cartesian, vertical
-      ### Layout 1: Randomized Complete Block Design 3X12
+      ### Layout 1: Randomized Complete Block Design 3 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -1113,7 +1113,7 @@
       101 102 103 104 105 106 107 108 109 110 111 112
       201 202 203 204 205 206 207 208 209 210 211 212
       301 302 303 304 305 306 307 308 309 310 311 312
-      ### Layout 2: Randomized Complete Block Design 9X4
+      ### Layout 2: Randomized Complete Block Design 9 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4
@@ -1135,7 +1135,7 @@
       301 302 303 304
       305 306 307 308
       309 310 311 312
-      ### Layout 3: Randomized Complete Block Design 6X6
+      ### Layout 3: Randomized Complete Block Design 6 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6
@@ -1151,7 +1151,7 @@
       207 208 209 210 211 212
       301 302 303 304 305 306
       307 308 309 310 311 312
-      ### Layout 4: Randomized Complete Block Design 18X2
+      ### Layout 4: Randomized Complete Block Design 18 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2
@@ -1191,7 +1191,7 @@
       307 308
       309 310
       311 312
-      ### Layout 5: Randomized Complete Block Design 12X3
+      ### Layout 5: Randomized Complete Block Design 12 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3
@@ -1219,7 +1219,7 @@
       304 305 306
       307 308 309
       310 311 312
-      ### Layout 6: Randomized Complete Block Design 36X1
+      ### Layout 6: Randomized Complete Block Design 36 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1
@@ -1296,7 +1296,7 @@
       311
       312
       ## serpentine, horizontal
-      ### Layout 1: Randomized Complete Block Design 12X3
+      ### Layout 1: Randomized Complete Block Design 12 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1 13 25
@@ -1324,7 +1324,7 @@
       110 210 310
       111 211 311
       112 212 312
-      ### Layout 2: Randomized Complete Block Design 4X9
+      ### Layout 2: Randomized Complete Block Design 4 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3 13 14 15 25 26 27
@@ -1336,7 +1336,7 @@
       106 105 104 206 205 204 306 305 304
       107 108 109 207 208 209 307 308 309
       112 111 110 212 211 210 312 311 310
-      ### Layout 3: Randomized Complete Block Design 6X6
+      ### Layout 3: Randomized Complete Block Design 6 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2 13 14 25 26
@@ -1352,7 +1352,7 @@
       108 107 208 207 308 307
       109 110 209 210 309 310
       112 111 212 211 312 311
-      ### Layout 4: Randomized Complete Block Design 2X18
+      ### Layout 4: Randomized Complete Block Design 2 × 18
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6 13 14 15 16 17 18 25 26 27 28 29 30
@@ -1360,7 +1360,7 @@
       PLOT:
       101 102 103 104 105 106 201 202 203 204 205 206 301 302 303 304 305 306
       112 111 110 109 108 107 212 211 210 209 208 207 312 311 310 309 308 307
-      ### Layout 5: Randomized Complete Block Design 3X12
+      ### Layout 5: Randomized Complete Block Design 3 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4 13 14 15 16 25 26 27 28
@@ -1371,7 +1371,7 @@
       108 107 106 105 208 207 206 205 308 307 306 305
       109 110 111 112 209 210 211 212 309 310 311 312
       ## cartesian, horizontal
-      ### Layout 1: Randomized Complete Block Design 12X3
+      ### Layout 1: Randomized Complete Block Design 12 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1 13 25
@@ -1399,7 +1399,7 @@
       110 210 310
       111 211 311
       112 212 312
-      ### Layout 2: Randomized Complete Block Design 4X9
+      ### Layout 2: Randomized Complete Block Design 4 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3 13 14 15 25 26 27
@@ -1411,7 +1411,7 @@
       104 105 106 204 205 206 304 305 306
       107 108 109 207 208 209 307 308 309
       110 111 112 210 211 212 310 311 312
-      ### Layout 3: Randomized Complete Block Design 6X6
+      ### Layout 3: Randomized Complete Block Design 6 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2 13 14 25 26
@@ -1427,7 +1427,7 @@
       107 108 207 208 307 308
       109 110 209 210 309 310
       111 112 211 212 311 312
-      ### Layout 4: Randomized Complete Block Design 2X18
+      ### Layout 4: Randomized Complete Block Design 2 × 18
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6 13 14 15 16 17 18 25 26 27 28 29 30
@@ -1435,7 +1435,7 @@
       PLOT:
       101 102 103 104 105 106 201 202 203 204 205 206 301 302 303 304 305 306
       107 108 109 110 111 112 207 208 209 210 211 212 307 308 309 310 311 312
-      ### Layout 5: Randomized Complete Block Design 3X12
+      ### Layout 5: Randomized Complete Block Design 3 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4 13 14 15 16 25 26 27 28
@@ -1456,7 +1456,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Randomized Complete Block Design 3X10
+      ### Layout 1: Randomized Complete Block Design 3 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10
@@ -1466,7 +1466,7 @@
       101 102 103 104 105 106 107 108 109 110
       201 202 203 204 205 206 207 208 209 210
       301 302 303 304 305 306 307 308 309 310
-      ### Layout 2: Randomized Complete Block Design 15X2
+      ### Layout 2: Randomized Complete Block Design 15 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2
@@ -1500,7 +1500,7 @@
       305 306
       308 307
       309 310
-      ### Layout 3: Randomized Complete Block Design 6X5
+      ### Layout 3: Randomized Complete Block Design 6 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5
@@ -1516,7 +1516,7 @@
       210 209 208 207 206
       301 302 303 304 305
       310 309 308 307 306
-      ### Layout 4: Randomized Complete Block Design 30X1
+      ### Layout 4: Randomized Complete Block Design 30 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1
@@ -1581,7 +1581,7 @@
       309
       310
       ## cartesian, vertical
-      ### Layout 1: Randomized Complete Block Design 3X10
+      ### Layout 1: Randomized Complete Block Design 3 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10
@@ -1591,7 +1591,7 @@
       101 102 103 104 105 106 107 108 109 110
       201 202 203 204 205 206 207 208 209 210
       301 302 303 304 305 306 307 308 309 310
-      ### Layout 2: Randomized Complete Block Design 15X2
+      ### Layout 2: Randomized Complete Block Design 15 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2
@@ -1625,7 +1625,7 @@
       305 306
       307 308
       309 310
-      ### Layout 3: Randomized Complete Block Design 6X5
+      ### Layout 3: Randomized Complete Block Design 6 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5
@@ -1641,7 +1641,7 @@
       206 207 208 209 210
       301 302 303 304 305
       306 307 308 309 310
-      ### Layout 4: Randomized Complete Block Design 30X1
+      ### Layout 4: Randomized Complete Block Design 30 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1
@@ -1706,7 +1706,7 @@
       309
       310
       ## serpentine, horizontal
-      ### Layout 1: Randomized Complete Block Design 10X3
+      ### Layout 1: Randomized Complete Block Design 10 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1 11 21
@@ -1730,7 +1730,7 @@
       108 208 308
       109 209 309
       110 210 310
-      ### Layout 2: Randomized Complete Block Design 2X15
+      ### Layout 2: Randomized Complete Block Design 2 × 15
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5 11 12 13 14 15 21 22 23 24 25
@@ -1738,7 +1738,7 @@
       PLOT:
       101 102 103 104 105 201 202 203 204 205 301 302 303 304 305
       110 109 108 107 106 210 209 208 207 206 310 309 308 307 306
-      ### Layout 3: Randomized Complete Block Design 5X6
+      ### Layout 3: Randomized Complete Block Design 5 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2 11 12 21 22
@@ -1753,7 +1753,7 @@
       108 107 208 207 308 307
       109 110 209 210 309 310
       ## cartesian, horizontal
-      ### Layout 1: Randomized Complete Block Design 10X3
+      ### Layout 1: Randomized Complete Block Design 10 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1 11 21
@@ -1777,7 +1777,7 @@
       108 208 308
       109 209 309
       110 210 310
-      ### Layout 2: Randomized Complete Block Design 2X15
+      ### Layout 2: Randomized Complete Block Design 2 × 15
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2  3  4  5 11 12 13 14 15 21 22 23 24 25
@@ -1785,7 +1785,7 @@
       PLOT:
       101 102 103 104 105 201 202 203 204 205 301 302 303 304 305
       106 107 108 109 110 206 207 208 209 210 306 307 308 309 310
-      ### Layout 3: Randomized Complete Block Design 5X6
+      ### Layout 3: Randomized Complete Block Design 5 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY CHECKS TREATMENT 
       Location loc1, ID:
        1  2 11 12 21 22
@@ -1810,7 +1810,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Randomized Complete Block Design 3X5
+      ### Layout 1: Randomized Complete Block Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  2  3  4  5
@@ -1820,7 +1820,7 @@
       101 102 103 104 105
       106 107 108 109 110
       111 112 113 114 115
-      ### Layout 2: Randomized Complete Block Design 15X1
+      ### Layout 2: Randomized Complete Block Design 15 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1
@@ -1855,7 +1855,7 @@
       114
       115
       ## cartesian, vertical
-      ### Layout 1: Randomized Complete Block Design 3X5
+      ### Layout 1: Randomized Complete Block Design 3 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  2  3  4  5
@@ -1865,7 +1865,7 @@
       101 102 103 104 105
       106 107 108 109 110
       111 112 113 114 115
-      ### Layout 2: Randomized Complete Block Design 15X1
+      ### Layout 2: Randomized Complete Block Design 15 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1
@@ -1900,7 +1900,7 @@
       114
       115
       ## serpentine, horizontal
-      ### Layout 1: Randomized Complete Block Design 5X3
+      ### Layout 1: Randomized Complete Block Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  6 11
@@ -1914,7 +1914,7 @@
       103 108 113
       104 109 114
       105 110 115
-      ### Layout 2: Randomized Complete Block Design 5X3
+      ### Layout 2: Randomized Complete Block Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  6 11
@@ -1928,14 +1928,14 @@
       103 108 113
       104 109 114
       105 110 115
-      ### Layout 3: Randomized Complete Block Design 1X15
+      ### Layout 3: Randomized Complete Block Design 1 × 15
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
       PLOT:
       101 102 103 104 105 106 107 108 109 110 111 112 113 114 115
       ## cartesian, horizontal
-      ### Layout 1: Randomized Complete Block Design 5X3
+      ### Layout 1: Randomized Complete Block Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  6 11
@@ -1949,7 +1949,7 @@
       103 108 113
       104 109 114
       105 110 115
-      ### Layout 2: Randomized Complete Block Design 5X3
+      ### Layout 2: Randomized Complete Block Design 5 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  6 11
@@ -1963,7 +1963,7 @@
       103 108 113
       104 109 114
       105 110 115
-      ### Layout 3: Randomized Complete Block Design 1X15
+      ### Layout 3: Randomized Complete Block Design 1 × 15
       Columns: ID LOCATION PLOT ROW COLUMN REP TREATMENT 
       Location loc1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
@@ -1980,7 +1980,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Latin Square Design 8X4
+      ### Layout 1: Latin Square Design 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -2001,7 +2001,7 @@
       209 210 211 212
       216 215 214 213
       ## cartesian, vertical
-      ### Layout 1: Latin Square Design 8X4
+      ### Layout 1: Latin Square Design 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -2022,7 +2022,7 @@
       209 210 211 212
       213 214 215 216
       ## serpentine, horizontal
-      ### Layout 1: Latin Square Design 4X8
+      ### Layout 1: Latin Square Design 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4 17 18 19 20
@@ -2035,7 +2035,7 @@
       109 110 111 112 209 210 211 212
       116 115 114 113 216 215 214 213
       ## cartesian, horizontal
-      ### Layout 1: Latin Square Design 4X8
+      ### Layout 1: Latin Square Design 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4 17 18 19 20
@@ -2058,7 +2058,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Latin Square Design 5X5
+      ### Layout 1: Latin Square Design 5 × 5
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -2073,7 +2073,7 @@
       20 19 18 17 16
       21 22 23 24 25
       ## cartesian, vertical
-      ### Layout 1: Latin Square Design 5X5
+      ### Layout 1: Latin Square Design 5 × 5
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -2088,7 +2088,7 @@
       16 17 18 19 20
       21 22 23 24 25
       ## serpentine, horizontal
-      ### Layout 1: Latin Square Design 5X5
+      ### Layout 1: Latin Square Design 5 × 5
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -2103,7 +2103,7 @@
       20 19 18 17 16
       21 22 23 24 25
       ## cartesian, horizontal
-      ### Layout 1: Latin Square Design 5X5
+      ### Layout 1: Latin Square Design 5 × 5
       Columns: ID LOCATION PLOT ROW COLUMN SQUARE ROW_SQ COLUMN_SQ TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -2128,7 +2128,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Full Factorial Design (RCBD) 2X6
+      ### Layout 1: Full Factorial Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2142,7 +2142,7 @@
       PLOT:
       1001 1002 1003 1004 1005 1006
       1101 1102 1103 1104 1105 1106
-      ### Layout 2: Full Factorial Design (RCBD) 6X2
+      ### Layout 2: Full Factorial Design (RCBD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2
@@ -2172,7 +2172,7 @@
       1102 1101
       1103 1104
       1106 1105
-      ### Layout 3: Full Factorial Design (RCBD) 4X3
+      ### Layout 3: Full Factorial Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3
@@ -2194,7 +2194,7 @@
       1006 1005 1004
       1101 1102 1103
       1106 1105 1104
-      ### Layout 4: Full Factorial Design (RCBD) 12X1
+      ### Layout 4: Full Factorial Design (RCBD) 12 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1
@@ -2249,7 +2249,7 @@
       1105
       1106
       ## cartesian, vertical
-      ### Layout 1: Full Factorial Design (RCBD) 2X6
+      ### Layout 1: Full Factorial Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2263,7 +2263,7 @@
       PLOT:
       1001 1002 1003 1004 1005 1006
       1101 1102 1103 1104 1105 1106
-      ### Layout 2: Full Factorial Design (RCBD) 6X2
+      ### Layout 2: Full Factorial Design (RCBD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2
@@ -2293,7 +2293,7 @@
       1101 1102
       1103 1104
       1105 1106
-      ### Layout 3: Full Factorial Design (RCBD) 4X3
+      ### Layout 3: Full Factorial Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3
@@ -2315,7 +2315,7 @@
       1004 1005 1006
       1101 1102 1103
       1104 1105 1106
-      ### Layout 4: Full Factorial Design (RCBD) 12X1
+      ### Layout 4: Full Factorial Design (RCBD) 12 × 1
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1
@@ -2370,7 +2370,7 @@
       1105
       1106
       ## serpentine, horizontal
-      ### Layout 1: Full Factorial Design (RCBD) 6X2
+      ### Layout 1: Full Factorial Design (RCBD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  7
@@ -2400,7 +2400,7 @@
       1004 1104
       1005 1105
       1006 1106
-      ### Layout 2: Full Factorial Design (RCBD) 2X6
+      ### Layout 2: Full Factorial Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3  7  8  9
@@ -2414,7 +2414,7 @@
       PLOT:
       1001 1002 1003 1101 1102 1103
       1006 1005 1004 1106 1105 1104
-      ### Layout 3: Full Factorial Design (RCBD) 3X4
+      ### Layout 3: Full Factorial Design (RCBD) 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -2433,7 +2433,7 @@
       1004 1003 1104 1103
       1005 1006 1105 1106
       ## cartesian, horizontal
-      ### Layout 1: Full Factorial Design (RCBD) 6X2
+      ### Layout 1: Full Factorial Design (RCBD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  7
@@ -2463,7 +2463,7 @@
       1004 1104
       1005 1105
       1006 1106
-      ### Layout 2: Full Factorial Design (RCBD) 2X6
+      ### Layout 2: Full Factorial Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  3  7  8  9
@@ -2477,7 +2477,7 @@
       PLOT:
       1001 1002 1003 1101 1102 1103
       1004 1005 1006 1104 1105 1106
-      ### Layout 3: Full Factorial Design (RCBD) 3X4
+      ### Layout 3: Full Factorial Design (RCBD) 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_A FACTOR_B TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -2506,7 +2506,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2514,7 +2514,7 @@
       PLOT:
       101 102 103 104 105 106
       112 111 110 109 108 107
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2531,7 +2531,7 @@
       109 110
       112 111
       ## cartesian, vertical
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2539,7 +2539,7 @@
       PLOT:
       101 102 103 104 105 106
       107 108 109 110 111 112
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2556,7 +2556,7 @@
       109 110
       111 112
       ## serpentine, horizontal
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2564,7 +2564,7 @@
       PLOT:
       101 102 103 104 105 106
       112 111 110 109 108 107
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2581,7 +2581,7 @@
       109 110
       112 111
       ## cartesian, horizontal
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2589,7 +2589,7 @@
       PLOT:
       101 102 103 104 105 106
       107 108 109 110 111 112
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2606,7 +2606,7 @@
       109 110
       111 112
       ## serpentine, grid_panel
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2614,7 +2614,7 @@
       PLOT:
       101 102 103 104 105 106
       112 111 110 109 108 107
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2631,7 +2631,7 @@
       109 110
       112 111
       ## cartesian, grid_panel
-      ### Layout 1: Full Factorial Design (CRD) 2X6
+      ### Layout 1: Full Factorial Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2639,7 +2639,7 @@
       PLOT:
       101 102 103 104 105 106
       107 108 109 110 111 112
-      ### Layout 2: Full Factorial Design (CRD) 6X2
+      ### Layout 2: Full Factorial Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP FACTOR_N FACTOR_P TRT_COMB 
       Location 1, ID:
        1  2
@@ -2662,7 +2662,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Split Plot Design (RCBD) 4X3
+      ### Layout 1: Split Plot Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5
@@ -2684,7 +2684,7 @@
       1001 1002 1003
       1101 1102 1103
       1101 1102 1103
-      ### Layout 2: Split Plot Design (RCBD) 2X6
+      ### Layout 2: Split Plot Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2698,7 +2698,7 @@
       PLOT:
       1001 1001 1002 1002 1003 1003
       1101 1101 1102 1102 1103 1103
-      ### Layout 3: Split Plot Design (RCBD) 4X3
+      ### Layout 3: Split Plot Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5
@@ -2721,7 +2721,7 @@
       1101 1102 1103
       1101 1102 1103
       ## cartesian, vertical
-      ### Layout 1: Split Plot Design (RCBD) 4X3
+      ### Layout 1: Split Plot Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5
@@ -2743,7 +2743,7 @@
       1001 1002 1003
       1101 1102 1103
       1101 1102 1103
-      ### Layout 2: Split Plot Design (RCBD) 2X6
+      ### Layout 2: Split Plot Design (RCBD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2757,7 +2757,7 @@
       PLOT:
       1001 1001 1002 1002 1003 1003
       1101 1101 1102 1102 1103 1103
-      ### Layout 3: Split Plot Design (RCBD) 4X3
+      ### Layout 3: Split Plot Design (RCBD) 4 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5
@@ -2780,7 +2780,7 @@
       1101 1102 1103
       1101 1102 1103
       ## serpentine, horizontal
-      ### Layout 1: Split Plot Design (RCBD) 3X4
+      ### Layout 1: Split Plot Design (RCBD) 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -2799,7 +2799,7 @@
       1002 1002 1102 1102
       1003 1003 1103 1103
       ## cartesian, horizontal
-      ### Layout 1: Split Plot Design (RCBD) 3X4
+      ### Layout 1: Split Plot Design (RCBD) 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -2828,7 +2828,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2836,7 +2836,7 @@
       PLOT:
       101 101 101 102 102 102
       104 104 104 103 103 103
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2853,7 +2853,7 @@
       103 104
       104 104
       ## cartesian, vertical
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2861,7 +2861,7 @@
       PLOT:
       101 101 101 102 102 102
       103 103 103 104 104 104
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2878,7 +2878,7 @@
       103 104
       104 104
       ## serpentine, horizontal
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2886,7 +2886,7 @@
       PLOT:
       101 101 101 102 102 102
       104 104 104 103 103 103
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2903,7 +2903,7 @@
       103 104
       104 104
       ## cartesian, horizontal
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2911,7 +2911,7 @@
       PLOT:
       101 101 101 102 102 102
       103 103 103 104 104 104
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2928,7 +2928,7 @@
       103 104
       104 104
       ## serpentine, grid_panel
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2936,7 +2936,7 @@
       PLOT:
       101 101 101 102 102 102
       104 104 104 103 103 103
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2953,7 +2953,7 @@
       103 104
       104 104
       ## cartesian, grid_panel
-      ### Layout 1: Split Plot Design (CRD) 2X6
+      ### Layout 1: Split Plot Design (CRD) 2 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6
@@ -2961,7 +2961,7 @@
       PLOT:
       101 101 101 102 102 102
       103 103 103 104 104 104
-      ### Layout 2: Split Plot Design (CRD) 6X2
+      ### Layout 2: Split Plot Design (CRD) 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -2984,7 +2984,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 1: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5  7
@@ -2996,7 +2996,7 @@
       101 101 102 102
       201 201 202 202
       201 201 202 202
-      ### Layout 2: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 2: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4
@@ -3008,7 +3008,7 @@
       102 102 102 102
       201 201 201 201
       202 202 202 202
-      ### Layout 3: Split-Split Plot Design (RCBD) 8X2
+      ### Layout 3: Split-Split Plot Design (RCBD) 8 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3
@@ -3028,7 +3028,7 @@
       201 201
       202 202
       202 202
-      ### Layout 4: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 4: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4
@@ -3041,7 +3041,7 @@
       201 201 201 201
       202 202 202 202
       ## cartesian, vertical
-      ### Layout 1: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 1: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3  5  7
@@ -3053,7 +3053,7 @@
       101 101 102 102
       201 201 202 202
       201 201 202 202
-      ### Layout 2: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 2: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4
@@ -3065,7 +3065,7 @@
       102 102 102 102
       201 201 201 201
       202 202 202 202
-      ### Layout 3: Split-Split Plot Design (RCBD) 8X2
+      ### Layout 3: Split-Split Plot Design (RCBD) 8 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  3
@@ -3085,7 +3085,7 @@
       201 201
       202 202
       202 202
-      ### Layout 4: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 4: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4
@@ -3098,7 +3098,7 @@
       201 201 201 201
       202 202 202 202
       ## serpentine, horizontal
-      ### Layout 1: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 1: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  9 10
@@ -3111,7 +3111,7 @@
       102 102 202 202
       102 102 202 202
       ## cartesian, horizontal
-      ### Layout 1: Split-Split Plot Design (RCBD) 4X4
+      ### Layout 1: Split-Split Plot Design (RCBD) 4 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  9 10
@@ -3134,7 +3134,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3142,7 +3142,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       104 104 104 104 104 104 103 103 103 103 103 103
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3171,7 +3171,7 @@
       104 104
       104 104
       ## cartesian, vertical
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3179,7 +3179,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       103 103 103 103 103 103 104 104 104 104 104 104
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3208,7 +3208,7 @@
       104 104
       104 104
       ## serpentine, horizontal
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3216,7 +3216,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       104 104 104 104 104 104 103 103 103 103 103 103
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3245,7 +3245,7 @@
       104 104
       104 104
       ## cartesian, horizontal
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3253,7 +3253,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       103 103 103 103 103 103 104 104 104 104 104 104
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3282,7 +3282,7 @@
       104 104
       104 104
       ## serpentine, grid_panel
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3290,7 +3290,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       104 104 104 104 104 104 103 103 103 103 103 103
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3319,7 +3319,7 @@
       104 104
       104 104
       ## cartesian, grid_panel
-      ### Layout 1: Split-Split Plot Design (CRD) 2X12
+      ### Layout 1: Split-Split Plot Design (CRD) 2 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10 11 12
@@ -3327,7 +3327,7 @@
       PLOT:
       101 101 101 101 101 101 102 102 102 102 102 102
       103 103 103 103 103 103 104 104 104 104 104 104
-      ### Layout 2: Split-Split Plot Design (CRD) 12X2
+      ### Layout 2: Split-Split Plot Design (CRD) 12 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP WHOLE_PLOT SUB_PLOT SUB_SUB_PLOT TRT_COMB 
       Location 1, ID:
        1  2
@@ -3362,7 +3362,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Strip-Plot Design 6X2
+      ### Layout 1: Strip-Plot Design 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2
@@ -3393,7 +3393,7 @@
       1103 1104
       1106 1105
       ## cartesian, vertical
-      ### Layout 1: Strip-Plot Design 6X2
+      ### Layout 1: Strip-Plot Design 6 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2
@@ -3424,7 +3424,7 @@
       1103 1104
       1105 1106
       ## serpentine, horizontal
-      ### Layout 1: Strip-Plot Design 3X4
+      ### Layout 1: Strip-Plot Design 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -3443,7 +3443,7 @@
       1004 1003 1104 1103
       1005 1006 1105 1106
       ## cartesian, horizontal
-      ### Layout 1: Strip-Plot Design 3X4
+      ### Layout 1: Strip-Plot Design 3 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  7  8
@@ -3472,7 +3472,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Strip-Plot Design 6X3
+      ### Layout 1: Strip-Plot Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  3
@@ -3489,7 +3489,7 @@
       301 302 303
       306 305 304
       ## cartesian, vertical
-      ### Layout 1: Strip-Plot Design 6X3
+      ### Layout 1: Strip-Plot Design 6 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  3
@@ -3506,7 +3506,7 @@
       301 302 303
       304 305 306
       ## serpentine, horizontal
-      ### Layout 1: Strip-Plot Design 2X9
+      ### Layout 1: Strip-Plot Design 2 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  3  7  8  9 13 14 15
@@ -3515,7 +3515,7 @@
       101 102 103 201 202 203 301 302 303
       106 105 104 206 205 204 306 305 304
       ## cartesian, horizontal
-      ### Layout 1: Strip-Plot Design 2X9
+      ### Layout 1: Strip-Plot Design 2 × 9
       Columns: ID LOCATION PLOT ROW COLUMN REP HSTRIP VSTRIP TRT_COMB 
       Location 1, ID:
        1  2  3  7  8  9 13 14 15
@@ -3534,7 +3534,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Incomplete Blocks Design Field Layout 4X6
+      ### Layout 1: Incomplete Blocks Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6  9 10
@@ -3546,7 +3546,7 @@
       112 111 110 109 108 107
       201 202 203 204 205 206
       212 211 210 209 208 207
-      ### Layout 2: Incomplete Blocks Design Field Layout 8X3
+      ### Layout 2: Incomplete Blocks Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9
@@ -3566,7 +3566,7 @@
       206 205 204
       207 208 209
       212 211 210
-      ### Layout 3: Incomplete Blocks Design Field Layout 6X4
+      ### Layout 3: Incomplete Blocks Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -3583,7 +3583,7 @@
       205 206 207 208
       212 211 210 209
       ## cartesian, vertical
-      ### Layout 1: Incomplete Blocks Design Field Layout 4X6
+      ### Layout 1: Incomplete Blocks Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6  9 10
@@ -3595,7 +3595,7 @@
       107 108 109 110 111 112
       201 202 203 204 205 206
       207 208 209 210 211 212
-      ### Layout 2: Incomplete Blocks Design Field Layout 8X3
+      ### Layout 2: Incomplete Blocks Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9
@@ -3615,7 +3615,7 @@
       204 205 206
       207 208 209
       210 211 212
-      ### Layout 3: Incomplete Blocks Design Field Layout 6X4
+      ### Layout 3: Incomplete Blocks Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -3632,7 +3632,7 @@
       205 206 207 208
       209 210 211 212
       ## serpentine, horizontal
-      ### Layout 1: Incomplete Blocks Design Field Layout 3X8
+      ### Layout 1: Incomplete Blocks Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -3642,7 +3642,7 @@
       101 102 103 104 201 202 203 204
       108 107 106 105 208 207 206 205
       109 110 111 112 209 210 211 212
-      ### Layout 2: Incomplete Blocks Design Field Layout 6X4
+      ### Layout 2: Incomplete Blocks Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 13 14
@@ -3658,7 +3658,7 @@
       108 107 208 207
       109 110 209 210
       112 111 212 211
-      ### Layout 3: Incomplete Blocks Design Field Layout 4X6
+      ### Layout 3: Incomplete Blocks Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21
@@ -3671,7 +3671,7 @@
       103 107 111 203 207 211
       106 108 110 206 208 210
       ## cartesian, horizontal
-      ### Layout 1: Incomplete Blocks Design Field Layout 3X8
+      ### Layout 1: Incomplete Blocks Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -3681,7 +3681,7 @@
       101 102 103 104 201 202 203 204
       105 106 107 108 205 206 207 208
       109 110 111 112 209 210 211 212
-      ### Layout 2: Incomplete Blocks Design Field Layout 6X4
+      ### Layout 2: Incomplete Blocks Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 13 14
@@ -3697,7 +3697,7 @@
       107 108 207 208
       109 110 209 210
       111 112 211 212
-      ### Layout 3: Incomplete Blocks Design Field Layout 4X6
+      ### Layout 3: Incomplete Blocks Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21
@@ -3720,7 +3720,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Incomplete Blocks Design Field Layout 10X2
+      ### Layout 1: Incomplete Blocks Design Field Layout 10 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  6
@@ -3766,7 +3766,7 @@
       206 205
       207 208
       210 209
-      ### Layout 2: Incomplete Blocks Design Field Layout 4X5
+      ### Layout 2: Incomplete Blocks Design Field Layout 4 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -3788,7 +3788,7 @@
       110 109 108 107 106
       201 202 203 204 205
       210 209 208 207 206
-      ### Layout 3: Incomplete Blocks Design Field Layout 2X10
+      ### Layout 3: Incomplete Blocks Design Field Layout 2 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10
@@ -3803,7 +3803,7 @@
       101 102 103 104 105 106 107 108 109 110
       210 209 208 207 206 205 204 203 202 201
       ## cartesian, vertical
-      ### Layout 1: Incomplete Blocks Design Field Layout 10X2
+      ### Layout 1: Incomplete Blocks Design Field Layout 10 × 2
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  6
@@ -3849,7 +3849,7 @@
       205 206
       207 208
       209 210
-      ### Layout 2: Incomplete Blocks Design Field Layout 4X5
+      ### Layout 2: Incomplete Blocks Design Field Layout 4 × 5
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5
@@ -3871,7 +3871,7 @@
       106 107 108 109 110
       201 202 203 204 205
       206 207 208 209 210
-      ### Layout 3: Incomplete Blocks Design Field Layout 2X10
+      ### Layout 3: Incomplete Blocks Design Field Layout 2 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6  7  8  9 10
@@ -3886,7 +3886,7 @@
       101 102 103 104 105 106 107 108 109 110
       201 202 203 204 205 206 207 208 209 210
       ## serpentine, horizontal
-      ### Layout 1: Incomplete Blocks Design Field Layout 2X10
+      ### Layout 1: Incomplete Blocks Design Field Layout 2 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5 11 12 13 14 15
@@ -3900,7 +3900,7 @@
       PLOT:
       101 102 103 104 105 201 202 203 204 205
       110 109 108 107 106 210 209 208 207 206
-      ### Layout 2: Incomplete Blocks Design Field Layout 5X4
+      ### Layout 2: Incomplete Blocks Design Field Layout 5 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  6 11 16
@@ -3927,7 +3927,7 @@
       103 109 203 209
       105 110 205 210
       ## cartesian, horizontal
-      ### Layout 1: Incomplete Blocks Design Field Layout 2X10
+      ### Layout 1: Incomplete Blocks Design Field Layout 2 × 10
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5 11 12 13 14 15
@@ -3941,7 +3941,7 @@
       PLOT:
       101 102 103 104 105 201 202 203 204 205
       106 107 108 109 110 206 207 208 209 210
-      ### Layout 2: Incomplete Blocks Design Field Layout 5X4
+      ### Layout 2: Incomplete Blocks Design Field Layout 5 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  6 11 16
@@ -3978,7 +3978,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Alpha Lattice Design Field Layout 4X6
+      ### Layout 1: Alpha Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6  9 10
@@ -3990,7 +3990,7 @@
       112 111 110 109 108 107
       201 202 203 204 205 206
       212 211 210 209 208 207
-      ### Layout 2: Alpha Lattice Design Field Layout 8X3
+      ### Layout 2: Alpha Lattice Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9
@@ -4010,7 +4010,7 @@
       206 205 204
       207 208 209
       212 211 210
-      ### Layout 3: Alpha Lattice Design Field Layout 6X4
+      ### Layout 3: Alpha Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4027,7 +4027,7 @@
       205 206 207 208
       212 211 210 209
       ## cartesian, vertical
-      ### Layout 1: Alpha Lattice Design Field Layout 4X6
+      ### Layout 1: Alpha Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6  9 10
@@ -4039,7 +4039,7 @@
       107 108 109 110 111 112
       201 202 203 204 205 206
       207 208 209 210 211 212
-      ### Layout 2: Alpha Lattice Design Field Layout 8X3
+      ### Layout 2: Alpha Lattice Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9
@@ -4059,7 +4059,7 @@
       204 205 206
       207 208 209
       210 211 212
-      ### Layout 3: Alpha Lattice Design Field Layout 6X4
+      ### Layout 3: Alpha Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4076,7 +4076,7 @@
       205 206 207 208
       209 210 211 212
       ## serpentine, horizontal
-      ### Layout 1: Alpha Lattice Design Field Layout 3X8
+      ### Layout 1: Alpha Lattice Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -4086,7 +4086,7 @@
       101 102 103 104 201 202 203 204
       108 107 106 105 208 207 206 205
       109 110 111 112 209 210 211 212
-      ### Layout 2: Alpha Lattice Design Field Layout 6X4
+      ### Layout 2: Alpha Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 13 14
@@ -4102,7 +4102,7 @@
       108 107 208 207
       109 110 209 210
       112 111 212 211
-      ### Layout 3: Alpha Lattice Design Field Layout 4X6
+      ### Layout 3: Alpha Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21
@@ -4115,7 +4115,7 @@
       103 107 111 203 207 211
       106 108 110 206 208 210
       ## cartesian, horizontal
-      ### Layout 1: Alpha Lattice Design Field Layout 3X8
+      ### Layout 1: Alpha Lattice Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -4125,7 +4125,7 @@
       101 102 103 104 201 202 203 204
       105 106 107 108 205 206 207 208
       109 110 111 112 209 210 211 212
-      ### Layout 2: Alpha Lattice Design Field Layout 6X4
+      ### Layout 2: Alpha Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 13 14
@@ -4141,7 +4141,7 @@
       107 108 207 208
       109 110 209 210
       111 112 211 212
-      ### Layout 3: Alpha Lattice Design Field Layout 4X6
+      ### Layout 3: Alpha Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21
@@ -4164,7 +4164,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Alpha Lattice Design Field Layout 18X4
+      ### Layout 1: Alpha Lattice Design Field Layout 18 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10
@@ -4204,7 +4204,7 @@
       604 603 602 601
       605 606 607 608
       612 611 610 609
-      ### Layout 2: Alpha Lattice Design Field Layout 12X6
+      ### Layout 2: Alpha Lattice Design Field Layout 12 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6
@@ -4232,7 +4232,7 @@
       512 511 510 509 508 507
       601 602 603 604 605 606
       612 611 610 609 608 607
-      ### Layout 3: Alpha Lattice Design Field Layout 24X3
+      ### Layout 3: Alpha Lattice Design Field Layout 24 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3
@@ -4285,7 +4285,7 @@
       607 608 609
       612 611 610
       ## cartesian, vertical
-      ### Layout 1: Alpha Lattice Design Field Layout 18X4
+      ### Layout 1: Alpha Lattice Design Field Layout 18 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10
@@ -4325,7 +4325,7 @@
       601 602 603 604
       605 606 607 608
       609 610 611 612
-      ### Layout 2: Alpha Lattice Design Field Layout 12X6
+      ### Layout 2: Alpha Lattice Design Field Layout 12 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6
@@ -4353,7 +4353,7 @@
       507 508 509 510 511 512
       601 602 603 604 605 606
       607 608 609 610 611 612
-      ### Layout 3: Alpha Lattice Design Field Layout 24X3
+      ### Layout 3: Alpha Lattice Design Field Layout 24 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3
@@ -4406,7 +4406,7 @@
       607 608 609
       610 611 612
       ## serpentine, horizontal
-      ### Layout 1: Alpha Lattice Design Field Layout 4X18
+      ### Layout 1: Alpha Lattice Design Field Layout 4 × 18
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3 13 14 15 25 26 27 37 38 39 49 50 51 61 62 63
@@ -4418,7 +4418,7 @@
       106 105 104 206 205 204 306 305 304 406 405 404 506 505 504 606 605 604
       107 108 109 207 208 209 307 308 309 407 408 409 507 508 509 607 608 609
       112 111 110 212 211 210 312 311 310 412 411 410 512 511 510 612 611 610
-      ### Layout 2: Alpha Lattice Design Field Layout 3X24
+      ### Layout 2: Alpha Lattice Design Field Layout 3 × 24
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22 25 28 31 34 37 40 43 46 49 52 55 58 61 64 67 70
@@ -4429,7 +4429,7 @@
       102 108 105 111 202 208 205 211 302 308 305 311 402 408 405 411 502 508 505 511 602 608 605 611
       103 107 109 112 203 207 209 212 303 307 309 312 403 407 409 412 503 507 509 512 603 607 609 612
       ## cartesian, horizontal
-      ### Layout 1: Alpha Lattice Design Field Layout 4X18
+      ### Layout 1: Alpha Lattice Design Field Layout 4 × 18
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3 13 14 15 25 26 27 37 38 39 49 50 51 61 62 63
@@ -4441,7 +4441,7 @@
       104 105 106 204 205 206 304 305 306 404 405 406 504 505 506 604 605 606
       107 108 109 207 208 209 307 308 309 407 408 409 507 508 509 607 608 609
       110 111 112 210 211 212 310 311 312 410 411 412 510 511 512 610 611 612
-      ### Layout 2: Alpha Lattice Design Field Layout 3X24
+      ### Layout 2: Alpha Lattice Design Field Layout 3 × 24
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22 25 28 31 34 37 40 43 46 49 52 55 58 61 64 67 70
@@ -4452,7 +4452,7 @@
       102 105 108 111 202 205 208 211 302 305 308 311 402 405 408 411 502 505 508 511 602 605 608 611
       103 106 109 112 203 206 209 212 303 306 309 312 403 406 409 412 503 506 509 512 603 606 609 612
       ## serpentine, grid_panel
-      ### Layout 1: Alpha Lattice Design Field Layout 6X12
+      ### Layout 1: Alpha Lattice Design Field Layout 6 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22 25 28 31 34
@@ -4468,7 +4468,7 @@
       401 402 403 404 501 502 503 504 601 602 603 604
       408 407 406 405 508 507 506 505 608 607 606 605
       409 410 411 412 509 510 511 512 609 610 611 612
-      ### Layout 2: Alpha Lattice Design Field Layout 9X8
+      ### Layout 2: Alpha Lattice Design Field Layout 9 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22
@@ -4491,7 +4491,7 @@
       508 507 506 505 608 607 606 605
       509 510 511 512 609 610 611 612
       ## cartesian, grid_panel
-      ### Layout 1: Alpha Lattice Design Field Layout 6X12
+      ### Layout 1: Alpha Lattice Design Field Layout 6 × 12
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22 25 28 31 34
@@ -4507,7 +4507,7 @@
       401 402 403 404 501 502 503 504 601 602 603 604
       405 406 407 408 505 506 507 508 605 606 607 608
       409 410 411 412 509 510 511 512 609 610 611 612
-      ### Layout 2: Alpha Lattice Design Field Layout 9X8
+      ### Layout 2: Alpha Lattice Design Field Layout 9 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22
@@ -4536,7 +4536,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Square Lattice Design Field Layout 8X4
+      ### Layout 1: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6
@@ -4556,7 +4556,7 @@
       208 207 206 205
       209 210 211 212
       216 215 214 213
-      ### Layout 2: Square Lattice Design Field Layout 8X4
+      ### Layout 2: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13
@@ -4576,7 +4576,7 @@
       208 207 206 205
       209 210 211 212
       216 215 214 213
-      ### Layout 3: Square Lattice Design Field Layout 4X8
+      ### Layout 3: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6  7  8
@@ -4588,7 +4588,7 @@
       116 115 114 113 112 111 110 109
       201 202 203 204 205 206 207 208
       216 215 214 213 212 211 210 209
-      ### Layout 4: Square Lattice Design Field Layout 8X4
+      ### Layout 4: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4609,7 +4609,7 @@
       209 210 211 212
       216 215 214 213
       ## cartesian, vertical
-      ### Layout 1: Square Lattice Design Field Layout 8X4
+      ### Layout 1: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  5  6
@@ -4629,7 +4629,7 @@
       205 206 207 208
       209 210 211 212
       213 214 215 216
-      ### Layout 2: Square Lattice Design Field Layout 8X4
+      ### Layout 2: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13
@@ -4649,7 +4649,7 @@
       205 206 207 208
       209 210 211 212
       213 214 215 216
-      ### Layout 3: Square Lattice Design Field Layout 4X8
+      ### Layout 3: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6  7  8
@@ -4661,7 +4661,7 @@
       109 110 111 112 113 114 115 116
       201 202 203 204 205 206 207 208
       209 210 211 212 213 214 215 216
-      ### Layout 4: Square Lattice Design Field Layout 8X4
+      ### Layout 4: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4682,7 +4682,7 @@
       209 210 211 212
       213 214 215 216
       ## serpentine, horizontal
-      ### Layout 1: Square Lattice Design Field Layout 4X8
+      ### Layout 1: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 17 18 19 20
@@ -4694,7 +4694,7 @@
       108 107 106 105 208 207 206 205
       109 110 111 112 209 210 211 212
       116 115 114 113 216 215 214 213
-      ### Layout 2: Square Lattice Design Field Layout 8X4
+      ### Layout 2: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 17 18
@@ -4714,7 +4714,7 @@
       112 111 212 211
       113 114 213 214
       116 115 216 215
-      ### Layout 3: Square Lattice Design Field Layout 4X8
+      ### Layout 3: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21 25 29
@@ -4727,7 +4727,7 @@
       103 106 111 114 203 206 211 214
       104 105 112 113 204 205 212 213
       ## cartesian, horizontal
-      ### Layout 1: Square Lattice Design Field Layout 4X8
+      ### Layout 1: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 17 18 19 20
@@ -4739,7 +4739,7 @@
       105 106 107 108 205 206 207 208
       109 110 111 112 209 210 211 212
       113 114 115 116 213 214 215 216
-      ### Layout 2: Square Lattice Design Field Layout 8X4
+      ### Layout 2: Square Lattice Design Field Layout 8 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2 17 18
@@ -4759,7 +4759,7 @@
       111 112 211 212
       113 114 213 214
       115 116 215 216
-      ### Layout 3: Square Lattice Design Field Layout 4X8
+      ### Layout 3: Square Lattice Design Field Layout 4 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  5  9 13 17 21 25 29
@@ -4782,7 +4782,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Rectangular Lattice Design Field Layout 6X4
+      ### Layout 1: Rectangular Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10
@@ -4798,7 +4798,7 @@
       204 203 202 201
       205 206 207 208
       212 211 210 209
-      ### Layout 2: Rectangular Lattice Design Field Layout 4X6
+      ### Layout 2: Rectangular Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6
@@ -4810,7 +4810,7 @@
       112 111 110 109 108 107
       201 202 203 204 205 206
       212 211 210 209 208 207
-      ### Layout 3: Rectangular Lattice Design Field Layout 8X3
+      ### Layout 3: Rectangular Lattice Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3
@@ -4831,7 +4831,7 @@
       207 208 209
       212 211 210
       ## cartesian, vertical
-      ### Layout 1: Rectangular Lattice Design Field Layout 6X4
+      ### Layout 1: Rectangular Lattice Design Field Layout 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10
@@ -4847,7 +4847,7 @@
       201 202 203 204
       205 206 207 208
       209 210 211 212
-      ### Layout 2: Rectangular Lattice Design Field Layout 4X6
+      ### Layout 2: Rectangular Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4  5  6
@@ -4859,7 +4859,7 @@
       107 108 109 110 111 112
       201 202 203 204 205 206
       207 208 209 210 211 212
-      ### Layout 3: Rectangular Lattice Design Field Layout 8X3
+      ### Layout 3: Rectangular Lattice Design Field Layout 8 × 3
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3
@@ -4880,7 +4880,7 @@
       207 208 209
       210 211 212
       ## serpentine, horizontal
-      ### Layout 1: Rectangular Lattice Design Field Layout 4X6
+      ### Layout 1: Rectangular Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3 13 14 15
@@ -4892,7 +4892,7 @@
       106 105 104 206 205 204
       107 108 109 207 208 209
       112 111 110 212 211 210
-      ### Layout 2: Rectangular Lattice Design Field Layout 3X8
+      ### Layout 2: Rectangular Lattice Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22
@@ -4903,7 +4903,7 @@
       102 108 105 111 202 208 205 211
       103 107 109 112 203 207 209 212
       ## cartesian, horizontal
-      ### Layout 1: Rectangular Lattice Design Field Layout 4X6
+      ### Layout 1: Rectangular Lattice Design Field Layout 4 × 6
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  2  3 13 14 15
@@ -4915,7 +4915,7 @@
       104 105 106 204 205 206
       107 108 109 207 208 209
       110 111 112 210 211 212
-      ### Layout 2: Rectangular Lattice Design Field Layout 3X8
+      ### Layout 2: Rectangular Lattice Design Field Layout 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP IBLOCK UNIT ENTRY TREATMENT 
       Location 1, ID:
        1  4  7 10 13 16 19 22
@@ -4936,7 +4936,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Row-Column Design 6X4
+      ### Layout 1: Row-Column Design 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4953,7 +4953,7 @@
       205 206 207 208
       212 211 210 209
       ## cartesian, vertical
-      ### Layout 1: Row-Column Design 6X4
+      ### Layout 1: Row-Column Design 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -4970,7 +4970,7 @@
       205 206 207 208
       209 210 211 212
       ## serpentine, horizontal
-      ### Layout 1: Row-Column Design 3X8
+      ### Layout 1: Row-Column Design 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -4981,7 +4981,7 @@
       108 107 106 105 208 207 206 205
       109 110 111 112 209 210 211 212
       ## cartesian, horizontal
-      ### Layout 1: Row-Column Design 3X8
+      ### Layout 1: Row-Column Design 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -5002,7 +5002,7 @@
       print_layouts(catalogue_design(entry))
     Output
       ## serpentine, vertical
-      ### Layout 1: Row-Column Design 6X4
+      ### Layout 1: Row-Column Design 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -5033,7 +5033,7 @@
       1105 1106 1107 1108
       1112 1111 1110 1109
       ## cartesian, vertical
-      ### Layout 1: Row-Column Design 6X4
+      ### Layout 1: Row-Column Design 6 × 4
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
@@ -5064,7 +5064,7 @@
       1105 1106 1107 1108
       1109 1110 1111 1112
       ## serpentine, horizontal
-      ### Layout 1: Row-Column Design 3X8
+      ### Layout 1: Row-Column Design 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
@@ -5083,7 +5083,7 @@
       1008 1007 1006 1005 1108 1107 1106 1105
       1009 1010 1011 1012 1109 1110 1111 1112
       ## cartesian, horizontal
-      ### Layout 1: Row-Column Design 3X8
+      ### Layout 1: Row-Column Design 3 × 8
       Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16

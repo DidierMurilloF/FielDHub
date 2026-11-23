@@ -57,7 +57,7 @@ draw_augmented_row_column_layout <- function(x, df, ...) {
 
 # Title of a layout map, with its dimensions
 layout_title <- function(title, df) {
-  paste0(title, max(as.numeric(df$ROW)), "X", max(as.numeric(df$COLUMN)))
+  paste0(title, max(as.numeric(df$ROW)), " \u00d7 ", max(as.numeric(df$COLUMN)))
 }
 
 #' @method draw_layout fieldhub_crd

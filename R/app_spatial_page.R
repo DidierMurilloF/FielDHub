@@ -1,9 +1,9 @@
 #' Result tabs of a spatial design page
 #'
 #' @description The main panel of a spatial page
-#' (\code{mod_design_ui()} with a \code{kind = "spatial"} spec): "Get
-#' Random" (the steps offered after Run!, Randomize!, what the run found and
-#' the page's \code{setup} view), "Data Input" (the entry tables), the
+#' (\code{mod_design_ui()} with a \code{kind = "spatial"} spec): "Field
+#' setup" (the steps offered after Generate design, Randomize field, what
+#' the run found and the page's \code{setup} view), "Entries" (the entry tables), the
 #' spec's \code{panels} (the randomize steps above the first), "Field Book"
 #' and "Heatmap", with the ids of the page's spatial workflow
 #' (\code{spatial_workflow_spec()}).
@@ -19,9 +19,10 @@ app_spatial_tabs <- function(ns, spec) {
     shinyjs::hidden(shiny::div(id = ns(paste0(step$id, "_step")), app_control_ui(step, ns)))
   }
   steps <- function(stage) lapply(Filter(function(step) identical(step$stage, stage), spec$steps), step_ui)
-  setup <- if (identical(spec$setup$type, "summary")) {
-    shiny::div(class = "fieldhub-design-summary",
-      app_output_feedback(shiny::verbatimTextOutput(ns("setup"), placeholder = FALSE)))
+  setup <- if (identical(spec$setup$type, "none")) {
+    NULL  # the tab holds the steps of the field and nothing else
+  } else if (identical(spec$setup$type, "summary")) {
+    shiny::div(class = "fieldhub-design-summary", app_output_feedback(shiny::uiOutput(ns("setup"))))
   } else {
     app_output_feedback(DT::DTOutput(ns("setup"), width = NULL, height = NULL))
   }
@@ -33,26 +34,37 @@ app_spatial_tabs <- function(ns, spec) {
   }
   panels <- lapply(seq_along(spec$panels), function(i) {
     panel <- spec$panels[[i]]
+    # The first plot carries the randomize steps and, where the page has
+    # one, the button that opens its report (the check spacing)
     shiny::tabPanel(panel$title, feedback(
-      app_plot_ui(ns, panel, controls = if (i == 1L) steps("randomize"))))
+      app_plot_ui(ns, panel, controls = if (i == 1L) c(steps("randomize"),
+        if (!is.null(spec$report)) list(shiny::uiOutput(ns("design_report"), class = "fh-report"))))))
   })
   tabs <- c(
     list(
       id = ns(ids[["tabset"]]),
-      shiny::tabPanel("Get Random", value = "setup",
+      shiny::tabPanel("Field setup", value = "setup",
         feedback(
           shinyjs::useShinyjs(),
-          shiny::br(),
-          steps("run"),
-          shinyjs::hidden(app_task_button(ns("randomize"), "Randomize!",
-                                          busy_message = spec$busy_message, results_id = ns("results"))),
-          shiny::br(), shiny::br(),
+          # The steps of the field and the button that randomizes it, as one card
+          shiny::div(class = "fh-setup",
+            shiny::div(class = "fh-setup-steps", steps("run")),
+            shinyjs::hidden(app_task_button(ns("randomize"), "Randomize field", class = "fh-btn-primary",
+                                            busy_message = spec$busy_message, results_id = ns("results"))),
+            shiny::p(class = "fh-setup-empty", "Generate the design to set up the field.")),
           shiny::uiOutput(ns("status")),
-          setup,
-          if (!is.null(spec$report)) shiny::div(class = "fieldhub-design-summary",
-            app_output_feedback(shiny::verbatimTextOutput(ns("design_report"), placeholder = FALSE))),
+          # Every page: the steps first, what they are chosen for under them.
+          # The Design block of the run (app_design_facts()), then the
+          # page's own view, under a heading where the block is over it.
+          if (is.function(spec$setup$facts)) {
+            shiny::div(class = "fieldhub-design-summary", shiny::uiOutput(ns("design_facts")))
+          },
+          if (is.null(spec$setup$heading)) setup else {
+            shiny::div(class = "fh-summary fh-setup-view",
+                       shiny::tags$section(shiny::h3(spec$setup$heading), setup))
+          },
           tasks = setup_tasks)),
-      shiny::tabPanel("Data Input", feedback(entries))
+      shiny::tabPanel("Entries", feedback(entries))
     ),
     panels,
     list(
@@ -298,12 +310,31 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   })
   # Validation must be ready when Run returns from another result tab.
   shiny::outputOptions(output, "status", suspendWhenHidden = FALSE)
-  if (identical(spec$setup$type, "summary")) {
-    output$setup <- shiny::renderPrint({
-      if (!randomized()) return(invisible(NULL))
-      current <- settled(design)
-      cat("Randomization was successful!", "\n", "\n")
-      print(current, n = 6)
+  if (is.function(spec$setup$facts)) {
+    # The run, and the field in the selects as it changes: before Randomize
+    output$design_facts <- shiny::renderUI({
+      inputs <- settled(staged)
+      chosen <- if (isTRUE(input$multi_dimension)) {
+        lapply(seq_len(inputs$values$l), function(i) input[[paste0("location_dimensions_", i)]])
+      } else {
+        list(input$dimensions)
+      }
+      # a select still empty, or between two runs, names no field yet
+      sizes <- lapply(chosen, function(value) {
+        size <- if (is.character(value) && length(value) == 1L) {
+          suppressWarnings(as.numeric(strsplit(value, " x ", fixed = TRUE)[[1L]]))
+        }
+        if (length(size) == 2L && !anyNA(size)) size
+      })
+      app_design_facts(validate_design(spec$setup$facts(inputs$values, inputs$data, sizes)))
+    })
+  }
+  if (identical(spec$setup$type, "none")) {
+    NULL
+  } else if (identical(spec$setup$type, "summary")) {
+    output$setup <- shiny::renderUI({
+      if (!randomized()) return(NULL)
+      app_design_summary(settled(design), tabset = session$ns(ids[["tabset"]]))
     })
   } else {
     # Paged allocations stay client-side so copy, Excel and print include every row.
@@ -320,13 +351,18 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
       app_spatial_table(validate_design(spec$setup$view(inputs$values, choices)),
                         caption = spec$setup$caption,
                         design = if (!is.null(spec$optim)) inputs$values[[spec$optim$into]],
-                        export = spec$setup$export, rows = spec$setup$rows)
+                        export = spec$setup$export, rows = spec$setup$rows,
+                        height = spec$setup$height, tip = spec$setup$tip,
+                        plain = isTRUE(spec$setup$plain))
     }, server = is.null(spec$setup$rows))
   }
   if (!is.null(spec$report)) {
-    output$design_report <- shiny::renderPrint({
-      if (!randomized()) return(invisible(NULL))
-      spec$report(settled(design), location())
+    # Drawn once for a design: its own select changes the location shown,
+    # so the open panel is not replaced under the reader
+    output$design_report <- shiny::renderUI({
+      if (!randomized()) return(NULL)
+      app_design_report(spec$report, settled(design), shiny::isolate(location()),
+                        session$ns("design_report_panel"))
     })
   }
   for (i in seq_along(spec$entries)) local({
@@ -370,21 +406,35 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
 
 #' A table of a spatial page (entry list, allocation, check options)
 #'
+#' @description The table is as tall as its rows: \code{height} is the
+#' most it grows to before it scrolls, not a box it always fills.
+#'
 #' @param data The data frame.
 #' @param caption Optional caption.
-#' @param height Scroll height.
+#' @param height The tallest the rows get before they scroll.
 #' @param filter \code{"top"} to filter by column, \code{"none"}.
 #' @param design Optional result whose metadata the export buttons carry.
 #' @param export Optional name of the exported table (adds export buttons).
 #' @param rows Optional number of rows per page; otherwise shows all rows.
+#' @param tip Optional explanation of the caption, shown as a tooltip on an
+#'   (i) beside it.
+#' @param plain \code{TRUE} for the table alone: no search box, row count
+#'   or page links (a short reference table).
 #' @noRd
 app_spatial_table <- function(data, caption = NULL, height = "600px", filter = "none",
-                              design = NULL, export = NULL, rows = NULL) {
+                              design = NULL, export = NULL, rows = NULL, tip = NULL, plain = FALSE) {
+  if (is.null(height)) height <- "600px"
   options <- list(pageLength = rows %||% nrow(data), autoWidth = FALSE, scrollX = TRUE, scrollY = height,
+                  scrollCollapse = TRUE,
                   columnDefs = list(list(className = "dt-center", targets = "_all")))
+  if (plain) options$dom <- "t"
+  if (!is.null(caption) && !is.null(tip)) {
+    caption <- shiny::tags$caption(caption, shiny::span(class = "fh-tip fh-info", tabindex = "0",
+      role = "img", `data-fh-tip` = NA, title = tip, `aria-label` = tip,
+      shiny::icon("circle-info", verify_fa = FALSE)))
+  }
   if (!is.null(rows)) {
     options$paging <- TRUE
-    options$scrollCollapse <- TRUE
     options$lengthMenu <- unique(c(rows, 10L, 25L, 50L, 100L))
   }
   if (!is.null(export)) {

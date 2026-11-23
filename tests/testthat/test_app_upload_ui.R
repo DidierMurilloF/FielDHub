@@ -21,13 +21,13 @@ test_that("app_upload_ui() uses the canonical labels for every module", {
   skip_if_not_installed("shiny")
   for (design in all_upload_keys) {
     html <- as.character(app_upload_ui(shiny::NS("mod"), design))
-    expect_match(html, "Import entries' list?", fixed = TRUE, info = design)
-    expect_match(html, "Upload a CSV File:", fixed = TRUE, info = design)
+    expect_match(html, "Import entries list", fixed = TRUE, info = design)
+    expect_match(html, "CSV file", fixed = TRUE, info = design)
     expect_match(html, "Separator", fixed = TRUE, info = design)
     expect_match(html, "Comma", fixed = TRUE, info = design)
     expect_match(html, "Semicolon", fixed = TRUE, info = design)
     expect_match(html, "Tab", fixed = TRUE, info = design)
-    # Regression: several modules said "Upload a csv File:" (lowercase csv).
+    # Regression: several modules said "CSV file" (lowercase csv).
     expect_no_match(html, "Upload a csv File", fixed = TRUE, info = design)
   }
 })
