@@ -2,9 +2,6 @@
 #'
 #' @description It randomly generates a full factorial design across locations.
 #'
-#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
-#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
-#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param setfactors Numeric vector with levels of each factor.
 #' @param reps Number of replicates (full blocks).
 #' @param l Number of locations. By default \code{l = 1}.
@@ -25,6 +22,11 @@
 #' @param data (optional) Data frame whose first two columns contain factor
 #'   names and level labels. Levels must be unique within each factor, but a
 #'   label may occur in different factors. Incomplete rows are omitted.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the planting path of the whole field (see
+#'   \code{planter}). See \code{\link{field_layout}} for how the design is placed.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],

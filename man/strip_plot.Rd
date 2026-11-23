@@ -23,10 +23,6 @@ strip_plot(
 )
 }
 \arguments{
-\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
-the other. See \code{\link{field_layout}} for placement rules. When supplied,
-the field book includes \code{ROW} and \code{COLUMN}.}
-
 \item{Hplots}{Number of horizontal factors, as an integer or a vector.}
 
 \item{Vplots}{Number of vertical factors, as an integer or a vector.}
@@ -54,6 +50,12 @@ assigned. Default is \code{factorLabels =TRUE}.}
 \item{data}{(optional) data frame with the labels of vertical and horizontal plots.}
 
 \item{reps}{Number of blocks (full replicates) per location. Default is one.}
+
+\item{nrows, ncols}{Optional positive whole numbers: the rows and columns of the
+field at each location. If only one is given, the other follows from the
+number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+its plots are numbered along the planting path of the whole field (see
+\code{planter}). See \code{\link{field_layout}} for how the design is placed.}
 }
 \value{
 A list with four elements.

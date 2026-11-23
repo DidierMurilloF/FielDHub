@@ -21,10 +21,6 @@ split_split_plot(
 )
 }
 \arguments{
-\item{nrows, ncols}{Optional field dimensions per location. Supply one to infer
-the other. See \code{\link{field_layout}} for placement rules. When supplied,
-the field book includes \code{ROW} and \code{COLUMN}.}
-
 \item{wp}{Number of whole plots, as an integer or a vector.}
 
 \item{sp}{Number of sub plots per whole plot, as an integer or a vector.}
@@ -48,6 +44,12 @@ labels from the original data set otherwise, numeric labels will be
 assigned. Default is \code{factorLabels =TRUE}.}
 
 \item{data}{(optional) Data frame with label list of treatments.}
+
+\item{nrows, ncols}{Optional positive whole numbers: the rows and columns of the
+field at each location. If only one is given, the other follows from the
+number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+its plots are numbered along the serpentine planting path of the whole
+field. See \code{\link{field_layout}} for how the design is placed.}
 }
 \value{
 A list with two elements.

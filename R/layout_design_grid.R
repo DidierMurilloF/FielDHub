@@ -1,3 +1,54 @@
+#-----------------------------------------------------------------------
+# Field grids: the layout of a design in a field of given dimensions.
+#
+# The units of the design (blocks, incomplete blocks, whole plots, squares)
+# tile the field as equal rectangles, and the plots are then numbered along
+# the planting path of the whole field.
+#-----------------------------------------------------------------------
+
+#' One field dimension: a single positive whole number
+#' @noRd
+validate_field_dimension <- function(value, name) {
+  if (!is.numeric(value) || !is.null(dim(value)) || length(value) != 1L ||
+      !is.finite(value) || value < 1 || value != trunc(value) ||
+      value > .Machine$integer.max) {
+    fieldhub_abort("`", name, "` must be one positive whole number.",
+                   data = list(argument = name))
+  }
+  invisible(value)
+}
+
+#' Whether the dimensions asked for are those of the grid a field book
+#' already has; other dimensions are an error
+#' @noRd
+matches_stored_grid <- function(book, nrows, ncols) {
+  rows <- max(book$ROW)
+  cols <- max(book$COLUMN)
+  if ((is.null(nrows) || nrows == rows) && (is.null(ncols) || ncols == cols)) return(TRUE)
+  fieldhub_abort("This design already has a stored ", rows, " x ", cols,
+                 " field layout: 'nrows' and 'ncols' must match it.")
+}
+
+#' Number the plots of every location along the planting path of its field
+#'
+#' The plot numbers of a location are kept and handed out in increasing
+#' order as the planter first reaches each plot. Rows that share a plot
+#' number (the subplots of a whole plot) keep sharing one.
+#' @param book A field book with ROW and COLUMN.
+#' @noRd
+number_along_field <- function(book, planter) {
+  for (rows in split(seq_len(nrow(book)), match(book$LOCATION, unique(book$LOCATION)))) {
+    path <- planting_path(max(book$ROW[rows]), max(book$COLUMN[rows]), planter)
+    step <- matrix(0L, max(path[, "ROW"]), max(path[, "COLUMN"]))
+    step[path] <- seq_len(nrow(path))
+    plots <- book$PLOT[rows]
+    unit <- match(plots, unique(plots))
+    reached <- tapply(step[cbind(book$ROW[rows], book$COLUMN[rows])], unit, min)
+    book$PLOT[rows] <- sort(unique(plots))[rank(reached)][unit]
+  }
+  book
+}
+
 grid_factor_pairs <- function(n) {
   divisors <- seq_len(floor(sqrt(n)))
   divisors <- divisors[n %% divisors == 0]
@@ -62,16 +113,11 @@ grouped_grid_coordinates <- function(book, groups, axes, dims, base, planter) {
 }
 
 design_grid_layout <- function(x, spec, nrows, ncols, planter) {
-  if (!is.null(nrows)) validate_iteration_budget(nrows, "nrows")
-  if (!is.null(ncols)) validate_iteration_budget(ncols, "ncols")
+  if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
+  if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
   if (has_design_grid(x)) {
-    rows <- max(x$fieldBook$ROW)
-    cols <- max(x$fieldBook$COLUMN)
-    if ((is.null(nrows) || nrows == rows) && (is.null(ncols) || ncols == cols)) {
-      return(x$fieldBook)
-    }
-    fieldhub_abort("This design already has a stored field layout. Valid dimensions: ",
-                   rows, " x ", cols, ".")
+    matches_stored_grid(x$fieldBook, nrows, ncols)
+    return(x$fieldBook)
   }
 
   book <- x$fieldBook
@@ -105,26 +151,25 @@ design_grid_layout <- function(x, spec, nrows, ncols, planter) {
   if (inherits(x, "fieldhub_latin_square")) {
     names(book)[match(spec$axes, names(book))] <- c("ROW_SQ", "COLUMN_SQ")
   }
-  book$ROW <- coords[, "ROW"]
-  book$COLUMN <- coords[, "COLUMN"]
-  layout_columns(book)
+  book$ROW <- as.integer(coords[, "ROW"])
+  book$COLUMN <- as.integer(coords[, "COLUMN"])
+  number_along_field(layout_columns(book), planter)
 }
 
 # Fit a full field with congruent rectangular complete blocks.
 rcbd_grid_layout <- function(x, nrows, ncols, planter) {
-  if (!is.null(nrows)) validate_iteration_budget(nrows, "nrows")
-  if (!is.null(ncols)) validate_iteration_budget(ncols, "ncols")
+  if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
+  if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
 
   book <- x$fieldBook
   if (all(c("ROW", "COLUMN") %in% names(book))) {
-    rows <- max(book$ROW)
-    cols <- max(book$COLUMN)
-    if ((is.null(nrows) || nrows == rows) && (is.null(ncols) || ncols == cols)) return(book)
-    fieldhub_abort("This RCBD already has a stored ", rows, " x ", cols, " field layout.")
+    matches_stored_grid(book, nrows, ncols)
+    return(book)
   }
 
+  sites <- split(seq_len(nrow(book)), match(book$LOCATION, unique(book$LOCATION)))
   reps <- dplyr::n_distinct(book$REP)
-  plots <- nrow(book) / dplyr::n_distinct(book$LOCATION)
+  plots <- nrow(book) / length(sites)
   rows <- if (is.null(nrows)) plots / ncols else nrows
   cols <- if (is.null(ncols)) plots / nrows else ncols
   if (rows > plots || cols > plots || rows %% 1 != 0 || cols %% 1 != 0 ||
@@ -139,7 +184,7 @@ rcbd_grid_layout <- function(x, nrows, ncols, planter) {
   }
 
   # Prefer a vertical stack, then a horizontal stack, then the most
-  # block rows that fit. Number the blocks across each row of blocks.
+  # block rows that fit. The blocks lie across each row of blocks.
   block_rows <- unique(c(reps, 1L, rev(seq_len(reps))))
   block_rows <- block_rows[reps %% block_rows == 0]
   block_cols <- reps / block_rows
@@ -149,16 +194,13 @@ rcbd_grid_layout <- function(x, nrows, ncols, planter) {
   width <- cols / across
   path <- planting_path(height, width, "cartesian")
 
-  books <- lapply(location_books(x), function(site) {
-    blocks <- split(site, site$REP)
-    for (i in seq_along(blocks)) {
-      block <- blocks[[i]]
-      block$ROW <- path[, "ROW"] + ((i - 1L) %/% across) * height
-      block$COLUMN <- path[, "COLUMN"] + ((i - 1L) %% across) * width
-      block$PLOT <- plots_along_grid(block$PLOT, width, planter)
-      blocks[[i]] <- block
-    }
-    layout_columns(dplyr::bind_rows(blocks))
-  })
-  dplyr::bind_rows(books)
+  book$ROW <- 0L
+  book$COLUMN <- 0L
+  for (site in sites) {
+    block <- match(book$REP[site], sort(unique(book$REP[site]))) - 1L
+    cell <- stats::ave(block, block, FUN = seq_along)
+    book$ROW[site] <- as.integer(path[cell, "ROW"] + (block %/% across) * height)
+    book$COLUMN[site] <- as.integer(path[cell, "COLUMN"] + (block %% across) * width)
+  }
+  number_along_field(layout_columns(book), planter)
 }

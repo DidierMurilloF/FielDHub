@@ -14,24 +14,41 @@
 #'   plots when they are built; their field book already has \code{ROW} and
 #'   \code{COLUMN}, and it is returned as it is.
 #'
-#'   For supported designs, dimensions select a rectangular grid instead of a numbered
-#'   layout or stacking. Each location must have exactly as many cells as
-#'   plots, including repeated checks. For RCBD, complete blocks occupy equal rectangles.
-#'   The layout prefers blocks stacked vertically, then blocks side by side,
-#'   then the arrangement with the most rows of blocks. Blocks are placed
-#'   across each row of blocks, and the planting path restarts in each block.
-#'   Plot numbers may move within a block to follow that path.
+#'   With \code{nrows} or \code{ncols}, the design is placed in a field of
+#'   those dimensions instead of a numbered layout. Each location must have
+#'   exactly as many cells as plots, including repeated checks, and the units
+#'   of the design are equal rectangles of the field:
+#'   \itemize{
+#'   \item CRD and factorials in CRD fill any rectangle that holds the plots.
+#'   \item RCBD and factorials in RCBD keep each complete block together. The
+#'   blocks of an RCBD are stacked vertically where that fits, else side by
+#'   side, else in the arrangement with the most rows of blocks.
+#'   \item Incomplete blocks and lattices keep each replicate and each
+#'   incomplete block together.
+#'   \item Split plots keep each whole plot together, split-split plots also
+#'   each subplot, and their RCBD variants each replicate.
+#'   \item Latin squares and strip plots tile their squares and strip grids
+#'   whole, in their own orientation. The row and column labels of a Latin
+#'   square are kept as \code{ROW_SQ} and \code{COLUMN_SQ}.
+#'   }
+#'   The plots are then numbered along the planting path of the whole field,
+#'   serpentine or cartesian as \code{planter} says, as in the numbered
+#'   layouts: the plot numbers of the location are handed out in increasing
+#'   order as the planter reaches each plot, and the path does not restart in
+#'   each block or replicate. With a serpentine planter, consecutive plot
+#'   numbers are therefore neighbours in the field. Subplots that share a plot
+#'   number keep sharing one. The randomization does not change: every row of
+#'   the field book keeps its treatment, replicate and block, and only
+#'   \code{PLOT} differs from the design's own field book. Where the plot
+#'   numbers restart at each replicate (101, 201, ...), the hundreds name the
+#'   replicate only where the replicates lie one above the other.
 #'
-#'   CRD and factorials in CRD can fill any exact rectangle. Factorials in
-#'   RCBD keep complete blocks together. Incomplete blocks and lattices keep
-#'   each replicate and incomplete block intact. Split plots keep whole plots
-#'   intact and split-split plots also keep the subplots within them intact.
-#'   Their RCBD variants keep replicate blocks intact. Latin squares and strip
-#'   plots tile intact squares or strip grids with their original planting order.
-#'   Original Latin square labels are retained as \code{ROW_SQ} and \code{COLUMN_SQ}. These designs keep
-#'   each plot's original number and treatment assignment. Invalid grids
-#'   report suggested dimensions. For a design with a stored grid, supplied
-#'   dimensions must match the stored grid.
+#'   Dimensions that do not fit are an error that suggests valid ones.
+#'   \code{layout} and \code{stacked} belong to the numbered layouts: giving
+#'   either together with dimensions is an error. A design built with
+#'   dimensions (\code{RCBD(..., nrows = 4)}) has its grid stored in its field
+#'   book, which is returned as it is whatever the \code{planter} or
+#'   \code{stacked}; other dimensions are an error.
 #'
 #' @param x A design created by a FielDHub function.
 #' @param layout Layout option, a whole number. The options depend on the
@@ -42,9 +59,9 @@
 #' @param stacked How the reps are arranged: \code{"vertical"} (by default),
 #'   \code{"horizontal"}, or \code{"grid_panel"} for designs in incomplete
 #'   blocks and split plots in complete blocks with more than two reps.
-#' @param nrows,ncols Optional positive whole numbers specifying the field
-#'   dimensions per location for a supported design. If only one is given, the other is
-#'   inferred from the plot count.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns
+#'   of the field at each location, for the designs listed above. If only one
+#'   is given, the other follows from the number of plots.
 #'
 #' @return A data frame: the field book of every location with the columns
 #'   \code{ID}, \code{LOCATION}, \code{PLOT}, \code{ROW} and \code{COLUMN}
@@ -57,7 +74,8 @@
 #' head(field_layout(rcbd))
 #' # Blocks side by side, plots planted row by row
 #' head(field_layout(rcbd, stacked = "horizontal", planter = "cartesian"))
-#' # Six complete blocks arranged two down and three across
+#' # Six complete blocks arranged two down and three across in a field of
+#' # 4 rows and 9 columns, numbered along the serpentine path of the field
 #' head(field_layout(RCBD(t = 6, reps = 6, seed = 1), nrows = 4, ncols = 9))
 #'
 #' @export
@@ -69,6 +87,10 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   x <- with_design_class(x)
   check_layout_arguments(planter, stacked)
   if (!is.null(nrows) || !is.null(ncols)) {
+    if (!missing(layout) || !missing(stacked)) {
+      fieldhub_abort("'layout' and 'stacked' select a numbered layout: ",
+                     "they cannot be combined with 'nrows' or 'ncols'.")
+    }
     if (inherits(x, "fieldhub_rcbd")) return(rcbd_grid_layout(x, nrows, ncols, planter))
     spec <- design_grid_spec(x)
     if (is.null(spec)) fieldhub_abort("Field dimensions are not supported for this design.")
@@ -90,10 +112,31 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   all_locations_layout(x, options, layout)
 }
 
-# Store the coordinates of a grid chosen when the design is built
-store_design_grid <- function(x, nrows, ncols, planter = "serpentine") {
-  if (!is.null(nrows) || !is.null(ncols)) {
-    x$fieldBook <- field_layout(x, nrows = nrows, ncols = ncols, planter = planter)
+# Store the coordinates of a grid chosen when the design is built. The
+# elements named in `maps` hold plot numbers (matrices, in lists by location
+# when `by_location`), which follow the plots to their numbers in the grid.
+store_design_grid <- function(x, nrows, ncols, planter = "serpentine", maps = character(),
+                              by_location = TRUE) {
+  if (is.null(nrows) && is.null(ncols)) return(x)
+  old <- x$fieldBook
+  x$fieldBook <- field_layout(x, nrows = nrows, ncols = ncols, planter = planter)
+  site <- match(old$LOCATION, unique(old$LOCATION))
+  if (!by_location) site[] <- 1L
+  renumber <- function(map, at) {
+    if (is.list(map)) return(lapply(map, renumber, at = at))
+    here <- site == at
+    # A table of the plots holds their numbers in its PLOT column
+    table <- "PLOT" %in% colnames(map)
+    new <- x$fieldBook$PLOT[here][match(if (table) map[, "PLOT"] else map, old$PLOT[here])]
+    if (table) map[, "PLOT"] <- new else map[] <- new
+    map
+  }
+  for (name in maps) {
+    if (by_location) {
+      for (at in seq_along(x[[name]])) x[[name]][[at]] <- renumber(x[[name]][[at]], at)
+    } else {
+      x[[name]] <- renumber(x[[name]], 1L)
+    }
   }
   x
 }

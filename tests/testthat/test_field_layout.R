@@ -177,35 +177,248 @@ test_that("plot() explains that a stacking is not available", {
     NA
   )
 })
-test_that("RCBD dimensions place complete blocks in a rectangular grid", {
-  args <- list(t = 4, checks = 1, rep_checks = 2, reps = 6, l = 2,
-               plotNumber = c(101, 1001), seed = 42)
-  original <- do.call(RCBD, args)
-  spatial <- do.call(RCBD, c(args, list(nrows = 4, ncols = 9)))
-  book <- spatial$fieldBook
-  expect_identical(book, field_layout(original, nrows = 4, ncols = 9))
-  expect_identical(book, field_layout(original, ncols = 9))
-  expect_identical(book, field_layout(spatial))
-  expect_identical(book, plot_layout(spatial)$allSitesFieldbook)
-  expect_identical(spatial, reproduce_design(spatial))
-  expect_identical(book$TREATMENT, original$fieldBook$TREATMENT)
-  expect_true(all(table(book$LOCATION, book$ROW, book$COLUMN) == 1L))
-  expect_equal(as.numeric(table(book$LOCATION, book$REP, book$CHECKS)[, , "1"]),
-               rep(2, 12))
-  first <- book[book$LOCATION == book$LOCATION[1] & book$REP == 1, ]
-  expect_equal(first$ROW, rep(1:2, each = 3))
-  expect_equal(first$COLUMN, rep(1:3, 2))
-  expect_equal(first$PLOT, c(101:103, 106:104))
-  expect_equal(unname(spatial$plotNumber[[1]][1:2, 1:3]),
-               matrix(first$PLOT, nrow = 2, byrow = TRUE))
+
+# Field dimensions (nrows, ncols) ---------------------------------------
+
+# Step of the planting path at which each row of a one-location field book
+# is planted
+grid_path_step <- function(book, planter) {
+  path <- planting_path(max(book$ROW), max(book$COLUMN), planter)
+  match(paste(book$ROW, book$COLUMN), paste(path[, "ROW"], path[, "COLUMN"]))
+}
+
+grid_cases <- list(
+  CRD_data = list(grid = c(2, 5)),
+  RCBD_two_locations = list(grid = c(6, 3), groups = "REP"),
+  RCBD_checks = list(grid = c(4, 9), groups = "REP"),
+  full_factorial_crd_data = list(grid = c(3, 4)),
+  full_factorial_rcbd = list(grid = c(3, 4), groups = "REP"),
+  incomplete_blocks_labels = list(grid = c(5, 4), groups = c("REP", "IBLOCK")),
+  alpha_lattice = list(grid = c(4, 6), groups = c("REP", "IBLOCK")),
+  square_lattice = list(grid = c(4, 8), groups = c("REP", "IBLOCK")),
+  rectangular_lattice = list(grid = c(6, 4), groups = c("REP", "IBLOCK")),
+  split_plot_rcbd = list(grid = c(3, 4), groups = c("REP", "WHOLE_PLOT")),
+  split_plot_crd = list(grid = c(3, 4), groups = "WHOLE_PLOT"),
+  split_split_plot_rcbd = list(grid = c(4, 4),
+                              groups = c("REP", "WHOLE_PLOT", "SUB_PLOT")),
+  split_split_plot_crd = list(grid = c(4, 6), groups = c("WHOLE_PLOT", "SUB_PLOT")),
+  latin_square = list(grid = c(4, 8), groups = "SQUARE",
+                      axes = c("ROW_SQ", "COLUMN_SQ")),
+  strip_plot = list(grid = c(3, 4), groups = "REP", axes = c("HSTRIP", "VSTRIP"))
+)
+
+test_that("field dimensions keep the randomization and tile the experimental units", {
+  for (name in names(grid_cases)) {
+    case <- grid_cases[[name]]
+    original <- catalogue_design(name)
+    dims <- setNames(as.list(case$grid), c("nrows", "ncols"))
+    planter <- original$metadata$parameters$planter
+    if (is.null(planter)) planter <- "serpentine"
+    layout <- function(...) field_layout(original, planter = planter, ...)
+    design <- do.call(catalogue[[name]]$fun, c(original$metadata$parameters, dims))
+    book <- design$fieldBook
+    expect_identical(book, layout(nrows = dims$nrows, ncols = dims$ncols), info = name)
+    expect_identical(book, layout(ncols = dims$ncols), info = name)
+    expect_identical(book, layout(nrows = dims$nrows), info = name)
+    expect_identical(book, field_layout(design), info = name)
+    expect_identical(book, plot_layout(design)$allSitesFieldbook, info = name)
+    expect_identical(design, reproduce_design(design), info = name)
+    expect_type(book$ROW, "integer")
+    expect_type(book$COLUMN, "integer")
+    expect_identical(dim(table(book$ROW, book$COLUMN)), as.integer(case$grid), info = name)
+    expect_true(all(table(book$LOCATION, book$ROW, book$COLUMN) == 1L), info = name)
+
+    # The randomization is the default design's: only PLOT, ROW and COLUMN differ
+    assignments <- book[setdiff(names(book), c("PLOT", "ROW", "COLUMN"))]
+    if (name == "latin_square") {
+      names(assignments)[match(case$axes, names(assignments))] <- c("ROW", "COLUMN")
+    }
+    kept <- setdiff(names(original$fieldBook), "PLOT")
+    expect_identical(assignments[kept], original$fieldBook[kept], info = name)
+    expect_identical(sort(book$PLOT), sort(original$fieldBook$PLOT), info = name)
+
+    if (name %in% c("split_plot_crd", "split_split_plot_crd")) {
+      book$WHOLE_PLOT <- interaction(book$REP, book$WHOLE_PLOT, drop = TRUE)
+    }
+    groups <- c("LOCATION", case$groups)
+    for (level in seq_along(groups)) {
+      units <- split(book, as.list(book[groups[seq_len(level)]]), drop = TRUE)
+      for (unit in units) {
+        expect_equal((diff(range(unit$ROW)) + 1) * (diff(range(unit$COLUMN)) + 1),
+                     nrow(unit), info = name)
+      }
+    }
+    if (length(case$axes)) {
+      for (unit in units) {
+        expect_equal(nrow(unique(unit[c("ROW", case$axes[1L])])), length(unique(unit$ROW)))
+        expect_equal(nrow(unique(unit[c("COLUMN", case$axes[2L])])), length(unique(unit$COLUMN)))
+      }
+    }
+  }
 })
 
-test_that("RCBD dimension errors suggest valid field grids", {
+test_that("one field dimension builds and reproduces the same design as both", {
+  for (name in names(grid_cases)) {
+    original <- catalogue_design(name)
+    dims <- setNames(as.list(grid_cases[[name]]$grid), c("nrows", "ncols"))
+    fun <- catalogue[[name]]$fun
+    both <- do.call(fun, c(original$metadata$parameters, dims))
+    for (one in names(dims)) {
+      design <- do.call(fun, c(original$metadata$parameters, dims[one]))
+      expect_identical(design$fieldBook, both$fieldBook, info = paste(name, one))
+      expect_identical(design$metadata$parameters[[one]], dims[[one]], info = paste(name, one))
+      expect_identical(design, reproduce_design(design), info = paste(name, one))
+    }
+  }
+})
+
+test_that("plot numbers follow the planter's path across the whole field", {
+  for (name in names(grid_cases)) {
+    original <- catalogue_design(name)
+    dims <- grid_cases[[name]]$grid
+    for (planter in c("serpentine", "cartesian")) {
+      book <- field_layout(original, planter = planter, nrows = dims[1L], ncols = dims[2L])
+      info <- paste(name, planter)
+      expect_identical(dim(table(book$ROW, book$COLUMN)), as.integer(dims), info = info)
+      for (site in split(book, book$LOCATION, drop = TRUE)) {
+        # A plot is numbered when the planter first reaches it; a whole plot
+        # of a split plot holds several cells under one number
+        reached <- tapply(grid_path_step(site, planter), site$PLOT, min)
+        expect_false(is.unsorted(reached, strictly = TRUE), info = info)
+        if (!anyDuplicated(site$PLOT)) {
+          expect_identical(order(site$PLOT), order(grid_path_step(site, planter)), info = info)
+        }
+      }
+    }
+  }
+})
+
+test_that("consecutive plot numbers are neighbours in a serpentine field", {
+  designs <- list(
+    RCBD(t = 6, reps = 6, seed = 1, nrows = 4, ncols = 9),
+    RCBD(t = 5, reps = 3, l = 2, continuous = TRUE, seed = 6, ncols = 3),
+    incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17, nrows = 6, ncols = 4),
+    alpha_lattice(t = 12, k = 3, reps = 6, seed = 36, nrows = 4),
+    full_factorial(setfactors = c(2, 3), reps = 2, type = 2, seed = 9, nrows = 4),
+    latin_square(t = 4, reps = 2, seed = 7, nrows = 4, ncols = 8),
+    strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15, nrows = 6),
+    CRD(t = 5, reps = 3, seed = 1, nrows = 3)
+  )
+  for (design in designs) {
+    for (site in split(design$fieldBook, design$fieldBook$LOCATION, drop = TRUE)) {
+      site <- site[order(site$PLOT), ]
+      expect_true(all(abs(diff(site$ROW)) + abs(diff(site$COLUMN)) == 1L),
+                  info = class(design)[1L])
+    }
+  }
+  # The numbering does not restart in each block of an RCBD: three blocks of
+  # two rows lie side by side, and the planter crosses all three in each row
+  book <- designs[[1L]]$fieldBook
+  expect_identical(book$PLOT[order(book$ROW, book$COLUMN)][1:18],
+                   c(101:106, 201:203, 306:301, 206:204))
+  expect_identical(book$REP[order(book$ROW, book$COLUMN)][1:18], rep(rep(1:3, each = 3), 2))
+})
+
+test_that("fields of one row and of one column are valid grids", {
+  designs <- list(CRD(t = 4, reps = 3, seed = 1),
+                  RCBD(t = 3, reps = 2, seed = 1),
+                  incomplete_blocks(t = 4, k = 2, reps = 2, seed = 1),
+                  split_plot(wp = 2, sp = 2, reps = 2, seed = 1))
+  for (design in designs) {
+    n <- nrow(design$fieldBook)
+    row <- field_layout(design, nrows = 1)
+    expect_identical(row$ROW, rep(1L, n))
+    expect_identical(sort(row$COLUMN), seq_len(n))
+    expect_identical(row$PLOT[order(row$COLUMN)], sort(design$fieldBook$PLOT))
+    column <- field_layout(design, ncols = 1)
+    expect_identical(column$COLUMN, rep(1L, n))
+    expect_identical(sort(column$ROW), seq_len(n))
+    expect_identical(column$PLOT[order(column$ROW)], sort(design$fieldBook$PLOT))
+  }
+})
+
+test_that("invalid field dimensions suggest grids that preserve the design", {
   x <- RCBD(t = 6, reps = 6, seed = 1)
   expect_error(field_layout(x, nrows = 5, ncols = 7), "36 plots.*4 x 9",
                class = "fieldhub_input_error")
   expect_error(RCBD(t = 6, reps = 6, nrows = 5), "Valid dimensions",
                class = "fieldhub_input_error")
-  expect_error(field_layout(x, nrows = 1.5), "whole number",
+  expect_error(latin_square(4, reps = 2, nrows = 2, ncols = 16, seed = 1),
+               "Valid dimensions.*4 x 8.*8 x 4", class = "fieldhub_input_error")
+  expect_error(strip_plot(3, 2, reps = 2, nrows = 2, ncols = 6, seed = 1),
+               "Valid dimensions.*3 x 4", class = "fieldhub_input_error")
+  expect_error(CRD(6, 2, nrows = 5, seed = 1),
+               "Valid dimensions.*4 x 3", class = "fieldhub_input_error")
+  expect_error(field_layout(row_column(12, nrows = 3, reps = 2, seed = 1), nrows = 4),
+               "not supported", class = "fieldhub_input_error")
+})
+
+test_that("field dimensions must be single positive whole numbers", {
+  designs <- list(RCBD(t = 6, reps = 6, seed = 1), CRD(t = 6, reps = 6, seed = 1))
+  for (x in designs) {
+    for (value in list("4", c(4, 9), NA, NA_real_, 0, -4, TRUE, Inf, 1.5, list(4))) {
+      expect_error(field_layout(x, nrows = value), "`nrows` must be one positive whole number",
+                   class = "fieldhub_input_error")
+      expect_error(field_layout(x, nrows = 4, ncols = value),
+                   "`ncols` must be one positive whole number", class = "fieldhub_input_error")
+    }
+  }
+  expect_error(CRD(t = 6, reps = 6, seed = 1, nrows = "4"), "`nrows`",
                class = "fieldhub_input_error")
+  expect_error(RCBD(t = 6, reps = 6, seed = 1, ncols = 0), "`ncols`",
+               class = "fieldhub_input_error")
+})
+
+test_that("a design with a stored grid accepts only its own dimensions", {
+  for (stored in list(RCBD(t = 6, reps = 6, seed = 1, nrows = 4),
+                      incomplete_blocks(t = 12, k = 4, reps = 3, seed = 1, nrows = 4))) {
+    expect_identical(field_layout(stored, nrows = 4, ncols = 9), stored$fieldBook)
+    expect_identical(field_layout(stored, ncols = 9), stored$fieldBook)
+    expect_error(field_layout(stored, nrows = 6), "already has a stored 4 x 9 field layout",
+                 class = "fieldhub_input_error")
+    expect_error(field_layout(stored, nrows = 4, ncols = 6), "already has a stored",
+                 class = "fieldhub_input_error")
+  }
+})
+
+test_that("field dimensions cannot be combined with a numbered layout or a stacking", {
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(field_layout(x, layout = 2, nrows = 4), "'layout'.*'stacked'",
+               class = "fieldhub_input_error")
+  expect_error(field_layout(x, stacked = "horizontal", ncols = 9), "'layout'.*'stacked'",
+               class = "fieldhub_input_error")
+})
+
+test_that("plot-number maps of a design follow the plots to the grid", {
+  squares <- latin_square(t = 3, reps = 2, seed = 1, nrows = 3, ncols = 6)
+  book <- squares$fieldBook
+  for (i in 1:2) {
+    square <- book[book$SQUARE == i, ]
+    at <- cbind(match(square$ROW_SQ, unique(square$ROW_SQ)),
+                match(square$COLUMN_SQ, unique(square$COLUMN_SQ)))
+    expect_identical(squares$plotSquares[[i]][at], square$PLOT)
+  }
+  expect_identical(lapply(squares$plotSquares, dim),
+                   lapply(latin_square(t = 3, reps = 2, seed = 1)$plotSquares, dim))
+
+  for (type in 1:2) {
+    split <- split_plot(wp = 3, sp = 2, reps = 2, l = 2, type = type, seed = 11, nrows = 3)
+    for (loc in 1:2) {
+      site <- split$fieldBook[split$fieldBook$LOCATION == loc, ]
+      whole <- site[!duplicated(site$PLOT), ]
+      expect_identical(unname(split$layoutlocations[[loc]][, "PLOT"]), as.character(whole$PLOT))
+      expect_identical(unname(split$layoutlocations[[loc]][, "Whole-plot"]),
+                       as.character(whole$WHOLE_PLOT))
+    }
+  }
+
+  strips <- strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2, seed = 1, nrows = 3)
+  for (loc in 1:2) {
+    site <- strips$fieldBook[strips$fieldBook$LOCATION == loc, ]
+    for (rep in 1:2) {
+      plots <- site$PLOT[site$REP == rep]
+      expect_setequal(strips$plotLayouts[[loc]][[rep]], plots)
+      expect_identical(as.vector(t(strips$plotLayouts[[loc]][[rep]])), plots)
+    }
+  }
 })

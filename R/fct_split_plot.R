@@ -2,9 +2,6 @@
 #'
 #' @description It randomly generates a split plot design (SPD) across locations.
 #'
-#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
-#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
-#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param wp Number of whole plots, as an integer or a vector.
 #' @param sp Number of sub plots per whole plot, as an integer or a vector.
 #' @param reps Number of blocks (full replicates).
@@ -17,6 +14,11 @@
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) Data frame with label list of treatments.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the serpentine planting path of the whole
+#'   field. See \code{\link{field_layout}} for how the design is placed.
 #' 
 #' 
 #' @author Didier Murillo [aut],
@@ -232,6 +234,6 @@ split_plot <- function(wp = NULL, sp = NULL, reps = NULL, type = 2, l = 1, plotN
     reproduction_parameters[c("nrows", "ncols")] <- NULL
   }
   output <- new_fieldhub_design(output, "split_plot", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols)
+  output <- store_design_grid(output, nrows, ncols, maps = "layoutlocations")
   return(invisible(output))
 }

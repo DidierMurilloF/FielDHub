@@ -2,9 +2,6 @@
 #'
 #' @description It randomly generates a strip plot design across locations.
 #'
-#' @param nrows,ncols Optional field dimensions per location. Supply one to infer
-#'   the other. See \code{\link{field_layout}} for placement rules. When supplied,
-#'   the field book includes \code{ROW} and \code{COLUMN}.
 #' @param Hplots Number of horizontal factors, as an integer or a vector.
 #' @param Vplots Number of vertical factors, as an integer or a vector.
 #' @param b Deprecated alias for \code{reps}; positional calls remain supported.
@@ -20,6 +17,11 @@
 #' @param randomizeH Logical flag: \code{TRUE} to randomize horizontal strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
 #' @param randomizeV Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
 #' @param data (optional) data frame with the labels of vertical and horizontal plots.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the planting path of the whole field (see
+#'   \code{planter}). See \code{\link{field_layout}} for how the design is placed.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -282,6 +284,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     reproduction_parameters[c("nrows", "ncols")] <- NULL
   }
   output <- new_fieldhub_design(output, "strip_plot", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols, planter = planter)
+  output <- store_design_grid(output, nrows, ncols, planter = planter,
+                              maps = "plotLayouts")
   return(invisible(output))
 }

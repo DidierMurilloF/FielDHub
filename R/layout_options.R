@@ -7,8 +7,9 @@
 # among the options that fit its reps and blocks. layout_options() computes
 # those options for each location, field_layout() returns one of them and
 # plot_layout() draws it. The other designs place their plots when they are
-# built, so their field books already have ROW and COLUMN. RCBD can also
-# store coordinates at creation when field dimensions are supplied.
+# built, so their field books already have ROW and COLUMN. The classic
+# designs also store coordinates when they are built with field dimensions
+# (nrows, ncols): R/layout_design_grid.R.
 #-----------------------------------------------------------------------
 
 #' Columns of a field book with coordinates: the identifiers, the
