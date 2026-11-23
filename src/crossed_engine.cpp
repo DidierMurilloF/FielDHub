@@ -494,11 +494,11 @@ class Engine {
     double bound = 0.0, row_bound = 0.0, diag = 0.0, row_diag = 0.0;
     if (out_.debug) {
       before = fresh_log_det(joint, 2);
-      bound = error_bound(joint, x, y, true);
+      bound = error_bound(joint, x, y, true, 2);
       diag = joint.max_diag();
       if (rows_differ) {
         row_before = fresh_log_det(row, 1);
-        row_bound = error_bound(row, x, y, false);
+        row_bound = error_bound(row, x, y, false, 1);
         row_diag = row.max_diag();
       }
     }
@@ -706,12 +706,19 @@ class Engine {
   // CrossedSpace::ratio_error_bound() on the ratio of swapping x and y from
   // the state `s` as it is, whose errors the sparse drift checks measure; the
   // alarm quantity of `s` goes to `debug_state`.
-  double error_bound(const CrossedSpace& s, int x, int y, bool cache) {
-    const double rho = s.drift(), d = s.max_diag(), dc = s.drift_cache();
-    const double state = std::max(rho * std::max(1.0, d), dc);
+  // The two measures are themselves computed in floating point, so their
+  // own rounding is added (crossed_space.h, "Error of a ratio"). A state too
+  // far off for the bound (B rho >= 1 / 2) is a failure: `debug_bound` is
+  // then infinite.
+  double error_bound(const CrossedSpace& s, int x, int y, bool cache, int F) {
+    const double u = 1.1102230246251565e-16;
+    const double d = s.max_diag(), fr = static_cast<double>(F) * lay_.r;
+    const double state = std::max(s.drift() * std::max(1.0, d), s.drift_cache());
     if (!(state <= out_.debug_state)) out_.debug_state = state;
+    const double rho = s.drift() + 5.0 * (s.blocks() + fr + lay_.v + 3.0) * u * std::max(1.0, d);
+    const double dc = s.drift_cache() + (fr + 1.0) * fr * u * std::max(1.0, d);
     const double brho = s.blocks() * rho;
-    if (!(brho < 0.5)) return INFINITY;
+    if (!(brho < 0.5)) { out_.debug_bound = INFINITY; return INFINITY; }
     return s.ratio_error_bound(x, y, cache, brho * d / (1.0 - brho), dc);
   }
 

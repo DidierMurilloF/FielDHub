@@ -116,6 +116,16 @@
 // dM <= B max|M*| rho <= B (d + dM) rho, that is dM <= B rho d / (1 - B rho);
 // and G - M* N' = (G - M N') + (M - M*) N', so dG <= drift_cache() +
 // dM l_1 / 2.
+// The two measures are themselves computed in floating point and carry a
+// rounding floor, so the true rho and cache error can exceed the computed
+// ones by it. An entry of What M - I is a sum of at most B + F r + k + 3
+// terms (y'm, the F r entries of a treatment's row of N M, the k treatments
+// of the block, and three more) whose sizes add to at most (1 + 2 F) d <=
+// 5 d (|m| <= d; the y term at most F d because sum_j k_j = F n; the N'N
+// term at most F d because k wt^2 = 1), so rho is known to within
+// 5 (B + F r + v + 3) u d (k <= v); an entry of G - M N' is a sum of F r + 1
+// terms of size at most d, known to within (F r + 1) F r u d. The check adds
+// both floors to the measures before it forms dM and dG.
 //
 // Treatment-space form (phase 2 spec 5.1c). Every factorisation above is of
 // order B. With fewer treatments than block columns (v < B) the same state

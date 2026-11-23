@@ -56,7 +56,8 @@
 #     (see below); joint log det >= the start's (reference) - 1e-9; the final
 #     values match the reference to 1e-9; and the accuracy of the accepted
 #     rank-2 ratios (below). The same invariants on 9/3/2, 12/4/2 and 16/4/2
-#     nested (stage 1 often singular or nearly so) and on 600 random complete
+#     nested (stage 1 often singular or nearly so; 3200 searches in all with
+#     the default seeds) and on 600 random complete
 #     starts (v 8-16, many near-singular or singular and then repaired: the
 #     ill-conditioned states where a rank-2 score loses digits), at least 200
 #     of them searched.
@@ -67,19 +68,49 @@
 #     - formulas: the error is at most its bound, derived from the error of
 #       the state that the sparse drift checks measure just before the swap,
 #       plus the rounding of the two factorisations (`ratio[["bound"]]`, the
-#       largest error / bound, <= 1). A wrong ratio formula fails it on every
+#       largest error / bound, <= 1; infinite, a failure, when a state is
+#       too far off for the bound). A wrong ratio formula fails it on every
 #       shape (measured: a relative 1e-10 on one term gives 2 to 400);
 #     - decisions: the exact ratio of every swap a descent accepted passes
 #       the acceptance rule (`ratio[["false_accepts"]]` 0), so every such
 #       swap is a real improvement. A wrong update of the state fails it (a
 #       relative 1e-9 on one term of the update of M or of the cache gives
 #       thousands of them);
-#     - state, on the five well-conditioned shapes only: the alarm quantity
+#     - state, on the six well-conditioned shapes only (16/4/2 nested among
+#       them): the alarm quantity
 #       of the drift check, measured before every accepted swap, never
 #       exceeds the engine's alarm level 1e-8 (`ratio[["state"]]`; measured
-#       at most 4e-12, and above 1e-8 with either wrong update). On the
-#       ill-conditioned shapes it is printed, not judged: between two drift
-#       checks the engine does not bound it (2.4e-7 measured at 12/4/2).
+#       at most 2.8e-11 at 24/6/2 nested and 1.6e-10 at 16/4/2 nested, seeds
+#       1:400, and above 1e-8 with either wrong update), and no drift check
+#       alarms (`drift_events` 0: the alarm caps the state error near its
+#       level, so a wrong update shows there, hundreds to thousands of
+#       events). On the two ill-conditioned shapes (9/3/2 and 12/4/2
+#       nested) and the random starts the state error is printed, not
+#       judged: between two drift checks the engine does not bound it
+#       (2.4e-7 measured at 12/4/2).
+#     - optima (review of RC4, I-1 and I-2): no optimum is recorded as
+#       better unless its log det from scratch is above that of the record
+#       before by more than 1e-10 (`optima[["false_records"]]` 0); and the
+#       largest distance of a running log det from the value from scratch at
+#       an optimum is at most 1e-8 (`optima[["drift"]]`), a hundredth of the
+#       engine's margin 1e-6, inside which it compares from scratch
+#       (measured: at most 1.3e-9 on 9/3/2 nested, seeds 1:2000, and 1.6e-9
+#       with the treatment-space form forced; 1.1e-7 without the refresh
+#       after a swap with large ratio terms, which this catches).
+#     - exact states: the same search without any hook and with the check
+#       hook `exact_states` (both states rebuilt from scratch after every
+#       accepted swap) gives the same evaluations, swaps, stop reason,
+#       design and generator state, on every stage 1 start of the scan. So
+#       no decision of the search (acceptance, record of an optimum, stale
+#       count, choice of the result) depends on the error of a running
+#       state.
+#     - the drift check itself, on 24/6/2 and 12/4/2 nested, seeds 1:8, with
+#       the check hook `drift`, which multiplies one entry of M of the joint
+#       state by 1 + 1e-6 just before each periodic drift check: the check
+#       must alarm (`drift_events` >= 1) and refresh, so that every other
+#       invariant still holds (the state error before every accepted swap is
+#       judged against 1e-8 at 24/6/2). Without the periodic check there is
+#       no alarm and the disturbed state stays, and this fails.
 #     `debug_max_error`, the largest error relative to max(1, ratio), is
 #     printed. Its limit of 1e-8 was a measured value, not a derived one: the
 #     error of a ratio is proportional to the size of its two terms and to
@@ -848,6 +879,10 @@ if (check %in% c("crossed", "repair", "treatment_form")) {
     if (!(q[["bound"]] <= 1)) return(sprintf("ratio error %.3g times its bound (debug_max_error %.3g)", q[["bound"]], res$search$debug_max_error))
     if (q[["false_accepts"]] != 0) return(sprintf("%g accepted swaps whose exact ratio fails the acceptance rule", q[["false_accepts"]]))
     if (!is.null(state_limit) && !(q[["state"]] <= state_limit)) return(sprintf("state error %.3g before an accepted swap", q[["state"]]))
+    o <- res$search$check$optima
+    if (!is.numeric(o) || length(o) != 2L || anyNA(o)) return("no optimum comparison reported")
+    if (o[["false_records"]] != 0) return(sprintf("%g optima recorded as better that are not better from scratch", o[["false_records"]]))
+    if (!(o[["drift"]] <= 1e-8)) return(sprintf("running log det %.3g from the value from scratch at an optimum", o[["drift"]]))
     NULL
   }
   # The Row floors of a result against its start (header): a problem, or NULL.
@@ -925,7 +960,7 @@ if (check == "crossed") {
                       shared = c(FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE),
                       target = c(0.5929, 0.6349, 0.7173, 0.8466, NA, NA, NA, NA),
                       parity_seeds = c(8, 8, 4, 8, NA, NA, NA, NA),
-                      well = c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE))
+                      well = c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, FALSE))
   for (g in seq_len(nrow(cases))) {
     v <- cases$t[g]; nrows <- cases$nrows[g]; r <- cases$r[g]; shared <- cases$shared[g]
     ncols <- v / nrows
@@ -934,17 +969,35 @@ if (check == "crossed") {
     joint_d <- rep(NA_real_, 8L)
     problems <- character()
     worst_debug <- 0
-    worst <- c(bound = 0, state = 0)
+    worst <- c(bound = 0, state = 0, optimum = 0)
     searched <- 0L
     seconds <- system.time(for (seed in seq_len(n_scan)) {
       set.seed(seed)
       s1 <- stage1(v, nrows, ncols, r, shared, work_limit, TRUE)
       ref0 <- joint_ref(s1$treatments, lay, v, r)
-      res <- tryCatch(crossed(s1$treatments, v, r, nrows, ncols, shared,
-                              work_cap = max(work_limit - s1$work, 1)), error = function(e) e)
-      if (inherits(res, "error")) { problems <- c(problems, sprintf("seed %d error: %s", seed, conditionMessage(res))); next }
-      trt <- as.integer(res$treatments)
+      state <- get(".Random.seed", envir = globalenv())
+      # The same search with no hook and with exact states (header).
+      run <- function(flags) {
+        assign(".Random.seed", state, envir = globalenv())
+        if (nzchar(flags)) Sys.setenv(FIELDHUB_ENGINE_DEBUG = flags) else Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
+        out <- tryCatch(crossed(s1$treatments, v, r, nrows, ncols, shared,
+                                work_cap = max(work_limit - s1$work, 1)), error = function(e) e)
+        if (!inherits(out, "error")) out$generator <- get(".Random.seed", envir = globalenv())
+        out
+      }
+      plain <- run("")
+      exact <- run("exact_states")
+      res <- run("1")
       fail <- function(what) problems <<- c(problems, sprintf("seed %d: %s", seed, what))
+      if (inherits(res, "error")) { problems <- c(problems, sprintf("seed %d error: %s", seed, conditionMessage(res))); next }
+      if (inherits(plain, "error") || inherits(exact, "error")) { fail("error without a hook or with exact states"); next }
+      same <- function(a, b) identical(a$treatments, b$treatments) && identical(a$search$evaluations, b$search$evaluations) &&
+        identical(a$search$joint_swaps, b$search$joint_swaps) && identical(a$search$stop_reason, b$search$stop_reason) &&
+        identical(a$generator, b$generator)
+      if (!same(plain, res)) fail("the debug measures changed the search")
+      if (!same(plain, exact)) fail(sprintf("the search differs from the one with exact states (evaluations %g against %g, stop %s against %s)",
+                                            plain$search$evaluations, exact$search$evaluations, plain$search$stop_reason, exact$search$stop_reason))
+      trt <- as.integer(res$treatments)
       if (!complete_reps(trt, lay, v, r)) { fail("a replicate is not complete"); next }
       if (!isTRUE(res$full_rank)) { if (ref0$full) fail("full-rank start reported not full rank"); next }
       ref <- joint_ref(trt, lay, v, r)
@@ -959,14 +1012,16 @@ if (check == "crossed") {
       if (!is.null(rp)) fail(rp)
       else {
         worst_debug <- max(worst_debug, res$search$debug_max_error)
-        worst <- pmax(worst, res$search$check$ratio[c("bound", "state")])
+        worst <- pmax(worst, c(res$search$check$ratio[c("bound", "state")], optimum = res$search$check$optima[["drift"]]))
       }
+      if (cases$well[g] && res$search$drift_events != 0) fail(sprintf("%g drift alarms", res$search$drift_events))
       if (seed <= 8L) joint_d[seed] <- res$joint_d
     })[["elapsed"]]
     report(length(problems) == 0L && searched >= n_scan %/% 2L,
-           sprintf("crossed invariants %s (seeds 1:%d, %d searched; largest ratio error %.2e of its bound, state error %.2e%s; debug error %.2e)%s",
+           sprintf("crossed invariants %s (seeds 1:%d, %d searched, each as with exact states; largest ratio error %.2e of its bound, state error %.2e%s, optimum drift %.2e; debug error %.2e)%s",
                    label, n_scan, searched, worst[["bound"]], worst[["state"]],
-                   if (cases$well[g]) sprintf(" <= %.0e", STATE) else ", not judged", worst_debug,
+                   if (cases$well[g]) sprintf(" <= %.0e and no drift alarm", STATE) else ", not judged",
+                   worst[["optimum"]], worst_debug,
                    if (length(problems)) sprintf(": %d problems, first %s", length(problems), problems[1]) else ""))
     cat(sprintf("  %s: %.1f s; joint D by seed (1:8) %s\n", label, seconds,
                 paste(sprintf("%.4f", joint_d), collapse = " ")))
@@ -979,6 +1034,39 @@ if (check == "crossed") {
   }
   # Ill-conditioned states: random complete starts, many near-singular, where
   # a rank-2 ratio loses digits (the prototype review's pitfall).
+  Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1")
+  # The drift check itself (header): the hook disturbs the joint state before
+  # each periodic check.
+  for (shape in list(c(24, 6, 2), c(12, 4, 2))) {
+    v <- shape[1]; nrows <- shape[2]; r <- shape[3]; ncols <- v / nrows
+    lay <- layout_of(v, r, nrows, FALSE)
+    problems <- character()
+    alarms <- 0
+    for (seed in 1:8) {
+      set.seed(seed)
+      s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
+      Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1,drift")
+      res <- tryCatch(crossed(s1$treatments, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1)),
+                      error = function(e) e)
+      Sys.setenv(FIELDHUB_ENGINE_DEBUG = "1")
+      fail <- function(what) problems <<- c(problems, sprintf("seed %d: %s", seed, what))
+      if (inherits(res, "error")) { fail(conditionMessage(res)); next }
+      trt <- as.integer(res$treatments)
+      if (!complete_reps(trt, lay, v, r) || !isTRUE(res$full_rank)) { fail("not a complete full-rank design"); next }
+      ref <- joint_ref(trt, lay, v, r)
+      ref0 <- joint_ref(s1$treatments, lay, v, r)
+      fp <- floor_problem(res, trt, s1$treatments, lay, v, r)
+      rp <- ratio_problem(res, if (v == 24) STATE)
+      if (!is.null(fp)) fail(fp)
+      if (!is.null(rp)) fail(rp)
+      if (!(ref$log_det >= ref0$log_det - VAL) || !close(res$joint_log_det, ref$log_det)) fail("joint log det below the start's or not the reference's")
+      if (!(res$search$drift_events >= 1)) fail(sprintf("no drift alarm in %g swaps", res$search$joint_swaps))
+      alarms <- alarms + res$search$drift_events
+    }
+    report(length(problems) == 0L,
+           sprintf("crossed drift check %d/%d/%d nested (hook, seeds 1:8): %g alarms, each refreshed%s", v, nrows, r, alarms,
+                   if (length(problems)) sprintf(": %d problems, first %s", length(problems), problems[1]) else ""))
+  }
   set.seed(20261121)
   worst_debug <- 0
   worst <- c(bound = 0, state = 0)
