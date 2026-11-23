@@ -224,11 +224,11 @@
   in `tools/onestage-accepted-loss.csv`) the mean Column D-, Column A-
   or joint A-efficiency is below the previous mean by more than the
   margin, while the Row efficiency is equal and the joint D-efficiency
-  is higher. The largest shortfalls are 0.0069 (Column D) and 0.0169
-  (Column A), at 15 entries in blocks of 5 with four replicates and 20
-  iterations, and 0.0015 (joint A), at 20 entries in blocks of 10 with
-  three replicates. The new search favors the joint D-optimal design,
-  and the shortfall is the price of it.
+  is equal or higher. The largest shortfalls are 0.0069 (Column D) and
+  0.0169 (Column A), at 15 entries in blocks of 5 with four replicates
+  and 20 iterations, and 0.0015 (joint A), at 20 entries in blocks of 10
+  with three replicates. The new search favors the joint D-optimal
+  design, and the shortfall is the price of it.
 - Fewer fallbacks. In 1.6.0, 73 onestage shapes (40 latinized, 33
   nested; `tools/onestage-fallback-changes.csv`) fell back to twostage
   for some seeds (1,204 of 14,450 seed runs). None of these shapes falls
@@ -252,11 +252,11 @@
   is -0.0226 and +0.0661), it was never below the best A-efficiency
   found, and the best design reached it in 156 shapes, against 87 for
   the old bound.
-- Rectangular lattices with three or more replicates show A below the
-  `A-Bound`. For example, for 12 entries in blocks of 3 with three
-  replicates, A is 0.6800618 and the bound is 0.6848249, because the
-  second-moment bound cannot reach a rectangular lattice with three or
-  more replicates (see `inst/PROVENANCE.md`).
+- Rectangular lattices with three or more replicates can show A slightly
+  below the `A-Bound`, because the second-moment bound cannot reach
+  every such lattice (see `inst/PROVENANCE.md`). For example, for 12
+  entries in blocks of 3 with three replicates, A is 0.6800618 and the
+  bound is 0.6848249.
 - Acknowledgment. Earlier versions of FielDHub used the `blocksdesign`
   package (Edmondson 2021) to optimize block and row-column designs.
   FielDHub’s engine is an independent implementation, written without
@@ -326,7 +326,7 @@ above it the rows are left as the column design gave them, with a
 warning of the same class.
 
 Every other design is unchanged, apart from the onestage row-column
-designs and the `A-Bound` below.
+designs and the `A-Bound` above.
 
 # FielDHub 1.6.0
 
