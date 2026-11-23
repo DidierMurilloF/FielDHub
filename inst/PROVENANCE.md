@@ -1,8 +1,12 @@
 # Provenance of the compiled block engine
 
 The engine is a clean-room implementation. Nobody working on it read the source
-code of the blocksdesign package; blocksdesign is used only as an installed
-black box in tests and benchmarks, to compare output shape and efficiency.
+code of the blocksdesign package; its output was used only as a black box, to
+compare output shape and efficiency. FielDHub no longer uses blocksdesign, and
+earlier versions did. FielDHub is an independent implementation, and its designs
+were validated against the results of blocksdesign (Edmondson 2021). FielDHub is
+grateful to Rodney N. Edmondson for the package and the optimized designs it
+gave FielDHub for years. No code was ported or derived from it.
 
 | File | Content | Sources |
 |---|---|---|
@@ -35,6 +39,23 @@ black box in tests and benchmarks, to compare output shape and efficiency.
 | `R/engine_blocks.R` (`resolvable_a_bound()`, `unsearched_resolvable_design()`), `blocks_engine.cpp` (`resolvable_score_cpp()`) | Resolvable A-efficiency bound: the r replicates make rank(N) <= r b - r + 1, so at most min(v, r b - r + 1) - 1 efficiencies differ from 1, with the convexity argument of `block_a_bound()`; a start attaining it is scored once and returned without search | Own derivation (controller ruling R18, 2026-11-19); John & Williams (1995) ch. 2 (efficiency factors); nested-engine spec section 6.2b decision 4 |
 | `blocks_engine.cpp` (mode 2, `make_column_layout()`), `R/engine_blocks.R` (`rows_within_columns()`), `R/engine_row_column_optimization.R` (`improve_efficiency()`) | Twostage row step: the rows of a resolvable row-column design are the blocks of a resolvable design, scored by the block-space state unchanged, and a swap exchanges two plots of one column of one replicate, so the column design is kept; one search from the given design, full passes, escapes and budget as in resolvable mode, the budget scaled by `iterations / 1000` | Own derivation, nested-engine spec sections 5 (each replicate is the union of its rows) and 6.8; Edmondson (2020) section 2.2 (conditional swaps); FielDHub's former R row step (swaps inside a column) for the swap set |
 | `R/engine_mols_data.R` (`stored_mols`), `tools/search-mols.R` | Orthogonal Latin square pairs of orders 14, 18 and 26, stored as data, and the seeded tool that found them: a random Latin square by a Jacobson-Matthews walk, then (method 1) its transversals by backtracking and q disjoint ones by Algorithm X, (method 2) cycle-switch local search on the mate, (method 3) backtracking for a pair developed over Z_(q-1) with one fixed point. Each pair is checked (both squares Latin, all q^2 ordered pairs different) before it is written | Own computer search, `tools/search-mols.R`; orthogonal pairs exist by Bose, Shrikhande & Parker (1960), Canad. J. Math. 12:189-203. Algorithms from the literature, no implementation consulted: Jacobson & Matthews (1996), J. Combin. Des. 4:405-437 (random Latin squares); Knuth (2000), "Dancing links" (Algorithm X); Dénes & Keedwell (1974), *Latin Squares and their Applications* (transversals and orthogonal mates, cycle switches); van Lint & Wilson, *A Course in Combinatorics*, ch. 22 (orthogonal arrays developed over a group; the difference conditions of method 3 are our own derivation). No pair was copied from a published table; nested-engine spec section 6.7 |
+| `R/engine_block_efficiency.R` (`fieldhub_a_bound()`, `block_factor_class()`, `block_a_bound()` edge cases) | A-efficiency bound by design class: convexity bound, second-moment bound, pair bound | Own derivation, spec sections 5.2 and 5.2b (2026-11-20); John & Williams (1995) ch. 2 for the efficiency factors. Jarrett (1977) was not consulted |
+| `blocks_engine.cpp` (mode 3, `CrossedSpace`, `run_crossed_search()`) | Crossed row and column search on the block-space information matrix | Spec section 5.1 and the Task 6 block-space identity (2026-11-20) |
+| `blocks_engine.cpp` (mode 4), `R/engine_row_column_onestage.R` (`segmented_blocks()`) | Stage 1 of onestage: rows and columns searched as segmented blocks | Own derivation, spec section 6.1 (2026-11-20) |
+| `R/engine_row_column_onestage.R` (`onestage_stage1()`, `crossed_search()`, the repair), `R/engine_row_column_optimization.R` (`build_row_column_onestage()`) | Staged onestage row-column search: stage 1, repair of the treatment counts (spec section 6.1), joint row-by-column search, and the design builder | Own derivation, spec sections 5 and 6.1 (2026-11-20, Amendment 1 2026-11-22); Mitchell (1974), Technometrics 16:203-210 (exchange search) |
+
+## Notes
+
+- The two 12/3/3 information spectra of spec section 5.2b explain why the
+  second-moment bound cannot reach a rectangular lattice with r >= 3 (12
+  entries in blocks of 3, three replicates: A 0.6800618, bound 0.6848249).
+- FielDHub no longer uses blocksdesign, and earlier versions did. The engine is
+  FielDHub's own implementation, written without reading the blocksdesign
+  source and validated against its results as a black box (Edmondson 2021,
+  *blocksdesign: Nested and Crossed Block Designs for Factorial, Fractional
+  Factorial and Unstructured Treatment Sets*, R package). FielDHub is grateful
+  to Rodney N. Edmondson for the package and for the optimized designs it gave
+  FielDHub for years.
 
 ## Exposure records
 

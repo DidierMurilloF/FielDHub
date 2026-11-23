@@ -201,6 +201,61 @@ knitr::opts_chunk$set(
   shared pairs left are reported in `infoDesign$shared_pairs`. With the default,
   every layout is unchanged.
 
+## Onestage row-column designs and the A-Bound
+
+- `row_column(method = "onestage")`, with or without `latinize`, now runs on
+  FielDHub's own compiled block search instead of `blocksdesign::design()`.
+  The search is staged: a first stage on the rows and columns, a repair of
+  the treatment counts, and a joint row-by-column search. `blocksdesign` is no
+  longer a dependency of FielDHub.
+- Seeded onestage layouts change. The designs are not less efficient: on a
+  validation grid of 90,200 onestage designs (nested and latinized, two seed
+  sets), every shape passed the non-inferiority checks against the previous
+  `blocksdesign` designs, except the 23 shapes below, and the paired timing shows
+  the engine faster than `design()` on all 496 grid shapes (median time ratio
+  0.025, at most 0.13). The Phase 1 grids pass unchanged (300 of 300 and 132 of
+  132 shapes).
+- Accepted losses. In 23 onestage shapes (22 nested, 1 latinized; listed in
+  `tools/onestage-accepted-loss.csv`) the mean Column D-, Column A- or joint
+  A-efficiency is below the previous mean by more than the margin, while the
+  Row efficiency is equal and the joint D-efficiency is higher. The largest
+  shortfalls are 0.0069 (Column D) and 0.0169 (Column A), at 15 entries in
+  blocks of 5 with four replicates and 20 iterations, and 0.0015 (joint A),
+  at 20 entries in blocks of 10 with three replicates. The new search favors
+  the joint D-optimal design, and the shortfall is the price of it.
+- Fewer fallbacks. In 1.6.0, 73 onestage shapes (40 latinized, 33 nested;
+  `tools/onestage-fallback-changes.csv`) fell back to twostage for some seeds
+  (1,204 of 14,450 seed runs). None of these shapes falls back now. Onestage is never replaced
+  by twostage because of its size.
+- `iterations` is the effort of the joint stage, as the number of joint
+  searches requested. `infoDesign$joint_searches` reports the number requested
+  and the number completed. The work of the search is capped (a fixed number
+  of work units, not seconds), so on large designs the cap sets the number of
+  joint searches. The shapes where this happens are listed in
+  `tools/onestage-truncation-list.csv`, which the maintainer reviewed and
+  signed off on 2026-11-22.
+- One new warning, of class `fieldhub_design_warning`, for a joint stage that
+  cannot start (beyond about 2,000 treatments). The joint efficiency of an
+  onestage design is computed from the treatment information.
+- The `A-Bound` numbers change. The new bound combines a convexity bound, a
+  second-moment bound and a pair bound (`tools/a-bound-report.csv`, 344 shapes of incomplete-block, alpha,
+  square and rectangular lattice and row-column designs). It changed in 266
+  of the 344 shapes (lower in 180, higher in 86; the largest change is
+  -0.0226 and +0.0661), it was never below the best A-efficiency found, and
+  the best design reached it in 156 shapes, against 87 for the old bound.
+- Rectangular lattices with three or more replicates show A below the
+  `A-Bound`. For example, for 12 entries in
+  blocks of 3 with three replicates, A is 0.6800618 and the bound is
+  0.6848249, because the second-moment bound cannot reach a rectangular lattice with
+  three or more replicates (see `inst/PROVENANCE.md`).
+- Acknowledgment. Earlier versions of FielDHub used the `blocksdesign`
+  package (Edmondson 2021) to optimize block and row-column designs. FielDHub's
+  engine is an independent implementation, written without reading the
+  `blocksdesign` source, and its designs were validated against those of
+  `blocksdesign` as a black box: the 90,200 onestage designs above, and the
+  Phase 1 grids. FielDHub is grateful to Rodney N. Edmondson for the package
+  and for the optimized designs it gave FielDHub for years.
+
 ## Changes to results for a given seed
 
 The new allocation search changes the allocation, and so the field book,
@@ -225,8 +280,8 @@ by:
 * `rectangular_lattice()`, and the Rectangular Lattice page;
 * `row_column(method = "twostage")`, both its columns and its rows, and the
   Resolvable Row-Column Design (RRCD) page when a small design falls back
-  from onestage to twostage. The default `method = "onestage"` still uses
-  `blocksdesign::design()` and is unchanged.
+  from onestage to twostage. The default `method = "onestage"` also changes
+  (see "Onestage row-column designs and the A-Bound").
 
 The designs are not less efficient than before, by a non-inferiority check
 against the previous results: over many seeds, the mean efficiency of a shape
@@ -259,7 +314,8 @@ built in closed form at any size. The row search of
 rows in total, and a predicted work within the cap); above it the rows are
 left as the column design gave them, with a warning of the same class.
 
-Every other design is unchanged.
+Every other design is unchanged, apart from the onestage row-column designs
+and the `A-Bound` below.
 
 # FielDHub 1.6.0
 
