@@ -31,3 +31,16 @@ test_that("recording replication aliases does not supply both spellings", {
   expect_silent(replay <- do.call(incomplete_blocks, x$metadata$parameters))
   expect_identical(replay, x)
 })
+
+test_that("incomplete-block designs reproduce from the seed and differ between locations", {
+  first <- incomplete_blocks(t = 20, k = 4, reps = 2, l = 3, seed = 7)
+  second <- incomplete_blocks(t = 20, k = 4, reps = 2, l = 3, seed = 7)
+  expect_identical(first, second)
+  book <- first$fieldBook
+  entries <- split(book$ENTRY, book$LOCATION)
+  expect_length(entries, 3L)
+  expect_false(identical(entries[[1]], entries[[2]]) && identical(entries[[2]], entries[[3]]))
+
+  alpha <- alpha_lattice(t = 30, k = 5, reps = 3, seed = 11)
+  expect_identical(reproduce_design(alpha), alpha)
+})

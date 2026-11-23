@@ -45,3 +45,12 @@ test_that("designs reject duplicated treatment labels", {
   expect_error(CRD(t = c("A", "A", "B"), reps = 2, seed = 1),
                "unique treatment labels; duplicated: A")
 })
+
+test_that("incomplete_blocks() keeps supplied entries and labels once per replicate", {
+  data <- data.frame(ENTRY = 101:120, NAME = paste0("G", 101:120))
+  book <- incomplete_blocks(t = 20, k = 4, reps = 2, l = 2, data = data, seed = 3)$fieldBook
+  expect_setequal(book$TREATMENT, data$NAME)
+  expect_equal(as.character(book$TREATMENT), data$NAME[match(book$ENTRY, data$ENTRY)])
+  counts <- table(book$TREATMENT, interaction(book$LOCATION, book$REP, drop = TRUE))
+  expect_true(all(counts == 1))
+})

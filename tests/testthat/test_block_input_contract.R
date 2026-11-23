@@ -44,3 +44,36 @@ test_that("lattice entry tables must have two columns before they are indexed", 
     expect_error(do.call(name, args), class = "fieldhub_input_error")
   }
 })
+
+test_that("incomplete_blocks() builds many blocks of two plots", {
+  expect_no_warning(x <- incomplete_blocks(t = 200, k = 2, reps = 3, seed = 1))
+  expect_equal(nrow(x$fieldBook), 600)
+  # With two replicates of blocks of two, every connected design is one cycle
+  # through all treatments, whose A-efficiency is 3 / (v + 1) (reported to
+  # seven decimals).
+  y <- incomplete_blocks(t = 100, k = 2, reps = 2, seed = 1)
+  level2 <- y$blocksModel[y$blocksModel$Level == 2, ]
+  expect_lte(abs(level2[["A-Efficiency"]] - 3 / 101), 1e-7)
+})
+
+test_that("incomplete_blocks() returns an unoptimized resolvable design above the block limit", {
+  # 1002 / 2 * 4 = 2004 blocks, beyond the block search (2000): the design is
+  # still built, connected and resolvable, with a warning that it was not
+  # optimized.
+  expect_warning(x <- incomplete_blocks(t = 1002, k = 2, reps = 4, seed = 1),
+                 "not optimized", class = "fieldhub_design_warning")
+  book <- x$fieldBook
+  expect_true(all(table(book$ENTRY, book$REP) == 1))
+  expect_true(all(table(interaction(book$REP, book$IBLOCK, drop = TRUE)) == 2))
+  level2 <- x$blocksModel[x$blocksModel$Level == 2, ]
+  expect_gt(level2[["A-Efficiency"]], 0)
+  # Within the block limit but too much work for the search: 1000 blocks of
+  # 12 took about a minute, up to the time limit, where a run no longer
+  # reproduces from its seed. The design is not optimized either, and the
+  # same seed gives the same field book.
+  expect_warning(y <- incomplete_blocks(t = 6000, k = 12, reps = 2, seed = 1),
+                 "not optimized", class = "fieldhub_design_warning")
+  expect_true(all(table(y$fieldBook$ENTRY, y$fieldBook$REP) == 1))
+  z <- suppressWarnings(incomplete_blocks(t = 6000, k = 12, reps = 2, seed = 1))
+  expect_identical(y$fieldBook, z$fieldBook)
+})

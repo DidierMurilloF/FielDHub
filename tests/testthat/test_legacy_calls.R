@@ -12,8 +12,9 @@ historical_bundle <- readRDS(test_path("fixtures", "v1.5.0-designs.rds"))
 # seeded optimizer can choose different equivalent layouts with other BLAS
 # implementations. Keep literal reference checks there, and require the same
 # treatment counts, location sizes and local seeded replay on every platform.
-legacy_optimized_engines <- c("incomplete_blocks", "alpha_lattice",
-                              "sparse_allocation", "multi_location_prep", "row_column")
+legacy_optimized_engines <- c("incomplete_blocks", "alpha_lattice", "square_lattice",
+                              "rectangular_lattice", "sparse_allocation",
+                              "multi_location_prep", "row_column")
 legacy_reference_platform <- identical(Sys.info()[["sysname"]], "Darwin") &&
   !tolower(Sys.getenv("FIELDHUB_GOLDEN", "true")) %in% c("false", "0", "no")
 
@@ -27,7 +28,8 @@ expect_optimized_legacy_contract <- function(saved, replayed, engine) {
   testthat::expect_equal(counts(new, "LOCATION"), counts(old, "LOCATION"))
   # Complete treatment replicates are an invariant of the classical designs,
   # not of sparse/multi-location allocation: membership by site is optimized.
-  if (replayed$metadata$design %in% c("incomplete_blocks", "alpha_lattice", "row_column")) {
+  if (replayed$metadata$design %in% c("incomplete_blocks", "alpha_lattice", "square_lattice",
+                                      "rectangular_lattice", "row_column")) {
     testthat::expect_equal(counts(new, c("ENTRY", "REP", "LOCATION")),
                            counts(old, c("ENTRY", "REP", "LOCATION")))
   }
@@ -35,6 +37,18 @@ expect_optimized_legacy_contract <- function(saved, replayed, engine) {
   # allocation. Other tests independently check balance and efficiency.
   testthat::expect_identical(
     expect_only_classed_warnings(reproduce_design(replayed), "reproduction"), replayed)
+  # A design whose layout changed must be at least as efficient as the
+  # recorded 1.5.0 one: Level 2 (blocks within replicates) A-efficiency of
+  # the resolvable incomplete-block designs, with the engines' tolerance.
+  if (engine %in% names(legacy_result_changes) &&
+      replayed$metadata$design %in% c("incomplete_blocks", "alpha_lattice", "square_lattice",
+                                      "rectangular_lattice")) {
+    level_2_a <- function(x) {
+      x$blocksModel[as.character(x$blocksModel$Level) == "2", "A-Efficiency"]
+    }
+    testthat::expect_length(level_2_a(saved), 1L)
+    testthat::expect_gte(level_2_a(replayed), level_2_a(saved) - 1.5e-7)
+  }
   if (legacy_reference_platform && !engine %in% names(legacy_result_changes)) {
     aligned <- align_column_types(old, new)
     testthat::expect_equal(aligned$new, aligned$old, ignore_attr = TRUE)
@@ -55,8 +69,41 @@ legacy_result_changes <- c(
   row_column = paste(
     "row_column()'s new default, method = \"onestage\", jointly optimizes",
     "rows and columns instead of the 1.5.x two-step optimization (NEWS,",
-    "'Changes to results for a given seed'); method = \"twostage\"",
-    "reproduces the 1.5.x field book."
+    "'Changes to results for a given seed'). method = \"twostage\" still",
+    "optimizes columns first and then rows, but its column and row designs",
+    "now come from FielDHub's own block search, so its field book changes",
+    "for a given seed too (NEWS 1.7.0, 'Changes to results for a given",
+    "seed')."
+  ),
+  `row_column(method = twostage)` = paste(
+    "The twostage column and row designs come from FielDHub's own block",
+    "search instead of blocksdesign::blocks() and the 1.5.x row swaps (NEWS",
+    "1.7.0, 'Changes to results for a given seed'); the replay meets the",
+    "optimized-design contract."
+  ),
+  incomplete_blocks = paste(
+    "incomplete_blocks() builds its resolvable design with FielDHub's own",
+    "block search, started from a lattice construction when the shape has",
+    "one, instead of blocksdesign::blocks(), so its field book changes for a",
+    "given seed (NEWS 1.7.0, 'Changes to results for a given seed'); the",
+    "replay meets the optimized-design contract."
+  ),
+  alpha_lattice = paste(
+    "alpha_lattice() uses the same new block search as incomplete_blocks(),",
+    "so its field book changes for a given seed (NEWS 1.7.0); the replay",
+    "meets the optimized-design contract."
+  ),
+  square_lattice = paste(
+    "square_lattice() starts from an algebraic lattice (orthogonal Latin",
+    "squares) in FielDHub's own block search instead of blocksdesign::blocks(),",
+    "so its field book changes for a given seed (NEWS 1.7.0); the replay",
+    "meets the optimized-design contract."
+  ),
+  rectangular_lattice = paste(
+    "rectangular_lattice() starts from Shrikhande's construction in FielDHub's",
+    "own block search instead of blocksdesign::blocks(), so its field book",
+    "changes for a given seed (NEWS 1.7.0); the replay meets the",
+    "optimized-design contract."
   ),
   split_families = paste(
     "split_families() now accepts seed; called without one (as the 1.5.0",

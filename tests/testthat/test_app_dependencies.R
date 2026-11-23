@@ -6,7 +6,8 @@ test_that("the standard app installs with FielDHub while workers and tooling are
   }
   expect_identical(app_dependencies(), app)
   expect_setequal(packages("Imports"),
-    c("dplyr", "blocksdesign", "ggplot2", "rlang", "viridisLite", "desplot", app))
+    c("dplyr", "ggplot2", "rlang", "viridisLite", "desplot", app))
+  expect_false("blocksdesign" %in% packages("Imports"))
   expect_setequal(packages("Suggests"),
     c("mirai", "codetools", "testthat", "spelling", "knitr", "rmarkdown"))
   # Imports installs packages; qualified calls do not need whole-namespace imports.

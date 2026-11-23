@@ -85,10 +85,6 @@ squareLattice2$infoDesign
 head(squareLattice2$fieldBook,12)
 
 }
-\references{
-Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-}
 \author{
 Didier Murillo [aut],
         Salvador Gezan [aut],

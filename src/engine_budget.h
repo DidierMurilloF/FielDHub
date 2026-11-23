@@ -1,15 +1,28 @@
 // Global evaluation budget with interrupt and wall-time checks (spec sections 6 and 9).
 #pragma once
 #include <chrono>
+#include <cmath>
 #include <cpp11/protect.hpp>
 
 enum StopReason { STOP_NONE = 0, STOP_BUDGET = 1, STOP_STALE = 2, STOP_TIME = 3, STOP_NO_START = 4 };
 
 class Budget {
  public:
-  Budget(double cap, double time_limit)
+  // work_cap: a third limit on the recorded dense work (default none). Once the
+  // accumulated work exceeds it, work() stops the run as the evaluation budget
+  // does, so a run that would otherwise end on the wall clock ends at a point
+  // fixed by the seed.
+  // evaluation_work: work units charged for every evaluation spent (default
+  // none), so that the work cap also bounds the evaluations of a run.
+  // strict (the onestage search, phase 2 spec 6.1 W2 and W3; default off):
+  // a charge that would take the work past the cap is refused and not
+  // counted, so the recorded work never exceeds the cap (except by force()).
+  // Without it the charge that passes the cap is counted, as in phase 1.
+  Budget(double cap, double time_limit, double work_cap = INFINITY, double evaluation_work = 0.0,
+         bool strict = false)
       : cap_(cap), used_(0.0), limit_(time_limit), next_check_(10000.0),
-        work_(0.0), next_work_check_(kWorkPerCheck),
+        work_(0.0), next_work_check_(kWorkPerCheck), work_cap_(work_cap),
+        evaluation_work_(evaluation_work), capped_(false), strict_(strict),
         stop_(STOP_NONE), start_(std::chrono::steady_clock::now()) {}
 
   // Spend n evaluations. Returns false, and spends nothing, once the budget or
@@ -17,7 +30,11 @@ class Budget {
   bool spend(double n) {
     if (stop_ != STOP_NONE) return false;
     if (used_ + n > cap_) { stop_ = STOP_BUDGET; return false; }
+    if (strict_ && evaluation_work_ > 0.0 && work_ + evaluation_work_ * (used_ + n) > work_cap_) {
+      stop_ = STOP_BUDGET; capped_ = true; return false;
+    }
     used_ += n;
+    if (evaluation_work_ > 0.0 && work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     if (used_ >= next_check_) {
       next_check_ = used_ + 10000.0;
       cpp11::check_user_interrupt();  // throws to R; no R API runs during unwinding
@@ -27,12 +44,15 @@ class Budget {
   }
   // Record dense linear-algebra work (about one unit per floating-point
   // multiply-add) that the evaluation count does not reflect, such as refreshes
-  // and Woodbury updates at many blocks. It never touches the evaluation budget,
-  // so results do not depend on it; it only keeps the interrupt and time checks
-  // frequent. Returns false once the time limit is reached.
+  // and Woodbury updates at many blocks. It never touches the evaluation budget;
+  // it keeps the interrupt and time checks frequent and, when a work cap is
+  // set, stops the run with STOP_BUDGET once the work exceeds it. Returns false
+  // once the time limit or the work cap is reached.
   bool work(double units) {
     if (stop_ != STOP_NONE) return false;
+    if (strict_ && work_used() + units > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     work_ += units;
+    if (work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
     if (work_ >= next_work_check_) {
       next_work_check_ = work_ + kWorkPerCheck;
       cpp11::check_user_interrupt();
@@ -40,16 +60,28 @@ class Budget {
     }
     return true;
   }
+  // Record work that is done whatever the cap (the start of a call): it is
+  // always counted, and the run stops if it took the work past the cap.
+  // Returns false once the run has stopped.
+  bool force(double units) {
+    if (stop_ != STOP_NONE) { work_ += units; return false; }
+    work_ += units;
+    if (work_used() > work_cap_) { stop_ = STOP_BUDGET; capped_ = true; return false; }
+    return true;
+  }
   double elapsed() const {
     return std::chrono::duration<double>(std::chrono::steady_clock::now() - start_).count();
   }
   double used() const { return used_; }
+  double work_used() const { return work_ + evaluation_work_ * used_; }
+  bool capped() const { return capped_; }  // stopped by the work cap
   int stop() const { return stop_; }
   bool stopped() const { return stop_ != STOP_NONE; }
 
  private:
   static constexpr double kWorkPerCheck = 2e7;
-  double cap_, used_, limit_, next_check_, work_, next_work_check_;
+  double cap_, used_, limit_, next_check_, work_, next_work_check_, work_cap_, evaluation_work_;
+  bool capped_, strict_;
   int stop_;
   std::chrono::steady_clock::time_point start_;
 };

@@ -190,10 +190,10 @@ app_replicate_spacing_table <- function(pairs) {
   data.frame(
     Measure = c("Minimum same-entry distance", "Mean same-entry distance",
                 "Pairs of copies", "Pairs sharing a row or column"),
-    Value = c(if (none) "–" else sprintf("%.2f", min(distance)),
-              if (none) "–" else sprintf("%.2f", mean(distance)),
+    Value = c(if (none) "\u2013" else sprintf("%.2f", min(distance)),
+              if (none) "\u2013" else sprintf("%.2f", mean(distance)),
               format(length(distance), big.mark = ",", trim = TRUE),
-              if (none) "–" else sprintf("%.1f%%", 100 * mean(shared))),
+              if (none) "\u2013" else sprintf("%.1f%%", 100 * mean(shared))),
     stringsAsFactors = FALSE)
 }
 
@@ -225,7 +225,7 @@ app_check_spacing_table <- function(report) {
   figures <- function(metrics) {
     totals <- diagonal_spacing_totals(metrics)
     shown <- c(sprintf("%.2f", totals[1:3]), sprintf("%.1f%%", totals[4]))
-    ifelse(is.na(totals), "–", shown)
+    ifelse(is.na(totals), "\u2013", shown)
   }
   table <- data.frame(Measure = c("Minimum same-check distance", "Mean nearest same-check distance",
     "Mean pairwise same-check distance", "Occurrences with a same-check neighbor"),

@@ -167,6 +167,16 @@ catalogue <- list(
     do_optim(design = "sparse", lines = 120, l = 4, copies_per_entry = 3,
              add_checks = TRUE, checks = 4, seed = 36)
   }),
+  # Seeded single-level results pinned before the nested engine: the sampled
+  # search (more than 2e5 plot pairs) and the square-lattice start (v = 9, b = 6)
+  do_optim_sparse_sampled = list(fun = "do_optim", family = "allocation", build = function() {
+    do_optim(design = "sparse", lines = 400, l = 3, copies_per_entry = 2,
+             add_checks = TRUE, checks = 2, seed = 1)
+  }),
+  do_optim_sparse_lattice_start = list(fun = "do_optim", family = "allocation", build = function() {
+    do_optim(design = "sparse", lines = 9, l = 6, copies_per_entry = 2,
+             add_checks = TRUE, checks = 2, seed = 1)
+  }),
   do_optim_prep = list(fun = "do_optim", family = "allocation", build = function() {
     do_optim(design = "prep", lines = 80, l = 4, copies_per_entry = 5,
              add_checks = TRUE, checks = 2, rep_checks = c(4, 4), seed = 37)

@@ -32,10 +32,6 @@
 #'   \item \code{fieldBook} is a data frame with the incomplete block design field book.
 #' }
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#'
 #' @examples
 #' # Example 1: Generates a resolvable IBD of characteristics (t,k,r) = (12,4,2).
 #' # 1-resolvable IBDs
@@ -168,11 +164,12 @@ build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
   if (sqrt(nt) == round(sqrt(nt))) square <- TRUE
   outIBD_loc <- vector(mode = "list", length = l)
   blocks_model <- list()
-  local_optimizer_options()
   for (i in 1:l) {
+    # Only the engine's connectivity error means more replication would help;
+    # its other errors pass through unchanged.
     mydes <- tryCatch(
-      blocksdesign::blocks(treatments = nt, replicates = r, blocks = list(r, b), seed = NULL),
-      error = function(e) {
+      blocks_engine(treatments = nt, replicates = r, blocks = b, resolvable = TRUE),
+      fieldhub_unconnected_error = function(e) {
         fieldhub_abort(
           caller, "() cannot build a resolvable design for t = ", nt,
           " treatments, k = ", k, ", and reps = ", r, ": not enough replication ",

@@ -87,3 +87,11 @@ test_that("reproduce_design replays an old result recorded with amountChecks", {
   expect_identical(replay$fieldBook, x$fieldBook)
   expect_identical(replay$infoDesign, x$infoDesign)
 })
+
+test_that("reproduce_design rebuilds an onestage row-column design", {
+  for (L in c(FALSE, TRUE)) {
+    x <- row_column(t = 12, nrows = 3, reps = 2, seed = 11, iterations = 20, latinize = L)
+    expect_equal(x$infoDesign$optimization, "onestage")
+    expect_identical(reproduce_design(x), x)
+  }
+})

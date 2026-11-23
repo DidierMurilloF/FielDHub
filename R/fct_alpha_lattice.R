@@ -35,10 +35,6 @@
 #' }
 #'
 #'
-#' @references
-#' Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and
-#' unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign
-#'
 #'
 #' @examples
 #' # Example 1: Generates an alpha design with 4 full blocks and 15 treatments.
