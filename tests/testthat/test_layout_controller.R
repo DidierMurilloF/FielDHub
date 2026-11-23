@@ -65,8 +65,9 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, nrows = 4, ncols = 9, planter = "cartesian"))
     expect_true(all(as.character(view()$fieldBookXY$LOCATION) == "loc2"))
-    expect_equal(view()$layout_metadata$parameters$nrows, 4)
-    expect_equal(view()$layout_metadata$parameters$ncols, 9)
+    expect_identical(view()$layout_metadata,
+                     list(parameters = list(planter = "cartesian", nrows = 4L, ncols = 9L),
+                          selected = 2))
     expect_silent(ggplot2::ggplot_build(view()$out_layout))
     session$setInputs(stacked = "horizontal")
     expect_identical(view()$allSitesFieldbook,
@@ -77,4 +78,45 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, nrows = 4, ncols = 9, planter = "cartesian"))
   })
+})
+
+test_that("field grids of every classic design reach the Shiny layout view", {
+  designs <- list(
+    CRD = CRD(t = 4, reps = 3, seed = 1),
+    LSD = latin_square(t = 3, reps = 2, seed = 1),
+    FD = full_factorial(setfactors = c(2, 3), reps = 2, l = 2, type = 2, seed = 9),
+    SPD = split_plot(wp = 3, sp = 2, reps = 2, seed = 11),
+    SSPD = split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 13),
+    STRIPD = strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15),
+    IBD = incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17),
+    Alpha = alpha_lattice(t = 12, k = 4, reps = 2, seed = 19),
+    Square = square_lattice(t = 9, k = 3, reps = 2, seed = 20),
+    Rectangular = rectangular_lattice(t = 12, k = 3, reps = 2, seed = 21)
+  )
+  current <- NULL
+  server <- function(input, output, session) {
+    view <- app_layout_selection(input, session, function() current, function() "serpentine",
+                                 c(layout = "layout", stacked = "stacked", location = "location"))
+  }
+  for (name in names(designs)) {
+    current <- designs[[name]]
+    grid <- layout_choice_labels(current, include_grids = TRUE)[["Field grid"]][[1L]]
+    dims <- as.numeric(strsplit(grid, ":", fixed = TRUE)[[1L]][-1L])
+    shiny::testServer(server, {
+      session$setInputs(stacked = "vertical", layout = "1", location = "1")
+      expect_identical(view()$allSitesFieldbook, field_layout(current), info = name)
+      session$setInputs(layout = grid)
+      book <- field_layout(current, nrows = dims[1L], ncols = dims[2L])
+      expect_identical(view()$allSitesFieldbook, book, info = name)
+      expect_identical(dim(table(view()$fieldBookXY$ROW, view()$fieldBookXY$COLUMN)),
+                       as.integer(dims), info = name)
+      expect_silent(ggplot2::ggplot_build(view()$out_layout))
+      expect_silent(ggplot2::ggplot_build(view()$out_layoutPlots))
+      # A grid that does not fit this design is a message, not a crash
+      session$setInputs(layout = "grid:7:7")
+      expect_error(view(), class = "shiny.silent.error", info = name)
+      session$setInputs(layout = "1")
+      expect_identical(view()$allSitesFieldbook, field_layout(current), info = name)
+    })
+  }
 })

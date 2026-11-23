@@ -64,23 +64,62 @@ test_that("shared layout panels retain control labels, namespacing, and options"
   expect_identical(.Random.seed, before)
 })
 
-test_that("classic layout menus retain numbered layouts and offer new field grids", {
+test_that("classic layout menus keep the numbered layouts and group the field grids", {
   design <- RCBD(t = 6, reps = 6, seed = 1)
   numbered <- layout_choice_labels(design)
   choices <- layout_choice_labels(design, include_grids = TRUE)
-  expect_identical(head(choices, length(numbered)),
-                   stats::setNames(as.character(numbered), names(numbered)))
-  expect_identical(unname(choices["4 \u00d7 9"]), "grid:4:9")
+  expect_identical(choices[seq_along(numbered)], as.list(numbered))
+  expect_identical(names(choices)[-seq_along(numbered)], "Field grid")
+  expect_identical(choices[["Field grid"]][["Grid 4 \u00d7 9"]], "grid:4:9")
 
   spec <- design_app_spec("RCBD")$workflow
   html <- as.character(app_classic_layout_panel(identity, spec, design))
-  expect_true(grepl('<option value="grid:4:9">4 \u00d7 9</option>', html, fixed = TRUE))
+  for (i in seq_along(numbered)) {
+    expect_true(grepl(paste0('<option value="', numbered[[i]], '"',
+                             if (i == 1L) " selected", ">", names(numbered)[i], "</option>"),
+                      html, fixed = TRUE))
+  }
+  expect_true(grepl('<optgroup label="Field grid">', html, fixed = TRUE))
+  expect_true(grepl('<option value="grid:4:9">Grid 4 \u00d7 9</option>', html, fixed = TRUE))
 
   squares <- latin_square(t = 4, reps = 2, seed = 1)
-  square_choices <- layout_choice_labels(squares, include_grids = TRUE)
-  expect_true("grid:4:8" %in% square_choices)
-  expect_false("grid:2:16" %in% square_choices)
+  square_grids <- unlist(layout_choice_labels(squares, include_grids = TRUE)[["Field grid"]])
+  expect_true("grid:4:8" %in% square_grids)
+  expect_false("grid:2:16" %in% square_grids)
 
   stored <- RCBD(t = 6, reps = 6, nrows = 4, ncols = 9, seed = 1)
   expect_identical(layout_choice_labels(stored, include_grids = TRUE), layout_choice_labels(stored))
+})
+
+test_that("no layout label means two different field books", {
+  designs <- list(
+    incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17),
+    rectangular_lattice(t = 12, k = 3, reps = 2, seed = 21),
+    alpha_lattice(t = 12, k = 3, reps = 6, seed = 36),
+    full_factorial(setfactors = c(2, 3), reps = 2, type = 2, seed = 9),
+    strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15),
+    latin_square(t = 4, reps = 2, seed = 7),
+    RCBD(t = 6, reps = 6, seed = 1)
+  )
+  for (design in designs) {
+    for (planter in c("serpentine", "cartesian")) {
+      numbered <- character()
+      grids <- list()
+      for (stacked in c("vertical", "horizontal", "grid_panel")) {
+        choices <- layout_choice_labels(design, planter = planter, stacked = stacked,
+                                        include_grids = TRUE)
+        # A stacking without field grids gives the plain numbered options
+        group <- if (is.list(choices)) choices[["Field grid"]]
+        numbered <- c(numbered, setdiff(names(choices), "Field grid"))
+        for (label in names(group)) {
+          book <- app_selected_layout_view(design, group[[label]], planter, 1,
+                                           stacked)$allSitesFieldbook
+          if (is.null(grids[[label]])) grids[[label]] <- book
+          expect_identical(book, grids[[label]], info = paste(class(design)[1L], label))
+        }
+      }
+      expect_gt(length(grids), 0L)
+      expect_length(intersect(names(grids), numbered), 0L)
+    }
+  }
 })

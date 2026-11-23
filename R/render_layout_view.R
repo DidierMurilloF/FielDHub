@@ -42,8 +42,9 @@ checked_layout_view <- function(x, layout = 1, planter = "serpentine",
   )
   if (dimensioned) {
     view$allSitesFieldbook <- book
-    view$layout_metadata$parameters$nrows <- max(book$ROW)
-    view$layout_metadata$parameters$ncols <- max(book$COLUMN)
+    # A grid has no numbered option and no stacking
+    view$layout_metadata$parameters <- list(planter = planter, nrows = max(book$ROW),
+                                            ncols = max(book$COLUMN))
   }
   view
 }

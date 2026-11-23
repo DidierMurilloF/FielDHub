@@ -38,15 +38,19 @@ layout_block_direction <- function(book) {
 #' field on. Options of one shape (the same field with its blocks in another
 #' direction) say how their blocks lie: "21 \u00d7 7 \u00b7 blocks in rows".
 #' @inheritParams layout_choices
-#' @param include_grids Append valid field sizes that the numbered options
-#'   do not cover.
-#' @return Named values for a select. The values are integers for numbered
-#'   options and strings when additional grids are available.
+#' @param include_grids Append the valid field grids (\code{nrows} by
+#'   \code{ncols} of \code{field_layout()}) whose shape no numbered option of
+#'   this stacking has, as a group "Field grid" with labels such as
+#'   "Grid 8 \u00d7 3".
+#' @return Named integer values for a select. With grids, a list for a select
+#'   with an option group: the numbered options, then "Field grid" with the
+#'   values "grid:<rows>:<columns>".
 #' @noRd
 layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical", location = 1,
                                  include_grids = FALSE) {
   x <- with_design_class(x)
   choices <- layout_choices(x, planter = planter, stacked = stacked, location = location)
+  if (!length(choices)) return(choices)
   options <- layout_options(x, planter = planter, stacked = stacked)[[location]]
   extent <- function(v) max(as.numeric(as.character(v)))
   sizes <- vapply(options, function(book) {
@@ -54,7 +58,7 @@ layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical"
     c(extent(book$ROW), extent(book$COLUMN))
   }, numeric(2))
   if (anyNA(sizes)) return(choices)
-  shapes <- if (length(choices)) paste(sizes[1L, ], "\u00d7", sizes[2L, ]) else character()
+  shapes <- paste(sizes[1L, ], "\u00d7", sizes[2L, ])
   extra <- if (include_grids) additional_layout_choices(x, shapes)
   # Options of one shape differ in how the incomplete blocks lie in the
   # field: they say so. Where that does not tell them apart, a number does.
@@ -71,7 +75,10 @@ layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical"
   # the order of the field dimensions of the spatial pages
   # (squarest_first()). The first is the one a page opens on.
   numbered <- stats::setNames(choices, shapes)[order(abs(sizes[1L, ] - sizes[2L, ]), sizes[1L, ], choices)]
-  c(numbered, extra)
+  if (!length(extra)) return(numbered)
+  # The grids are a group of their own in the select: a grid does not depend
+  # on the stacking, and its label is never that of a numbered option.
+  c(as.list(numbered), list("Field grid" = as.list(extra)))
 }
 
 additional_layout_choices <- function(x, existing_shapes) {
@@ -84,8 +91,8 @@ additional_layout_choices <- function(x, existing_shapes) {
   grids <- valid_field_grids(x$fieldBook, spec$axes)
   if (!nrow(grids)) return(NULL)
   grids <- grids[order(abs(grids[, "rows"] - grids[, "cols"]), grids[, "rows"]), , drop = FALSE]
-  labels <- paste(grids[, "rows"], "\u00d7", grids[, "cols"])
-  more <- !labels %in% existing_shapes
+  shapes <- paste(grids[, "rows"], "\u00d7", grids[, "cols"])
+  more <- !shapes %in% existing_shapes
   values <- sprintf("grid:%.0f:%.0f", grids[, "rows"], grids[, "cols"])
-  stats::setNames(values[more], labels[more])
+  stats::setNames(values[more], paste("Grid", shapes[more]))
 }
