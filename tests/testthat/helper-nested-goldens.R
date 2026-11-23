@@ -419,9 +419,10 @@ nested_bootstrap_lower <- function(baseline, candidate, resamples = 2000L) {
 # `noninferior_failed` is not empty and names only col_D, col_A or joint_A, the
 # candidate's mean joint D is at least the baseline's (no tolerance), and
 # worst_ok, constant_ok, optimum_ok, errors_ok, fallback_ok and clash_ok are
-# all TRUE. A listed onestage row gets pass = NA only when it is eligible;
-# otherwise the list changes nothing and the row is judged by the rules, so a
-# failing row fails. The speed rule is not judged here: the check tool fails a
+# all TRUE. A listed onestage row gets pass = NA only when it is eligible.
+# The list gives a row no exemption beyond that rule: a listed row that passes
+# every rule outright stays a pass, and a listed row that fails a rule and is
+# not eligible fails. The speed rule is not judged here: the check tool fails a
 # listed row that is too slow. For the other callers the list works as before.
 # Onestage callers: `fallback_ok` is the count rule (candidate fallbacks <=
 # baseline fallbacks, and 0 where onestage_rule_holds()). `clash_ok` is the

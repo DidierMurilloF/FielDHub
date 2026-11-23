@@ -13,7 +13,9 @@
 # Onestage callers (phase 2 spec 7, owner decision 2026-11-22): the list is
 # keyed by caller,t,k,r,iterations, and a listed row is an accepted loss only
 # when nested_acceptance() finds it eligible (accepted_loss_eligible) and its
-# speed rule passes; otherwise it is judged like any other row. With
+# speed rule passes. The list gives a row no exemption beyond that rule: a
+# listed row that passes every rule outright stays a pass, and a listed row
+# that fails a rule and is not eligible fails. With
 # write-accepted=<out.csv> the tool writes the eligible rows whose speed rule
 # passes (when pairs are given): caller,t,k,r,iterations,noninferior_failed
 # and the candidate mean less the baseline mean of Column D, Column A, joint D
@@ -22,7 +24,8 @@
 # a candidate seed is a hit when A >= the baseline's recorded bound - 1.5e-7.
 # The A-Bound the candidate reports itself never gates.
 # Shapes are matched by caller, t, k, r and, where a shape was run at several
-# iteration counts, by iterations; the candidate and the pairs must be complete
+# iteration counts, by iterations (a shape recorded at one count is matched
+# with its paired timing at that count); the candidate and the pairs must be complete
 # runs of the baseline's grid. In a partial run that holds one iteration count
 # of such a shape, that count is not kept, and the lone variant is compared
 # with the default-iterations baseline.
@@ -54,6 +57,16 @@ speed_lines <- character(0)
 if (!is.null(pairs)) {
   speed <- nested_speed(pairs)
   j <- match(nested_shape_key(res), nested_shape_key(speed))
+  # nested_summary() keeps `iterations` only for a shape recorded at several
+  # counts, and the timings carry the count they ran with (the os shapes with
+  # t >= 300 run at iterations = 20 only). A shape that the comparison keys
+  # without `iterations` and that was timed at exactly one count is matched
+  # with that timing.
+  speed_base <- paste(speed$caller, speed$t, speed$k, speed$r, sep = "|")
+  single <- !speed_base %in% speed_base[duplicated(speed_base)]
+  lone <- is.na(j) & is.na(res$iterations)
+  j[lone] <- match(paste(res$caller, res$t, res$k, res$r, sep = "|")[lone],
+                   ifelse(single, speed_base, NA))
   res$bd_median <- speed$bd_median[j]
   res$engine_median <- speed$engine_median[j]
   res$speed_ok <- speed$speed_ok[j]
