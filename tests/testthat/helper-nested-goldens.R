@@ -508,7 +508,7 @@ nested_acceptance <- function(baseline, candidate, accepted_loss = NULL, bootstr
       if (run_bootstrap && length(bx) > 1L) {
         margin <- max(2e-6, 0.5 * stats::sd(bx))
         fine <- nested_bootstrap_lower(bx, cx) >= -margin
-        noninferior <- noninferior && fine
+        noninferior <- noninferior && isTRUE(fine)
         if (!isTRUE(fine)) failed <- c(failed, e)
       }
     }
