@@ -495,6 +495,19 @@ test_that("onestage builds a large latinized design without falling back", {
   expect_equal(des$infoDesign$joint_searches$requested, 1)
 })
 
+test_that("onestage warns once when its joint search cannot start", {
+  skip_on_cran()
+  # Beyond the measured universe the joint search may be too large to start.
+  # The design is still onestage (never twostage), with one warning.
+  w <- capture_warnings(
+    des <- row_column(t = 2500, nrows = 2, reps = 3, seed = 1, iterations = 20)
+  )
+  expect_length(w, 1)
+  expect_match(w, "were not optimized jointly")
+  expect_no_match(w, "twostage")
+  expect_equal(des$infoDesign$optimization, "onestage")
+})
+
 test_that("infoDesign reports the joint searches of onestage", {
   skip_on_cran()
   des <- row_column(t = 24, nrows = 6, reps = 2, seed = 1, iterations = 200)
