@@ -64,7 +64,7 @@ test_that("the layout options are named by the shape of their field, with the va
   rcbd <- RCBD(t = 18, reps = 3, seed = 4)
   for (stacked in c("vertical", "horizontal")) {
     labels <- layout_choice_labels(rcbd, stacked = stacked)
-    sizes <- vapply(strsplit(sub(" \\([0-9]+\\)$", "", names(labels)), " \u00d7 ", fixed = TRUE), as.numeric, numeric(2))
+    sizes <- vapply(strsplit(sub(" \u00b7 .*$", "", names(labels)), " \u00d7 ", fixed = TRUE), as.numeric, numeric(2))
     key <- abs(sizes[1L, ] - sizes[2L, ])
     expect_false(is.unsorted(key))
     expect_true(all(diff(sizes[1L, ])[diff(key) == 0] >= 0))
@@ -73,18 +73,25 @@ test_that("the layout options are named by the shape of their field, with the va
     for (i in seq_along(labels)) {
       title <- checked_layout_view(rcbd, layout = labels[[i]], planter = "serpentine", location = 1,
                                    stacked = stacked)$out_layout$labels$title
-      expect_true(endsWith(title, sub(" \\([0-9]+\\)$", "", names(labels)[[i]])))
+      expect_true(endsWith(title, sub(" \u00b7 .*$", "", names(labels)[[i]])))
     }
   }
   # a page opens on the first
   panel <- as.character(app_classic_layout_panel(shiny::NS("x"), classic_workflow_spec("RCBD"), rcbd))
   first <- layout_choice_labels(rcbd)[1L]
   expect_match(panel, sprintf('<option value="%s" selected>%s</option>', first, names(first)), fixed = TRUE)
-  # two options of one shape are numbered
+  # two options of one shape say how their incomplete blocks lie in the field
+  alpha <- alpha_lattice(t = 36, k = 6, reps = 3, seed = 1)
+  expect_identical(names(layout_choice_labels(alpha)),
+                   c("9 \u00d7 12", "12 \u00d7 9", "6 \u00d7 18", "18 \u00d7 6 \u00b7 blocks of 3 \u00d7 2",
+                     "18 \u00d7 6 \u00b7 blocks in columns", "18 \u00d7 6 \u00b7 blocks in rows"))
+  for (stacked in c("vertical", "horizontal")) {
+    expect_false(anyDuplicated(names(layout_choice_labels(alpha, stacked = stacked))) > 0)
+  }
   lattice <- square_lattice(t = 49, k = 7, reps = 3, seed = 1)
-  expect_identical(names(layout_choice_labels(lattice)), c("21 \u00d7 7 (1)", "21 \u00d7 7 (2)"))
+  expect_identical(names(layout_choice_labels(lattice)), c("21 \u00d7 7 \u00b7 blocks in columns", "21 \u00d7 7 \u00b7 blocks in rows"))
   expect_identical(names(layout_choice_labels(lattice, stacked = "horizontal")),
-                   c("7 \u00d7 21 (1)", "7 \u00d7 21 (2)"))
+                   c("7 \u00d7 21 \u00b7 blocks in rows", "7 \u00d7 21 \u00b7 blocks in columns"))
   expect_identical(layout_choice_labels(lattice, stacked = "grid_panel"), integer())
   for (design in list(crd, lattice)) {
     expect_identical(unname(layout_choice_labels(design)), layout_choices(design))

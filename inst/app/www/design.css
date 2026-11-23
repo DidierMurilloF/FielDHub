@@ -679,7 +679,7 @@ html[data-theme="dark"] .modal { color-scheme: dark; }
   width: max-content;
   padding: 10px;
 }
-#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > * { width: 168px; }
+#fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > * { width: auto; min-width: 168px; }
 #fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) > [hidden] { display: none; }
 #fieldhub-app .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) .control-label { margin-bottom: 2px; font-size: 12px; }
 #fieldhub-app .fh-design .fh-view-bar .fh-view-menu-panel:not(.fh-spacing) select.form-control { height: 32px; line-height: 30px; }
