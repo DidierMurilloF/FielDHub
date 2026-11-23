@@ -3517,7 +3517,7 @@
 Efficiency of design: 
   Level Blocks D-Efficiency A-Efficiency   A-Bound
 1     1      3    1.0000000    1.0000000 1.0000000
-2     2     24    0.8549751    0.8358296 0.8358296
+2     2     24    0.8549751    0.8358296 0.8368997
 
 Information on the design parameters: 
 List of 7
@@ -3531,16 +3531,16 @@ List of 7
 
  10 First observations of the data frame with the rectangular_lattice field book: 
    ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-1   1    FARGO  101   1      1    1    38      G-38
-2   2    FARGO  102   1      1    2    43      G-43
-3   3    FARGO  103   1      1    3     2       G-2
-4   4    FARGO  104   1      1    4     5       G-5
-5   5    FARGO  105   1      1    5    22      G-22
-6   6    FARGO  106   1      1    6    18      G-18
-7   7    FARGO  107   1      1    7    15      G-15
-8   8    FARGO  108   1      2    1     7       G-7
-9   9    FARGO  109   1      2    2    33      G-33
-10 10    FARGO  110   1      2    3    56      G-56
+1   1    FARGO  101   1      1    1     6       G-6
+2   2    FARGO  102   1      1    2    47      G-47
+3   3    FARGO  103   1      1    3    10      G-10
+4   4    FARGO  104   1      1    4     7       G-7
+5   5    FARGO  105   1      1    5    38      G-38
+6   6    FARGO  106   1      1    6    42      G-42
+7   7    FARGO  107   1      1    7    52      G-52
+8   8    FARGO  108   1      2    1    16      G-16
+9   9    FARGO  109   1      2    2     1       G-1
+10 10    FARGO  110   1      2    3    19      G-19
 </code></pre></div>
 <h3 id="access-to-rect-object">Access to <code>rect</code> object<a class="headerlink" href="#access-to-rect-object" title="Permanent link">&para;</a></h3>
 <p>The function <code>rectangular_lattice()</code> returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>rect$layoutRandom</code> or <code>rect$fieldBook</code>.</p>
@@ -3549,16 +3549,16 @@ List of 7
 <span class="nf">head</span><span class="p">(</span><span class="n">rect</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-1   1    FARGO  101   1      1    1    38      G-38
-2   2    FARGO  102   1      1    2    43      G-43
-3   3    FARGO  103   1      1    3     2       G-2
-4   4    FARGO  104   1      1    4     5       G-5
-5   5    FARGO  105   1      1    5    22      G-22
-6   6    FARGO  106   1      1    6    18      G-18
-7   7    FARGO  107   1      1    7    15      G-15
-8   8    FARGO  108   1      2    1     7       G-7
-9   9    FARGO  109   1      2    2    33      G-33
-10 10    FARGO  110   1      2    3    56      G-56
+1   1    FARGO  101   1      1    1     6       G-6
+2   2    FARGO  102   1      1    2    47      G-47
+3   3    FARGO  103   1      1    3    10      G-10
+4   4    FARGO  104   1      1    4     7       G-7
+5   5    FARGO  105   1      1    5    38      G-38
+6   6    FARGO  106   1      1    6    42      G-42
+7   7    FARGO  107   1      1    7    52      G-52
+8   8    FARGO  108   1      2    1    16      G-16
+9   9    FARGO  109   1      2    2     1       G-1
+10 10    FARGO  110   1      2    3    19      G-19
 </code></pre></div>
 <h3 id="plot-the-field-layout">Plot the field layout<a class="headerlink" href="#plot-the-field-layout" title="Permanent link">&para;</a></h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code>, you can use the the generic function <code>plot()</code> as follows,</p>

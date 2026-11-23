@@ -3533,16 +3533,16 @@ List of 7
 
  10 First observations of the data frame with the square_lattice field book: 
    ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-1   1    FARGO  101   1      1    1     3       G-3
-2   2    FARGO  102   1      1    2    38      G-38
-3   3    FARGO  103   1      1    3    37      G-37
-4   4    FARGO  104   1      1    4    24      G-24
-5   5    FARGO  105   1      1    5    40      G-40
-6   6    FARGO  106   1      1    6    29      G-29
-7   7    FARGO  107   1      1    7    25      G-25
-8   8    FARGO  108   1      1    8    53      G-53
-9   9    FARGO  109   1      2    1    61      G-61
-10 10    FARGO  110   1      2    2    23      G-23
+1   1    FARGO  101   1      1    1    48      G-48
+2   2    FARGO  102   1      1    2    63      G-63
+3   3    FARGO  103   1      1    3    56      G-56
+4   4    FARGO  104   1      1    4    50      G-50
+5   5    FARGO  105   1      1    5    62      G-62
+6   6    FARGO  106   1      1    6    33      G-33
+7   7    FARGO  107   1      1    7    41      G-41
+8   8    FARGO  108   1      1    8    15      G-15
+9   9    FARGO  109   1      2    1    46      G-46
+10 10    FARGO  110   1      2    2     1       G-1
 </code></pre></div>
 <h3 id="access-to-square-object">Access to <code>square</code> object<a class="headerlink" href="#access-to-square-object" title="Permanent link">&para;</a></h3>
 <p>The <code>square_lattice()</code> function returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>square$layoutRandom</code> or <code>square$fieldBook</code>.</p>
@@ -3551,16 +3551,16 @@ List of 7
 <span class="nf">head</span><span class="p">(</span><span class="n">square</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT
-1   1    FARGO  101   1      1    1     3       G-3
-2   2    FARGO  102   1      1    2    38      G-38
-3   3    FARGO  103   1      1    3    37      G-37
-4   4    FARGO  104   1      1    4    24      G-24
-5   5    FARGO  105   1      1    5    40      G-40
-6   6    FARGO  106   1      1    6    29      G-29
-7   7    FARGO  107   1      1    7    25      G-25
-8   8    FARGO  108   1      1    8    53      G-53
-9   9    FARGO  109   1      2    1    61      G-61
-10 10    FARGO  110   1      2    2    23      G-23
+1   1    FARGO  101   1      1    1    48      G-48
+2   2    FARGO  102   1      1    2    63      G-63
+3   3    FARGO  103   1      1    3    56      G-56
+4   4    FARGO  104   1      1    4    50      G-50
+5   5    FARGO  105   1      1    5    62      G-62
+6   6    FARGO  106   1      1    6    33      G-33
+7   7    FARGO  107   1      1    7    41      G-41
+8   8    FARGO  108   1      1    8    15      G-15
+9   9    FARGO  109   1      2    1    46      G-46
+10 10    FARGO  110   1      2    2     1       G-1
 </code></pre></div>
 <h3 id="plot-the-field-layout">Plot the field layout<a class="headerlink" href="#plot-the-field-layout" title="Permanent link">&para;</a></h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code>, you can use the the generic function <code>plot()</code> as follows,</p>

@@ -2199,17 +2199,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#author" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3231,17 +3220,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#author" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3331,8 +3309,6 @@ Number of full resolvable replicates per location.</p>
 </ul>
 <h2 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h2>
 <p>The result records effective inputs and the resolved seed in <code>metadata$parameters</code>, using <code>reps</code> for replication. Under the same package versions and RNG settings, rebuild a result <code>x</code> with <code>do.call(square_lattice, x$metadata$parameters)</code>.</p>
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <h2 id="author">Author<a class="headerlink" href="#author" title="Permanent link">&para;</a></h2>
 <p>Didier Murillo [aut], Salvador Gezan [aut], Ana Heilman [ctb], Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb]</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
@@ -3369,18 +3345,18 @@ Number of full resolvable replicates per location.</p>
 <span class="c1">#&gt; </span>
 <span class="nf">head</span><span class="p">(</span><span class="n">squareLattice1</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="m">12</span><span class="p">)</span>
 <span class="c1">#&gt;    ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT</span>
-<span class="c1">#&gt; 1   1    FARGO 1001   1      1    1    43      G-43</span>
-<span class="c1">#&gt; 2   2    FARGO 1002   1      1    2    49      G-49</span>
-<span class="c1">#&gt; 3   3    FARGO 1003   1      1    3    35      G-35</span>
-<span class="c1">#&gt; 4   4    FARGO 1004   1      1    4    15      G-15</span>
-<span class="c1">#&gt; 5   5    FARGO 1005   1      1    5    45      G-45</span>
-<span class="c1">#&gt; 6   6    FARGO 1006   1      1    6    42      G-42</span>
-<span class="c1">#&gt; 7   7    FARGO 1007   1      1    7    40      G-40</span>
-<span class="c1">#&gt; 8   8    FARGO 1008   1      1    8    10      G-10</span>
-<span class="c1">#&gt; 9   9    FARGO 1009   1      2    1    61      G-61</span>
-<span class="c1">#&gt; 10 10    FARGO 1010   1      2    2    21      G-21</span>
-<span class="c1">#&gt; 11 11    FARGO 1011   1      2    3    62      G-62</span>
-<span class="c1">#&gt; 12 12    FARGO 1012   1      2    4    34      G-34</span>
+<span class="c1">#&gt; 1   1    FARGO 1001   1      1    1    64      G-64</span>
+<span class="c1">#&gt; 2   2    FARGO 1002   1      1    2    61      G-61</span>
+<span class="c1">#&gt; 3   3    FARGO 1003   1      1    3     2       G-2</span>
+<span class="c1">#&gt; 4   4    FARGO 1004   1      1    4     8       G-8</span>
+<span class="c1">#&gt; 5   5    FARGO 1005   1      1    5    33      G-33</span>
+<span class="c1">#&gt; 6   6    FARGO 1006   1      1    6    59      G-59</span>
+<span class="c1">#&gt; 7   7    FARGO 1007   1      1    7    39      G-39</span>
+<span class="c1">#&gt; 8   8    FARGO 1008   1      1    8     5       G-5</span>
+<span class="c1">#&gt; 9   9    FARGO 1009   1      2    1    35      G-35</span>
+<span class="c1">#&gt; 10 10    FARGO 1010   1      2    2    51      G-51</span>
+<span class="c1">#&gt; 11 11    FARGO 1011   1      2    3    10      G-10</span>
+<span class="c1">#&gt; 12 12    FARGO 1012   1      2    4    25      G-25</span>
 
 <span class="c1"># Example 2: Generates a square lattice design with 3 full blocks, 7 units per IBlock,</span>
 <span class="c1"># 7 IBlocks for a square number of treatmens of 49 in one location.</span>
@@ -3428,18 +3404,18 @@ Number of full resolvable replicates per location.</p>
 <span class="c1">#&gt; </span>
 <span class="nf">head</span><span class="p">(</span><span class="n">squareLattice2</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="m">12</span><span class="p">)</span>
 <span class="c1">#&gt;    ID  LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT</span>
-<span class="c1">#&gt; 1   1 CASSELTON 1001   1      1    1    27       G27</span>
-<span class="c1">#&gt; 2   2 CASSELTON 1002   1      1    2    30       G30</span>
-<span class="c1">#&gt; 3   3 CASSELTON 1003   1      1    3    42       G42</span>
-<span class="c1">#&gt; 4   4 CASSELTON 1004   1      1    4     1        G1</span>
-<span class="c1">#&gt; 5   5 CASSELTON 1005   1      1    5    20       G20</span>
-<span class="c1">#&gt; 6   6 CASSELTON 1006   1      1    6    26       G26</span>
-<span class="c1">#&gt; 7   7 CASSELTON 1007   1      1    7    48       G48</span>
-<span class="c1">#&gt; 8   8 CASSELTON 1008   1      2    1    49       G49</span>
-<span class="c1">#&gt; 9   9 CASSELTON 1009   1      2    2    29       G29</span>
-<span class="c1">#&gt; 10 10 CASSELTON 1010   1      2    3    24       G24</span>
-<span class="c1">#&gt; 11 11 CASSELTON 1011   1      2    4    34       G34</span>
-<span class="c1">#&gt; 12 12 CASSELTON 1012   1      2    5    47       G47</span>
+<span class="c1">#&gt; 1   1 CASSELTON 1001   1      1    1    14       G14</span>
+<span class="c1">#&gt; 2   2 CASSELTON 1002   1      1    2    16       G16</span>
+<span class="c1">#&gt; 3   3 CASSELTON 1003   1      1    3    15       G15</span>
+<span class="c1">#&gt; 4   4 CASSELTON 1004   1      1    4    32       G32</span>
+<span class="c1">#&gt; 5   5 CASSELTON 1005   1      1    5    45       G45</span>
+<span class="c1">#&gt; 6   6 CASSELTON 1006   1      1    6    30       G30</span>
+<span class="c1">#&gt; 7   7 CASSELTON 1007   1      1    7    27       G27</span>
+<span class="c1">#&gt; 8   8 CASSELTON 1008   1      2    1    43       G43</span>
+<span class="c1">#&gt; 9   9 CASSELTON 1009   1      2    2    22       G22</span>
+<span class="c1">#&gt; 10 10 CASSELTON 1010   1      2    3    38       G38</span>
+<span class="c1">#&gt; 11 11 CASSELTON 1011   1      2    4     2        G2</span>
+<span class="c1">#&gt; 12 12 CASSELTON 1012   1      2    5     1        G1</span>
 </code></pre></div>
 
 

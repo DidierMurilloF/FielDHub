@@ -1891,17 +1891,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#author" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3231,17 +3220,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        References
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#author" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3331,8 +3309,6 @@ Number of full resolvable replicates per location.</p>
 </ul>
 <h2 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h2>
 <p>The result records effective inputs and the resolved seed in <code>metadata$parameters</code>, using <code>reps</code> for replication. Under the same package versions and RNG settings, rebuild a result <code>x</code> with <code>do.call(incomplete_blocks, x$metadata$parameters)</code>.</p>
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p>Edmondson., R. N. (2021). blocksdesign: Nested and crossed block designs for factorial and unstructured treatment sets. https://CRAN.R-project.org/package=blocksdesign</p>
 <h2 id="author">Author<a class="headerlink" href="#author" title="Permanent link">&para;</a></h2>
 <p>Didier Murillo [aut], Salvador Gezan [aut], Ana Heilman [ctb], Thomas Walk [ctb], Johan Aparicio [ctb], Richard Horsley [ctb]</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
@@ -3369,12 +3345,12 @@ Number of full resolvable replicates per location.</p>
 <span class="c1">#&gt; </span>
 <span class="nf">head</span><span class="p">(</span><span class="n">ibd1</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">)</span>
 <span class="c1">#&gt;   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT</span>
-<span class="c1">#&gt; 1  1        1  101   1      1    1     7       G-7</span>
-<span class="c1">#&gt; 2  2        1  102   1      1    2     9       G-9</span>
-<span class="c1">#&gt; 3  3        1  103   1      1    3    11      G-11</span>
-<span class="c1">#&gt; 4  4        1  104   1      1    4     5       G-5</span>
+<span class="c1">#&gt; 1  1        1  101   1      1    1     3       G-3</span>
+<span class="c1">#&gt; 2  2        1  102   1      1    2     2       G-2</span>
+<span class="c1">#&gt; 3  3        1  103   1      1    3     1       G-1</span>
+<span class="c1">#&gt; 4  4        1  104   1      1    4     6       G-6</span>
 <span class="c1">#&gt; 5  5        1  105   1      2    1    10      G-10</span>
-<span class="c1">#&gt; 6  6        1  106   1      2    2     6       G-6</span>
+<span class="c1">#&gt; 6  6        1  106   1      2    2     4       G-4</span>
 
 <span class="c1"># Example 2: Generates a balanced resolvable IBD of characteristics (t,k,r) = (15,3,7).</span>
 <span class="c1"># In this case, we show how to use the option data.</span>
@@ -3421,12 +3397,12 @@ Number of full resolvable replicates per location.</p>
 <span class="c1">#&gt; </span>
 <span class="nf">head</span><span class="p">(</span><span class="n">ibd2</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">)</span>
 <span class="c1">#&gt;   ID LOCATION PLOT REP IBLOCK UNIT ENTRY TREATMENT</span>
-<span class="c1">#&gt; 1  1        1  101   1      1    1     4      TX-4</span>
-<span class="c1">#&gt; 2  2        1  102   1      1    2     8      TX-8</span>
+<span class="c1">#&gt; 1  1        1  101   1      1    1     7      TX-7</span>
+<span class="c1">#&gt; 2  2        1  102   1      1    2     1      TX-1</span>
 <span class="c1">#&gt; 3  3        1  103   1      1    3     5      TX-5</span>
-<span class="c1">#&gt; 4  4        1  104   1      2    1    10     TX-10</span>
-<span class="c1">#&gt; 5  5        1  105   1      2    2     3      TX-3</span>
-<span class="c1">#&gt; 6  6        1  106   1      2    3     9      TX-9</span>
+<span class="c1">#&gt; 4  4        1  104   1      2    1    11     TX-11</span>
+<span class="c1">#&gt; 5  5        1  105   1      2    2     9      TX-9</span>
+<span class="c1">#&gt; 6  6        1  106   1      2    3     8      TX-8</span>
 </code></pre></div>
 
 
