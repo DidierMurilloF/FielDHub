@@ -3325,7 +3325,9 @@
 <span class="w">  </span><span class="n">seed</span><span class="p">,</span>
 <span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
 <span class="w">  </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
-<span class="w">  </span><span class="n">checksPercent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span>
+<span class="w">  </span><span class="n">checksPercent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">spread_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">,</span>
+<span class="w">  </span><span class="n">dist_method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;euclidean&quot;</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
@@ -3359,11 +3361,18 @@ Number of genotypes checks.</p>
 (optional) Year recorded in the <code>YEAR</code> column of the field book. By default the current year.</p>
 <p>checksPercent<br />
 (optional) Percentage of checks in each location, one of the options available for the field. By default the last (largest) option.</p>
+<p>spread_checks<br />
+Logical. Exchange check identities among the existing check plots of each location to increase separation of repeated checks, as in <a href="diagonal_arrangement.html"><code>diagonal_arrangement()</code></a>. The allocation of entries to locations, test entries, filler plots, the check plots themselves and each check's replication in a location stay fixed. The default <code>FALSE</code> preserves the original randomization.</p>
+<p>dist_method<br />
+Distance between field coordinates for check optimization: <code>"euclidean"</code> (default) or <code>"manhattan"</code>. Grid steps have equal scale.</p>
 <h2 id="value">Value<a class="headerlink" href="#value" title="Permanent link">&para;</a></h2>
-<p>A list with eight elements.</p>
+<p>A list with nine elements.</p>
 <ul>
 <li>
-<p><code>infoDesign</code> is a list with information on the design parameters.</p>
+<p><code>infoDesign</code> is a list with information on the design parameters. With check optimization enabled, <code>check_optimization</code> records the search of each location.</p>
+</li>
+<li>
+<p><code>check_spacing</code> records the same-check spacing of each location (see <a href="diagonal_arrangement.html"><code>diagonal_arrangement()</code></a>), before and, with optimization enabled, after the search.</p>
 </li>
 <li>
 <p><code>layoutRandom</code> is a list with the randomization layout of each location.</p>
@@ -3389,6 +3398,7 @@ Number of genotypes checks.</p>
 </ul>
 <h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
 <p>The allocation of entries to locations comes from <a href="do_optim.html"><code>do_optim()</code></a>; see its Details for the search, and for allocations that changed in FielDHub 1.7.0.</p>
+<p>Check optimization is the deterministic local exchange described in <a href="diagonal_arrangement.html"><code>diagonal_arrangement()</code></a>, run in each location on its own. It measures spacing, not statistical precision.</p>
 <h2 id="reproducibility">Reproducibility<a class="headerlink" href="#reproducibility" title="Permanent link">&para;</a></h2>
 <p>The result records effective inputs and the resolved seed in <code>metadata$parameters</code>. Under the same package versions and RNG settings, rebuild a result <code>x</code> with <code>do.call(sparse_allocation, x$metadata$parameters)</code>.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>

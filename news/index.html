@@ -3269,6 +3269,11 @@ from the seed on another machine.</p>
   replication remain fixed. The default layouts and least-filler option are
   unchanged. Results record search limits and minimum check distances.</p>
 </li>
+<li>Multiple Diagonal Arrangement (<code>kindExpt = "DBUDC"</code>) and
+  <code>sparse_allocation()</code> offer the same opt-in check-spacing optimization
+  (<code>spread_checks = TRUE</code>, <code>dist_method</code>), in each location on its own, and
+  record <code>check_spacing</code> for every location. The default layouts are
+  unchanged.</li>
 <li>
 <p>The Single Diagonal Arrangement page caches complete results by percentage
   and seeded inputs within each session. Background workers prepare the other
