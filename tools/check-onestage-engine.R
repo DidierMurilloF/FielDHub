@@ -97,7 +97,7 @@
 #     result is full rank and not below the start in joint log det, and at
 #     least two seeds took the replacement (`floor_fallback` 1; 16/8/4 takes
 #     it on several seeds, so the path does not hang on one rounding).
-#     The repair's output gets the same comparison: on 8/4/3 nested seed 16
+#     The repair's output gets the same comparison: on 8/4/3 nested seed 22
 #     (a singular stage 1 start) the hook lets the repair reach a full-rank
 #     design one rounding below the Row floors, which must be rejected:
 #     `floor_fallback` 2, the start returned unchanged, `full_rank` FALSE with
@@ -152,13 +152,13 @@
 # the form.
 # (a) mode 3 on 9/3/2, 12/2/4, 12/6/3, 24/2/3 and 30/15/4 nested (a shared
 #     design never has fewer treatments than block columns), seeds 1:4, and
-#     on 12/2/3 (seeds 2, 39, 45, 1) and 8/4/3 (seeds 3, 5, 10, 1) nested, from
+#     on 12/2/3 (seeds 7, 16, 28, 1) and 8/4/3 (seeds 7, 15, 17, 1) nested, from
 #     onestage_stage1() starts and from random complete starts. The stage 1
 #     design of 12/2/4 was full rank on seeds 1:30 (measured 2026-11-22), so
 #     12/2/3 and 8/4/3, whose stage 1 design is singular on the first three
 #     seeds named, stand in for it as singular stage 1 starts (the seeds
 #     follow the nested row step of stage 1; chosen again on 2026-11-23 for
-#     its 40 escapes, RC3):
+#     its 40 escapes of one jump, RC3):
 #     - the engine's classification of the start equals the dense full-rank
 #       test; the starts must include both sides of the trace shortcut (tr(M)
 #       <= 1e7, and no usable trace: a singular start, among them stage 1
@@ -215,7 +215,7 @@
 #       hundredth of the margins (1e-10 on the log det, 1e-12 relative on
 #       the A denominator); it is printed.
 #     - Near-floor states, forced with the hook `slack_floors`: on 16/8/4
-#       nested from stage 1 starts (seeds 1:8) the search without any
+#       nested from stage 1 starts (seeds 1:16) the search without any
 #       confirmation ends one rounding below a Row floor on several seeds
 #       (`floor_fallback` 1; at least two are needed), so those searches
 #       pass through designs whose Row values tie with the floors. On every
@@ -1048,7 +1048,7 @@ if (check == "crossed") {
   # The repair's output under the hook: full rank, but below the Row floors.
   v <- 8; nrows <- 4; ncols <- 2; r <- 3
   lay <- layout_of(v, r, nrows, FALSE)
-  set.seed(16)
+  set.seed(22)
   s1 <- stage1(v, nrows, ncols, r, FALSE, work_limit, TRUE)
   start <- as.integer(s1$treatments)
   res <- crossed(start, v, r, nrows, ncols, FALSE, work_cap = max(work_limit - s1$work, 1))
@@ -1060,7 +1060,7 @@ if (check == "crossed") {
          else if (!identical(res$full_rank, FALSE) || !is.na(res$joint_d) || !is.na(res$joint_a)) "full_rank or joint values claimed"
          else if (!identical(res$search$evaluations, 0) || !(res$search$repair_swaps > 0)) "evaluations spent, or no repair swap"
          else NULL
-  report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 16): floor_fallback %s, %g repair swaps, start returned%s",
+  report(is.null(why), sprintf("crossed repair output below the Row floors (hook, 8/4/3 nested seed 22): floor_fallback %s, %g repair swaps, start returned%s",
                                format(res$search$floor_fallback), res$search$repair_swaps,
                                if (is.null(why)) "" else paste0("; PROBLEM ", why)))
   Sys.unsetenv("FIELDHUB_ENGINE_DEBUG")
@@ -1128,7 +1128,7 @@ if (check == "treatment_form") {
     if (!is.numeric(dbg) || length(dbg) != 1L || is.na(dbg) || dbg > 1e-8) sprintf("debug_max_error %s", format(dbg)) else NULL
   }
   shapes <- list(c(9, 3, 2), c(12, 2, 4), c(12, 6, 3), c(24, 2, 3), c(30, 15, 4), c(12, 2, 3), c(8, 4, 3))
-  seed_sets <- list("12/2/3" = c(2L, 39L, 45L, 1L), "8/4/3" = c(3L, 5L, 10L, 1L))
+  seed_sets <- list("12/2/3" = c(7L, 16L, 28L, 1L), "8/4/3" = c(7L, 15L, 17L, 1L))
   sides <- c(shortcut = 0L, no_trace = 0L, exact = 0L)
   singular_stage1 <- character()
   worst <- c(debug = 0, criterion = 0)
@@ -1311,7 +1311,7 @@ if (check == "treatment_form") {
   problems <- character()
   late_problems <- character()
   below <- 0L; rolled <- 0L
-  for (s in starts_of(v, nrows, r, 1:8, "stage 1")) {
+  for (s in starts_of(v, nrows, r, 1:16, "stage 1")) {
     slack <- hooked("treatment_form,slack_floors", search_from(s, v, nrows, r))
     lazy <- search_from(s, v, nrows, r)
     late <- hooked("1,treatment_form,late_floors", search_from(s, v, nrows, r))
@@ -1330,10 +1330,10 @@ if (check == "treatment_form") {
     rolled <- rolled + (floors_of(late)[["rollbacks"]] > 0)
   }
   report(length(problems) == 0L && below >= 2L,
-         sprintf("treatment form, Row confirmation near a floor (16/8/4 nested, 8 seeds): %d searches end below a floor without confirmation (need >= 2), each confirmed a swap and kept the floors%s",
+         sprintf("treatment form, Row confirmation near a floor (16/8/4 nested, 16 seeds): %d searches end below a floor without confirmation (need >= 2), each confirmed a swap and kept the floors%s",
                  below, if (length(problems)) paste0(": ", problems[1]) else ""))
   report(length(late_problems) == 0L && rolled >= 1L,
-         sprintf("treatment form, rollback after a breach at a checkpoint (hook, 16/8/4 nested, 8 seeds): %d runs rolled back (need >= 1), floors kept%s",
+         sprintf("treatment form, rollback after a breach at a checkpoint (hook, 16/8/4 nested, 16 seeds): %d runs rolled back (need >= 1), floors kept%s",
                  rolled, if (length(late_problems)) paste0(": ", late_problems[1]) else ""))
   # At the natural size, no `treatment_form` hook
   for (shape in list(c(300, 2, 4), c(1000, 500, 4))) {

@@ -409,7 +409,9 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
        search = search)
 }
 
-#' Failed escapes in a row that end one search of the nested row step of
+#' Escapes of the nested row step of stage 1: the failed escapes in a row
+#' that end one of its searches, and the jumps of one escape
+#' (`onestage_row_jumps_per_escape`, below). The step is the row search of
 #' stage 1 (`blocks_engine(resolvable = TRUE)`, mode 1; phase 2 spec 6.1).
 #' The evaluation budget of the step is unchanged: resolvable mode's pool of
 #' 20 searches of ten full passes.
@@ -460,14 +462,32 @@ segmented_blocks <- function(start, block_of, segment_of, treatments, replicates
 #' escapes: its Row values pass the Row rules on every `os` shape, none
 #' near the margin.
 #'
-#' Not adopted: one jump per escape instead of three in this step
-#' (`jumps_per_escape`). Measured 2026-11-23 it raises Row further at less
-#' work (Row A at 200/100/3, `iterations` = 200: bootstrap margin -0.37 to
-#' +6.96) and creates no failure outside the accepted-loss rule on 189
-#' nested shape rows, but three checks of `tools/check-onestage-engine.R`
-#' then fail on their fixed seeds, so it waits for a ruling (RC3 report).
+#' Jumps per escape, `onestage_row_jumps_per_escape`: one, where resolvable
+#' mode takes three (controller ruling R12; adopted 2026-11-23). The figures
+#' above were measured with three jumps. An escape of
+#' one swap stays nearer the optimum it leaves, and the 40 escapes then find
+#' better rows at no more work. Row step alone, 12 or 20 paired seeds, all
+#' 104 nested `os` shapes with onestage seeds
+#' (`~/fieldhub-libs/scratch/rc3/rowj.R`, `rc3-rowj.log`): the Row values
+#' change on 18 shapes, upward on every one (0.01 to 2.7 SDs of 1.7.0), and
+#' are identical on the other 86; the work is 0.78 to 1.0 of that with three
+#' jumps. Through `row_column()`, bootstrap margins of the mean Row D and
+#' Row A against 1.7.0 (the rule fails below -1), three jumps and then one,
+#' `iterations` = 200, seeds 1 to 50: 200/100/3 -0.18 and -0.37, then +3.40
+#' and +6.96; 200/100/4 -0.22 and -0.38, then +2.54 and +4.71; 200/25/3
+#' +0.73 and +0.73, then +4.75 and +4.84; 100/20/4 (200 seeds) +0.83 and
+#' +0.80, then +5.30 and +5.31. On 189 nested shape rows (every shape with
+#' t <= 100 at both `iterations`, nine rows with t = 200) no Row margin
+#' falls, 167 rows pass and 22 fail only the rules of the accepted-loss
+#' rule of spec 7, as many as with three jumps (14/7/3 at 20 enters,
+#' 30/6/4 at 20 leaves); Column D moves by -0.01 margins on average
+#' (`rc3-lever-compare.log`). The stage 1 designs change with it, so the
+#' seeds that `tools/check-onestage-engine.R` names for singular stage 1
+#' starts were chosen again.
 #' @noRd
 onestage_row_stale_escapes <- 40L
+#' @noRd
+onestage_row_jumps_per_escape <- 1L
 
 #' Stage 1 of the onestage search: rows first (phase 2 spec 6.1)
 #'
@@ -589,7 +609,8 @@ onestage_stage1 <- function(nt, nrows, ncols, reps, latinize, work_left, first,
                    # plot in row: the canonical order, the plot's position
                    # in its row as its column.
                    out <- blocks_engine(v, r, nrows, resolvable = TRUE, work_cap = limit, admission = FALSE,
-                                        max_stale_escapes = onestage_row_stale_escapes)
+                                        max_stale_escapes = onestage_row_stale_escapes,
+                                        jumps_per_escape = onestage_row_jumps_per_escape)
                    list(treatments = out$Design$treatments, scored = TRUE, search = out$search)
                  }
                })
