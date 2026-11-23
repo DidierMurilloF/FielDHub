@@ -1089,7 +1089,16 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
       out.scoring_joint += 1;
       finish_work += current.refresh_work();
     }
-    if (!local_treat.empty() && !(current_ld > local_best)) {
+    // The choice is between values of one kind, with a tie rule (review of
+    // RC4, M-7): the current design replaces the best optimum only if its
+    // log det is higher by more than kTie when both values are from scratch,
+    // and by more than kOptimumMargin when one of them is a running value.
+    // Otherwise the best optimum, recorded first, is kept, so the design
+    // returned does not hang on the last bits of two log dets of one value
+    // (it did: the two were compared with no tolerance, one from scratch and
+    // one running).
+    const bool both_fresh = best_fresh && (!cheap || end_alarm);
+    if (!local_treat.empty() && !(current_ld > local_best + (both_fresh ? kTie : kOptimumMargin))) {
       result = local_treat;
     } else if (std::isfinite(current_ld)) {
       result = joint.treatments();
