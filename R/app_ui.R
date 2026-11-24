@@ -88,7 +88,7 @@ app_add_external_resources <- function(){
 #' resources are served under a path with this version, so a browser fetches
 #' them again whenever a file changes, not only on a new release.
 #' @param files File names in \code{app/www}.
-#' @return A version string such as \code{"1.7.0.123456789"}.
+#' @return A string containing the package version and asset fingerprint.
 #' @noRd
 app_resources_version <- function(files) {
   sums <- tools::md5sum(file.path(app_sys("app/www"), files))

@@ -3,6 +3,24 @@
 
 # Changelog
 
+# FielDHub 1.7.5
+
+## Design-aware trait simulation
+
+- `stats::simulate(x)` generates Gaussian trait data for all 21 field
+  designs using their realized treatment and experimental units.
+  Repeated entries and checks retain a shared treatment effect across
+  locations. Set the trait mean and residual SD globally or by location.
+  Spatial correlation is optional and uses physical field-book
+  coordinates. Shiny calls the package method and uses its simulated
+  field book for tables, maps, and downloads. `reproduce_simulation()`
+  replays new and existing records.
+- Simulated augmented RCBD block effects are nested within experiment
+  and location. Distinct entries with the same display label retain
+  separate effects. Row-column layouts preserve the experimental axes as
+  `ROW_REP` and `COLUMN_REP`, so spatial simulation can use physical
+  coordinates alongside the experimental units.
+
 # FielDHub 1.7.0
 
 ## New design
