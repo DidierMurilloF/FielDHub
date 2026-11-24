@@ -24,6 +24,9 @@
 #'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
 #'   its plots are numbered along the serpentine planting path of the whole
 #'   field. See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked The stacking of the replicates of the designs in blocks. A
+#'   completely randomized design has no replicates to stack: giving
+#'   \code{stacked} is an error.
 #'
 #'
 #' @author Didier Murillo [aut],

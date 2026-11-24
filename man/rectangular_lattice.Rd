@@ -15,7 +15,8 @@ rectangular_lattice(
   data = NULL,
   reps = NULL,
   nrows = NULL,
-  ncols = NULL
+  ncols = NULL,
+  stacked = NULL
 )
 }
 \arguments{
@@ -42,6 +43,14 @@ field at each location. If only one is given, the other follows from the
 number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
 its plots are numbered along the serpentine planting path of the whole
 field. See \code{\link{field_layout}} for how the design is placed.}
+
+\item{stacked}{How the replicates of a field of given dimensions are arranged:
+\code{"vertical"} (one above another, each across all the columns of
+the field), \code{"horizontal"} (side by side, each down all its rows) or
+\code{"grid_panel"} (in rows and columns of replicates). It needs
+\code{nrows} or \code{ncols}. By default the arrangement whose replicate
+is the most square among those that fit the dimensions; the stacking
+chosen is recorded in the design. See \code{\link{field_layout}}.}
 }
 \value{
 A list with two elements.

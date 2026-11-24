@@ -63,12 +63,29 @@ knitr::opts_chunk$set(
   of whole plots).
   The randomization is that of the same call without dimensions: only `PLOT`,
   `ROW` and `COLUMN` differ. Dimensions that do not fit are an error that
-  suggests valid ones, and `layout` or `stacked` together with dimensions is
-  an error. A design built with dimensions has that one layout:
-  `field_layout()` returns it, and asking for another planter, a stacking or
-  other dimensions is an error that says to build the design again with
-  other dimensions or without them. `plot()` follows the same rules. See
-  `?field_layout`.
+  suggests valid ones, and `layout` together with dimensions is an error. A
+  design built with dimensions has that one layout: `field_layout()` returns
+  it, and asking for another planter, another stacking or other dimensions
+  is an error that says to build the design again with other dimensions or
+  without them. `plot()` follows the same rules. See `?field_layout`.
+- `stacked` arranges the replicates of a field of given dimensions, in the
+  same eleven functions, in `field_layout()` and in `plot()`: `"vertical"`
+  puts them one above another (each across all the columns of the field),
+  `"horizontal"` side by side (each down all its rows) and `"grid_panel"` in
+  rows and columns of replicates. The replicates are the complete blocks of
+  an RCBD or of a factorial in blocks, the replicates of split, split-split
+  and strip plots, of incomplete blocks and of the lattices, and the squares
+  of a Latin square. Dimensions that do not fit the stacking are an error
+  that suggests dimensions that do. When `stacked` is not given, the stacking
+  is the one whose replicate is the most square among those that fit the
+  dimensions (a 4 x 3 replicate rather than a 6 x 2 one); a tie goes to the
+  vertical stack, then to the horizontal one, then to the panel with the most
+  rows of replicates. The stacking chosen is recorded in
+  `metadata$parameters` and in `infoDesign`, so `print()` shows it and
+  `reproduce_design()` rebuilds the same field. A CRD, and a factorial or a
+  split plot in CRD, has no replicates to stack: `stacked` with its
+  dimensions is an error, and so is `stacked` without dimensions in a
+  constructor.
 - `RCBD()` with dimensions keeps `plotNumber` as the matrix of blocks by
   plots, adds the field map of the plot numbers as `plotNumberField`, and
   records `nrows` and `ncols` in `infoDesign`, which `print()` and `summary()`
@@ -76,9 +93,14 @@ knitr::opts_chunk$set(
   (`plotSquares`, `plotLayouts`, `layoutlocations`) carry the numbers of the
   grid.
 - In the app, the layout menu of these designs lists, in a group of their
-  own, "Field grid", the valid field sizes that no "Reps layout" offers as a
-  numbered option, with labels such as "Grid 4 × 9". The group is the same
-  under every "Reps layout", and the numbered layout options are unchanged.
+  own, "Field grid", the field sizes of the selected "Reps layout" that it
+  does not already offer as a numbered option, with labels such as "Grid
+  4 × 9": the vertical menu lists only fields whose replicates lie one above
+  another, the horizontal menu only fields whose replicates lie side by
+  side. Every page whose replicates can lie in rows and columns of replicates
+  has a "Grid Panel" in its "Reps layout", which lists those fields; a "Reps
+  layout" without any option is not offered. The numbered layout options are
+  unchanged.
 - Calls without `nrows` and `ncols` return what they returned before.
 - Redesigned Welcome, Help and About pages, in one style: a green banner
   beside a photograph, NDSU green links with accessible contrast, and a shared

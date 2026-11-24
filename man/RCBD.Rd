@@ -18,7 +18,8 @@ RCBD(
   rep_checks = NULL,
   spread_checks = TRUE,
   nrows = NULL,
-  ncols = NULL
+  ncols = NULL,
+  stacked = NULL
 )
 }
 \arguments{
@@ -69,6 +70,14 @@ path of the whole field (see \code{planter}): the numbering does not restart
 in each block, so with \code{continuous = FALSE} the hundreds of a plot
 number name the block only where the blocks lie one above the other.
 See \code{\link{field_layout}} for how the blocks are placed.}
+
+\item{stacked}{How the blocks of a field of given dimensions are arranged:
+\code{"vertical"} (one above another, each across all the columns of
+the field), \code{"horizontal"} (side by side, each down all its rows) or
+\code{"grid_panel"} (in rows and columns of blocks). It needs
+\code{nrows} or \code{ncols}. By default the arrangement whose block
+is the most square among those that fit the dimensions; the stacking
+chosen is recorded in the design. See \code{\link{field_layout}}.}
 }
 \value{
 A list with five elements.

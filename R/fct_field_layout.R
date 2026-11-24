@@ -20,9 +20,7 @@
 #'   of the design are equal rectangles of the field:
 #'   \itemize{
 #'   \item CRD and factorials in CRD fill any rectangle that holds the plots.
-#'   \item RCBD and factorials in RCBD keep each complete block together. The
-#'   blocks of an RCBD are stacked vertically where that fits, else side by
-#'   side, else in the arrangement with the most rows of blocks.
+#'   \item RCBD and factorials in RCBD keep each complete block together.
 #'   \item Incomplete blocks and lattices keep each replicate and each
 #'   incomplete block together.
 #'   \item Split plots keep each whole plot together, split-split plots also
@@ -46,17 +44,39 @@
 #'   numbers restart at each replicate (101, 201, ...), the hundreds name the
 #'   replicate only where the replicates lie one above the other.
 #'
-#'   Dimensions that do not fit are an error that suggests valid ones.
-#'   \code{layout} and \code{stacked} belong to the numbered layouts: giving
-#'   either together with dimensions is an error.
+#'   In a field of given dimensions, \code{stacked} arranges the replicates:
+#'   the complete blocks of an RCBD or of a factorial in blocks, the
+#'   replicates of split, split-split and strip plots, of incomplete blocks
+#'   and of the lattices, and the squares of a Latin square.
+#'   \itemize{
+#'   \item \code{"vertical"}: one above another. Each replicate spans all the
+#'   columns of the field and \code{nrows / reps} of its rows.
+#'   \item \code{"horizontal"}: side by side. Each replicate spans all the
+#'   rows of the field and \code{ncols / reps} of its columns.
+#'   \item \code{"grid_panel"}: in rows and columns of replicates, more than
+#'   one of each.
+#'   }
+#'   When \code{stacked} is not given with dimensions, the stacking is the one
+#'   whose replicate is the most square (the smallest difference between its
+#'   rows and its columns) among those that fit the dimensions; this also
+#'   chooses among the panels of \code{"grid_panel"}. A tie goes to
+#'   \code{"vertical"}, then to \code{"horizontal"}, then to the panel with the
+#'   most rows of replicates. CRD, and factorials and split plots in CRD, have
+#'   no replicates to stack: \code{stacked} with their dimensions is an error.
+#'
+#'   Dimensions that do not fit, or do not fit the stacking asked for, are an
+#'   error that suggests dimensions that do. \code{layout} selects a numbered
+#'   layout: giving it together with dimensions is an error.
 #'
 #'   A design built with dimensions (\code{RCBD(..., nrows = 4)}) has one
 #'   layout: the grid stored in its field book, numbered along the path of the
-#'   planter it was built with. \code{field_layout()} returns that field book
-#'   when it is called with no other argument, with the same \code{planter} or
-#'   with the same dimensions. Another \code{planter}, a \code{stacked} other
-#'   than the default or other dimensions are an error: for another layout,
-#'   build the design again with other dimensions or without them.
+#'   planter it was built with, its replicates stacked as its
+#'   \code{metadata$parameters$stacked} records. \code{field_layout()} returns
+#'   that field book when it is called with no other argument, or with the
+#'   same \code{planter}, \code{stacked} or dimensions. Another
+#'   \code{planter}, another \code{stacked} or other dimensions are an error:
+#'   for another layout, build the design again with other dimensions or
+#'   another stacking, or without dimensions.
 #'
 #' @param x A design created by a FielDHub function.
 #' @param layout Layout option, a whole number. The options depend on the
@@ -66,7 +86,10 @@
 #'   (by default) or \code{"cartesian"}.
 #' @param stacked How the reps are arranged: \code{"vertical"} (by default),
 #'   \code{"horizontal"}, or \code{"grid_panel"} for designs in incomplete
-#'   blocks and split plots in complete blocks with more than two reps.
+#'   blocks and split plots in complete blocks with more than two reps. With
+#'   \code{nrows} or \code{ncols} it arranges the replicates in the field of
+#'   those dimensions, for every design with replicates, and its default is
+#'   the stacking whose replicate is the most square (see the description).
 #' @param nrows,ncols Optional positive whole numbers: the rows and columns
 #'   of the field at each location, for the designs listed above. If only one
 #'   is given, the other follows from the number of plots.
@@ -85,6 +108,11 @@
 #' # Six complete blocks arranged two down and three across in a field of
 #' # 4 rows and 9 columns, numbered along the serpentine path of the field
 #' head(field_layout(RCBD(t = 6, reps = 6, seed = 1), nrows = 4, ncols = 9))
+#' # Four blocks of 1 x 6 plots one above another, or 2 x 3 blocks in a panel
+#' # of two by two, in the same field of 4 rows and 6 columns
+#' blocks <- RCBD(t = 6, reps = 4, seed = 1)
+#' head(field_layout(blocks, stacked = "vertical", nrows = 4, ncols = 6))
+#' head(field_layout(blocks, stacked = "grid_panel", nrows = 4, ncols = 6))
 #'
 #' @export
 field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "vertical",
