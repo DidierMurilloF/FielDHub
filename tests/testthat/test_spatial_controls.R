@@ -42,5 +42,6 @@ test_that("all spatial workflows share the correlation controls with their exist
                                              y = paste0("ROY", sources[[name]])))
   }
   expect_identical(sum(all.names(body(app_spatial_page)) == "app_spatial_workflow"), 1L)
-  expect_identical(sum(all.names(body(app_spatial_simulation_modal)) == "app_spatial_correlations"), 1L)
+  expect_identical(sum(all.names(body(app_spatial_simulation_modal)) == "app_simulation_modal"), 1L)
+  expect_identical(sum(all.names(body(app_simulation_modal)) == "app_spatial_correlations"), 1L)
 })

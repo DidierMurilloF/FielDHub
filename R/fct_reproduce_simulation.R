@@ -1,6 +1,6 @@
 #' Reconstruct recorded simulated responses
 #'
-#' @description Replays a classic truncated-normal or spatial AR1-by-AR1
+#' @description Replays a design-based Gaussian, classic truncated-normal or spatial AR1-by-AR1
 #' simulation using its saved input field book, parameters, seed, and RNG settings.
 #'
 #' @param x A simulation record containing \code{input_field_book},
@@ -64,12 +64,14 @@ simulation_reproduction_engine <- function(x) {
     fieldhub_abort("The simulation has invalid or missing recorded parameters or RNG metadata.")
   }
   if (!is.character(meta$model) || length(meta$model) != 1L || is.na(meta$model) ||
-      !meta$model %in% c("truncated_normal", "ar1xar1")) {
+      !meta$model %in% c("truncated_normal", "ar1xar1", "design_gaussian")) {
     fieldhub_abort("The recorded simulation model is not supported.")
   }
-  engine <- if (meta$model == "truncated_normal") {
-    simulate_classic_field_book
-  } else simulate_spatial_field_book
+  engine <- switch(meta$model,
+    truncated_normal = simulate_classic_field_book,
+    ar1xar1 = simulate_spatial_field_book,
+    design_gaussian = simulate_design_field_book
+  )
   expected <- setdiff(names(formals(engine)), "field_book")
   if (!setequal(names(meta$parameters), expected)) {
     fieldhub_abort("The recorded parameters do not match the simulation model.")

@@ -13,7 +13,7 @@ test_that("the field book and layout exports keep CHECK_DIRECTION and physical c
   x <- arc_app_design()
   spec <- spatial_workflow_spec("Augmented_RowCol")
   expect_true("CHECK_DIRECTION" %in% spec$table_columns)
-  book <- spatial_workflow_book(x$fieldBook, NULL, 10, 8)$df
+  book <- app_trait_simulation(x, x$fieldBook)$df
   file <- tempfile(fileext = ".csv")
   on.exit(unlink(file), add = TRUE)
   csv_download_handlers(function() csv_export_filename(x), function() as.data.frame(book))$content(file)

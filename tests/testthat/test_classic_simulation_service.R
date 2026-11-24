@@ -63,6 +63,6 @@ test_that("every classic module delegates response generation to the shared serv
     expect_identical(sum(symbols == "app_classic_workflow"), 1L)
     expect_false("norm_trunc" %in% symbols)
   }
-  expect_identical(sum(all.names(body(app_classic_workflow)) == "classic_workflow_book"), 1L)
-  expect_identical(sum(all.names(body(classic_workflow_book)) == "simulate_classic_field_book"), 1L)
+  expect_identical(sum(all.names(body(app_classic_workflow)) == "app_trait_simulation"), 1L)
+  expect_match(paste(deparse(body(app_trait_simulation)), collapse = " "), "stats::simulate", fixed = TRUE)
 })

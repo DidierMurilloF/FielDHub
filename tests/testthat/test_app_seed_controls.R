@@ -62,10 +62,10 @@ test_that("automatic simulation seeds come from the accepted design", {
   expect_identical(workflow_seed(numeric(), design), design$metadata$seed)
   expect_identical(workflow_seed(19, stop("Do not evaluate the design")), 19)
   expect_error(workflow_seed(NULL, list()), class = "fieldhub_internal_error")
-  settings <- list(min_value = 10, max_value = 30, response_name = "Yield")
+  settings <- list(mean = 20, residual_sd = 4, trait = "Yield")
   expect_identical(
-    classic_workflow_book(design$fieldBook, settings, workflow_seed(NULL, design)),
-    classic_workflow_book(design$fieldBook, settings, design$metadata$seed))
+    app_trait_simulation(design, design$fieldBook, settings, workflow_seed(NULL, design)),
+    app_trait_simulation(design, design$fieldBook, settings, design$metadata$seed))
 })
 
 test_that("a run resolves an automatic seed once for allocation and field construction", {

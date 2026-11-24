@@ -48,6 +48,14 @@ knitr::opts_chunk$set(
 
 ## Enhancements
 
+- `stats::simulate(x)` generates Gaussian trait data for all 21 field designs
+  using their realized treatment and experimental units. Repeated entries
+  and checks retain a shared treatment effect across locations. Set the
+  trait mean and residual SD globally or by location. Spatial correlation
+  is optional and uses physical field-book coordinates. Shiny calls the
+  package method and uses its simulated field book for tables, maps, and
+  downloads. `reproduce_simulation()` replays new and existing records.
+
 - Field dimensions for the classic designs. `CRD()`, `RCBD()`,
   `latin_square()`, `full_factorial()`, `split_plot()`, `split_split_plot()`,
   `strip_plot()`, `incomplete_blocks()`, `alpha_lattice()`, `square_lattice()`

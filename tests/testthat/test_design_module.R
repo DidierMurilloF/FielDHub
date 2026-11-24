@@ -781,9 +781,8 @@ test_that("the Augmented Row-Column entry tables and simulated field book come f
   checks <- arc_location_checks(design, 2)
   expect_identical(checks$ENTRY, 1:4)
   expect_identical(checks$TIMES, rep(8L, 4))
-  settings <- list(min_value = 1, max_value = 10, response_name = "Yield",
-                   correlation_x = 0.5, correlation_y = 0.5)
-  book <- spatial_workflow_book(design$fieldBook, settings, 10, 8, 4)
+  settings <- list(mean = 6, residual_sd = .4, trait = "Yield", spatial = TRUE)
+  book <- app_trait_simulation(design, design$fieldBook, settings, 4)
   expect_true(all(c("CHECK_DIRECTION", "Yield") %in% names(book$df)))
   expect_identical(nrow(book$df), nrow(design$fieldBook))
 })

@@ -16,7 +16,7 @@ and the named \code{parameters} used by that model.}
 The reconstructed simulation record, invisibly.
 }
 \description{
-Replays a classic truncated-normal or spatial AR1-by-AR1
+Replays a design-based Gaussian, classic truncated-normal or spatial AR1-by-AR1
 simulation using its saved input field book, parameters, seed, and RNG settings.
 }
 \details{

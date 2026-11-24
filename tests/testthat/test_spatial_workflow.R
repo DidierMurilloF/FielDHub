@@ -1,34 +1,27 @@
 test_that("spatial workflow books preserve simulation records separately from display IDs", {
   design <- partially_replicated(nrows = 4, ncols = 4, repGens = c(8, 4), repUnits = c(1, 2),
                                  seed = 18, year = 2026, spread_reps = FALSE)
+  design$fieldBook$ID <- seq_len(nrow(design$fieldBook)) + 100L
   book <- design$fieldBook
-  book$ID <- seq_len(nrow(book)) + 100L
-  settings <- list(min_value = 0, max_value = 20, response_name = "YIELD",
-                    correlation_x = .4, correlation_y = .5)
+  settings <- list(mean = 6, residual_sd = .4, trait = "YIELD", spatial = TRUE)
   set.seed(816)
   before <- .Random.seed
-  expect_identical(spatial_workflow_book(book, NULL, seed = stop("unused"),
-                                         nrows = stop("unused"), ncols = stop("unused")),
+  expect_identical(app_trait_simulation(design, book, seed = stop("unused")),
                    list(df = book, simulation = NULL))
-  expected <- simulate_spatial_field_book(book, 4, 4, .4, .5, 0, 20, "YIELD", seed = 14)
+  expected <- stats::simulate(design, seed = 14, mean = 6, residual_sd = .4, spatial = TRUE)
   for (renumber in c(FALSE, TRUE)) {
-    actual <- spatial_workflow_book(book, settings, 4, 4, 14, renumber_display = renumber)
+    actual <- app_trait_simulation(design, book, settings, 14, renumber_display = renumber)
     display <- expected$field_book
     if (renumber) display$ID <- seq_len(nrow(display))
     expect_identical(actual, list(df = display, simulation = expected))
   }
   plain_display <- book
   plain_display$ID <- seq_len(nrow(book))
-  expect_identical(spatial_workflow_book(book, renumber_display = TRUE),
+  expect_identical(app_trait_simulation(design, book, renumber_display = TRUE),
                    list(df = plain_display, simulation = NULL))
   expect_identical(.Random.seed, before)
-  for (bad in list(NULL, list(), book[FALSE, ])) {
-    expect_error(spatial_workflow_book(bad), class = "fieldhub_input_error")
-  }
-  for (bad in list(1, list(), settings[1:3])) {
-    expect_error(spatial_workflow_book(book, bad, 4, 4, 14), class = "fieldhub_input_error")
-  }
-  expect_error(spatial_workflow_book(book, renumber_display = NA), class = "fieldhub_input_error")
+  expect_error(app_trait_simulation(design, book, renumber_display = NA),
+               class = "fieldhub_input_error")
 })
 
 test_that("spatial workflows keep per-module view and correlation identifiers", {
@@ -58,14 +51,16 @@ test_that("shared spatial dialogs preserve controls and use trait terminology", 
   skip_if_not_installed("shiny")
   for (module in names(fieldhub_spatial_workflows())) {
     spec <- spatial_workflow_spec(module)
-    for (failed in c(FALSE, TRUE)) {
-      html <- as.character(app_spatial_simulation_modal(shiny::NS("example"), spec, failed))
-      for (id in c(spec$simulation_ids, spec$correlation_ids, spec$heatmap_checkbox)) {
+    for (spatial in c(FALSE, TRUE)) {
+      html <- as.character(app_spatial_simulation_modal(shiny::NS("example"), spec, spatial_available = spatial))
+      for (id in c(spec$simulation_ids, if (spatial) spec$correlation_ids, spec$heatmap_checkbox)) {
         expect_match(html, paste0('id="example-', id, '"'), fixed = TRUE)
       }
       expect_match(html, "Trait name", fixed = TRUE)
       expect_false(grepl("Input Trial Name:", html, fixed = TRUE))
-      expect_identical(grepl("Invalid input of data max and min", html, fixed = TRUE), failed)
+      expect_match(html, "Trait mean", fixed = TRUE)
+      expect_match(html, "Plot-to-plot SD", fixed = TRUE)
+      expect_identical(grepl("Add spatial correlation", html, fixed = TRUE), spatial)
     }
   }
 })

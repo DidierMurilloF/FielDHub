@@ -38,5 +38,7 @@ test_that("all spatial modules use the shared heatmap builder", {
   for (module in modules) {
     expect_identical(sum(all.names(spatial_server_body(module)) == "app_spatial_workflow"), 1L)
   }
-  expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_spatial_heatmap"), 1L)
+  symbols <- all.names(body(app_spatial_workflow))
+  expect_identical(sum(symbols == "field_book_heatmap_data"), 1L)
+  expect_identical(sum(symbols == "app_tile_heatmap"), 1L)
 })

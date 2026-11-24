@@ -6,14 +6,13 @@
 fieldhub_spatial_workflows <- function() {
   entry <- function(ids, simulation_ids, correlation_ids, correlation_suffix,
                      heatmap_checkbox = NULL,
-                     numeric_labels = c("Minimum value", "Maximum value"),
                      renumber_display = FALSE, coerce_book = FALSE,
                      table_columns = c("EXPT", "LOCATION", "PLOT", "ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT"),
                      table_height = 600, table_collapse = NULL,
                      heatmap_height = 720, heatmap_title = FALSE) {
     list(ids = ids, simulation_ids = simulation_ids, correlation_ids = correlation_ids,
          correlation_suffix = correlation_suffix, heatmap_checkbox = heatmap_checkbox,
-         numeric_labels = numeric_labels, renumber_display = renumber_display,
+         renumber_display = renumber_display,
          coerce_book = coerce_book, table_columns = table_columns,
          table_height = table_height, table_collapse = table_collapse,
          heatmap_height = heatmap_height, heatmap_title = heatmap_title)
@@ -81,7 +80,6 @@ fieldhub_spatial_workflows <- function() {
       correlation_ids = c(x = "ROX.PREP", y = "ROY.PREP"),
       correlation_suffix = ".PREP",
       heatmap_checkbox = "heatmap_PREP",
-      numeric_labels = c("Minimum value", "Maximum value"),
       coerce_book = TRUE,
       table_height = 500,
       heatmap_height = 700
@@ -94,7 +92,6 @@ fieldhub_spatial_workflows <- function() {
       correlation_ids = c(x = "ROX.PREP", y = "ROY.PREP"),
       correlation_suffix = ".PREP",
       heatmap_checkbox = "heatmap_PREP",
-      numeric_labels = c("Minimum value", "Maximum value"),
       renumber_display = TRUE,
       table_height = 500,
       heatmap_height = 700
