@@ -19,6 +19,10 @@
   complete blocks (\code{type = 2}), whose whole plots are numbered in a
   fixed order.
   \item \code{stacked} it can be \code{vertical} or \code{horizontal} stacked layout.
+  \item \code{nrows}, \code{ncols} the rows and columns of a field grid, as in
+  \code{\link{field_layout}()}; they cannot be combined with \code{layout}
+  or \code{stacked}. A design built with \code{nrows} or \code{ncols} draws
+  only that grid: another \code{planter} or \code{stacked} is an error.
   \item \code{field_grid} \code{FALSE} removes the white line drawn around every
   plot in maps that have one. Other arguments are passed to \code{desplot}.
 }}

@@ -56,15 +56,43 @@ matches_stored_grid <- function(x, nrows, ncols) {
 #' @noRd
 number_along_field <- function(book, planter) {
   for (rows in split(seq_len(nrow(book)), match(book$LOCATION, unique(book$LOCATION)))) {
-    path <- planting_path(max(book$ROW[rows]), max(book$COLUMN[rows]), planter)
-    step <- matrix(0L, max(path[, "ROW"]), max(path[, "COLUMN"]))
-    step[path] <- seq_len(nrow(path))
     plots <- book$PLOT[rows]
     unit <- match(plots, unique(plots))
-    reached <- tapply(step[cbind(book$ROW[rows], book$COLUMN[rows])], unit, min)
+    # Whole plots that tile the field as equal rectangles are planted along
+    # the path over the grid of whole plots, so consecutive numbers are
+    # neighbours; a plot of one cell is its own tile, the path of the field
+    tile <- unit_tiling(book$ROW[rows], book$COLUMN[rows], unit)
+    path <- planting_path(tile$nrows, tile$ncols, planter)
+    step <- matrix(0L, tile$nrows, tile$ncols)
+    step[path] <- seq_len(nrow(path))
+    reached <- tapply(step[cbind(tile$row, tile$col)], unit, min)
     book$PLOT[rows] <- sort(unique(plots))[rank(reached)][unit]
   }
   book
+}
+
+#' The grid of plot units in a field
+#'
+#' When every unit (the cells that share one plot number) is a full rectangle
+#' of the same height and width and the units tile the field, each cell is
+#' mapped to its unit's place in the grid of units. Otherwise every cell is
+#' its own place, the path of the field.
+#' @noRd
+unit_tiling <- function(row, col, unit) {
+  top <- tapply(row, unit, min)
+  left <- tapply(col, unit, min)
+  height <- tapply(row, unit, max) - top + 1L
+  width <- tapply(col, unit, max) - left + 1L
+  h <- max(height)
+  w <- max(width)
+  tiles <- all(height == h) && all(width == w) && all(tabulate(unit) == h * w) &&
+    all((top - 1L) %% h == 0L) && all((left - 1L) %% w == 0L) &&
+    max(row) %% h == 0L && max(col) %% w == 0L
+  if (!tiles || (h == 1L && w == 1L)) {
+    return(list(row = row, col = col, nrows = max(row), ncols = max(col)))
+  }
+  list(row = (top[unit] - 1L) %/% h + 1L, col = (left[unit] - 1L) %/% w + 1L,
+       nrows = max(row) %/% h, ncols = max(col) %/% w)
 }
 
 grid_factor_pairs <- function(n) {

@@ -319,6 +319,51 @@ test_that("consecutive plot numbers are neighbours in a serpentine field", {
   expect_identical(book$REP[order(book$ROW, book$COLUMN)][1:18], rep(rep(1:3, each = 3), 2))
 })
 
+test_that("consecutive whole plots are neighbours in a serpentine field", {
+  # Whole plots two rows tall: the planter follows the grid of whole plots,
+  # so the whole plot after 103 is the one beside it, not across the field
+  designs <- list(
+    split_plot(wp = 3, sp = 2, reps = 2, seed = 11, nrows = 4),
+    split_plot(wp = 2, sp = 3, reps = 3, l = 2, seed = 4, ncols = 2),
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 1, nrows = 4),
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 1, nrows = 2)
+  )
+  for (design in designs) {
+    for (site in split(design$fieldBook, design$fieldBook$LOCATION, drop = TRUE)) {
+      top <- tapply(site$ROW, site$PLOT, min)
+      left <- tapply(site$COLUMN, site$PLOT, min)
+      height <- tapply(site$ROW, site$PLOT, max) - top + 1L
+      width <- tapply(site$COLUMN, site$PLOT, max) - left + 1L
+      step_row <- abs(diff(top))
+      step_col <- abs(diff(left))
+      beside <- (step_row == 0L & step_col == width[-length(width)]) |
+        (step_col == 0L & step_row == height[-length(height)])
+      expect_true(all(beside), info = class(design)[1L])
+    }
+  }
+  book <- designs[[1L]]$fieldBook
+  map <- tapply(book$PLOT, list(book$ROW, book$COLUMN), unique)
+  expect_equal(unname(map[3L, ]), c(203, 202, 201))
+})
+
+test_that("plot() follows the rules of field_layout() for field grids", {
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  stored <- RCBD(t = 6, reps = 6, seed = 1, nrows = 4)
+  fixed <- "built on a fixed 4 x 9 field with a serpentine planter"
+  expect_error(plot(stored, planter = "cartesian"), fixed, class = "fieldhub_input_error")
+  expect_error(plot(stored, stacked = "horizontal"), fixed, class = "fieldhub_input_error")
+  expect_identical(plot(stored)$field_book, stored$fieldBook)
+  expect_identical(plot(stored, planter = "serpentine", stacked = "vertical")$field_book,
+                   stored$fieldBook)
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(plot(x, layout = 2, nrows = 4), "'layout'.*'stacked'",
+               class = "fieldhub_input_error")
+  expect_error(plot(x, stacked = "horizontal", ncols = 9), "'layout'.*'stacked'",
+               class = "fieldhub_input_error")
+  expect_identical(plot(x, nrows = 4)$field_book, field_layout(x, nrows = 4))
+})
+
 test_that("fields of one row and of one column are valid grids", {
   designs <- list(CRD(t = 4, reps = 3, seed = 1),
                   RCBD(t = 3, reps = 2, seed = 1),

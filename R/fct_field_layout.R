@@ -37,7 +37,10 @@
 #'   order as the planter reaches each plot, and the path does not restart in
 #'   each block or replicate. With a serpentine planter, consecutive plot
 #'   numbers are therefore neighbours in the field. Subplots that share a plot
-#'   number keep sharing one. The randomization does not change: every row of
+#'   number keep sharing one; whole plots that tile the field as equal
+#'   rectangles are numbered along the planter's path over the grid of whole
+#'   plots, so consecutive whole plots are neighbours too. The randomization
+#'   does not change: every row of
 #'   the field book keeps its treatment, replicate and block, and only
 #'   \code{PLOT} differs from the design's own field book. Where the plot
 #'   numbers restart at each replicate (101, 201, ...), the hundreds name the
@@ -91,18 +94,9 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   }
   x <- with_design_class(x)
   check_layout_arguments(planter, stacked)
-  # A design built with dimensions has one layout: its grid, numbered along
-  # the path of the planter it was built with
-  if (stores_design_grid(x) &&
-      ((!missing(planter) && !identical(planter, stored_grid_planter(x))) ||
-         !identical(stacked, "vertical"))) {
-    abort_fixed_grid(x)
-  }
+  check_fixed_grid_request(x, planter, stacked, planter_given = !missing(planter))
   if (!is.null(nrows) || !is.null(ncols)) {
-    if (!missing(layout) || !missing(stacked)) {
-      fieldhub_abort("'layout' and 'stacked' select a numbered layout: ",
-                     "they cannot be combined with 'nrows' or 'ncols'.")
-    }
+    check_dimensions_alone(layout_given = !missing(layout), stacked_given = !missing(stacked))
     if (inherits(x, "fieldhub_rcbd")) return(rcbd_grid_layout(x, nrows, ncols, planter))
     spec <- design_grid_spec(x)
     if (is.null(spec)) fieldhub_abort("Field dimensions are not supported for this design.")
@@ -122,6 +116,27 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
     )
   }
   all_locations_layout(x, options, layout)
+}
+
+# A design built with dimensions has one layout: its grid, numbered along the
+# path of the planter it was built with. Another planter or a stacking other
+# than the default is refused; the same planter or none returns the grid.
+check_fixed_grid_request <- function(x, planter, stacked, planter_given) {
+  if (stores_design_grid(x) &&
+      ((planter_given && !identical(planter, stored_grid_planter(x))) ||
+         !identical(stacked, "vertical"))) {
+    abort_fixed_grid(x)
+  }
+  invisible(x)
+}
+
+# A numbered layout option or a stacking cannot be combined with dimensions
+check_dimensions_alone <- function(layout_given, stacked_given) {
+  if (layout_given || stacked_given) {
+    fieldhub_abort("'layout' and 'stacked' select a numbered layout: ",
+                   "they cannot be combined with 'nrows' or 'ncols'.")
+  }
+  invisible(TRUE)
 }
 
 # Store the coordinates of a grid chosen when the design is built. The

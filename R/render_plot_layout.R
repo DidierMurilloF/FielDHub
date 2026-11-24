@@ -39,6 +39,17 @@ plot_layout <- function(
     l = 1,
     stacked = "vertical",
     ...) {
+    # The same rules as field_layout(): a design built with dimensions draws
+    # only its grid, and dimensions select a grid, not a numbered option
+    if (inherits(x, "FielDHub")) {
+      check_layout_arguments(planter, stacked)
+      check_fixed_grid_request(with_design_class(x), planter, stacked,
+                               planter_given = !missing(planter))
+    }
+    dots <- list(...)
+    if (!is.null(dots$nrows) || !is.null(dots$ncols)) {
+      check_dimensions_alone(layout_given = !missing(layout), stacked_given = !missing(stacked))
+    }
     checked_layout_view(x, layout = layout, planter = planter, location = l,
                         stacked = stacked, ...)
 }

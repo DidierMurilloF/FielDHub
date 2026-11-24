@@ -74,7 +74,10 @@ Returns the field book of a design with the \code{ROW} and
   order as the planter reaches each plot, and the path does not restart in
   each block or replicate. With a serpentine planter, consecutive plot
   numbers are therefore neighbours in the field. Subplots that share a plot
-  number keep sharing one. The randomization does not change: every row of
+  number keep sharing one; whole plots that tile the field as equal
+  rectangles are numbered along the planter's path over the grid of whole
+  plots, so consecutive whole plots are neighbours too. The randomization
+  does not change: every row of
   the field book keeps its treatment, replicate and block, and only
   \code{PLOT} differs from the design's own field book. Where the plot
   numbers restart at each replicate (101, 201, ...), the hundreds name the
