@@ -186,7 +186,7 @@ test_that("(R6) incomplete_blocks() keeps its 1.5 signature without an internal 
   expect_identical(
     names(formals(incomplete_blocks)),
     c("t", "k", "r", "l", "plotNumber", "locationNames", "seed", "data", "reps",
-      "nrows", "ncols")
+      "nrows", "ncols", "stacked")
   )
 })
 

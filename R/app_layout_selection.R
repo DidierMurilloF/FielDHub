@@ -19,7 +19,7 @@ app_layout_selection <- function(input, session, design, planter, ids) {
       choices <- validate_design(layout_choice_labels(design(), planter = planter(),
                                                       stacked = stacking, include_grids = TRUE),
                                  report = TRUE)
-      first <- if (length(choices)) choices[[1L]] else 1
+      first <- if (length(choices)) app_first_layout_choice(choices) else 1
       reset(first)
       shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Layout option",
                                choices = choices, selected = first)
@@ -40,9 +40,23 @@ app_layout_selection <- function(input, session, design, planter, ids) {
 app_selected_layout_view <- function(design, selected, planter, location, stacking) {
   if (grepl("^grid:[0-9]+:[0-9]+$", selected)) {
     dims <- as.numeric(strsplit(selected, ":", fixed = TRUE)[[1L]][-1L])
+    # The replicates of a grid lie as the "Reps layout" of its menu says; a
+    # design without replicates has one field for its dimensions
+    replicates <- inherits(design, "FielDHub") &&
+      !is.null(grid_replicate_unit(with_design_class(design)))
     return(checked_layout_view(design, planter = planter, location = location,
-                               stacked = stacking, nrows = dims[1L], ncols = dims[2L]))
+                               stacked = if (replicates) stacking,
+                               nrows = dims[1L], ncols = dims[2L]))
   }
   checked_layout_view(design, layout = suppressWarnings(as.numeric(selected)),
                       planter = planter, location = location, stacked = stacking)
+}
+
+#' The first option of a layout menu: the one a page or a stacking opens on
+#' @param choices The value of \code{layout_choice_labels()}.
+#' @noRd
+app_first_layout_choice <- function(choices) {
+  if (!length(choices)) return(NULL)
+  first <- choices[[1L]]
+  if (is.list(first)) first[[1L]] else first
 }

@@ -499,17 +499,6 @@ test_that("field dimensions cannot be combined with a numbered layout", {
 
 # Stacking of the replicates in a field of given dimensions -----------------
 
-# How the replicates (or the squares) of the first location lie in the field:
-# one above another, side by side, or in rows and columns of replicates
-replicates_lie <- function(book, unit = "REP") {
-  book <- book[book$LOCATION == book$LOCATION[1L], ]
-  rows <- unique(lapply(split(book$ROW, book[[unit]]), range))
-  columns <- unique(lapply(split(book$COLUMN, book[[unit]]), range))
-  if (length(columns) == 1L && length(rows) > 1L) return("vertical")
-  if (length(rows) == 1L && length(columns) > 1L) return("horizontal")
-  if (length(rows) > 1L && length(columns) > 1L) "grid_panel" else "one replicate"
-}
-
 # Rows and columns of each replicate
 replicate_shape <- function(book, unit = "REP") {
   unique(lapply(split(book[c("ROW", "COLUMN")], book[[unit]]), function(u) {

@@ -5,10 +5,10 @@
 #' @noRd
 fieldhub_classic_workflows <- function() {
   layout_entry <- function(output, ids, widths = c(2, 3, 3, 3), container = "split",
-                            grid = FALSE, select_layout = FALSE, select_location = FALSE,
+                            select_layout = FALSE, select_location = FALSE,
                             current_planter = FALSE) {
     list(output = output, ids = ids, widths = widths, container = container,
-         grid = grid, select_layout = select_layout, select_location = select_location,
+         select_layout = select_layout, select_location = select_location,
          current_planter = current_planter)
   }
   entry <- function(ids, simulation_ids, export_prefixes, table_columns, layout,
@@ -161,7 +161,7 @@ fieldhub_classic_workflows <- function() {
     Alpha_Lattice = entry(
       layout = layout_entry("well_panel_layout",
         c(layout = "layoutO", stacked = "stackedAlpha", location = "locLayout"), widths = c(3, 3, 2, 2),
-        container = "page", grid = TRUE, select_layout = TRUE),
+        container = "page", select_layout = TRUE),
       ids = c(plot_type = "typlotALPHA", simulate = "Simulate.alpha", plot = "random_layout",
         table = "ALPHA_fieldbook", field_book_download = "downloadData.alpha", layout_download = "downloadCsv.alpha"
         ),
@@ -175,7 +175,7 @@ fieldhub_classic_workflows <- function() {
     Square_Lattice = entry(
       layout = layout_entry("well_panel_layout_sq",
         c(layout = "layoutO_sq", stacked = "stacked_sq", location = "locLayout_sq"),
-        widths = c(3, 3, 2, 2), grid = TRUE, select_layout = TRUE),
+        widths = c(3, 3, 2, 2), select_layout = TRUE),
       ids = c(plot_type = "typlotSQ", simulate = "Simulate.square", plot = "random_layout", table = "square_fieldbook",
         field_book_download = "downloadData.square", layout_download = "downloadCsv.square"
         ),
@@ -190,7 +190,7 @@ fieldhub_classic_workflows <- function() {
     Rectangular_Lattice = entry(
       layout = layout_entry("well_panel_layout_rt",
         c(layout = "layoutO_rt", stacked = "stackedRT", location = "locLayout_rt"),
-        widths = c(3, 3, 2, 2), grid = TRUE, select_layout = TRUE),
+        widths = c(3, 3, 2, 2), select_layout = TRUE),
       ids = c(plot_type = "typlotRT", simulate = "Simulate.rectangular", plot = "random_layout",
         table = "rectangular_fieldbook", field_book_download = "downloadData.rectangular",
         layout_download = "downloadCsv.rectangular"),
