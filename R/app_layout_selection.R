@@ -21,7 +21,7 @@ app_layout_selection <- function(input, session, design, planter, ids) {
                                  report = TRUE)
       first <- if (length(choices)) app_first_layout_choice(choices) else 1
       reset(first)
-      shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Layout option",
+      shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Field dimensions",
                                choices = choices, selected = first)
     })
     shiny::observeEvent(input[[ids[["layout"]]]], reset(NULL))
@@ -38,15 +38,14 @@ app_layout_selection <- function(input, session, design, planter, ids) {
 }
 
 app_selected_layout_view <- function(design, selected, planter, location, stacking) {
-  if (grepl("^grid:[0-9]+:[0-9]+$", selected)) {
-    dims <- as.numeric(strsplit(selected, ":", fixed = TRUE)[[1L]][-1L])
-    # The replicates of a grid lie as the "Reps layout" of its menu says; a
-    # design without replicates has one field for its dimensions
-    replicates <- inherits(design, "FielDHub") &&
-      !is.null(grid_replicate_unit(with_design_class(design)))
+  grid <- regmatches(selected, regexec("^grid:([a-z_]+):([0-9]+):([0-9]+)$", selected))[[1L]]
+  if (length(grid)) {
+    # A grid is drawn with its own stacking, the one its name states, not
+    # with that of the menu that lists it; a design without replicates has
+    # one field for its dimensions ("none")
     return(checked_layout_view(design, planter = planter, location = location,
-                               stacked = if (replicates) stacking,
-                               nrows = dims[1L], ncols = dims[2L]))
+                               stacked = if (!identical(grid[2L], "none")) grid[2L],
+                               nrows = as.numeric(grid[3L]), ncols = as.numeric(grid[4L])))
   }
   checked_layout_view(design, layout = suppressWarnings(as.numeric(selected)),
                       planter = planter, location = location, stacked = stacking)
@@ -57,6 +56,5 @@ app_selected_layout_view <- function(design, selected, planter, location, stacki
 #' @noRd
 app_first_layout_choice <- function(choices) {
   if (!length(choices)) return(NULL)
-  first <- choices[[1L]]
-  if (is.list(first)) first[[1L]] else first
+  choices[[1L]]
 }

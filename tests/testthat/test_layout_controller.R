@@ -61,16 +61,15 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
     session$setInputs(stacked = "vertical", layout = "1", location = "2")
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, layout = 1, planter = "cartesian"))
-    session$setInputs(layout = "grid:4:9")
-    # No stack of six blocks fits 4 x 9: a selection that the vertical menu
-    # does not offer is a message
+    session$setInputs(layout = "grid:vertical:4:9")
+    # No stack of six blocks fits 4 x 9: a grid that no menu offers is a message
     expect_error(view(), class = "shiny.silent.error")
     session$setInputs(stacked = "grid_panel")
     # A new stacking opens on its first option, the most square field
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, stacked = "grid_panel", nrows = 6, ncols = 6,
                                   planter = "cartesian"))
-    session$setInputs(layout = "grid:4:9")
+    session$setInputs(layout = "grid:grid_panel:4:9")
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, stacked = "grid_panel", nrows = 4, ncols = 9,
                                   planter = "cartesian"))
@@ -85,14 +84,16 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
                      field_layout(design, layout = as.numeric(layout_choice_labels(
                        design, planter = "cartesian", stacked = "horizontal")[1L]),
                        planter = "cartesian", stacked = "horizontal"))
-    session$setInputs(layout = "grid:1:36")
+    # A grid is drawn with the stacking of its value, whatever the menu says:
+    # the one-row field of the grid panel has its blocks side by side
+    session$setInputs(stacked = "grid_panel", layout = "grid:horizontal:1:36")
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, stacked = "horizontal", nrows = 1, planter = "cartesian"))
     expect_identical(view()$layout_metadata$parameters$stacked, "horizontal")
   })
 })
 
-test_that("the layout menu of a real page follows its 'Reps layout' to the drawn field", {
+test_that("the layout menu of a real page follows its 'Replicate layout' to the drawn field", {
   # The module every classic page mounts: the panel it renders and the view
   # it hands to the plot, the field book and the downloads
   pages <- list(
@@ -105,6 +106,11 @@ test_that("the layout menu of a real page follows its 'Reps layout' to the drawn
     IBD = incomplete_blocks(t = 12, k = 4, reps = 4, seed = 1),
     Alpha_Lattice = alpha_lattice(t = 12, k = 3, reps = 4, seed = 36)
   )
+  lies <- function(name, menu) {
+    if (grepl("stacked vertically", name)) "vertical" else
+      if (grepl("stacked horizontally", name)) "horizontal" else
+        if (grepl("replicates [0-9]", name)) "grid_panel" else menu
+  }
   options_of <- function(html, id) {
     select <- regmatches(html, regexpr(paste0('(?s)<select[^>]*id="', id, '".*?</select>'), html,
                                        perl = TRUE))
@@ -126,7 +132,7 @@ test_that("the layout menu of a real page follows its 'Reps layout' to the drawn
       expect_identical(stackings, c("vertical", "horizontal", "grid_panel"), info = module)
       # The page opens on the vertical menu
       expect_identical(options_of(html, session$ns(ids[["layout"]])),
-                       as.character(unlist(layout_choice_labels(design, include_grids = TRUE))),
+                       unname(layout_choice_labels(design, include_grids = TRUE)),
                        info = module)
       set <- function(id, value) do.call(session$setInputs, stats::setNames(list(value), ids[[id]]))
       set("stacked", "vertical")
@@ -134,22 +140,29 @@ test_that("the layout menu of a real page follows its 'Reps layout' to the drawn
       if ("location" %in% names(ids)) set("location", "1")
       for (stacked in c("horizontal", "grid_panel", "vertical")) {
         set("stacked", stacked)
-        choices <- unlist(layout_choice_labels(design, stacked = stacked, include_grids = TRUE))
+        choices <- layout_choice_labels(design, stacked = stacked, include_grids = TRUE)
+        # The vertical and horizontal menus hold no field grid
+        expect_identical(any(grepl("^grid:", choices)), stacked == "grid_panel",
+                         info = paste(module, stacked))
         # The stacking opens on its first option, whatever the select still
         # holds; the browser then sets the select to it
-        expect_identical(replicates_lie(view()$allSitesFieldbook, unit), stacked,
-                         info = paste(module, stacked))
+        expect_identical(replicates_lie(view()$allSitesFieldbook, unit),
+                         lies(names(choices)[1L], stacked), info = paste(module, stacked))
         set("layout", paste0(choices[[1L]], ""))
         for (i in seq_along(choices)) {
           set("layout", paste0(choices[[i]], ""))
           info <- paste(module, stacked, names(choices)[i])
           book <- view()$allSitesFieldbook
-          expect_identical(replicates_lie(book, unit), stacked, info = info)
+          # Every option lies as its menu says or, in the grid panel, as its
+          # own name says
+          expect_identical(replicates_lie(book, unit), lies(names(choices)[i], stacked), info = info)
           if (grepl("^grid:", choices[[i]])) {
-            dims <- as.numeric(strsplit(choices[[i]], ":", fixed = TRUE)[[1L]][-1L])
-            expect_identical(book, field_layout(design, stacked = stacked, nrows = dims[1L],
-                                                ncols = dims[2L]), info = info)
-            expect_identical(view()$layout_metadata$parameters$stacked, stacked, info = info)
+            grid <- strsplit(choices[[i]], ":", fixed = TRUE)[[1L]]
+            expect_identical(grid[2L], lies(names(choices)[i], stacked), info = info)
+            expect_identical(book, field_layout(design, stacked = grid[2L],
+                                                nrows = as.numeric(grid[3L]),
+                                                ncols = as.numeric(grid[4L])), info = info)
+            expect_identical(view()$layout_metadata$parameters$stacked, grid[2L], info = info)
           }
           expect_silent(ggplot2::ggplot_build(view()$out_layout))
         }
@@ -178,19 +191,18 @@ test_that("field grids of every classic design reach the Shiny layout view", {
   }
   for (name in names(designs)) {
     current <- designs[[name]]
-    # The first field grid the page offers, under the stacking that lists it
-    menus <- lapply(stats::setNames(nm = c("vertical", "horizontal", "grid_panel")), function(stacked) {
-      layout_choice_labels(current, stacked = stacked, include_grids = TRUE)
-    })
-    menus <- Filter(function(menu) is.list(menu) && "Field grid" %in% names(menu), menus)
-    expect_gt(length(menus), 0L)
-    stacking <- names(menus)[1L]
-    grid <- menus[[1L]][["Field grid"]][[1L]]
-    dims <- as.numeric(strsplit(grid, ":", fixed = TRUE)[[1L]][-1L])
+    # The first field grid the page offers: in its one list of fields, or
+    # under the grid panel, with the stacking that its value carries
+    menu <- layout_choice_labels(current, include_grids = TRUE,
+                                 stacked = utils::tail(layout_stacking_choices(current), 1L))
+    grid <- menu[grepl("^grid:", menu)][[1L]]
+    stacking <- strsplit(grid, ":", fixed = TRUE)[[1L]][2L]
+    dims <- as.numeric(strsplit(grid, ":", fixed = TRUE)[[1L]][3:4])
     shiny::testServer(server, {
       session$setInputs(stacked = "vertical", layout = "1", location = "1")
       expect_identical(view()$allSitesFieldbook, field_layout(current), info = name)
-      session$setInputs(stacked = stacking, layout = grid)
+      session$setInputs(stacked = utils::tail(layout_stacking_choices(current), 1L)[[1L]],
+                        layout = grid)
       book <- if (name == "CRD") {
         field_layout(current, nrows = dims[1L], ncols = dims[2L])
       } else {
@@ -202,7 +214,7 @@ test_that("field grids of every classic design reach the Shiny layout view", {
       expect_silent(ggplot2::ggplot_build(view()$out_layout))
       expect_silent(ggplot2::ggplot_build(view()$out_layoutPlots))
       # A grid that does not fit this design is a message, not a crash
-      session$setInputs(layout = "grid:7:7")
+      session$setInputs(layout = "grid:vertical:7:7")
       expect_error(view(), class = "shiny.silent.error", info = name)
       session$setInputs(stacked = "vertical", layout = "1")
       expect_identical(view()$allSitesFieldbook, field_layout(current), info = name)

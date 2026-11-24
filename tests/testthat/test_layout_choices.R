@@ -60,7 +60,7 @@ test_that("the layout options are named by the shape of their field, with the va
   crd <- CRD(t = 15, reps = 4, seed = 5)
   expect_identical(layout_choice_labels(crd), c("4 \u00d7 15" = 1L, "15 \u00d7 4" = 2L))
   expect_identical(unname(layout_choice_labels(crd)), layout_choices(crd))
-  # the most square field first, the wider of two alike before the taller
+  # the most square field first, the one with fewer rows of two alike
   rcbd <- RCBD(t = 18, reps = 3, seed = 4)
   for (stacked in c("vertical", "horizontal")) {
     labels <- layout_choice_labels(rcbd, stacked = stacked)
@@ -69,6 +69,7 @@ test_that("the layout options are named by the shape of their field, with the va
     expect_false(is.unsorted(key))
     expect_true(all(diff(sizes[1L, ])[diff(key) == 0] >= 0))
     expect_setequal(unname(labels), layout_choices(rcbd, stacked = stacked))
+    expect_identical(anyDuplicated(names(labels)), 0L)
     # the title of each option is the shape of its name
     for (i in seq_along(labels)) {
       title <- checked_layout_view(rcbd, layout = labels[[i]], planter = "serpentine", location = 1,
@@ -83,7 +84,7 @@ test_that("the layout options are named by the shape of their field, with the va
   # two options of one shape say how their incomplete blocks lie in the field
   alpha <- alpha_lattice(t = 36, k = 6, reps = 3, seed = 1)
   expect_identical(names(layout_choice_labels(alpha)),
-                   c("9 \u00d7 12", "12 \u00d7 9", "6 \u00d7 18", "18 \u00d7 6 \u00b7 blocks of 3 \u00d7 2",
+                   c("9 \u00d7 12", "12 \u00d7 9", "6 \u00d7 18", "18 \u00d7 6 \u00b7 blocks 3 \u00d7 2",
                      "18 \u00d7 6 \u00b7 blocks in columns", "18 \u00d7 6 \u00b7 blocks in rows"))
   for (stacked in c("vertical", "horizontal")) {
     expect_false(anyDuplicated(names(layout_choice_labels(alpha, stacked = stacked))) > 0)
