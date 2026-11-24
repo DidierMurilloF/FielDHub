@@ -47,14 +47,15 @@
   squares, strip grids) are equal rectangles of the field, and the plots
   are numbered along the planting path of the whole field, serpentine or
   cartesian, so that consecutive plot numbers of a serpentine are
-  neighbours. The randomization is that of the same call without
-  dimensions: only `PLOT`, `ROW` and `COLUMN` differ. Dimensions that do
-  not fit are an error that suggests valid ones, and `layout` or
-  `stacked` together with dimensions is an error. A design built with
-  dimensions has that one layout: `field_layout()` returns it, and
-  asking for another planter, a stacking or other dimensions is an error
-  that says to build the design again with other dimensions or without
-  them. See `?field_layout`.
+  neighbours (whole plots of split and split-split plots follow the path
+  over the grid of whole plots). The randomization is that of the same
+  call without dimensions: only `PLOT`, `ROW` and `COLUMN` differ.
+  Dimensions that do not fit are an error that suggests valid ones, and
+  `layout` or `stacked` together with dimensions is an error. A design
+  built with dimensions has that one layout: `field_layout()` returns
+  it, and asking for another planter, a stacking or other dimensions is
+  an error that says to build the design again with other dimensions or
+  without them. `plot()` follows the same rules. See `?field_layout`.
 
 - `RCBD()` with dimensions keeps `plotNumber` as the matrix of blocks by
   plots, adds the field map of the plot numbers as `plotNumberField`,
@@ -63,10 +64,11 @@
   and split plots (`plotSquares`, `plotLayouts`, `layoutlocations`)
   carry the numbers of the grid.
 
-- In the app, the layout menu of these designs lists the other valid
-  field sizes in a group of their own, “Field grid”, with labels such as
-  “Grid 4 × 9”. The numbered layout options are unchanged. A grid does
-  not depend on the “Reps layout” select.
+- In the app, the layout menu of these designs lists, in a group of
+  their own, “Field grid”, the valid field sizes that no “Reps layout”
+  offers as a numbered option, with labels such as “Grid 4 × 9”. The
+  group is the same under every “Reps layout”, and the numbered layout
+  options are unchanged.
 
 - Calls without `nrows` and `ncols` return what they returned before.
 

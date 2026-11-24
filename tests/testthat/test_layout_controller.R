@@ -83,11 +83,11 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
 test_that("field grids of every classic design reach the Shiny layout view", {
   designs <- list(
     CRD = CRD(t = 4, reps = 3, seed = 1),
-    LSD = latin_square(t = 3, reps = 2, seed = 1),
+    LSD = latin_square(t = 3, reps = 4, seed = 1),
     FD = full_factorial(setfactors = c(2, 3), reps = 2, l = 2, type = 2, seed = 9),
     SPD = split_plot(wp = 3, sp = 2, reps = 2, seed = 11),
     SSPD = split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 13),
-    STRIPD = strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15),
+    STRIPD = strip_plot(Hplots = 3, Vplots = 2, reps = 4, seed = 15),
     IBD = incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17),
     Alpha = alpha_lattice(t = 12, k = 4, reps = 2, seed = 19),
     Square = square_lattice(t = 9, k = 3, reps = 2, seed = 20),

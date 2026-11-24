@@ -82,25 +82,37 @@ test_that("classic layout menus keep the numbered layouts and group the field gr
   expect_true(grepl('<optgroup label="Field grid">', html, fixed = TRUE))
   expect_true(grepl('<option value="grid:4:9">Grid 4 \u00d7 9</option>', html, fixed = TRUE))
 
+  # Two Latin squares fit only 4 x 8 and 8 x 4, the shapes of the two
+  # stackings: no field grid is offered, and the menu is the numbered one
   squares <- latin_square(t = 4, reps = 2, seed = 1)
-  square_grids <- unlist(layout_choice_labels(squares, include_grids = TRUE)[["Field grid"]])
-  expect_true("grid:4:8" %in% square_grids)
-  expect_false("grid:2:16" %in% square_grids)
+  for (stacked in c("vertical", "horizontal")) {
+    expect_identical(layout_choice_labels(squares, stacked = stacked, include_grids = TRUE),
+                     layout_choice_labels(squares, stacked = stacked))
+  }
 
   stored <- RCBD(t = 6, reps = 6, nrows = 4, ncols = 9, seed = 1)
   expect_identical(layout_choice_labels(stored, include_grids = TRUE), layout_choice_labels(stored))
 })
 
-test_that("no layout label means two different field books", {
+test_that("the field grids of a menu never repeat a stacking's layouts", {
+  # Regression test: the grid group listed the field shapes of the other
+  # stackings, so a vertical menu offered the horizontal shapes as grids,
+  # numbered differently. A grid is now only a shape no stacking offers.
   designs <- list(
-    incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17),
-    rectangular_lattice(t = 12, k = 3, reps = 2, seed = 21),
-    alpha_lattice(t = 12, k = 3, reps = 6, seed = 36),
-    full_factorial(setfactors = c(2, 3), reps = 2, type = 2, seed = 9),
-    strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15),
+    RCBD(t = 6, reps = 4, seed = 1),
+    RCBD(t = 6, reps = 6, seed = 1),
+    CRD(t = 6, reps = 4, seed = 1),
+    full_factorial(setfactors = c(2, 3), reps = 4, type = 2, seed = 1),
     latin_square(t = 4, reps = 2, seed = 7),
-    RCBD(t = 6, reps = 6, seed = 1)
+    split_plot(wp = 3, sp = 2, reps = 4, seed = 1),
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 4, seed = 1),
+    strip_plot(Hplots = 3, Vplots = 2, reps = 4, seed = 1),
+    alpha_lattice(t = 12, k = 4, reps = 4, seed = 1),
+    incomplete_blocks(t = 12, k = 4, reps = 4, seed = 1),
+    square_lattice(t = 16, k = 4, reps = 4, seed = 1),
+    rectangular_lattice(t = 12, k = 3, reps = 4, seed = 1)
   )
+  shape <- function(labels) sub(" · .*| \\([0-9]+\\)$", "", sub("^Grid ", "", labels))
   for (design in designs) {
     for (planter in c("serpentine", "cartesian")) {
       numbered <- character()
@@ -108,18 +120,25 @@ test_that("no layout label means two different field books", {
       for (stacked in c("vertical", "horizontal", "grid_panel")) {
         choices <- layout_choice_labels(design, planter = planter, stacked = stacked,
                                         include_grids = TRUE)
-        # A stacking without field grids gives the plain numbered options
         group <- if (is.list(choices)) choices[["Field grid"]]
-        numbered <- c(numbered, setdiff(names(choices), "Field grid"))
+        numbered <- c(numbered, shape(setdiff(names(choices), "Field grid")))
         for (label in names(group)) {
+          # A grid label gives one field book whatever the stacking
           book <- app_selected_layout_view(design, group[[label]], planter, 1,
                                            stacked)$allSitesFieldbook
           if (is.null(grids[[label]])) grids[[label]] <- book
           expect_identical(book, grids[[label]], info = paste(class(design)[1L], label))
         }
       }
-      expect_gt(length(grids), 0L)
-      expect_length(intersect(names(grids), numbered), 0L)
+      expect_length(intersect(shape(names(grids)), numbered), 0L)
     }
+  }
+  # The RCBD of the report: four reps of six plots stack as 4 x 6 or 6 x 4,
+  # neither is a grid; 1 x 24 and 24 x 1 are offered once each
+  rcbd <- RCBD(t = 6, reps = 4, seed = 1)
+  for (stacked in c("vertical", "horizontal")) {
+    group <- layout_choice_labels(rcbd, stacked = stacked, include_grids = TRUE)[["Field grid"]]
+    expect_false(any(c("Grid 6 × 4", "Grid 4 × 6", "Grid 3 × 8",
+                       "Grid 8 × 3") %in% names(group)), info = stacked)
   }
 })

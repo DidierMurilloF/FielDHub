@@ -40,7 +40,7 @@ layout_block_direction <- function(book) {
 #' @inheritParams layout_choices
 #' @param include_grids Append the valid field grids (\code{nrows} by
 #'   \code{ncols} of \code{field_layout()}) whose shape no numbered option of
-#'   this stacking has, as a group "Field grid" with labels such as
+#'   any stacking has, as a group "Field grid" with labels such as
 #'   "Grid 8 \u00d7 3".
 #' @return Named integer values for a select. With grids, a list for a select
 #'   with an option group: the numbered options, then "Field grid" with the
@@ -59,7 +59,9 @@ layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical"
   }, numeric(2))
   if (anyNA(sizes)) return(choices)
   shapes <- paste(sizes[1L, ], "\u00d7", sizes[2L, ])
-  extra <- if (include_grids) additional_layout_choices(x, shapes)
+  # A grid does not depend on the stacking: the group lists the shapes that
+  # no stacking offers as a numbered option, the same in every stacking
+  extra <- if (include_grids) additional_layout_choices(x, numbered_layout_shapes(x, planter, location))
   # Options of one shape differ in how the incomplete blocks lie in the
   # field: they say so. Where that does not tell them apart, a number does.
   alike <- shapes %in% shapes[duplicated(shapes)]
@@ -81,6 +83,22 @@ layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical"
   c(as.list(numbered), list("Field grid" = as.list(extra)))
 }
 
+#' Field shapes of the numbered options of every stacking
+#' @noRd
+numbered_layout_shapes <- function(x, planter = "serpentine", location = 1) {
+  shapes <- lapply(c("vertical", "horizontal", "grid_panel"), function(stacked) {
+    options <- tryCatch(layout_options(x, planter = planter, stacked = stacked),
+                        error = function(e) NULL)
+    if (length(options) < location) return(character())
+    vapply(options[[location]], function(book) {
+      if (!is.data.frame(book) || !all(c("ROW", "COLUMN") %in% names(book))) return(NA_character_)
+      paste(max(as.numeric(as.character(book$ROW))), "\u00d7",
+            max(as.numeric(as.character(book$COLUMN))))
+    }, character(1))
+  })
+  unique(stats::na.omit(unlist(shapes)))
+}
+
 additional_layout_choices <- function(x, existing_shapes) {
   spec <- design_grid_spec(x)
   rcbd <- inherits(x, "fieldhub_rcbd")
@@ -93,6 +111,7 @@ additional_layout_choices <- function(x, existing_shapes) {
   grids <- grids[order(abs(grids[, "rows"] - grids[, "cols"]), grids[, "rows"]), , drop = FALSE]
   shapes <- paste(grids[, "rows"], "\u00d7", grids[, "cols"])
   more <- !shapes %in% existing_shapes
+  if (!any(more)) return(NULL)
   values <- sprintf("grid:%.0f:%.0f", grids[, "rows"], grids[, "cols"])
   stats::setNames(values[more], paste("Grid", shapes[more]))
 }
