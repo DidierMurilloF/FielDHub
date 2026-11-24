@@ -3266,6 +3266,9 @@ further arguments passed to utility function <code>plot_layout()</code>.</p>
 <p><code>stacked</code> it can be <code>vertical</code> or <code>horizontal</code> stacked layout.</p>
 </li>
 <li>
+<p><code>nrows</code>, <code>ncols</code> the rows and columns of a field grid, as in <a href="field_layout.html"><code>field_layout()</code></a>; they cannot be combined with <code>layout</code>. With them, <code>stacked</code> arranges the replicates in that field (<code>"vertical"</code>, <code>"horizontal"</code> or <code>"grid_panel"</code>); when it is not given, the stacking whose replicate is the most square is drawn. A design built with <code>nrows</code> or <code>ncols</code> draws only that grid: another <code>planter</code> or <code>stacked</code> is an error.</p>
+</li>
+<li>
 <p><code>field_grid</code> <code>FALSE</code> removes the white line drawn around every plot in maps that have one. Other arguments are passed to <code>desplot</code>.</p>
 </li>
 </ul>

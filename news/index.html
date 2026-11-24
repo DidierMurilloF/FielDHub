@@ -3117,6 +3117,104 @@
 <h2 id="enhancements">Enhancements<a class="headerlink" href="#enhancements" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
+<p>Field dimensions for the classic designs. <code>CRD()</code>, <code>RCBD()</code>,
+  <code>latin_square()</code>, <code>full_factorial()</code>, <code>split_plot()</code>,
+  <code>split_split_plot()</code>, <code>strip_plot()</code>, <code>incomplete_blocks()</code>,
+  <code>alpha_lattice()</code>, <code>square_lattice()</code> and <code>rectangular_lattice()</code> gain
+  <code>nrows</code> and <code>ncols</code>, the rows and columns of the field at each
+  location; <code>field_layout()</code> gains the same two arguments for a design
+  built without them. One dimension is enough: the other follows from
+  the number of plots. The units of the design (complete blocks,
+  replicates and incomplete blocks, whole plots and subplots, Latin
+  squares, strip grids) are equal rectangles of the field, and the plots
+  are numbered along the planting path of the whole field, serpentine or
+  cartesian, so that consecutive plot numbers of a serpentine are
+  neighbours (whole plots of split and split-split plots follow the path
+  over the grid of whole plots). The randomization is that of the same
+  call without dimensions: only <code>PLOT</code>, <code>ROW</code> and <code>COLUMN</code> differ.
+  Dimensions that do not fit are an error that suggests valid ones, and
+  <code>layout</code> together with dimensions is an error. A design built with
+  dimensions has that one layout: <code>field_layout()</code> returns it, and
+  asking for another planter, another stacking or other dimensions is an
+  error that says to build the design again with other dimensions or
+  without them. <code>plot()</code> follows the same rules. See <code>?field_layout</code>.</p>
+</li>
+<li>
+<p><code>stacked</code> arranges the replicates of a field of given dimensions, in
+  the same eleven functions, in <code>field_layout()</code> and in <code>plot()</code>:
+  <code>"vertical"</code> puts them one above another (each across all the columns
+  of the field), <code>"horizontal"</code> side by side (each down all its rows)
+  and <code>"grid_panel"</code> in rows and columns of replicates. The replicates
+  are the complete blocks of an RCBD or of a factorial in blocks, the
+  replicates of split, split-split and strip plots, of incomplete blocks
+  and of the lattices, and the squares of a Latin square. Dimensions
+  that do not fit the stacking are an error that suggests dimensions
+  that do. When <code>stacked</code> is not given, the stacking is the one whose
+  replicate is the most square among those that fit the dimensions (a 4
+  x 3 replicate rather than a 6 x 2 one); a tie goes to the vertical
+  stack, then to the horizontal one, then to the panel with the most
+  rows of replicates. The stacking chosen is recorded in
+  <code>metadata$parameters</code> and in <code>infoDesign</code>, so <code>print()</code> shows it and
+  <code>reproduce_design()</code> rebuilds the same field. A CRD, and a factorial
+  or a split plot in CRD, has no replicates to stack: <code>stacked</code> with its
+  dimensions is an error, and so is <code>stacked</code> without dimensions in a
+  constructor.</p>
+</li>
+<li>
+<p><code>RCBD()</code> with dimensions keeps <code>plotNumber</code> as the matrix of blocks by
+  plots and adds the field map of the plot numbers as <code>plotNumberField</code>.
+  The plot-number tables of Latin squares, strip plots and split plots
+  (<code>plotSquares</code>, <code>plotLayouts</code>, <code>layoutlocations</code>) carry the numbers of
+  the grid. Every design built with dimensions records <code>nrows</code> and
+  <code>ncols</code> in <code>infoDesign</code>, beside its stacking, so <code>print()</code> and
+  <code>summary()</code> show the field of a lattice or a split plot as they show
+  that of an RCBD.</p>
+</li>
+<li>
+<p>In the app, the layout menu on the plot has the same names on every
+  page. “Replicate layout” (before, “Reps layout”) offers “Vertical”,
+  “Horizontal” and “Grid panel”; “Field dimensions” (before, “Layout
+  option”) lists the fields, each named by its rows and columns (“6 ×
+  9”): the numbered layouts (which are unchanged) first, then the field
+  grids, each from the most square on, so every menu opens on the layout
+  it opened on before. A menu lists only the fields whose replicates lie
+  as it says, numbered layouts and field grids alike: “Vertical” those
+  with the replicates one above another, “Horizontal” those with the
+  replicates side by side (three blocks of 24 have their “1 × 72” field
+  there), “Grid panel” those with rows and columns of replicates, more
+  than one of each, as <code>stacked = "grid_panel"</code> of <code>field_layout()</code> has
+  them. Every option of “Grid panel” says how its replicates lie (“6 ×
+  12 · replicates 2 × 2”, rows by columns of replicates), and “Grid
+  panel” is offered only to a design that has such a field: two or three
+  replicates have none. Fields of one size say what tells them apart
+  (“16 × 4 · blocks in rows”, “4 × 4 · whole plots in columns”) instead
+  of a number, and a layout that was listed twice is listed once. Whole
+  plots or blocks that wrap from one row of the field into the next say
+  “whole plots along the path” or “blocks along the path”. A field grid
+  of the size of a numbered layout is listed when its incomplete blocks
+  or its whole plots lie another way, and both say how: four replicates
+  of 16 treatments in blocks of 4 have “8 × 8 · replicates 2 × 2 ·
+  blocks in columns” (layout 1) and “8 × 8 · replicates 2 × 2 · blocks
+  in rows” (the field of <code>nrows = 8, ncols = 8</code>) under “Grid panel”. A
+  grid with the same field as a numbered layout, or with another path of
+  the plots inside the replicate only, is not listed again. A design
+  without replicates to arrange (a CRD, a factorial or a split plot in a
+  CRD, a single Latin square) has one list of fields, its field grids
+  included, and no “Replicate layout”.</p>
+</li>
+<li>
+<p>The spatial pages use the same names: field sizes read “18 × 18”, with
+  filler plots as “43 × 7 · 1 filler”; “Location to view” is “Location”;
+  the sizes of each location are “Field dimensions, location 1”; and the
+  options of “Plot order”, “Stack experiments” and “Blocks layout” are
+  in sentence case (“Serpentine”, “By column”). Sizes are listed from
+  the most square on, the one with fewer rows first of two alike; the
+  size selected when a page opens is the same as before.</p>
+</li>
+<li>
+<p>Calls without <code>nrows</code> and <code>ncols</code> return what they returned before.</p>
+</li>
+<li>
 <p>Redesigned Welcome, Help and About pages, in one style: a green banner
   beside a photograph, NDSU green links with accessible contrast, and a
   shared footer. Welcome walks through choosing a design (each linked to
@@ -3456,10 +3554,10 @@ designs and the <code>A-Bound</code> above.</p>
 </li>
 <li>
 <p>Multiple Diagonal Arrangement (<code>kindExpt = "DBUDC"</code>) and
-  <code>sparse_allocation()</code> offer the same opt-in check-spacing
-  optimization (<code>spread_checks = TRUE</code>, <code>dist_method</code>), in each
-  location on its own, and record <code>check_spacing</code> for every location.
-  The default layouts are unchanged.</p>
+  <code>sparse_allocation()</code> offer the same opt-in check-spacing optimization
+  (<code>spread_checks = TRUE</code>, <code>dist_method</code>), in each location on its own,
+  and record <code>check_spacing</code> for every location. The default layouts are
+  unchanged.</p>
 </li>
 <li>
 <p>The Single Diagonal Arrangement page caches complete results by

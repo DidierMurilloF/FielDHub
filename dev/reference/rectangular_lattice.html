@@ -3275,7 +3275,10 @@
 <span class="w">  </span><span class="n">locationNames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
 <span class="w">  </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
 <span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
-<span class="w">  </span><span class="n">reps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span>
+<span class="w">  </span><span class="n">reps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stacked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
@@ -3297,6 +3300,10 @@ Numeric vector with the starting plot number for each location. By default <code
 (optional) Data frame with label list of treatments.</p>
 <p>reps<br />
 Number of full resolvable replicates per location.</p>
+<p>nrows, ncols<br />
+Optional positive whole numbers: the rows and columns of the field at each location. If only one is given, the other follows from the number of plots. The field book then has <code>ROW</code> and <code>COLUMN</code>, and its plots are numbered along the serpentine planting path of the whole field. See <a href="field_layout.html"><code>field_layout</code></a> for how the design is placed.</p>
+<p>stacked<br />
+How the replicates of a field of given dimensions are arranged: <code>"vertical"</code> (one above another, each across all the columns of the field), <code>"horizontal"</code> (side by side, each down all its rows) or <code>"grid_panel"</code> (in rows and columns of replicates). It needs <code>nrows</code> or <code>ncols</code>. By default the arrangement whose replicate is the most square among those that fit the dimensions; the stacking chosen is recorded in the design. See <a href="field_layout.html"><code>field_layout</code></a>.</p>
 <h2 id="value">Value<a class="headerlink" href="#value" title="Permanent link">&para;</a></h2>
 <p>A list with two elements.</p>
 <ul>

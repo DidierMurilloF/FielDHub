@@ -3300,7 +3300,10 @@
 <span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
 <span class="w">  </span><span class="n">rep_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
-<span class="w">  </span><span class="n">spread_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span>
+<span class="w">  </span><span class="n">spread_checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">,</span>
+<span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">stacked</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NULL</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="arguments">Arguments<a class="headerlink" href="#arguments" title="Permanent link">&para;</a></h2>
@@ -3328,6 +3331,10 @@ Option for <code>serpentine</code> or <code>cartesian</code> arrangement. By def
 (optional) Number of times each check is repeated within every block. A single value is recycled across all checks, or supply one value per check. By default <code>rep_checks = NULL</code>, which is treated as 1 for every check.</p>
 <p>spread_checks<br />
 (optional) Logical. When <code>TRUE</code> (the default), the repeated copies of each check are spread across the block by placing one copy in each of <code>rep_checks</code> contiguous strata. When <code>FALSE</code>, the whole block is randomized without restriction.</p>
+<p>nrows, ncols<br />
+Optional positive whole numbers: the rows and columns of the field at each location. If only one is given, the other follows from the number of plots, including repeated checks. The complete blocks are then equal rectangles of the field, and the plots are numbered along the planting path of the whole field (see <code>planter</code>): the numbering does not restart in each block, so with <code>continuous = FALSE</code> the hundreds of a plot number name the block only where the blocks lie one above the other. See <a href="field_layout.html"><code>field_layout</code></a> for how the blocks are placed.</p>
+<p>stacked<br />
+How the blocks of a field of given dimensions are arranged: <code>"vertical"</code> (one above another, each across all the columns of the field), <code>"horizontal"</code> (side by side, each down all its rows) or <code>"grid_panel"</code> (in rows and columns of blocks). It needs <code>nrows</code> or <code>ncols</code>. By default the arrangement whose block is the most square among those that fit the dimensions; the stacking chosen is recorded in the design. See <a href="field_layout.html"><code>field_layout</code></a>.</p>
 <h2 id="value">Value<a class="headerlink" href="#value" title="Permanent link">&para;</a></h2>
 <p>A list with five elements.</p>
 <ul>
@@ -3341,10 +3348,13 @@ Option for <code>serpentine</code> or <code>cartesian</code> arrangement. By def
 <p><code>layoutRandom</code> is the RCBD layout randomization for each location.</p>
 </li>
 <li>
-<p><code>plotNumber</code> is the plot number layout for each location.</p>
+<p><code>plotNumber</code> is the plot number layout for each location: a matrix of blocks by plots, whose cells are the plot numbers of the treatments of <code>layoutRandom</code>. It has this shape with and without field dimensions.</p>
 </li>
 <li>
-<p><code>fieldBook</code> is a data frame with the RCBD field book design. Without <code>checks</code> it has columns <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code> and <code>TREATMENT</code>. When <code>checks</code> is supplied it gains <code>ENTRY</code> and <code>CHECKS</code> columns, ordered <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code>, <code>ENTRY</code>, <code>CHECKS</code>, <code>TREATMENT</code>.</p>
+<p><code>plotNumberField</code>, only when field dimensions are supplied, is the field map of the plot numbers for each location: a matrix of <code>nrows</code> by <code>ncols</code> with the first field row in its last row, as the field maps of the other designs. <code>infoDesign</code> then records <code>nrows</code> and <code>ncols</code>.</p>
+</li>
+<li>
+<p><code>fieldBook</code> is a data frame with the RCBD field book design. Without <code>checks</code> it has columns <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code> and <code>TREATMENT</code>. When <code>checks</code> is supplied it gains <code>ENTRY</code> and <code>CHECKS</code> columns, ordered <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code>, <code>ENTRY</code>, <code>CHECKS</code>, <code>TREATMENT</code>. When field dimensions are supplied, it also includes <code>ROW</code> and <code>COLUMN</code> after <code>PLOT</code>; its rows and treatments are those of the design without dimensions, and only <code>PLOT</code> differs.</p>
 </li>
 </ul>
 <h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
