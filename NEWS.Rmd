@@ -97,13 +97,16 @@ knitr::opts_chunk$set(
   "Replicate layout" (before, "Reps layout") offers "Vertical", "Horizontal"
   and "Grid panel"; "Field dimensions" (before, "Layout option") lists the
   fields, each named by its rows and columns ("6 × 9"), from the most square
-  on. The vertical and horizontal menus hold the numbered layouts, which are
-  unchanged. "Grid panel" holds every field grid of the design, whatever its
-  stacking, and each says how its replicates lie: "24 × 3 · replicates
-  stacked vertically", "3 × 24 · replicates stacked horizontally", "6 × 12 ·
-  replicates 2 × 2" (rows by columns of replicates); it is offered whenever
-  the design has such a field, so three blocks have their one-row field
-  there. Fields of one size say what tells them apart ("16 × 4 · blocks in
+  on. A menu lists only the fields whose replicates lie as it says, the
+  numbered layouts (which are unchanged) and the field grids alike:
+  "Vertical" those with the replicates one above another, "Horizontal" those
+  with the replicates side by side (three blocks of 24 have their "1 × 72"
+  field there), "Grid panel" those with rows and columns of replicates, more
+  than one of each, as `stacked = "grid_panel"` of `field_layout()` has them.
+  Every option of "Grid panel" says how its replicates lie ("6 × 12 ·
+  replicates 2 × 2", rows by columns of replicates), and "Grid panel" is
+  offered only to a design that has such a field: two or three replicates
+  have none. Fields of one size say what tells them apart ("16 × 4 · blocks in
   rows", "4 × 4 · whole plots in columns") instead of a number, and a layout
   that was listed twice is listed once. A design without replicates to
   arrange (a CRD, a factorial or a split plot in a CRD, a single Latin
