@@ -105,13 +105,6 @@ grid_factor_pairs <- function(n) {
   cbind(rows, cols = n / rows)
 }
 
-valid_field_grids <- function(book, axes = NULL) {
-  plots <- unique(tabulate(match(book$LOCATION, unique(book$LOCATION))))
-  if (length(plots) != 1L) return(grid_factor_pairs(0))
-  base <- field_grid_unit(book[book$LOCATION == book$LOCATION[1L], axes, drop = FALSE], axes)
-  sweep(grid_factor_pairs(plots / prod(base)), 2L, base, "*")
-}
-
 field_grid_unit <- function(book, axes) {
   if (!length(axes)) return(c(1L, 1L))
   vapply(book[axes], dplyr::n_distinct, integer(1))
