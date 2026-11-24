@@ -85,7 +85,7 @@
 split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
                              seed = NULL, locationNames = NULL, factorLabels = TRUE,
                              data = NULL,
-                             nrows = NULL, ncols = NULL) {
+                             nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(factorLabels, "factorLabels")
@@ -249,9 +249,9 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
                                     type = if (crd) 1 else 2)
   )
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "split_split_plot", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }

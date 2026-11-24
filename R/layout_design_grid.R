@@ -29,9 +29,12 @@ stored_grid_planter <- function(x) {
 #' A design built with field dimensions has that one layout
 #' @noRd
 abort_fixed_grid <- function(x) {
+  stacking <- x$metadata$parameters$stacked
   fieldhub_abort(
     "This design was built on a fixed ", max(x$fieldBook$ROW), " x ", max(x$fieldBook$COLUMN),
-    " field with a ", stored_grid_planter(x), " planter, and that is its only layout. ",
+    " field with a ", stored_grid_planter(x), " planter",
+    if (!is.null(stacking)) paste0(" and the \"", stacking, "\" stacking"),
+    ", and that is its only layout. ",
     "For another layout, build the design again with other 'nrows' and 'ncols', ",
     "or without them."
   )
@@ -122,6 +125,131 @@ suggest_field_grid <- function(grids, nrows, ncols) {
   paste(paste(candidates[, "rows"], candidates[, "cols"], sep = " x "), collapse = ", ")
 }
 
+#-----------------------------------------------------------------------
+# Stacking: how the replicates lie in a field of given dimensions.
+#
+# "vertical" puts the replicates one above another, each across all the
+# columns of the field; "horizontal" side by side, each down all its rows;
+# "grid_panel" in rows and columns of replicates, more than one of each.
+#-----------------------------------------------------------------------
+
+#' The unit that a stacking moves: the replicate (the complete block) of a
+#' design, or the square of a Latin square. NULL for a design without one.
+#' @noRd
+grid_replicate_unit <- function(x) {
+  if (inherits(x, "fieldhub_rcbd")) return("REP")
+  unit <- design_grid_spec(x)$groups[1L]
+  if (is.null(unit) || !unit %in% c("REP", "SQUARE")) NULL else unit
+}
+
+abort_no_replicates <- function() {
+  fieldhub_abort("This design has no replicates to stack: 'stacked' does not apply to its ",
+                 "field dimensions.")
+}
+
+check_grid_stacking <- function(stacked) {
+  if (!is.character(stacked) || length(stacked) != 1L || !stacked %in% stacking_choices) {
+    fieldhub_abort("'stacked' must be \"vertical\", \"horizontal\" or \"grid_panel\".")
+  }
+  invisible(stacked)
+}
+
+#' Rows of replicates of each arrangement of a stacking
+#' @noRd
+replicate_rows <- function(reps, stacked) {
+  divisors <- seq_len(reps)[reps %% seq_len(reps) == 0L]
+  switch(stacked,
+    vertical = reps,
+    horizontal = 1L,
+    grid_panel = divisors[divisors > 1L & divisors < reps])
+}
+
+#' The fields a design fits in, by stacking
+#'
+#' @param stacked The stackings to list; all of them by default. Ignored for
+#'   a design without replicates, whose fields have no stacking (NA).
+#' @return A data frame with one row per arrangement: the stacking, the rows
+#'   of replicates (\code{down}) and the replicates in each (\code{across}),
+#'   the rows and columns of a replicate (\code{height}, \code{width}) and of
+#'   the field (\code{rows}, \code{cols}). No row when the locations differ
+#'   in their number of plots.
+#' @noRd
+field_grid_candidates <- function(x, stacked = stacking_choices) {
+  book <- x$fieldBook
+  none <- data.frame(stacked = character(), down = numeric(), across = numeric(),
+                     height = numeric(), width = numeric())
+  plots <- unique(tabulate(match(book$LOCATION, unique(book$LOCATION))))
+  if (length(plots) != 1L) stacked <- character()
+  site <- book[book$LOCATION == book$LOCATION[1L], , drop = FALSE]
+  unit <- grid_replicate_unit(x)
+  axes <- design_grid_spec(x)$axes
+  base <- field_grid_unit(site, axes)
+  reps <- if (is.null(unit)) 1L else dplyr::n_distinct(site[[unit]])
+  # A replicate is any rectangle that holds its plots in whole units
+  shapes <- sweep(grid_factor_pairs(plots / reps / prod(base)), 2L, base, "*")
+  if (is.null(unit) && length(stacked)) stacked <- NA_character_
+  fields <- lapply(stacked, function(stacking) {
+    down <- if (is.na(stacking)) 1L else replicate_rows(reps, stacking)
+    if (!length(down)) return(none)
+    arrangement <- rep(seq_along(down), each = nrow(shapes))
+    shape <- rep(seq_len(nrow(shapes)), times = length(down))
+    data.frame(stacked = stacking, down = down[arrangement], across = reps / down[arrangement],
+               height = shapes[shape, "rows"], width = shapes[shape, "cols"])
+  })
+  fields <- do.call(rbind, c(list(none), fields))
+  fields$rows <- fields$down * fields$height
+  fields$cols <- fields$across * fields$width
+  fields
+}
+
+#' The dimensions of the candidate fields, each once
+#' @noRd
+field_grid_dimensions <- function(fields) {
+  grids <- unique(cbind(rows = fields$rows, cols = fields$cols))
+  grids[order(grids[, "rows"]), , drop = FALSE]
+}
+
+#' The field of a design for the dimensions and the stacking asked for
+#'
+#' Without a stacking, the one whose replicate is the most square among those
+#' that fit the dimensions; a tie goes to the vertical stack, then to the
+#' horizontal one, then to the panel with the most rows of replicates.
+#' @return One row of \code{field_grid_candidates()}.
+#' @noRd
+field_grid_plan <- function(x, nrows, ncols, stacked = NULL) {
+  if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
+  if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
+  if (!is.null(stacked)) {
+    check_grid_stacking(stacked)
+    if (is.null(grid_replicate_unit(x))) abort_no_replicates()
+  }
+  book <- x$fieldBook
+  plots <- unique(tabulate(match(book$LOCATION, unique(book$LOCATION))))
+  if (length(plots) != 1L) {
+    fieldhub_abort("A common field grid requires the same number of plots at every location.")
+  }
+  fields <- field_grid_candidates(x, if (is.null(stacked)) stacking_choices else stacked)
+  if (!nrow(fields)) {
+    fieldhub_abort("The \"grid_panel\" stacking needs rows and columns of replicates, more ",
+                   "than one of each: the replicates of this design cannot be arranged so.")
+  }
+  fits <- rep(TRUE, nrow(fields))
+  if (!is.null(nrows)) fits <- fits & fields$rows == nrows
+  if (!is.null(ncols)) fits <- fits & fields$cols == ncols
+  if (!any(fits)) {
+    how <- if (is.null(stacked)) " and preserve the design structure" else switch(stacked,
+      vertical = " with the replicates one above another (stacked = \"vertical\")",
+      horizontal = " with the replicates side by side (stacked = \"horizontal\")",
+      grid_panel = " with the replicates in rows and columns of replicates (stacked = \"grid_panel\")")
+    fieldhub_abort("The field grid must fit exactly ", plots, " plots per location", how, ". ",
+                   "Valid dimensions (nrows x ncols) include: ",
+                   suggest_field_grid(field_grid_dimensions(fields), nrows, ncols), ".")
+  }
+  fields <- fields[fits, , drop = FALSE]
+  fields[order(abs(fields$height - fields$width), match(fields$stacked, stacking_choices),
+               -fields$down)[1L], , drop = FALSE]
+}
+
 # Take as many of the remaining row factors as possible at this level.
 # The remaining factors are assigned to columns and to inner groups.
 grid_common_divisor <- function(a, b) {
@@ -133,7 +261,7 @@ grid_common_divisor <- function(a, b) {
   a
 }
 
-grouped_grid_coordinates <- function(book, groups, axes, dims, base, planter) {
+grouped_grid_coordinates <- function(book, groups, axes, dims, base, planter, down = NULL) {
   if (!length(groups)) {
     if (!length(axes)) return(planting_path(dims[1L], dims[2L], planter))
     return(cbind(
@@ -144,7 +272,9 @@ grouped_grid_coordinates <- function(book, groups, axes, dims, base, planter) {
 
   group <- book[[groups[1L]]]
   pieces <- split(seq_len(nrow(book)), match(group, unique(group)))
-  tile_rows <- grid_common_divisor(dims[1L] / base[1L], length(pieces))
+  # The replicates lie as their stacking says (`down` rows of them); the
+  # units inside take as many of the remaining row factors as they can
+  tile_rows <- if (is.null(down)) grid_common_divisor(dims[1L] / base[1L], length(pieces)) else down
   tile_cols <- length(pieces) / tile_rows
   cell <- dims / c(tile_rows, tile_cols)
   coordinates <- matrix(0, nrow(book), 2L, dimnames = list(NULL, c("ROW", "COLUMN")))
@@ -158,33 +288,54 @@ grouped_grid_coordinates <- function(book, groups, axes, dims, base, planter) {
   coordinates
 }
 
-design_grid_layout <- function(x, spec, nrows, ncols, planter) {
+#' The field book of a design in a field of given dimensions
+#'
+#' A design built with dimensions returns its stored grid, for the same
+#' dimensions only.
+#' @param stacked The stacking of the replicates, or NULL for the most square
+#'   replicate (\code{field_grid_plan()}).
+#' @noRd
+design_field_grid <- function(x, nrows, ncols, planter, stacked = NULL) {
   if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
   if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
-  if (has_design_grid(x)) {
+  if (stores_design_grid(x)) {
     matches_stored_grid(x, nrows, ncols)
     return(x$fieldBook)
   }
+  if (!inherits(x, "fieldhub_rcbd") && is.null(design_grid_spec(x))) {
+    fieldhub_abort("Field dimensions are not supported for this design.")
+  }
+  place_field_grid(x, field_grid_plan(x, nrows, ncols, stacked), planter)
+}
 
+#' The stacking of the replicates in the field of \code{design_field_grid()}:
+#' the one asked for, the one a design was built with, or the one of the most
+#' square replicate. NULL for a design without replicates.
+#' @noRd
+field_grid_stacking <- function(x, nrows, ncols, stacked = NULL) {
+  if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
+  if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
+  if (stores_design_grid(x)) return(x$metadata$parameters$stacked)
+  if (!inherits(x, "fieldhub_rcbd") && is.null(design_grid_spec(x))) {
+    fieldhub_abort("Field dimensions are not supported for this design.")
+  }
+  stacking <- field_grid_plan(x, nrows, ncols, stacked)$stacked
+  if (!is.na(stacking)) stacking
+}
+
+#' Place the plots of a design in the field of a plan
+#' @param plan One row of \code{field_grid_candidates()}.
+#' @noRd
+place_field_grid <- function(x, plan, planter) {
+  if (inherits(x, "fieldhub_rcbd")) return(rcbd_grid_layout(x, plan, planter))
+  design_grid_layout(x, design_grid_spec(x), plan, planter)
+}
+
+design_grid_layout <- function(x, spec, plan, planter) {
   book <- x$fieldBook
   sites <- split(seq_len(nrow(book)), match(book$LOCATION, unique(book$LOCATION)))
-  plot_counts <- lengths(sites)
-  if (length(unique(plot_counts)) != 1L) {
-    fieldhub_abort("A common field grid requires the same number of plots at every location.")
-  }
   base <- field_grid_unit(book[book$LOCATION == book$LOCATION[1L], , drop = FALSE], spec$axes)
-  grids <- valid_field_grids(book, spec$axes)
-  matches <- rep(TRUE, nrow(grids))
-  if (!is.null(nrows)) matches <- matches & grids[, "rows"] == nrows
-  if (!is.null(ncols)) matches <- matches & grids[, "cols"] == ncols
-  if (!any(matches)) {
-    fieldhub_abort("The field grid must fit exactly ", plot_counts[1L],
-                   " plots per location and preserve the design structure. ",
-                   "Valid dimensions (nrows x ncols) include: ",
-                   suggest_field_grid(grids, nrows, ncols), ".")
-  }
-
-  dims <- grids[which(matches)[1L], ]
+  dims <- c(rows = plan$rows, cols = plan$cols)
   coords <- matrix(0, nrow(book), 2L, dimnames = list(NULL, c("ROW", "COLUMN")))
   for (rows in sites) {
     placement <- book[rows, , drop = FALSE]
@@ -192,7 +343,8 @@ design_grid_layout <- function(x, spec, nrows, ncols, planter) {
       placement$.WHOLE_UNIT <- interaction(placement$REP, placement$WHOLE_PLOT, drop = TRUE)
     }
     coords[rows, ] <- grouped_grid_coordinates(placement, spec$groups, spec$axes, dims,
-                                                base, planter)
+                                                base, planter,
+                                                down = if (!is.na(plan$stacked)) plan$down)
   }
   if (inherits(x, "fieldhub_latin_square")) {
     names(book)[match(spec$axes, names(book))] <- c("ROW_SQ", "COLUMN_SQ")
@@ -202,42 +354,14 @@ design_grid_layout <- function(x, spec, nrows, ncols, planter) {
   number_along_field(layout_columns(book), planter)
 }
 
-# Fit a full field with congruent rectangular complete blocks.
-rcbd_grid_layout <- function(x, nrows, ncols, planter) {
-  if (!is.null(nrows)) validate_field_dimension(nrows, "nrows")
-  if (!is.null(ncols)) validate_field_dimension(ncols, "ncols")
-
+# Fit a full field with congruent rectangular complete blocks. The blocks
+# lie across each row of blocks.
+rcbd_grid_layout <- function(x, plan, planter) {
   book <- x$fieldBook
-  if (all(c("ROW", "COLUMN") %in% names(book))) {
-    matches_stored_grid(x, nrows, ncols)
-    return(book)
-  }
-
   sites <- split(seq_len(nrow(book)), match(book$LOCATION, unique(book$LOCATION)))
-  reps <- dplyr::n_distinct(book$REP)
-  plots <- nrow(book) / length(sites)
-  rows <- if (is.null(nrows)) plots / ncols else nrows
-  cols <- if (is.null(ncols)) plots / nrows else ncols
-  if (rows > plots || cols > plots || rows %% 1 != 0 || cols %% 1 != 0 ||
-      rows * as.double(cols) != plots) {
-    # Every factor pair of the plot count can be partitioned into complete
-    # blocks by distributing the factors of reps between the two axes.
-    fieldhub_abort(
-      "The RCBD field dimensions must fit exactly ", plots, " plots per location. ",
-      "Valid dimensions (nrows x ncols) include: ",
-      suggest_field_grid(grid_factor_pairs(plots), nrows, ncols), "."
-    )
-  }
-
-  # Prefer a vertical stack, then a horizontal stack, then the most
-  # block rows that fit. The blocks lie across each row of blocks.
-  block_rows <- unique(c(reps, 1L, rev(seq_len(reps))))
-  block_rows <- block_rows[reps %% block_rows == 0]
-  block_cols <- reps / block_rows
-  fit <- which(rows %% block_rows == 0 & cols %% block_cols == 0)[1L]
-  across <- block_cols[fit]
-  height <- rows / block_rows[fit]
-  width <- cols / across
+  across <- plan$across
+  height <- plan$height
+  width <- plan$width
   path <- planting_path(height, width, "cartesian")
 
   book$ROW <- 0L

@@ -9,15 +9,20 @@ checked_layout_view <- function(x, layout = 1, planter = "serpentine",
                                   nrows = NULL, ncols = NULL) {
   if (!inherits(x, "FielDHub")) fieldhub_abort("'x' must be a design created by FielDHub.")
   x <- with_design_class(x)
-  check_layout_arguments(planter, stacked)
+  dimensioned <- !is.null(nrows) || !is.null(ncols)
+  # A field of given dimensions may leave its stacking to the most square
+  # replicate (`stacked = NULL`)
+  check_layout_arguments(planter, if (dimensioned && is.null(stacked)) "vertical" else stacked)
   if (!is.numeric(location) || is.complex(location) || !is.null(dim(location)) ||
       length(location) != 1L || !is.finite(location) || location < 1 || location %% 1 != 0) {
     fieldhub_abort("Select one available location for the layout.")
   }
-  dimensioned <- !is.null(nrows) || !is.null(ncols)
   options <- if (dimensioned) {
     layout <- 1
-    book <- field_layout(x, planter = planter, nrows = nrows, ncols = ncols)
+    check_fixed_grid_request(x, planter, stacked, planter_given = TRUE,
+                             stacked_given = !is.null(stacked))
+    stacked <- field_grid_stacking(x, nrows, ncols, stacked)
+    book <- design_field_grid(x, nrows, ncols, planter, stacked)
     field_book_layouts(list(fieldBook = book))
   } else {
     layout_options(x, planter = planter, stacked = stacked)
@@ -42,9 +47,11 @@ checked_layout_view <- function(x, layout = 1, planter = "serpentine",
   )
   if (dimensioned) {
     view$allSitesFieldbook <- book
-    # A grid has no numbered option and no stacking
-    view$layout_metadata$parameters <- list(planter = planter, nrows = max(book$ROW),
-                                            ncols = max(book$COLUMN))
+    # A grid has no numbered option; its stacking is that of its replicates
+    view$layout_metadata$parameters <- c(
+      list(planter = planter, nrows = max(book$ROW), ncols = max(book$COLUMN)),
+      if (!is.null(stacked)) list(stacked = stacked)
+    )
   }
   view
 }

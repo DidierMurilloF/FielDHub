@@ -166,7 +166,7 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  continuous = FALSE, planter = "serpentine",
                  seed = NULL, locationNames = NULL, data = NULL,
                  checks = NULL, rep_checks = NULL, spread_checks = TRUE,
-                 nrows = NULL, ncols = NULL) {
+                 nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
@@ -354,11 +354,12 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
                  fieldBook = RCBD_output)
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(plotNumber = starting_plots, locationNames = recorded_locations),
-    exclude = if (is.null(nrows) && is.null(ncols)) c("nrows", "ncols") else character()
+    exclude = if (is.null(nrows) && is.null(ncols)) c("nrows", "ncols", "stacked") else character()
   )
   output <- new_fieldhub_design(output, "rcbd", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter, maps = "plotNumber",
+                              stacked = stacked)
   if (!is.null(nrows) || !is.null(ncols)) {
-    output <- store_design_grid(output, nrows, ncols, planter = planter, maps = "plotNumber")
     books <- location_books(output)
     # Field maps have the first field row in their last row
     output$plotNumberField <- stats::setNames(lapply(books, function(book) {
@@ -366,9 +367,13 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
       map[cbind(max(book$ROW) + 1L - book$ROW, book$COLUMN)] <- book$PLOT
       map
     }), names(output$plotNumber))
+    # The field and the stacking of its blocks, after the locations
+    stacking <- output$infoDesign$stacked
+    output$infoDesign$stacked <- NULL
     output$infoDesign <- append(
       output$infoDesign,
-      list(nrows = max(output$fieldBook$ROW), ncols = max(output$fieldBook$COLUMN)),
+      list(nrows = max(output$fieldBook$ROW), ncols = max(output$fieldBook$COLUMN),
+           stacked = stacking),
       after = which(names(output$infoDesign) == "locationNames")
     )
     classes <- class(output)

@@ -94,13 +94,11 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
   }
   x <- with_design_class(x)
   check_layout_arguments(planter, stacked)
-  check_fixed_grid_request(x, planter, stacked, planter_given = !missing(planter))
+  check_fixed_grid_request(x, planter, stacked, planter_given = !missing(planter),
+                           stacked_given = !missing(stacked))
   if (!is.null(nrows) || !is.null(ncols)) {
-    check_dimensions_alone(layout_given = !missing(layout), stacked_given = !missing(stacked))
-    if (inherits(x, "fieldhub_rcbd")) return(rcbd_grid_layout(x, nrows, ncols, planter))
-    spec <- design_grid_spec(x)
-    if (is.null(spec)) fieldhub_abort("Field dimensions are not supported for this design.")
-    return(design_grid_layout(x, spec, nrows, ncols, planter))
+    check_dimensions_alone(layout_given = !missing(layout))
+    return(design_field_grid(x, nrows, ncols, planter, if (!missing(stacked)) stacked))
   }
   options <- layout_options(x, planter = planter, stacked = stacked)
   available <- seq_along(options[[1]])
@@ -119,34 +117,49 @@ field_layout <- function(x, layout = 1, planter = "serpentine", stacked = "verti
 }
 
 # A design built with dimensions has one layout: its grid, numbered along the
-# path of the planter it was built with. Another planter or a stacking other
-# than the default is refused; the same planter or none returns the grid.
-check_fixed_grid_request <- function(x, planter, stacked, planter_given) {
-  if (stores_design_grid(x) &&
-      ((planter_given && !identical(planter, stored_grid_planter(x))) ||
-         !identical(stacked, "vertical"))) {
+# path of the planter it was built with, its replicates stacked as they were
+# then. Another planter or another stacking is refused; the same or none
+# returns the grid.
+check_fixed_grid_request <- function(x, planter, stacked, planter_given, stacked_given) {
+  if (!stores_design_grid(x)) return(invisible(x))
+  if (stacked_given && is.null(grid_replicate_unit(x))) abort_no_replicates()
+  if ((planter_given && !identical(planter, stored_grid_planter(x))) ||
+      (stacked_given && !identical(stacked, x$metadata$parameters$stacked))) {
     abort_fixed_grid(x)
   }
   invisible(x)
 }
 
-# A numbered layout option or a stacking cannot be combined with dimensions
-check_dimensions_alone <- function(layout_given, stacked_given) {
-  if (layout_given || stacked_given) {
-    fieldhub_abort("'layout' and 'stacked' select a numbered layout: ",
-                   "they cannot be combined with 'nrows' or 'ncols'.")
+# A numbered layout option cannot be combined with dimensions
+check_dimensions_alone <- function(layout_given) {
+  if (layout_given) {
+    fieldhub_abort("'layout' selects a numbered layout: it cannot be combined with ",
+                   "'nrows' or 'ncols'.")
   }
   invisible(TRUE)
 }
 
-# Store the coordinates of a grid chosen when the design is built. The
-# elements named in `maps` hold plot numbers (matrices, in lists by location
-# when `by_location`), which follow the plots to their numbers in the grid.
+# Store the coordinates of a grid chosen when the design is built, and the
+# stacking of its replicates. The elements named in `maps` hold plot numbers
+# (matrices, in lists by location when `by_location`), which follow the plots
+# to their numbers in the grid.
 store_design_grid <- function(x, nrows, ncols, planter = "serpentine", maps = character(),
-                              by_location = TRUE) {
-  if (is.null(nrows) && is.null(ncols)) return(x)
+                              by_location = TRUE, stacked = NULL) {
+  if (is.null(nrows) && is.null(ncols)) {
+    if (!is.null(stacked)) {
+      fieldhub_abort("'stacked' arranges the replicates in a field of given dimensions: ",
+                     "give 'nrows' or 'ncols' with it.")
+    }
+    return(x)
+  }
+  plan <- field_grid_plan(x, nrows, ncols, stacked)
   old <- x$fieldBook
-  x$fieldBook <- field_layout(x, nrows = nrows, ncols = ncols, planter = planter)
+  x$fieldBook <- place_field_grid(x, plan, planter)
+  # The stacking chosen rebuilds the same field; a design without replicates
+  # has none
+  stacking <- if (!is.na(plan$stacked)) plan$stacked
+  x$metadata$parameters$stacked <- stacking
+  x$infoDesign$stacked <- stacking
   site <- match(old$LOCATION, unique(old$LOCATION))
   if (!by_location) site[] <- 1L
   renumber <- function(map, at) {

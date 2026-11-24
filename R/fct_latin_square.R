@@ -83,7 +83,7 @@
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
                          seed = NULL, locationNames = NULL, data = NULL,
-                         nrows = NULL, ncols = NULL) {
+                         nrows = NULL, ncols = NULL, stacked = NULL) {
 
   seed <- resolve_seed(seed)
   local_design_seed(seed)
@@ -212,11 +212,11 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
                  plotSquares = plotSquares, fieldBook = latin_design)
   reproduction_parameters <- record_design_parameters(environment())
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "latin_square", parameters = reproduction_parameters)
   output <- store_design_grid(output, nrows, ncols, planter = planter,
-                              maps = "plotSquares", by_location = FALSE)
+                              maps = "plotSquares", by_location = FALSE, stacked = stacked)
   return(invisible(output))
 }
 

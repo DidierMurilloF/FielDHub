@@ -100,7 +100,7 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
                        data = NULL, reps = 1,
-                       nrows = NULL, ncols = NULL) {
+                       nrows = NULL, ncols = NULL, stacked = NULL) {
   # plotNumber's own default is NULL, so an explicit plotNumber = NULL is
   # indistinguishable from (and must warn the same as) not supplying it.
   plotNumber_supplied <- !missing(plotNumber) && !is.null(plotNumber)
@@ -281,10 +281,10 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
     environment(), overrides = list(reps = b), exclude = "b"
   )
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "strip_plot", parameters = reproduction_parameters)
   output <- store_design_grid(output, nrows, ncols, planter = planter,
-                              maps = "plotLayouts")
+                              maps = "plotLayouts", stacked = stacked)
   return(invisible(output))
 }

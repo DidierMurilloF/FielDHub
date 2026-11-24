@@ -88,7 +88,7 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
                            data = NULL,
-                           nrows = NULL, ncols = NULL) {
+                           nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
@@ -240,10 +240,10 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
     environment(), overrides = list(data = if (generated_data) NULL else data)
   )
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols, planter = planter)
+  output <- store_design_grid(output, nrows, ncols, planter = planter, stacked = stacked)
   return(invisible(output))
 }
 

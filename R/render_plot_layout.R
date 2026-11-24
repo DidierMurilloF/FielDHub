@@ -40,15 +40,20 @@ plot_layout <- function(
     stacked = "vertical",
     ...) {
     # The same rules as field_layout(): a design built with dimensions draws
-    # only its grid, and dimensions select a grid, not a numbered option
+    # only its grid, and dimensions select a grid, not a numbered option. The
+    # replicates of a grid lie as `stacked` says or, when it is not given, as
+    # the most square replicate does.
+    dots <- list(...)
     if (inherits(x, "FielDHub")) {
       check_layout_arguments(planter, stacked)
       check_fixed_grid_request(with_design_class(x), planter, stacked,
-                               planter_given = !missing(planter))
+                               planter_given = !missing(planter),
+                               stacked_given = !missing(stacked))
     }
-    dots <- list(...)
     if (!is.null(dots$nrows) || !is.null(dots$ncols)) {
-      check_dimensions_alone(layout_given = !missing(layout), stacked_given = !missing(stacked))
+      check_dimensions_alone(layout_given = !missing(layout))
+      return(checked_layout_view(x, planter = planter, location = l,
+                                 stacked = if (!missing(stacked)) stacked, ...))
     }
     checked_layout_view(x, layout = layout, planter = planter, location = l,
                         stacked = stacked, ...)

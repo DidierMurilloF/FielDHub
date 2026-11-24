@@ -69,7 +69,7 @@
 #' @export
 rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101, locationNames = NULL,
                                 seed = NULL, data = NULL, reps = NULL,
-                                nrows = NULL, ncols = NULL) {
+                                nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   r <- resolve_argument_alias(
@@ -137,9 +137,9 @@ rectangular_lattice <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber 
     environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
   )
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "rectangular_lattice", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }

@@ -90,7 +90,7 @@
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
                 seed = NULL, data = NULL, locationNames = NULL,
-                nrows = NULL, ncols = NULL) {
+                nrows = NULL, ncols = NULL, stacked = NULL) {
   locationName <- resolve_argument_alias(
     locationNames, locationName, new = "locationNames", old = "locationName",
     new_supplied = !missing(locationNames), old_supplied = !missing(locationName)
@@ -177,9 +177,9 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
     environment(), overrides = list(locationNames = locationName), exclude = "locationName"
   )
   if (is.null(nrows) && is.null(ncols)) {
-    reproduction_parameters[c("nrows", "ncols")] <- NULL
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
   }
   output <- new_fieldhub_design(output, "crd", parameters = reproduction_parameters)
-  output <- store_design_grid(output, nrows, ncols)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }
