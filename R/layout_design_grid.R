@@ -35,8 +35,8 @@ abort_fixed_grid <- function(x) {
     " field with a ", stored_grid_planter(x), " planter",
     if (!is.null(stacking)) paste0(" and the \"", stacking, "\" stacking"),
     ", and that is its only layout. ",
-    "For another layout, build the design again with other 'nrows' and 'ncols', ",
-    "or without them."
+    "For another layout, build the design again with other 'nrows' and 'ncols'",
+    if (!is.null(stacking)) " or another 'stacked'", ", or without them."
   )
 }
 

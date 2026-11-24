@@ -375,14 +375,10 @@ RCBD <- function(t = NULL, reps = NULL, l = 1, plotNumber = 101,
       map
     }), names(output$plotNumber))
     # The field and the stacking of its blocks, after the locations
-    stacking <- output$infoDesign$stacked
-    output$infoDesign$stacked <- NULL
-    output$infoDesign <- append(
-      output$infoDesign,
-      list(nrows = max(output$fieldBook$ROW), ncols = max(output$fieldBook$COLUMN),
-           stacked = stacking),
-      after = which(names(output$infoDesign) == "locationNames")
-    )
+    field <- output$infoDesign[c("nrows", "ncols", "stacked")]
+    output$infoDesign[c("nrows", "ncols", "stacked")] <- NULL
+    output$infoDesign <- append(output$infoDesign, field,
+                                after = which(names(output$infoDesign) == "locationNames"))
     classes <- class(output)
     output <- output[c(setdiff(names(output), c("fieldBook", "metadata")), "fieldBook", "metadata")]
     class(output) <- classes

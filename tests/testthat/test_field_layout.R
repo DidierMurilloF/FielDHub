@@ -362,6 +362,32 @@ test_that("plot() follows the rules of field_layout() for field grids", {
   expect_error(plot(x, layout = 2, nrows = 4), "'layout'.*cannot be combined",
                class = "fieldhub_input_error")
   expect_identical(plot(x, nrows = 4)$field_book, field_layout(x, nrows = 4))
+  # An abbreviated dimension is a dimension, as in field_layout()
+  expect_identical(plot(x, nrow = 4)$field_book, field_layout(x, nrow = 4))
+  expect_error(plot(x, layout = 2, nrow = 4), "'layout'.*cannot be combined",
+               class = "fieldhub_input_error")
+  # A design built with a cartesian planter draws its grid for its own
+  # dimensions, stacking and planter, or for none of them
+  built <- list(RCBD(t = 6, reps = 4, seed = 1, nrows = 4, planter = "cartesian"),
+                full_factorial(setfactors = c(2, 3), reps = 4, type = 2, seed = 1, nrows = 4,
+                               planter = "cartesian"),
+                latin_square(t = 3, reps = 4, seed = 1, nrows = 6, planter = "cartesian"),
+                strip_plot(Hplots = 3, Vplots = 2, reps = 4, seed = 1, nrows = 6,
+                           planter = "cartesian"))
+  for (design in built) {
+    info <- class(design)[1L]
+    rows <- max(design$fieldBook$ROW)
+    cols <- max(design$fieldBook$COLUMN)
+    own <- design$metadata$parameters$stacked
+    expect_identical(plot(design)$field_book, design$fieldBook, info = info)
+    expect_identical(plot(design, nrows = rows)$field_book, design$fieldBook, info = info)
+    expect_identical(plot(design, stacked = own, nrows = rows, ncols = cols)$field_book,
+                     design$fieldBook, info = info)
+    expect_identical(plot(design, planter = "cartesian", ncols = cols)$field_book,
+                     design$fieldBook, info = info)
+    expect_error(plot(design, planter = "serpentine", nrows = rows),
+                 "with a cartesian planter.*or another 'stacked'", class = "fieldhub_input_error")
+  }
 })
 
 test_that("fields of one row and of one column are valid grids", {
@@ -473,7 +499,8 @@ test_that("a design built on a field grid returns that grid only", {
     expect_identical(field_layout(stored, nrows = rows, ncols = 9), stored$fieldBook)
     expect_identical(field_layout(stored, ncols = 9, planter = built), stored$fieldBook)
     fixed <- paste0("built on a fixed ", rows, " x 9 field with a ", built,
-                    " planter.*again with other 'nrows' and 'ncols', or without them")
+                    " planter.*again with other 'nrows' and 'ncols' or another 'stacked', ",
+                    "or without them")
     expect_error(field_layout(stored, planter = other), fixed, class = "fieldhub_input_error")
     expect_error(field_layout(stored, ncols = 9, planter = other), fixed,
                  class = "fieldhub_input_error")
@@ -574,8 +601,15 @@ test_that("a design built with dimensions and a stacking stores, prints and repr
                        info = info)
       expect_identical(built$metadata$parameters$stacked, stacked, info = info)
       expect_identical(built$infoDesign$stacked, stacked, info = info)
-      expect_true(any(grepl(paste0("stacked.*", stacked), capture.output(print(built)))),
-                  info = info)
+      # print() and summary() show the field and the stacking of every design
+      expect_identical(built$infoDesign[c("nrows", "ncols")],
+                       list(nrows = as.integer(dims[1L]), ncols = as.integer(dims[2L])),
+                       info = info)
+      for (shown in list(capture.output(print(built)), capture.output(summary(built)))) {
+        expect_true(any(grepl(paste0("nrows +: int ", dims[1L], "$"), shown)), info = info)
+        expect_true(any(grepl(paste0("ncols +: int ", dims[2L], "$"), shown)), info = info)
+        expect_true(any(grepl(paste0("stacked.*", stacked), shown)), info = info)
+      }
       expect_identical(reproduce_design(built), built, info = info)
       expect_identical(do.call(case$fun, built$metadata$parameters), built, info = info)
       # Its own stacking or none returns the grid; another is refused
@@ -632,6 +666,9 @@ test_that("a stacking is refused where there are no replicates to stack, or no f
     built <- do.call(case$fun, c(case$args, list(nrows = 4)))
     expect_null(built$metadata$parameters$stacked)
     expect_null(built$infoDesign$stacked)
+    expect_identical(built$infoDesign$nrows, 4L)
+    expect_true(any(grepl("nrows +: int 4$", capture.output(print(built)))))
+    expect_true(any(grepl("ncols +: int ", capture.output(print(built)))))
     expect_error(field_layout(built, stacked = "vertical"), "no replicates",
                  class = "fieldhub_input_error")
   }
@@ -641,6 +678,10 @@ test_that("a stacking is refused where there are no replicates to stack, or no f
                  "'stacked'.*'nrows'.*'ncols'", class = "fieldhub_input_error")
   }
   expect_error(CRD(t = 6, reps = 4, seed = 1, stacked = "vertical"), "'stacked'",
+               class = "fieldhub_input_error")
+  # A stacking that does not exist is named as such, with or without a field
+  expect_error(RCBD(t = 6, reps = 4, seed = 1, stacked = "diagonal"),
+               "'stacked' must be \"vertical\", \"horizontal\" or \"grid_panel\"",
                class = "fieldhub_input_error")
 })
 

@@ -175,6 +175,7 @@ store_design_grid <- function(x, nrows, ncols, planter = "serpentine", maps = ch
                               by_location = TRUE, stacked = NULL) {
   if (is.null(nrows) && is.null(ncols)) {
     if (!is.null(stacked)) {
+      check_grid_stacking(stacked)
       fieldhub_abort("'stacked' arranges the replicates in a field of given dimensions: ",
                      "give 'nrows' or 'ncols' with it.")
     }
@@ -187,6 +188,9 @@ store_design_grid <- function(x, nrows, ncols, planter = "serpentine", maps = ch
   # has none
   stacking <- if (!is.na(plan$stacked)) plan$stacked
   x$metadata$parameters$stacked <- stacking
+  # print() and summary() show the field and the stacking of its replicates
+  x$infoDesign$nrows <- max(x$fieldBook$ROW)
+  x$infoDesign$ncols <- max(x$fieldBook$COLUMN)
   x$infoDesign$stacked <- stacking
   site <- match(old$LOCATION, unique(old$LOCATION))
   if (!by_location) site[] <- 1L

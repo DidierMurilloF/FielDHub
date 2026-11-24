@@ -38,22 +38,29 @@ plot_layout <- function(
     planter = "serpentine",
     l = 1,
     stacked = "vertical",
+    nrows = NULL,
+    ncols = NULL,
     ...) {
     # The same rules as field_layout(): a design built with dimensions draws
     # only its grid, and dimensions select a grid, not a numbered option. The
     # replicates of a grid lie as `stacked` says or, when it is not given, as
-    # the most square replicate does.
-    dots <- list(...)
+    # the most square replicate does. `nrows` and `ncols` are arguments of
+    # their own so that they may be abbreviated as in field_layout().
     if (inherits(x, "FielDHub")) {
       check_layout_arguments(planter, stacked)
       check_fixed_grid_request(with_design_class(x), planter, stacked,
                                planter_given = !missing(planter),
                                stacked_given = !missing(stacked))
+      # A planter that was not given is that of the grid the design was built on
+      if (missing(planter) && stores_design_grid(with_design_class(x))) {
+        planter <- stored_grid_planter(x)
+      }
     }
-    if (!is.null(dots$nrows) || !is.null(dots$ncols)) {
+    if (!is.null(nrows) || !is.null(ncols)) {
       check_dimensions_alone(layout_given = !missing(layout))
       return(checked_layout_view(x, planter = planter, location = l,
-                                 stacked = if (!missing(stacked)) stacked, ...))
+                                 stacked = if (!missing(stacked)) stacked, ...,
+                                 nrows = nrows, ncols = ncols))
     }
     checked_layout_view(x, layout = layout, planter = planter, location = l,
                         stacked = stacked, ...)
