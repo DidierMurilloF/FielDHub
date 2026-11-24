@@ -107,12 +107,12 @@ panel_select <- function(html, id) {
 test_that("each menu holds the numbered layouts and the field grids of its own stacking", {
   design <- split_plot(wp = 3, sp = 2, reps = 4, seed = 1)
   # A grid is named by its size, as a numbered layout is; its value carries
-  # the stacking of its menu
+  # the stacking of its menu. The numbered layouts come first, then the grids
   expect_identical(layout_choice_labels(design, stacked = "vertical", include_grids = TRUE),
                    c("4 \u00d7 6" = "2", "8 \u00d7 3" = "1", "12 \u00d7 2" = "grid:vertical:12:2",
                      "24 \u00d7 1" = "grid:vertical:24:1"))
   expect_identical(layout_choice_labels(design, stacked = "horizontal", include_grids = TRUE),
-                   c("6 \u00d7 4" = "grid:horizontal:6:4", "3 \u00d7 8" = "1",
+                   c("3 \u00d7 8" = "1", "6 \u00d7 4" = "grid:horizontal:6:4",
                      "2 \u00d7 12" = "grid:horizontal:2:12", "1 \u00d7 24" = "grid:horizontal:1:24"))
   # Every option of the grid panel says how its replicates lie
   expect_identical(layout_choice_labels(design, stacked = "grid_panel", include_grids = TRUE),
@@ -153,8 +153,8 @@ test_that("the grid panel lists only fields with rows and columns of replicates"
                      "2 \u00d7 12 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:2:12",
                      "12 \u00d7 2 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:12:2"))
   # The one-row field has its blocks side by side: it is a horizontal layout
-  expect_identical(layout_choice_labels(rcbd, stacked = "horizontal", include_grids = TRUE)[4L],
-                   c("1 \u00d7 24" = "grid:horizontal:1:24"))
+  expect_identical(layout_choice_labels(rcbd, stacked = "horizontal",
+                                        include_grids = TRUE)[["1 \u00d7 24"]], "grid:horizontal:1:24")
   # Regression test: the grid panel of three blocks of 24 once listed "1 x 72
   # (replicates stacked horizontally)", a field that field_layout() refuses
   # as a grid panel, and the horizontal menu lacked it. Three blocks cannot
@@ -164,8 +164,8 @@ test_that("the grid panel lists only fields with rows and columns of replicates"
   expect_length(layout_choice_labels(three, stacked = "grid_panel", include_grids = TRUE), 0L)
   horizontal <- layout_choice_labels(three, stacked = "horizontal", include_grids = TRUE)
   expect_identical(horizontal[["1 \u00d7 72"]], "grid:horizontal:1:72")
-  expect_identical(names(layout_choice_labels(three, stacked = "vertical", include_grids = TRUE))[8L],
-                   "72 \u00d7 1")
+  expect_true("72 \u00d7 1" %in% names(layout_choice_labels(three, stacked = "vertical",
+                                                             include_grids = TRUE)))
   side_by_side <- app_selected_layout_view(three, horizontal[["1 \u00d7 72"]], "serpentine", 1,
                                            "horizontal")$allSitesFieldbook
   expect_identical(replicates_lie(side_by_side), "horizontal")
@@ -193,6 +193,76 @@ test_that("the grid panel lists only fields with rows and columns of replicates"
                                         include_grids = TRUE)[["4 \u00d7 12"]], "grid:vertical:4:12")
   expect_identical(layout_choice_labels(lattice, stacked = "horizontal",
                                         include_grids = TRUE)[["12 \u00d7 4"]], "grid:horizontal:12:4")
+})
+
+test_that("a menu opens on a numbered layout and lists the grids after the numbered ones", {
+  # Regression test: the grids were once sorted in with the numbered layouts,
+  # so the horizontal menu of this split plot opened on the 6 x 4 grid, not
+  # on the 3 x 8 field of layout 1 as it always had
+  split <- split_plot(wp = 3, sp = 2, reps = 4, seed = 1)
+  horizontal <- layout_choice_labels(split, stacked = "horizontal", include_grids = TRUE)
+  expect_identical(app_first_layout_choice(horizontal), "1")
+  expect_identical(names(horizontal)[1L], "3 \u00d7 8")
+  designs <- list(split, RCBD(t = 6, reps = 4, seed = 1), latin_square(t = 4, reps = 4, seed = 7),
+                  incomplete_blocks(t = 16, k = 4, reps = 4, seed = 1),
+                  alpha_lattice(t = 12, k = 3, reps = 4, seed = 36), CRD(t = 6, reps = 4, seed = 1))
+  for (design in designs) {
+    for (stacked in layout_stacking_choices(design)) {
+      info <- paste(class(design)[1L], stacked)
+      numbered <- layout_choice_labels(design, stacked = stacked)
+      choices <- layout_choice_labels(design, stacked = stacked, include_grids = TRUE)
+      grid <- grepl("^grid:", choices)
+      # The numbered layouts in their own order, then the grids, the most
+      # square first
+      expect_identical(unname(choices[!grid]), as.character(numbered), info = info)
+      expect_false(is.unsorted(grid), info = info)
+      sizes <- vapply(strsplit(sub("^grid:[a-z_]+:", "", choices[grid]), ":"), as.numeric, numeric(2))
+      if (length(sizes)) {
+        expect_false(is.unsorted(order(abs(sizes[1L, ] - sizes[2L, ]), sizes[1L, ])), info = info)
+      }
+    }
+    # The page opens on the layout it opens on without the grids
+    opened <- layout_choice_labels(design, include_grids = TRUE)
+    expect_identical(app_first_layout_choice(opened),
+                     as.character(layout_choice_labels(design)[[1L]]))
+  }
+})
+
+test_that("a grid of the size of a numbered layout is listed when its blocks or whole plots lie another way", {
+  lies <- function(book, unit) {
+    one <- book[book$REP == book$REP[1L] & book[[unit]] == book[[unit]][1L], ]
+    if (length(unique(one$ROW)) == 1L) "rows" else if (length(unique(one$COLUMN)) == 1L) "columns" else "rectangle"
+  }
+  drawn <- function(design, value, stacked) {
+    app_selected_layout_view(design, value, "serpentine", 1, stacked)$allSitesFieldbook
+  }
+  # The 8 x 8 panel of four replicates of 4 x 4: layout 1 has the blocks in
+  # columns, field_layout(nrows = 8, ncols = 8) in rows. Both are listed and
+  # say so, after how the replicates lie
+  blocks <- incomplete_blocks(t = 16, k = 4, reps = 4, seed = 1)
+  panel <- layout_choice_labels(blocks, stacked = "grid_panel", include_grids = TRUE)
+  expect_identical(panel[1:2],
+                   c("8 \u00d7 8 \u00b7 replicates 2 \u00d7 2 \u00b7 blocks in columns" = "1",
+                     "8 \u00d7 8 \u00b7 replicates 2 \u00d7 2 \u00b7 blocks in rows" = "grid:grid_panel:8:8"))
+  expect_identical(lies(drawn(blocks, panel[[1L]], "grid_panel"), "IBLOCK"), "columns")
+  expect_identical(lies(drawn(blocks, panel[[2L]], "grid_panel"), "IBLOCK"), "rows")
+  expect_identical(drawn(blocks, panel[[2L]], "grid_panel"),
+                   field_layout(blocks, nrows = 8, ncols = 8, stacked = "grid_panel"))
+  expect_identical(anyDuplicated(names(panel)), 0L)
+  # Under a stack the two are told apart by that alone
+  split <- split_plot(wp = 4, sp = 2, reps = 2, seed = 1)
+  vertical <- layout_choice_labels(split, stacked = "vertical", include_grids = TRUE)
+  expect_identical(vertical[["8 \u00d7 2 \u00b7 whole plots in columns"]], "3")
+  expect_identical(vertical[["8 \u00d7 2 \u00b7 whole plots in rows"]], "grid:vertical:8:2")
+  expect_identical(lies(drawn(split, "3", "vertical"), "WHOLE_PLOT"), "columns")
+  expect_identical(lies(drawn(split, "grid:vertical:8:2", "vertical"), "WHOLE_PLOT"), "rows")
+  # A grid that is the field of a numbered layout, or differs from it only in
+  # the path of its plots, is listed once: as the numbered layout
+  rcbd <- layout_choice_labels(RCBD(t = 6, reps = 4, seed = 1), stacked = "vertical", include_grids = TRUE)
+  expect_identical(names(rcbd), c("4 \u00d7 6", "8 \u00d7 3", "12 \u00d7 2", "24 \u00d7 1"))
+  expect_false(any(grepl("^grid:", rcbd)))
+  expect_identical(sum(grepl("^16 \u00d7 4", names(layout_choice_labels(
+    blocks, stacked = "vertical", include_grids = TRUE)))), 3L)
 })
 
 test_that("a layout menu names its options by size and by what tells them apart", {
