@@ -43,12 +43,14 @@ simulation_design_terms <- function(x) {
     book$.axis_rep <- ifelse(use_shared, 0L, book$REP)
   }
 
+  # ENTRY 0 denotes an unplanted filler in spatial field books.
+  planted <- if (all(c("EXPT", "ENTRY") %in% names(book))) book$ENTRY != 0 else rep(TRUE, nrow(book))
   units <- switch(design,
     crd = list(),
     rcbd = list(block = replicate),
-    rcbd_augmented = list(block = c(site, "BLOCK")),
+    rcbd_augmented = list(block = c(site, "EXPT", "BLOCK")),
     augmented_row_column = list(row = c(site, "ROW"), column = c(site, "COLUMN")),
-    diagonal_arrangement = if (anyDuplicated(unique(book[c(site, "EXPT")])[[site]])) {
+    diagonal_arrangement = if (anyDuplicated(unique(book[planted, c(site, "EXPT"), drop = FALSE])[[site]])) {
       list(decision_block = c(site, "EXPT"))
     } else list(),
     optimized_arrangement = , sparse_allocation = ,
@@ -73,13 +75,31 @@ simulation_design_terms <- function(x) {
     units <- c(list(block = replicate), units)
   }
 
-  # ENTRY 0 denotes an unplanted filler in spatial field books.
-  planted <- if (all(c("EXPT", "ENTRY") %in% names(book))) book$ENTRY != 0 else rep(TRUE, nrow(book))
+  if (is.null(factorial)) treatment$treatment <- simulation_entry_columns(book, planted, design)
   list(
     treatment = lapply(treatment, function(columns) simulation_group(book, columns, planted)),
     design = lapply(units, function(columns) simulation_group(book, columns, planted, site)),
     planted = planted
   )
+}
+
+#' Resolve entry identity where display labels may be ambiguous
+#' @noRd
+simulation_entry_columns <- function(book, planted, design) {
+  if (design == "rcbd_augmented") {
+    # All experiment replicates and locations draw from the same entry list.
+    # Labels can repeat, even between a check and a test entry.
+    return(c("TREATMENT", "ENTRY"))
+  }
+  if (all(c("ENTRY", "TREATMENT") %in% names(book))) {
+    entries <- unique(book[planted, c("LOCATION", "ENTRY", "TREATMENT"), drop = FALSE])
+    if (anyDuplicated(entries[c("LOCATION", "TREATMENT")])) {
+      fieldhub_abort("Treatment labels must identify one entry per location for simulation.")
+    }
+  }
+  # Some designs assign ENTRY codes locally. Share unambiguous labels
+  # across locations regardless of their numeric codes.
+  "TREATMENT"
 }
 
 #' Group exact keys without concatenating or coercing user labels

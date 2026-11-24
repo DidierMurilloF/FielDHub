@@ -254,8 +254,7 @@ layout_options.fieldhub_row_column <- function(x, planter = "serpentine", stacke
                             csRep = dplyr::n_distinct(fb$COLUMN),
                             n_Reps = dplyr::n_distinct(fb$REP),
                             planter = planter, stacked = stacked, from_book = TRUE)
-  # The row and column within the rep give way to the field coordinates
-  square_coordinates(options)
+  square_coordinates(options, own = c("ROW_REP", "COLUMN_REP"))
 }
 
 #-----------------------------------------------------------------------

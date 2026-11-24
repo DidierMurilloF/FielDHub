@@ -42,3 +42,26 @@ test_that("classic and spatial Shiny workflows export the package simulation", {
     expect_true(file.exists(output[[paste0(spatial$ids[["heatmap"]], "_csv")]]))
   })
 })
+
+test_that("the row-column simulation form rejects experimental axis names", {
+  spec <- classic_workflow_spec("RowCol")
+  ids <- spec$simulation_ids
+  x <- row_column(12, nrows = 3, reps = 3, seed = 1)
+  view <- checked_layout_view(x, layout = 1, location = 1)
+  shiny::testServer(function(input, output, session) {
+    state <- app_classic_workflow(input, output, session,
+      design = function() x, layout = function() view,
+      seed = function() 1, selected = function() 1L, spec = spec,
+      simulation_ready = function() TRUE)
+  }, {
+    session$flushReact()
+    do.call(session$setInputs, setNames(list("YIELD", 6, 0.4, 1L),
+      ids[c("trait", "minimum", "maximum", "submit")]))
+    accepted <- state$book()
+    expect_identical(state$settings()$trait, "YIELD")
+    do.call(session$setInputs, setNames(list("Other", "ROW_REP", 2L),
+      ids[c("trait", "other", "submit")]))
+    expect_identical(state$settings()$trait, "YIELD")
+    expect_identical(state$book(), accepted)
+  })
+})

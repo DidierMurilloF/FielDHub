@@ -27,21 +27,10 @@ app_trait_simulation <- function(design, field_book, settings = NULL, seed = NUL
         fieldhub_abort("The displayed plots do not match the design's field book.")
       }
 
-      # Preserve the original experimental axes when the layout replaces them
-      # with field-wide coordinates. Latin-square layouts may already have them.
       design$fieldBook <- original[aligned, , drop = FALSE]
-      axes <- c("ROW", "COLUMN")
-      within <- if (inherits(design, "fieldhub_row_column")) {
-        c("ROW_REP", "COLUMN_REP")
-      } else if (inherits(design, "fieldhub_latin_square")) {
-        c("ROW_SQ", "COLUMN_SQ")
-      }
-      if (length(within) && !all(within %in% names(original))) {
-        design$fieldBook[within] <- design$fieldBook[axes]
-      }
-      if (all(axes %in% names(field_book))) {
-        design$fieldBook[axes] <- field_book[axes]
-      }
+      axes <- intersect(c("ROW", "COLUMN", "ROW_REP", "COLUMN_REP", "ROW_SQ", "COLUMN_SQ"),
+                        names(field_book))
+      design$fieldBook[axes] <- field_book[axes]
       design$fieldBook$PLOT <- as.numeric(as.character(field_book$PLOT))
     }
     simulation <- do.call(stats::simulate, c(list(object = design, seed = seed), settings), quote = TRUE)

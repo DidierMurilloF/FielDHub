@@ -52,7 +52,9 @@ Returns the field book of a design with the \code{ROW} and
   arranged in several ways, and the layouts that renumber the plots along
   the planting path also change \code{PLOT}. The other designs place their
   plots when they are built; their field book already has \code{ROW} and
-  \code{COLUMN}, and it is returned as it is.
+  \code{COLUMN}, and it is returned as it is. The physical layout of a
+  resolvable row-column design retains the experimental axes as
+  \code{ROW_REP} and \code{COLUMN_REP}.
 
   With \code{nrows} or \code{ncols}, the design is placed in a field of
   those dimensions instead of a numbered layout. Each location must have

@@ -8,6 +8,8 @@
 #' @param object A FielDHub field design.
 #' @param nsim Positive number of independent trials to draw.
 #' @param seed Simulation seed. With `NULL`, one seed is drawn and recorded.
+#'   If R is using Box-Muller normals, simulation draws from a private
+#'   stream to preserve the caller's cached normal.
 #' @param ... Reserved for future extensions.
 #' @param trait Name of the response column for one draw. Multiple draws use
 #'   this name with a numeric suffix.
@@ -28,7 +30,9 @@
 #'   overriding `sd` (half the typical residual SD), `rho_row` (0.5) and
 #'   `rho_col` (0.5). Spatial
 #'   correlation requires physical `ROW` and `COLUMN` in the field book,
-#'   with unique coordinate pairs within each location.
+#'   with unique coordinate pairs within each location. For Latin squares
+#'   and resolvable row-column designs, use the field book returned by
+#'   [field_layout()] so the experimental axes are retained separately.
 #'
 #' @details The typical residual SD is the arithmetic mean of the location
 #'   residual SDs. These defaults scale the trait signal and the effects of
@@ -57,15 +61,20 @@ simulate.FielDHub <- function(object, nsim = 1, seed = NULL, ...,
   problems <- field_book_problems(book)
   if (length(problems)) fieldhub_abort("Simulation requires a field design that ",
                                        paste(problems, collapse = ", "), ".")
+  if (!identical(spatial, FALSE)) check_simulation_axes(object)
   terms <- simulation_design_terms(object)
+  rng_kind <- RNGkind()
+  isolated_rng <- if (rng_kind[2L] == "Box-Muller") rng_kind
   simulate_design_field_book(book, nsim, seed, trait, mean, residual_sd,
-                             treatment_sd, design_sd, location_sd, spatial, terms)
+                             treatment_sd, design_sd, location_sd, spatial, terms,
+                             isolated_rng = isolated_rng)
 }
 
 #' Draw responses from a resolved experimental design and optional spatial model
 #' @noRd
 simulate_design_field_book <- function(field_book, nsim, seed, trait, mean, residual_sd,
-                                       treatment_sd, design_sd, location_sd, spatial, terms) {
+                                       treatment_sd, design_sd, location_sd, spatial, terms,
+                                       isolated_rng = NULL) {
   validate_iteration_budget(nsim, "nsim", minimum = 1)
   response_names <- simulation_response_names(trait, nsim, field_book)
   location <- as.character(field_book$LOCATION)
@@ -97,28 +106,34 @@ simulate_design_field_book <- function(field_book, nsim, seed, trait, mean, resi
   planted_rows <- which(terms$planted)
   planted_rows <- planted_rows[order(site[planted_rows], field_book$ID[planted_rows])]
   seed <- as.integer(resolve_seed(seed))
-  local_rng_state()
-  set.seed(seed)
+  draw_normal <- stats::rnorm
+  if (is.null(isolated_rng)) {
+    local_rng_state()
+    set.seed(seed)
+  } else {
+    stream <- simulation_rng_cpp(seed)
+    draw_normal <- function(n, sd = 1) stats::qnorm(simulation_uniforms_cpp(stream, n), sd = sd)
+  }
   effects <- vector("list", nsim)
   responses <- stats::setNames(vector("list", nsim), response_names)
   treatment_scale <- treatment_sd / sqrt(length(terms$treatment))
   for (draw in seq_len(nsim)) {
     location_shift <- if (length(locations) > 1L && is.null(names(mean))) {
-      stats::rnorm(length(locations), sd = location_sd)
+      draw_normal(length(locations), sd = location_sd)
     } else numeric(length(locations))
     components <- c(
       list(location = location_shift[site]),
-      lapply(terms$treatment, simulation_group_effect, sd = treatment_scale),
-      Map(simulation_group_effect, terms$design, design_scales)
+      lapply(terms$treatment, simulation_group_effect, sd = treatment_scale, draw_normal = draw_normal),
+      Map(function(group, sd) simulation_group_effect(group, sd, draw_normal), terms$design, design_scales)
     )
     if (length(patches)) {
       components$spatial <- numeric(n)
       for (patch in patches) {
-        components$spatial[patch$rows] <- simulation_spatial_draw(patch, spatial)
+        components$spatial[patch$rows] <- simulation_spatial_draw(patch, spatial, draw_normal)
       }
     }
     components$residual <- numeric(n)
-    components$residual[planted_rows] <- stats::rnorm(length(planted_rows),
+    components$residual[planted_rows] <- draw_normal(length(planted_rows),
       sd = site_sd[site[planted_rows]])
     response <- Reduce(`+`, components, init = site_mean[site])
     if (any(!is.finite(response))) fieldhub_abort("The simulation scales produced non-finite responses.")
@@ -132,18 +147,20 @@ simulate_design_field_book <- function(field_book, nsim, seed, trait, mean, resi
   structure(list(
     field_book = result_book, input_field_book = field_book, responses = responses,
     effects = effects, metadata = list(
-      model = "design_gaussian", schema_version = 1L, seed = seed, rng_kind = RNGkind(),
+      model = "design_gaussian", schema_version = 1L, seed = seed,
+      rng_kind = if (is.null(isolated_rng)) RNGkind() else isolated_rng,
       package_version = as.character(utils::packageVersion("FielDHub")),
-      parameters = list(nsim = nsim, seed = seed, trait = trait, mean = mean,
+      parameters = c(list(nsim = nsim, seed = seed, trait = trait, mean = mean,
         residual_sd = residual_sd, treatment_sd = treatment_sd,
         design_sd = if (length(design_scales)) design_scales else design_default,
-        location_sd = location_sd, spatial = spatial, terms = terms)
+        location_sd = location_sd, spatial = spatial, terms = terms),
+        if (!is.null(isolated_rng)) list(isolated_rng = isolated_rng))
     )
   ), class = "fieldhub_simulation")
 }
 
-simulation_group_effect <- function(group, sd) {
-  c(0, stats::rnorm(max(group), sd = sd))[group + 1L]
+simulation_group_effect <- function(group, sd, draw_normal) {
+  c(0, draw_normal(max(group), sd = sd))[group + 1L]
 }
 
 simulation_response_names <- function(trait, nsim, field_book) {

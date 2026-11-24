@@ -53,6 +53,19 @@ simulation_spatial_spec <- function(spatial, default_sd) {
   defaults
 }
 
+check_simulation_axes <- function(design) {
+  design <- with_design_class(design)
+  experimental_axes <- if (inherits(design, "fieldhub_latin_square")) {
+    c("ROW_SQ", "COLUMN_SQ")
+  } else if (inherits(design, "fieldhub_row_column")) {
+    c("ROW_REP", "COLUMN_REP")
+  }
+  if (!all(experimental_axes %in% names(design$fieldBook))) {
+    fieldhub_abort("Spatial simulation requires physical ROW and COLUMN. Use ",
+                   "the field book returned by field_layout() to retain the experimental axes.")
+  }
+}
+
 simulation_spatial_patches <- function(book, site, spatial) {
   axes <- c("ROW", "COLUMN")
   if (!all(axes %in% names(book))) {
@@ -92,9 +105,9 @@ simulation_spatial_patches <- function(book, site, spatial) {
 
 #' Draw a spatial patch on the observed coordinates
 #' @noRd
-simulation_spatial_draw <- function(patch, spatial) {
+simulation_spatial_draw <- function(patch, spatial, draw_normal = stats::rnorm) {
   if (!is.null(patch$size)) {
-    surface <- separable_ar1_patch(stats::rnorm(patch$size, sd = spatial$sd),
+    surface <- separable_ar1_patch(draw_normal(patch$size, sd = spatial$sd),
       patch$nrows, patch$ncols, spatial$rho_col, spatial$rho_row)
     return(surface[patch$index])
   }
@@ -102,7 +115,7 @@ simulation_spatial_draw <- function(patch, spatial) {
   row <- numeric(patch$ncols)
   column_sd <- sqrt(1 - patch$col_rho^2)
   for (i in seq_along(patch$observed)) {
-    innovation <- stats::rnorm(patch$ncols)
+    innovation <- draw_normal(patch$ncols)
     for (j in seq_along(patch$col_rho)) {
       innovation[j + 1L] <- patch$col_rho[j] * innovation[j] + column_sd[j] * innovation[j + 1L]
     }

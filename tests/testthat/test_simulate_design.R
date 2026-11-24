@@ -152,3 +152,95 @@ test_that("spatial correlation retains grid distances across unplanted gaps", {
     spec$rho_col ^ abs(outer(book$COLUMN, book$COLUMN, "-"))
   expect_equal(unname(stats::cov(t(draws))), expected, tolerance = .06)
 })
+
+test_that("augmented RCBD blocks and entries use their realized identities", {
+  entries <- data.frame(ENTRY = 1:53, NAME = c("A", "B", "C", "A", paste0("G", 5:53)))
+  x <- RCBD_augmented(lines = 50, checks = 3, b = 5, repsExpt = 2L,
+                      l = 2, data = entries, seed = 3)
+  out <- stats::simulate(x, seed = 9)
+  effects <- out$effects[[1L]]
+  book <- out$field_book
+  units <- unique(data.frame(book[c("LOCATION", "EXPT", "BLOCK")], effect = effects$block))
+  expect_identical(nrow(units), 20L)
+  expect_length(unique(units$effect), 20L)
+  expect_length(unique(effects$treatment[book$ENTRY == 1]), 1L)
+  expect_length(unique(effects$treatment[book$ENTRY == 4]), 1L)
+  expect_false(identical(effects$treatment[match(1, book$ENTRY)],
+                         effects$treatment[match(4, book$ENTRY)]))
+})
+
+test_that("row-column field layouts preserve shared experimental axes in the API and app", {
+  x <- row_column(24, nrows = 6, reps = 2, seed = 21, iterations = 30,
+                  method = "onestage", latinize = TRUE)
+  layout <- field_layout(x, stacked = "horizontal")
+  indexes <- match(layout$ID, x$fieldBook$ID)
+  expect_identical(layout$ROW_REP, x$fieldBook$ROW[indexes])
+  expect_identical(layout$COLUMN_REP, x$fieldBook$COLUMN[indexes])
+  expect_error(stats::simulate(x, spatial = TRUE), "field_layout")
+  settings <- list(trait = "YIELD", mean = 100, residual_sd = 8, spatial = TRUE)
+  app <- app_trait_simulation(x, layout, settings, seed = 42)
+  x$fieldBook <- layout
+  sim <- stats::simulate(x, spatial = TRUE, seed = 42)
+  expect_length(unique(sim$effects[[1L]]$column), 4L)
+  expect_identical(app$df$YIELD, sim$field_book$YIELD)
+  expect_error(simulation_request(100, 8, "Other", "ROW_REP", field_book = layout),
+               "already present")
+})
+
+test_that("numeric Latin-square experimental labels require a physical layout", {
+  data <- data.frame(Period = c("101", "205", "414"), Cow = c("605", "902", "987"),
+                     Treatment = c("A1", "A2", "A3"))
+  x <- latin_square(reps = 1, seed = 2, data = data)
+  expect_error(stats::simulate(x, spatial = TRUE), "field_layout")
+  x$fieldBook <- field_layout(x)
+  result <- stats::simulate(x, spatial = TRUE, seed = 2)
+  expect_identical(sort(unique(result$field_book$COLUMN)), 1:3)
+  expect_setequal(as.character(result$field_book$COLUMN_SQ), data$Cow)
+  expect_true("spatial" %in% names(result$effects[[1L]]))
+})
+
+test_that("diagonal fillers create no decision-block term", {
+  x <- diagonal_arrangement(10, 32, 287, 4, planter = "cartesian", seed = 25)
+  result <- stats::simulate(x, seed = 25)
+  filler <- x$fieldBook$ENTRY == 0
+  expect_true(any(filler))
+  expect_true(all(is.na(result$field_book$YIELD[filler])))
+  expect_false("decision_block" %in% names(result$effects[[1L]]))
+  expect_error(stats::simulate(x, design_sd = c(decision_block = 1)), "design effects")
+})
+
+test_that("simulation and its replay preserve the caller's Box-Muller cache", {
+  x <- RCBD(t = 6, reps = 3, nrows = 3, seed = 2)
+  local_rng_state()
+  old_kind <- RNGkind()
+  on.exit(do.call(RNGkind, as.list(old_kind)), add = TRUE, after = FALSE)
+  RNGkind(normal.kind = "Box-Muller")
+  set.seed(21)
+  expected <- stats::rnorm(2)
+  set.seed(21)
+  expect_identical(stats::rnorm(1), expected[1L])
+  before <- .Random.seed
+  result <- stats::simulate(x, nsim = 2, seed = 6, spatial = TRUE)
+  expect_identical(result, reproduce_simulation(result))
+  expect_identical(.Random.seed, before)
+  expect_identical(stats::rnorm(1), expected[2L])
+  RNGkind(normal.kind = "Inversion")
+  expect_identical(result, reproduce_simulation(result))
+  expect_identical(RNGkind()[2L], "Inversion")
+})
+
+test_that("unambiguous labels share an effect when entry numbers are location-local", {
+  names <- paste0("G", seq_len(12))
+  entries <- data.frame(
+    LOCATION = rep(c("A", "B"), each = 12L),
+    ENTRY = rep(seq_len(12), 2L),
+    NAME = c(names, rev(names)),
+    REPS = rep(c(rep(1, 8L), rep(2, 4L)), 2L)
+  )
+  x <- partially_replicated(4, 4, l = 2, locationNames = c("A", "B"),
+                            multiLocationData = TRUE, data = entries, seed = 1)
+  result <- stats::simulate(x, seed = 19)
+  shared <- result$field_book$TREATMENT == "G1"
+  expect_length(unique(result$field_book$ENTRY[shared]), 2L)
+  expect_length(unique(result$effects[[1L]]$treatment[shared]), 1L)
+})

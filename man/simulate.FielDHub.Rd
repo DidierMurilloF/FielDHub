@@ -23,7 +23,9 @@
 
 \item{nsim}{Positive number of independent trials to draw.}
 
-\item{seed}{Simulation seed. With \code{NULL}, one seed is drawn and recorded.}
+\item{seed}{Simulation seed. With \code{NULL}, one seed is drawn and recorded.
+If R is using Box-Muller normals, simulation draws from a private
+stream to preserve the caller's cached normal.}
 
 \item{...}{Reserved for future extensions.}
 
@@ -52,7 +54,9 @@ Defaults to 0.625 times the typical residual SD.}
 overriding \code{sd} (half the typical residual SD), \code{rho_row} (0.5) and
 \code{rho_col} (0.5). Spatial
 correlation requires physical \code{ROW} and \code{COLUMN} in the field book,
-with unique coordinate pairs within each location.}
+with unique coordinate pairs within each location. For Latin squares
+and resolvable row-column designs, use the field book returned by
+\code{\link[=field_layout]{field_layout()}} so the experimental axes are retained separately.}
 }
 \value{
 A \code{fieldhub_simulation} list with the field book augmented by

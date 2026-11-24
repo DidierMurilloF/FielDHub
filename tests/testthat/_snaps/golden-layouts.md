@@ -4937,7 +4937,7 @@
     Output
       ## serpentine, vertical
       ### Layout 1: Row-Column Design 6 × 4
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
        5  6  7  8
@@ -4954,7 +4954,7 @@
       212 211 210 209
       ## cartesian, vertical
       ### Layout 1: Row-Column Design 6 × 4
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
        5  6  7  8
@@ -4971,7 +4971,7 @@
       209 210 211 212
       ## serpentine, horizontal
       ### Layout 1: Row-Column Design 3 × 8
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
        5  6  7  8 17 18 19 20
@@ -4982,7 +4982,7 @@
       109 110 111 112 209 210 211 212
       ## cartesian, horizontal
       ### Layout 1: Row-Column Design 3 × 8
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
        5  6  7  8 17 18 19 20
@@ -5003,7 +5003,7 @@
     Output
       ## serpentine, vertical
       ### Layout 1: Row-Column Design 6 × 4
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
        5  6  7  8
@@ -5034,7 +5034,7 @@
       1112 1111 1110 1109
       ## cartesian, vertical
       ### Layout 1: Row-Column Design 6 × 4
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4
        5  6  7  8
@@ -5065,7 +5065,7 @@
       1109 1110 1111 1112
       ## serpentine, horizontal
       ### Layout 1: Row-Column Design 3 × 8
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
        5  6  7  8 17 18 19 20
@@ -5084,7 +5084,7 @@
       1009 1010 1011 1012 1109 1110 1111 1112
       ## cartesian, horizontal
       ### Layout 1: Row-Column Design 3 × 8
-      Columns: ID LOCATION PLOT ROW COLUMN REP ENTRY TREATMENT 
+      Columns: ID LOCATION PLOT ROW COLUMN REP ROW_REP COLUMN_REP ENTRY TREATMENT 
       Location 1, ID:
        1  2  3  4 13 14 15 16
        5  6  7  8 17 18 19 20

@@ -27,3 +27,11 @@ resolvable_score_cpp <- function(v, r, b, start) {
 engine_draw_indices_cpp <- function(n, m) {
   .Call(`_FielDHub_engine_draw_indices_cpp`, n, m)
 }
+
+simulation_rng_cpp <- function(seed) {
+  .Call(`_FielDHub_simulation_rng_cpp`, seed)
+}
+
+simulation_uniforms_cpp <- function(stream, n) {
+  .Call(`_FielDHub_simulation_uniforms_cpp`, stream, n)
+}

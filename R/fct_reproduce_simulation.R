@@ -37,6 +37,11 @@ reproduce_simulation <- function(x) {
       data = list(recorded_version = meta$package_version, installed_version = current_version)
     )
   }
+  arguments <- c(list(field_book = x$input_field_book), meta$parameters)
+  if (identical(meta$model, "design_gaussian") && !is.null(meta$parameters$isolated_rng)) {
+    # This stream is independent of the caller's R generators.
+    return(invisible(do.call(engine, arguments, quote = TRUE)))
+  }
   local_rng_state()
   previous_kind <- RNGkind()
   on.exit(do.call(RNGkind, as.list(previous_kind)), add = TRUE, after = FALSE)
@@ -47,8 +52,7 @@ reproduce_simulation <- function(x) {
       data = list(parent = e)
     )
   )
-  invisible(do.call(engine, c(list(field_book = x$input_field_book), meta$parameters),
-                    quote = TRUE))
+  invisible(do.call(engine, arguments, quote = TRUE))
 }
 
 #' Validate the record and select a known simulation service
@@ -73,6 +77,15 @@ simulation_reproduction_engine <- function(x) {
     design_gaussian = simulate_design_field_book
   )
   expected <- setdiff(names(formals(engine)), "field_book")
+  if (identical(meta$model, "design_gaussian")) {
+    if (!"isolated_rng" %in% names(meta$parameters)) {
+      # Gaussian records saved before adding the isolated stream.
+      expected <- setdiff(expected, "isolated_rng")
+    } else if (!identical(meta$parameters$isolated_rng, meta$rng_kind) ||
+               meta$rng_kind[2L] != "Box-Muller") {
+      fieldhub_abort("Invalid recorded isolated simulation RNG settings.")
+    }
+  }
   if (!setequal(names(meta$parameters), expected)) {
     fieldhub_abort("The recorded parameters do not match the simulation model.")
   }
