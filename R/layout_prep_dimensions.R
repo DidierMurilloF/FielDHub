@@ -55,14 +55,14 @@ prep_dimension_options <- function(
         options$source_order
     ), ]
     options$value <- paste(options$rows, "x", options$columns)
-    options$label <- ifelse(
-        options$fillers == 0,
-        options$value,
-        paste0(
-            options$value,
-            " (+",
-            options$fillers,
-            ifelse(options$fillers == 1, " filler)", " fillers)")
+    # Shown with a times sign and, after a middle dot, its filler plots
+    options$label <- paste0(
+        options$rows, " \u00d7 ", options$columns,
+        ifelse(
+            options$fillers == 0,
+            "",
+            paste0(" \u00b7 ", options$fillers,
+                   ifelse(options$fillers == 1, " filler", " fillers"))
         )
     )
     rownames(options) <- NULL

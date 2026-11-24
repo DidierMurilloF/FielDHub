@@ -10,14 +10,24 @@
 NULL
 
 #' Offer field sizes, the first selected
-#' @param labels Field sizes ("rows x columns"), in the order offered.
+#' @param labels Field sizes ("rows x columns").
 #' @param none Message when there is none.
-#' @return \code{list(choices = , selected = )}.
+#' @return \code{list(choices = , selected = )}: the sizes from the squarest
+#'   to the most elongated (\code{squarest_first()}), each shown with a times
+#'   sign ("18 \u00d7 18") and sent as it is ("18 x 18"). The size selected
+#'   is the first of \code{labels}, the one the design functions choose when
+#'   no size is given.
 #' @noRd
 field_size_choices <- function(labels, none) {
   if (length(labels) == 0L) fieldhub_abort(none)
-  list(choices = labels, selected = utils::head(labels, 1L))
+  listed <- squarest_first(labels)
+  list(choices = stats::setNames(listed, field_size_label(listed)),
+       selected = utils::head(labels, 1L))
 }
+
+#' The name a field size is shown with: "18 x 18" as "18 \u00d7 18"
+#' @noRd
+field_size_label <- function(sizes) gsub(" x ", " \u00d7 ", sizes, fixed = TRUE)
 
 #' Field sizes of an optimized arrangement
 #' @param plots Number of plots, replicated checks included.
@@ -43,7 +53,11 @@ prep_field_choices <- function(plots, allow_fillers) {
   options <- prep_dimension_options(total_plots = plots, allow_fillers = isTRUE(allow_fillers),
                                     max_fillers = .prep_max_fillers)
   if (is.null(options)) fieldhub_abort(prep_no_dimensions_problem(allow_fillers)$message)
-  list(choices = stats::setNames(options$value, options$label),
+  # Listed with the fields without fillers first, then from the most square
+  # on, the one with fewer rows of two alike; the size selected stays the
+  # first of the options, the one the design functions choose
+  listed <- options[order(options$fillers, options$diff_dim, options$rows), ]
+  list(choices = stats::setNames(listed$value, listed$label),
        selected = utils::head(options$value, 1L))
 }
 

@@ -13,14 +13,22 @@ expect_classed <- function(expr, info = NULL) {
 
 test_that("field sizes are offered with the first selected, or explained when none fits", {
   expect_identical(field_size_choices(c("2 x 3", "3 x 2"), "none"),
-                   list(choices = c("2 x 3", "3 x 2"), selected = "2 x 3"))
+                   list(choices = c("2 \u00d7 3" = "2 x 3", "3 \u00d7 2" = "3 x 2"), selected = "2 x 3"))
+  # Listed from the most square on, the one with fewer rows of two alike; the
+  # size selected is still the first given
+  expect_identical(field_size_choices(c("19 x 18", "18 x 19", "20 x 17", "17 x 20"), "none"),
+                   list(choices = c("18 \u00d7 19" = "18 x 19", "19 \u00d7 18" = "19 x 18",
+                                    "17 \u00d7 20" = "17 x 20", "20 \u00d7 17" = "20 x 17"),
+                        selected = "19 x 18"))
   expect_error(field_size_choices(character(), "Nothing fits."), "Nothing fits.",
                class = "fieldhub_input_error")
 })
 
 test_that("optimized arrangements offer the field sizes of their plots", {
   offered <- optim_field_choices(312)
-  expect_identical(offered$choices, optimized_dimension_choices(312))
+  expect_setequal(offered$choices, optimized_dimension_choices(312))
+  expect_identical(unname(offered$choices[1:4]), c("13 x 24", "24 x 13", "12 x 26", "26 x 12"))
+  expect_identical(names(offered$choices[1:2]), c("13 \u00d7 24", "24 \u00d7 13"))
   expect_identical(offered$selected, "13 x 24")
   # a prime number of plots has no field of at least 4 x 4
   expect_error(optim_field_choices(307), "Please try a different number of treatments or checks.",
@@ -75,11 +83,23 @@ test_that("entry lists show their names and entries as filterable factors", {
 test_that("p-rep pages offer field sizes, labelled with their filler plots where allowed", {
   offered <- prep_field_choices(300, FALSE)
   expect_identical(offered$selected, "15 x 20")
-  expect_identical(unname(offered$choices), prep_dimension_options(300)$value)
-  # 301 plots: 7 x 43 without fillers, squarer fields with them
-  expect_identical(unname(prep_field_choices(301, FALSE)$choices), c("43 x 7", "7 x 43"))
+  expect_setequal(offered$choices, prep_dimension_options(300)$value)
+  # Listed from the most square on, the one with fewer rows of two alike
+  expect_identical(offered$choices[1:4], c("15 \u00d7 20" = "15 x 20", "20 \u00d7 15" = "20 x 15",
+                                           "12 \u00d7 25" = "12 x 25", "25 \u00d7 12" = "25 x 12"))
+  # 301 plots: 7 x 43 without fillers, squarer fields with them. The size
+  # selected is the one partially_replicated() chooses for these plots
+  expect_identical(prep_field_choices(301, FALSE)$choices,
+                   c("7 \u00d7 43" = "7 x 43", "43 \u00d7 7" = "43 x 7"))
+  expect_identical(prep_field_choices(301, FALSE)$selected, prep_dimension_options(301)$value[1L])
   with_fillers <- prep_field_choices(301, TRUE)
-  expect_true("16 x 19 (+3 fillers)" %in% names(with_fillers$choices))
+  expect_identical(with_fillers$choices[["16 \u00d7 19 \u00b7 3 fillers"]], "16 x 19")
+  expect_identical(with_fillers$choices[["7 \u00d7 43"]], "7 x 43")
+  expect_identical(names(with_fillers$choices)[1:4],
+                   c("7 \u00d7 43", "43 \u00d7 7", "16 \u00d7 19 \u00b7 3 fillers",
+                     "19 \u00d7 16 \u00b7 3 fillers"))
+  expect_identical(prep_field_choices(299, TRUE)$choices[["15 \u00d7 20 \u00b7 1 filler"]], "15 x 20")
+  expect_false(any(grepl("(", names(with_fillers$choices), fixed = TRUE)))
   expect_identical(with_fillers$selected, "43 x 7")
   expect_error(prep_field_choices(307, FALSE), "Select 'Allow filler plots'", class = "fieldhub_input_error")
   expect_error(prep_field_choices(307, NA), "Select 'Allow filler plots'", class = "fieldhub_input_error")
@@ -91,8 +111,10 @@ test_that("augmented RCBD pages offer the blocks and fields their entries fit", 
   expect_identical(offered$choices, unique(set_augmented_blocks(180, 4, start = 3)$b))
   expect_identical(offered$selected, 3)
   fields <- augmented_field_choices(180, 4, 3)
-  expect_identical(fields$choices, c("12 x 16", "16 x 12", "8 x 24", "24 x 8", "6 x 32", "32 x 6",
-                                     "4 x 48", "48 x 4", "3 x 64", "2 x 96", "96 x 2"))
+  expect_identical(unname(fields$choices),
+                   c("12 x 16", "16 x 12", "8 x 24", "24 x 8", "6 x 32", "32 x 6",
+                     "4 x 48", "48 x 4", "3 x 64", "2 x 96", "96 x 2"))
+  expect_identical(names(fields$choices), gsub("x", "\u00d7", unname(fields$choices)))
   expect_identical(fields$selected, "12 x 16")
   expect_identical(squarest_first(c("15 x 2", "3 x 10", "2 x 15", "6 x 5", "10 x 3", "5 x 6")),
                    c("5 x 6", "6 x 5", "3 x 10", "10 x 3", "2 x 15", "15 x 2"))
@@ -129,7 +151,9 @@ test_that("diagonal pages read their entries and checks, typed or uploaded", {
 
 test_that("diagonal pages offer fields, then percentages of checks with the API default selected", {
   fields <- diagonal_field_choices(287, 287, 1:4)
-  expect_identical(fields$choices, diagonal_dimension_choices(287, 1:4))
+  expect_setequal(fields$choices, diagonal_dimension_choices(287, 1:4))
+  expect_identical(fields$choices[1:3], c("18 \u00d7 18" = "18 x 18", "18 \u00d7 19" = "18 x 19",
+                                          "19 \u00d7 18" = "19 x 18"))
   expect_identical(fields$selected, "18 x 18")
   expect_error(diagonal_field_choices(2, 2, 1:4), "Insufficient number of entries provided!",
                class = "fieldhub_input_error")

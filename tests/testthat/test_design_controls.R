@@ -253,7 +253,7 @@ test_that("field sizes read as rows and columns", {
 
 test_that("a step is read once it holds one of its current choices", {
   expect_true(step_choice_ready("15 x 20", c("15 x 20", "20 x 15")))
-  expect_true(step_choice_ready("15 x 20", c(`15 x 20 (+1 filler)` = "15 x 20")))
+  expect_true(step_choice_ready("15 x 20", c("15 \u00d7 20 \u00b7 1 filler" = "15 x 20")))
   expect_false(step_choice_ready("1 x 300", c("15 x 20", "20 x 15")))
   expect_true(step_choice_ready("9.6", c(4.5, 9.6)))
   expect_true(step_choice_ready(9.6, c(4.5, 9.6)))
@@ -288,8 +288,8 @@ test_that("a step with nothing to choose from is explained instead of waited for
   choices <- list(location_dimensions = list(choices = list("8 x 8", character(), character())))
   raw <- list(multi_dimension = TRUE, location_dimensions = list("8 x 8", NULL, NULL))
   err <- expect_error(read_design_steps(steps, raw, list(l = 3), choices), class = "fieldhub_input_error")
-  expect_match(conditionMessage(err), "^Dimensions for location 2: no field size fits this location")
-  expect_identical(err$control, "Dimensions for location 2")
+  expect_match(conditionMessage(err), "^Field dimensions, location 2: no field size fits this location")
+  expect_identical(err$control, "Field dimensions, location 2")
   # the per-location sizes are not read while their flag is off
   expect_identical(read_design_steps(steps, list(multi_dimension = FALSE), list(l = 3), choices),
                    list(l = 3, multi_dimension = FALSE))
@@ -347,7 +347,8 @@ test_that("control constructors take labels, defaults and minimums from the conc
                                                       !grepl(":", concepts[[id]]$label), info = id)
   }
   expect_error(ctl_count("unknown", 1), class = "fieldhub_internal_error")
-  expect_identical(ctl_select("stacked", selected = "By Row")$choices, c("By Column", "By Row"))
+  expect_identical(ctl_select("stacked", selected = "By Row")$choices,
+                   c("By column" = "By Column", "By row" = "By Row"))
   expect_identical(ctl_plot_start("1")$value, "1")
   expect_identical(ctl_expt_name()$value, "Expt1")
   expect_identical(ctl_location_view()$stage, "run")
@@ -376,7 +377,7 @@ test_that("app_control_ui() renders each control type with its namespaced id", {
   expect_match(html(ctl_count("t", 5, max = 10)), 'max="10"', fixed = TRUE)
   expect_match(html(ctl_plot_start()), 'id="page-plot_start" type="text" class="shiny-input-text form-control" value="101"',
                fixed = TRUE)
-  expect_match(html(ctl_planter()), '<option value="serpentine" selected>serpentine</option>', fixed = TRUE)
+  expect_match(html(ctl_planter()), '<option value="serpentine" selected>Serpentine</option>', fixed = TRUE)
   expect_match(html(ctl_flag("continuous")), 'id="page-continuous" type="checkbox" class="shiny-input-checkbox" checked',
                fixed = TRUE)
   expect_match(html(ctl_seed()), 'id="page-seed"', fixed = TRUE)

@@ -63,7 +63,7 @@ canonical_labels <- c(
   repsStack = "Stack experiments",
   stacked = "Blocks layout",
   copies_per_entry = "Copies per entry",
-  location_view = "Location to view",
+  location_view = "Location",
   expt_name = "Experiment name",
   year = "Year (blank = current)",
   check_direction = "Each check appears once in every",
@@ -78,7 +78,7 @@ canonical_labels <- c(
   rowcol_distinct = "Keep copies in distinct rows and columns",
   dimensions = "Field dimensions",
   multi_dimension = "Set different dimensions across locations",
-  location_dimensions = "Dimensions for location",
+  location_dimensions = "Field dimensions, location",
   checks_percent = "Share of checks"
 )
 

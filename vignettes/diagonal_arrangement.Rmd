@@ -297,7 +297,7 @@ kable(df)
 
 6. Since we want to run this experiment over 1 location, set **Input # of Locations** to `1`.
 
-7. Select `By Row` or `By Column` in the **Blocks Layout:**. For this example we will set the `By Row` experiments/blocks layout.
+7. Select `By row` or `By column` in the **Blocks layout**. For this example we will set the `By row` experiments/blocks layout.
 
 8. Select `serpentine` or `cartesian` in the **Plot Order Layout**. For this example we will set the `serpentine` layout.
 
