@@ -78,21 +78,39 @@
   constructor.
 
 - `RCBD()` with dimensions keeps `plotNumber` as the matrix of blocks by
-  plots, adds the field map of the plot numbers as `plotNumberField`,
-  and records `nrows` and `ncols` in `infoDesign`, which `print()` and
-  `summary()` show. The plot-number tables of Latin squares, strip plots
-  and split plots (`plotSquares`, `plotLayouts`, `layoutlocations`)
-  carry the numbers of the grid.
+  plots and adds the field map of the plot numbers as `plotNumberField`.
+  The plot-number tables of Latin squares, strip plots and split plots
+  (`plotSquares`, `plotLayouts`, `layoutlocations`) carry the numbers of
+  the grid. Every design built with dimensions records `nrows` and
+  `ncols` in `infoDesign`, beside its stacking, so `print()` and
+  `summary()` show the field of a lattice or a split plot as they show
+  that of an RCBD.
 
-- In the app, the layout menu of these designs lists, in a group of
-  their own, “Field grid”, the field sizes of the selected “Reps layout”
-  that it does not already offer as a numbered option, with labels such
-  as “Grid 4 × 9”: the vertical menu lists only fields whose replicates
-  lie one above another, the horizontal menu only fields whose
-  replicates lie side by side. Every page whose replicates can lie in
-  rows and columns of replicates has a “Grid Panel” in its “Reps
-  layout”, which lists those fields; a “Reps layout” without any option
-  is not offered. The numbered layout options are unchanged.
+- In the app, the layout menu on the plot has the same names on every
+  page. “Replicate layout” (before, “Reps layout”) offers “Vertical”,
+  “Horizontal” and “Grid panel”; “Field dimensions” (before, “Layout
+  option”) lists the fields, each named by its rows and columns (“6 ×
+  9”), from the most square on. The vertical and horizontal menus hold
+  the numbered layouts, which are unchanged. “Grid panel” holds every
+  field grid of the design, whatever its stacking, and each says how its
+  replicates lie: “24 × 3 · replicates stacked vertically”, “3 × 24 ·
+  replicates stacked horizontally”, “6 × 12 · replicates 2 × 2” (rows by
+  columns of replicates); it is offered whenever the design has such a
+  field, so three blocks have their one-row field there. Fields of one
+  size say what tells them apart (“16 × 4 · blocks in rows”, “4 × 4 ·
+  whole plots in columns”) instead of a number, and a layout that was
+  listed twice is listed once. A design without replicates to arrange (a
+  CRD, a factorial or a split plot in a CRD, a single Latin square) has
+  one list of fields, its field grids included, and no “Replicate
+  layout”.
+
+- The spatial pages use the same names: field sizes read “18 × 18”, with
+  filler plots as “43 × 7 · 1 filler”; “Location to view” is “Location”;
+  the sizes of each location are “Field dimensions, location 1”; and the
+  options of “Plot order”, “Stack experiments” and “Blocks layout” are
+  in sentence case (“Serpentine”, “By column”). Sizes are listed from
+  the most square on, the one with fewer rows first of two alike; the
+  size selected when a page opens is the same as before.
 
 - Calls without `nrows` and `ncols` return what they returned before.
 
