@@ -13,6 +13,18 @@
 #' @param locationNames (optional) String with names for each of the \code{l} locations.
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param data (optional) Data frame with label list of treatments.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the serpentine planting path of the whole
+#'   field. See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the replicates of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of replicates). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose replicate
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -78,7 +90,8 @@ alpha_lattice <- function(t = NULL,
                           plotNumber = 101, 
                           locationNames = NULL,
                           seed = NULL, 
-                          data = NULL, reps = NULL) {
+                          data = NULL, reps = NULL,
+                          nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   r <- resolve_argument_alias(
@@ -147,6 +160,10 @@ alpha_lattice <- function(t = NULL,
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(reps = r, locationNames = recorded_locations), exclude = "r"
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "alpha_lattice", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }

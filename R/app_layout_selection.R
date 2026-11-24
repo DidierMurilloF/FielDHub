@@ -16,10 +16,12 @@ app_layout_selection <- function(input, session, design, planter, ids) {
     shiny::observeEvent(input[[ids[["stacked"]]]], {
       stacking <- input[[ids[["stacked"]]]]
       shiny::req(stacking, design(), planter())
-      choices <- validate_design(layout_choice_labels(design(), planter = planter(), stacked = stacking), report = TRUE)
-      first <- if (length(choices)) choices[[1L]] else 1
+      choices <- validate_design(layout_choice_labels(design(), planter = planter(),
+                                                      stacked = stacking, include_grids = TRUE),
+                                 report = TRUE)
+      first <- if (length(choices)) app_first_layout_choice(choices) else 1
       reset(first)
-      shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Layout option",
+      shiny::updateSelectInput(session, inputId = ids[["layout"]], label = "Field dimensions",
                                choices = choices, selected = first)
     })
     shiny::observeEvent(input[[ids[["layout"]]]], reset(NULL))
@@ -29,9 +31,30 @@ app_layout_selection <- function(input, session, design, planter, ids) {
     stacking <- if ("stacked" %in% names(ids)) input[[ids[["stacked"]]]] else "vertical"
     location <- if ("location" %in% names(ids)) input[[ids[["location"]]]] else 1
     shiny::req(selected, stacking, location, design(), planter())
-    validate_design(checked_layout_view(
-      design(), layout = if (!is.null(reset())) reset() else suppressWarnings(as.numeric(selected)),
-      planter = planter(), location = suppressWarnings(as.numeric(location)), stacked = stacking
-    ))
+    selected <- if (!is.null(reset())) reset() else selected
+    validate_design(app_selected_layout_view(design(), selected, planter(),
+                                              suppressWarnings(as.numeric(location)), stacking))
   })
+}
+
+app_selected_layout_view <- function(design, selected, planter, location, stacking) {
+  grid <- regmatches(selected, regexec("^grid:([a-z_]+):([0-9]+):([0-9]+)$", selected))[[1L]]
+  if (length(grid)) {
+    # A grid is drawn with its own stacking, the one its name states, not
+    # with that of the menu that lists it; a design without replicates has
+    # one field for its dimensions ("none")
+    return(checked_layout_view(design, planter = planter, location = location,
+                               stacked = if (!identical(grid[2L], "none")) grid[2L],
+                               nrows = as.numeric(grid[3L]), ncols = as.numeric(grid[4L])))
+  }
+  checked_layout_view(design, layout = suppressWarnings(as.numeric(selected)),
+                      planter = planter, location = location, stacked = stacking)
+}
+
+#' The first option of a layout menu: the one a page or a stacking opens on
+#' @param choices The value of \code{layout_choice_labels()}.
+#' @noRd
+app_first_layout_choice <- function(choices) {
+  if (!length(choices)) return(NULL)
+  choices[[1L]]
 }

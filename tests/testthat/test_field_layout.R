@@ -177,3 +177,622 @@ test_that("plot() explains that a stacking is not available", {
     NA
   )
 })
+
+# Field dimensions (nrows, ncols) ---------------------------------------
+
+# Step of the planting path at which each row of a one-location field book
+# is planted
+grid_path_step <- function(book, planter) {
+  path <- planting_path(max(book$ROW), max(book$COLUMN), planter)
+  match(paste(book$ROW, book$COLUMN), paste(path[, "ROW"], path[, "COLUMN"]))
+}
+
+grid_cases <- list(
+  CRD_data = list(grid = c(2, 5)),
+  RCBD_two_locations = list(grid = c(6, 3), groups = "REP"),
+  RCBD_checks = list(grid = c(4, 9), groups = "REP"),
+  full_factorial_crd_data = list(grid = c(3, 4)),
+  full_factorial_rcbd = list(grid = c(3, 4), groups = "REP"),
+  incomplete_blocks_labels = list(grid = c(5, 4), groups = c("REP", "IBLOCK")),
+  alpha_lattice = list(grid = c(4, 6), groups = c("REP", "IBLOCK")),
+  square_lattice = list(grid = c(4, 8), groups = c("REP", "IBLOCK")),
+  rectangular_lattice = list(grid = c(6, 4), groups = c("REP", "IBLOCK")),
+  split_plot_rcbd = list(grid = c(3, 4), groups = c("REP", "WHOLE_PLOT")),
+  split_plot_crd = list(grid = c(3, 4), groups = "WHOLE_PLOT"),
+  split_split_plot_rcbd = list(grid = c(4, 4),
+                              groups = c("REP", "WHOLE_PLOT", "SUB_PLOT")),
+  split_split_plot_crd = list(grid = c(4, 6), groups = c("WHOLE_PLOT", "SUB_PLOT")),
+  latin_square = list(grid = c(4, 8), groups = "SQUARE",
+                      axes = c("ROW_SQ", "COLUMN_SQ")),
+  strip_plot = list(grid = c(3, 4), groups = "REP", axes = c("HSTRIP", "VSTRIP"))
+)
+
+test_that("field dimensions keep the randomization and tile the experimental units", {
+  for (name in names(grid_cases)) {
+    case <- grid_cases[[name]]
+    original <- catalogue_design(name)
+    dims <- setNames(as.list(case$grid), c("nrows", "ncols"))
+    planter <- original$metadata$parameters$planter
+    if (is.null(planter)) planter <- "serpentine"
+    layout <- function(...) field_layout(original, planter = planter, ...)
+    design <- do.call(catalogue[[name]]$fun, c(original$metadata$parameters, dims))
+    book <- design$fieldBook
+    expect_identical(book, layout(nrows = dims$nrows, ncols = dims$ncols), info = name)
+    expect_identical(book, layout(ncols = dims$ncols), info = name)
+    expect_identical(book, layout(nrows = dims$nrows), info = name)
+    expect_identical(book, field_layout(design), info = name)
+    expect_identical(book, plot_layout(design)$allSitesFieldbook, info = name)
+    expect_identical(design, reproduce_design(design), info = name)
+    expect_type(book$ROW, "integer")
+    expect_type(book$COLUMN, "integer")
+    expect_identical(dim(table(book$ROW, book$COLUMN)), as.integer(case$grid), info = name)
+    expect_true(all(table(book$LOCATION, book$ROW, book$COLUMN) == 1L), info = name)
+
+    # The randomization is the default design's: only PLOT, ROW and COLUMN differ
+    assignments <- book[setdiff(names(book), c("PLOT", "ROW", "COLUMN"))]
+    if (name == "latin_square") {
+      names(assignments)[match(case$axes, names(assignments))] <- c("ROW", "COLUMN")
+    }
+    kept <- setdiff(names(original$fieldBook), "PLOT")
+    expect_identical(assignments[kept], original$fieldBook[kept], info = name)
+    expect_identical(sort(book$PLOT), sort(original$fieldBook$PLOT), info = name)
+
+    if (name %in% c("split_plot_crd", "split_split_plot_crd")) {
+      book$WHOLE_PLOT <- interaction(book$REP, book$WHOLE_PLOT, drop = TRUE)
+    }
+    groups <- c("LOCATION", case$groups)
+    for (level in seq_along(groups)) {
+      units <- split(book, as.list(book[groups[seq_len(level)]]), drop = TRUE)
+      for (unit in units) {
+        expect_equal((diff(range(unit$ROW)) + 1) * (diff(range(unit$COLUMN)) + 1),
+                     nrow(unit), info = name)
+      }
+    }
+    if (length(case$axes)) {
+      for (unit in units) {
+        expect_equal(nrow(unique(unit[c("ROW", case$axes[1L])])), length(unique(unit$ROW)))
+        expect_equal(nrow(unique(unit[c("COLUMN", case$axes[2L])])), length(unique(unit$COLUMN)))
+      }
+    }
+  }
+})
+
+test_that("one field dimension builds and reproduces the same design as both", {
+  for (name in names(grid_cases)) {
+    original <- catalogue_design(name)
+    dims <- setNames(as.list(grid_cases[[name]]$grid), c("nrows", "ncols"))
+    fun <- catalogue[[name]]$fun
+    both <- do.call(fun, c(original$metadata$parameters, dims))
+    for (one in names(dims)) {
+      design <- do.call(fun, c(original$metadata$parameters, dims[one]))
+      expect_identical(design$fieldBook, both$fieldBook, info = paste(name, one))
+      expect_identical(design$metadata$parameters[[one]], dims[[one]], info = paste(name, one))
+      expect_identical(design, reproduce_design(design), info = paste(name, one))
+    }
+  }
+})
+
+test_that("plot numbers follow the planter's path across the whole field", {
+  for (name in names(grid_cases)) {
+    original <- catalogue_design(name)
+    dims <- grid_cases[[name]]$grid
+    for (planter in c("serpentine", "cartesian")) {
+      book <- field_layout(original, planter = planter, nrows = dims[1L], ncols = dims[2L])
+      info <- paste(name, planter)
+      expect_identical(dim(table(book$ROW, book$COLUMN)), as.integer(dims), info = info)
+      for (site in split(book, book$LOCATION, drop = TRUE)) {
+        # A plot is numbered when the planter first reaches it; a whole plot
+        # of a split plot holds several cells under one number
+        reached <- tapply(grid_path_step(site, planter), site$PLOT, min)
+        expect_false(is.unsorted(reached, strictly = TRUE), info = info)
+        if (!anyDuplicated(site$PLOT)) {
+          expect_identical(order(site$PLOT), order(grid_path_step(site, planter)), info = info)
+        }
+      }
+    }
+  }
+})
+
+test_that("consecutive plot numbers are neighbours in a serpentine field", {
+  designs <- list(
+    RCBD(t = 6, reps = 6, seed = 1, nrows = 4, ncols = 9),
+    RCBD(t = 5, reps = 3, l = 2, continuous = TRUE, seed = 6, ncols = 3),
+    incomplete_blocks(t = 12, k = 4, reps = 2, seed = 17, nrows = 6, ncols = 4),
+    alpha_lattice(t = 12, k = 3, reps = 6, seed = 36, nrows = 4),
+    full_factorial(setfactors = c(2, 3), reps = 2, type = 2, seed = 9, nrows = 4),
+    latin_square(t = 4, reps = 2, seed = 7, nrows = 4, ncols = 8),
+    strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15, nrows = 6),
+    CRD(t = 5, reps = 3, seed = 1, nrows = 3)
+  )
+  for (design in designs) {
+    for (site in split(design$fieldBook, design$fieldBook$LOCATION, drop = TRUE)) {
+      site <- site[order(site$PLOT), ]
+      expect_true(all(abs(diff(site$ROW)) + abs(diff(site$COLUMN)) == 1L),
+                  info = class(design)[1L])
+    }
+  }
+  # The numbering does not restart in each block of an RCBD: three blocks of
+  # two rows lie side by side, and the planter crosses all three in each row
+  book <- designs[[1L]]$fieldBook
+  expect_identical(book$PLOT[order(book$ROW, book$COLUMN)][1:18],
+                   c(101:106, 201:203, 306:301, 206:204))
+  expect_identical(book$REP[order(book$ROW, book$COLUMN)][1:18], rep(rep(1:3, each = 3), 2))
+})
+
+test_that("consecutive whole plots are neighbours in a serpentine field", {
+  # Whole plots two rows tall: the planter follows the grid of whole plots,
+  # so the whole plot after 103 is the one beside it, not across the field
+  designs <- list(
+    split_plot(wp = 3, sp = 2, reps = 2, seed = 11, nrows = 4),
+    split_plot(wp = 2, sp = 3, reps = 3, l = 2, seed = 4, ncols = 2),
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 1, nrows = 4),
+    split_split_plot(wp = 2, sp = 2, ssp = 2, reps = 2, seed = 1, nrows = 2)
+  )
+  for (design in designs) {
+    for (site in split(design$fieldBook, design$fieldBook$LOCATION, drop = TRUE)) {
+      top <- tapply(site$ROW, site$PLOT, min)
+      left <- tapply(site$COLUMN, site$PLOT, min)
+      height <- tapply(site$ROW, site$PLOT, max) - top + 1L
+      width <- tapply(site$COLUMN, site$PLOT, max) - left + 1L
+      step_row <- abs(diff(top))
+      step_col <- abs(diff(left))
+      beside <- (step_row == 0L & step_col == width[-length(width)]) |
+        (step_col == 0L & step_row == height[-length(height)])
+      expect_true(all(beside), info = class(design)[1L])
+    }
+  }
+  book <- designs[[1L]]$fieldBook
+  map <- tapply(book$PLOT, list(book$ROW, book$COLUMN), unique)
+  expect_equal(unname(map[3L, ]), c(203, 202, 201))
+})
+
+test_that("plot() follows the rules of field_layout() for field grids", {
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  stored <- RCBD(t = 6, reps = 6, seed = 1, nrows = 4)
+  fixed <- "built on a fixed 4 x 9 field with a serpentine planter"
+  expect_error(plot(stored, planter = "cartesian"), fixed, class = "fieldhub_input_error")
+  # Six blocks in a 4 x 9 field lie two down and three across: a grid panel
+  expect_error(plot(stored, stacked = "horizontal"), fixed, class = "fieldhub_input_error")
+  expect_error(plot(stored, stacked = "vertical"), fixed, class = "fieldhub_input_error")
+  expect_identical(plot(stored)$field_book, stored$fieldBook)
+  expect_identical(plot(stored, planter = "serpentine", stacked = "grid_panel")$field_book,
+                   stored$fieldBook)
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(plot(x, layout = 2, nrows = 4), "'layout'.*cannot be combined",
+               class = "fieldhub_input_error")
+  expect_identical(plot(x, nrows = 4)$field_book, field_layout(x, nrows = 4))
+  # An abbreviated dimension is a dimension, as in field_layout()
+  expect_identical(plot(x, nrow = 4)$field_book, field_layout(x, nrow = 4))
+  expect_error(plot(x, layout = 2, nrow = 4), "'layout'.*cannot be combined",
+               class = "fieldhub_input_error")
+  # A design built with a cartesian planter draws its grid for its own
+  # dimensions, stacking and planter, or for none of them
+  built <- list(RCBD(t = 6, reps = 4, seed = 1, nrows = 4, planter = "cartesian"),
+                full_factorial(setfactors = c(2, 3), reps = 4, type = 2, seed = 1, nrows = 4,
+                               planter = "cartesian"),
+                latin_square(t = 3, reps = 4, seed = 1, nrows = 6, planter = "cartesian"),
+                strip_plot(Hplots = 3, Vplots = 2, reps = 4, seed = 1, nrows = 6,
+                           planter = "cartesian"))
+  for (design in built) {
+    info <- class(design)[1L]
+    rows <- max(design$fieldBook$ROW)
+    cols <- max(design$fieldBook$COLUMN)
+    own <- design$metadata$parameters$stacked
+    expect_identical(plot(design)$field_book, design$fieldBook, info = info)
+    expect_identical(plot(design, nrows = rows)$field_book, design$fieldBook, info = info)
+    expect_identical(plot(design, stacked = own, nrows = rows, ncols = cols)$field_book,
+                     design$fieldBook, info = info)
+    expect_identical(plot(design, planter = "cartesian", ncols = cols)$field_book,
+                     design$fieldBook, info = info)
+    expect_error(plot(design, planter = "serpentine", nrows = rows),
+                 "with a cartesian planter.*or another 'stacked'", class = "fieldhub_input_error")
+  }
+})
+
+test_that("fields of one row and of one column are valid grids", {
+  designs <- list(CRD(t = 4, reps = 3, seed = 1),
+                  RCBD(t = 3, reps = 2, seed = 1),
+                  incomplete_blocks(t = 4, k = 2, reps = 2, seed = 1),
+                  split_plot(wp = 2, sp = 2, reps = 2, seed = 1))
+  for (design in designs) {
+    n <- nrow(design$fieldBook)
+    row <- field_layout(design, nrows = 1)
+    expect_identical(row$ROW, rep(1L, n))
+    expect_identical(sort(row$COLUMN), seq_len(n))
+    expect_identical(row$PLOT[order(row$COLUMN)], sort(design$fieldBook$PLOT))
+    column <- field_layout(design, ncols = 1)
+    expect_identical(column$COLUMN, rep(1L, n))
+    expect_identical(sort(column$ROW), seq_len(n))
+    expect_identical(column$PLOT[order(column$ROW)], sort(design$fieldBook$PLOT))
+  }
+})
+
+test_that("RCBD with dimensions keeps plotNumber by blocks and adds the field map", {
+  args <- list(t = 4, checks = 1, rep_checks = 2, reps = 6, l = 2,
+               plotNumber = c(101, 1001), seed = 42)
+  original <- do.call(RCBD, args)
+  spatial <- do.call(RCBD, c(args, list(nrows = 4, ncols = 9)))
+  book <- spatial$fieldBook
+  expect_identical(names(original), c("infoDesign", "layoutRandom", "plotNumber",
+                                      "fieldBook", "metadata"))
+  expect_null(original$infoDesign$nrows)
+  expect_identical(spatial$layoutRandom, original$layoutRandom)
+  expect_identical(names(spatial$plotNumber), names(original$plotNumber))
+  expect_identical(names(spatial$plotNumberField), names(original$plotNumber))
+  expect_equal(as.numeric(table(book$LOCATION, book$REP, book$CHECKS)[, , "1"]), rep(2, 12))
+  sites <- split(book, book$LOCATION, drop = TRUE)
+  for (i in seq_along(sites)) {
+    site <- sites[[i]]
+    plots <- spatial$plotNumber[[i]]
+    expect_identical(dim(plots), dim(original$plotNumber[[i]]))
+    expect_type(plots, "integer")
+    # plotNumber still lines up cell for cell with layoutRandom
+    treatments <- do.call(rbind, strsplit(spatial$layoutRandom[[i]][, 2L], " "))
+    expect_identical(site$TREATMENT[match(plots, site$PLOT)], as.vector(treatments))
+    expect_identical(site$REP[match(plots, site$PLOT)], as.vector(row(plots)))
+    # The field map has field row 1 in its last row, as other field maps
+    map <- spatial$plotNumberField[[i]]
+    expect_identical(dim(map), c(4L, 9L))
+    expect_identical(map[cbind(5L - site$ROW, site$COLUMN)], site$PLOT)
+  }
+  expect_identical(spatial$infoDesign[c("nrows", "ncols")], list(nrows = 4L, ncols = 9L))
+  expect_identical(RCBD(t = 6, reps = 6, seed = 1, ncols = 9)$infoDesign[c("nrows", "ncols")],
+                   list(nrows = 4L, ncols = 9L))
+  expect_true(any(grepl("nrows", capture.output(print(spatial)))))
+  expect_true(any(grepl("ncols", capture.output(summary(spatial)))))
+  expect_true(any(grepl("Field map of plot numbers", capture.output(summary(spatial)))))
+})
+
+test_that("invalid field dimensions suggest grids that preserve the design", {
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(field_layout(x, nrows = 5, ncols = 7), "36 plots.*4 x 9",
+               class = "fieldhub_input_error")
+  expect_error(RCBD(t = 6, reps = 6, nrows = 5), "Valid dimensions",
+               class = "fieldhub_input_error")
+  expect_error(latin_square(4, reps = 2, nrows = 2, ncols = 16, seed = 1),
+               "Valid dimensions.*4 x 8.*8 x 4", class = "fieldhub_input_error")
+  expect_error(strip_plot(3, 2, reps = 2, nrows = 2, ncols = 6, seed = 1),
+               "Valid dimensions.*3 x 4", class = "fieldhub_input_error")
+  expect_error(CRD(6, 2, nrows = 5, seed = 1),
+               "Valid dimensions.*4 x 3", class = "fieldhub_input_error")
+  expect_error(field_layout(row_column(12, nrows = 3, reps = 2, seed = 1), nrows = 4),
+               "not supported", class = "fieldhub_input_error")
+})
+
+test_that("field dimensions must be single positive whole numbers", {
+  designs <- list(RCBD(t = 6, reps = 6, seed = 1), CRD(t = 6, reps = 6, seed = 1))
+  for (x in designs) {
+    for (value in list("4", c(4, 9), NA, NA_real_, 0, -4, TRUE, Inf, 1.5, list(4))) {
+      expect_error(field_layout(x, nrows = value), "`nrows` must be one positive whole number",
+                   class = "fieldhub_input_error")
+      expect_error(field_layout(x, nrows = 4, ncols = value),
+                   "`ncols` must be one positive whole number", class = "fieldhub_input_error")
+    }
+  }
+  expect_error(CRD(t = 6, reps = 6, seed = 1, nrows = "4"), "`nrows`",
+               class = "fieldhub_input_error")
+  expect_error(RCBD(t = 6, reps = 6, seed = 1, ncols = 0), "`ncols`",
+               class = "fieldhub_input_error")
+})
+
+test_that("a design built on a field grid returns that grid only", {
+  designs <- list(
+    serpentine = RCBD(t = 6, reps = 6, seed = 1, nrows = 4),
+    cartesian = RCBD(t = 6, reps = 6, seed = 1, nrows = 4, planter = "cartesian"),
+    serpentine = incomplete_blocks(t = 12, k = 4, reps = 3, seed = 1, nrows = 4),
+    cartesian = latin_square(t = 3, reps = 3, seed = 1, ncols = 9, planter = "cartesian")
+  )
+  for (i in seq_along(designs)) {
+    stored <- designs[[i]]
+    built <- names(designs)[i]
+    rows <- max(stored$fieldBook$ROW)
+    other <- setdiff(c("serpentine", "cartesian"), built)
+    # Defaults, the planter of the design and its own dimensions give the grid
+    expect_identical(field_layout(stored), stored$fieldBook)
+    expect_identical(field_layout(stored, planter = built), stored$fieldBook)
+    # The stacking the dimensions gave the design, and no other
+    own <- stored$metadata$parameters$stacked
+    expect_identical(field_layout(stored, stacked = own), stored$fieldBook)
+    expect_identical(field_layout(stored, stacked = own, nrows = rows, planter = built),
+                     stored$fieldBook)
+    expect_identical(field_layout(stored, nrows = rows, ncols = 9), stored$fieldBook)
+    expect_identical(field_layout(stored, ncols = 9, planter = built), stored$fieldBook)
+    fixed <- paste0("built on a fixed ", rows, " x 9 field with a ", built,
+                    " planter.*again with other 'nrows' and 'ncols' or another 'stacked', ",
+                    "or without them")
+    expect_error(field_layout(stored, planter = other), fixed, class = "fieldhub_input_error")
+    expect_error(field_layout(stored, ncols = 9, planter = other), fixed,
+                 class = "fieldhub_input_error")
+    for (another in setdiff(c("vertical", "horizontal", "grid_panel"), own)) {
+      expect_error(field_layout(stored, stacked = another), fixed,
+                   class = "fieldhub_input_error")
+      expect_error(field_layout(stored, stacked = another, nrows = rows, ncols = 9), fixed,
+                   class = "fieldhub_input_error")
+    }
+    expect_error(field_layout(stored, nrows = 6), fixed, class = "fieldhub_input_error")
+    expect_error(field_layout(stored, nrows = rows, ncols = 6), fixed,
+                 class = "fieldhub_input_error")
+  }
+})
+
+test_that("field dimensions cannot be combined with a numbered layout", {
+  x <- RCBD(t = 6, reps = 6, seed = 1)
+  expect_error(field_layout(x, layout = 2, nrows = 4), "'layout'.*cannot be combined",
+               class = "fieldhub_input_error")
+  expect_error(field_layout(x, layout = 1, stacked = "grid_panel", ncols = 9),
+               "'layout'.*cannot be combined", class = "fieldhub_input_error")
+})
+
+# Stacking of the replicates in a field of given dimensions -----------------
+
+# Rows and columns of each replicate
+replicate_shape <- function(book, unit = "REP") {
+  unique(lapply(split(book[c("ROW", "COLUMN")], book[[unit]]), function(u) {
+    c(diff(range(u$ROW)), diff(range(u$COLUMN))) + 1
+  }))
+}
+
+# Designs of four replicates, with a field for each stacking
+stacking_cases <- list(
+  RCBD = list(fun = RCBD, args = list(t = 6, reps = 4, seed = 1),
+              vertical = c(4, 6), horizontal = c(6, 4), grid_panel = c(4, 6)),
+  full_factorial = list(fun = full_factorial,
+                        args = list(setfactors = c(2, 3), reps = 4, type = 2, seed = 1),
+                        vertical = c(4, 6), horizontal = c(6, 4), grid_panel = c(4, 6)),
+  split_plot = list(fun = split_plot, args = list(wp = 3, sp = 2, reps = 4, seed = 1),
+                    vertical = c(4, 6), horizontal = c(6, 4), grid_panel = c(4, 6)),
+  split_split_plot = list(fun = split_split_plot,
+                          args = list(wp = 2, sp = 2, ssp = 2, reps = 4, seed = 1),
+                          vertical = c(8, 4), horizontal = c(4, 8), grid_panel = c(4, 8)),
+  incomplete_blocks = list(fun = incomplete_blocks, args = list(t = 12, k = 4, reps = 4, seed = 1),
+                           vertical = c(8, 6), horizontal = c(6, 8), grid_panel = c(8, 6)),
+  alpha_lattice = list(fun = alpha_lattice, args = list(t = 12, k = 3, reps = 4, seed = 36),
+                       vertical = c(8, 6), horizontal = c(6, 8), grid_panel = c(8, 6)),
+  square_lattice = list(fun = square_lattice, args = list(t = 16, k = 4, reps = 4, seed = 1),
+                        vertical = c(16, 4), horizontal = c(4, 16), grid_panel = c(8, 8)),
+  rectangular_lattice = list(fun = rectangular_lattice,
+                             args = list(t = 12, k = 3, reps = 4, seed = 1),
+                             vertical = c(8, 6), horizontal = c(6, 8), grid_panel = c(8, 6)),
+  latin_square = list(fun = latin_square, args = list(t = 4, reps = 4, seed = 7), unit = "SQUARE",
+                      vertical = c(16, 4), horizontal = c(4, 16), grid_panel = c(8, 8)),
+  strip_plot = list(fun = strip_plot, args = list(Hplots = 3, Vplots = 2, reps = 4, seed = 1),
+                    vertical = c(12, 2), horizontal = c(3, 8), grid_panel = c(6, 4))
+)
+
+test_that("field_layout() arranges the replicates of a field as 'stacked' says", {
+  for (name in names(stacking_cases)) {
+    case <- stacking_cases[[name]]
+    unit <- if (is.null(case$unit)) "REP" else case$unit
+    x <- do.call(case$fun, case$args)
+    for (stacked in c("vertical", "horizontal", "grid_panel")) {
+      dims <- case[[stacked]]
+      info <- paste(name, stacked)
+      book <- field_layout(x, stacked = stacked, nrows = dims[1L], ncols = dims[2L])
+      expect_identical(c(max(book$ROW), max(book$COLUMN)), as.integer(dims), info = info)
+      expect_identical(replicates_lie(book, unit), stacked, info = info)
+      # One above another, each replicate spans all the columns; side by
+      # side, all the rows; in a panel of two by two, half of each
+      spans <- switch(stacked, vertical = dims / c(4, 1), horizontal = dims / c(1, 4),
+                      grid_panel = dims / 2)
+      expect_identical(replicate_shape(book, unit), list(spans), info = info)
+      expect_true(all(table(book$ROW, book$COLUMN) == 1L), info = info)
+      # One dimension and the stacking are enough
+      expect_identical(field_layout(x, stacked = stacked, nrows = dims[1L]), book, info = info)
+      expect_identical(field_layout(x, stacked = stacked, ncols = dims[2L]), book, info = info)
+      # The stacking moves the replicates only: the randomization is the design's
+      kept <- setdiff(names(x$fieldBook), c("PLOT", if (name == "latin_square") c("ROW", "COLUMN")))
+      expect_identical(book[kept], x$fieldBook[kept], info = info)
+    }
+  }
+})
+
+test_that("a design built with dimensions and a stacking stores, prints and reproduces it", {
+  for (name in names(stacking_cases)) {
+    case <- stacking_cases[[name]]
+    x <- do.call(case$fun, case$args)
+    for (stacked in c("vertical", "horizontal", "grid_panel")) {
+      dims <- case[[stacked]]
+      info <- paste(name, stacked)
+      built <- do.call(case$fun, c(case$args, list(nrows = dims[1L], ncols = dims[2L],
+                                                   stacked = stacked)))
+      expect_identical(built$fieldBook,
+                       field_layout(x, stacked = stacked, nrows = dims[1L], ncols = dims[2L]),
+                       info = info)
+      expect_identical(built$metadata$parameters$stacked, stacked, info = info)
+      expect_identical(built$infoDesign$stacked, stacked, info = info)
+      # print() and summary() show the field and the stacking of every design
+      expect_identical(built$infoDesign[c("nrows", "ncols")],
+                       list(nrows = as.integer(dims[1L]), ncols = as.integer(dims[2L])),
+                       info = info)
+      for (shown in list(capture.output(print(built)), capture.output(summary(built)))) {
+        expect_true(any(grepl(paste0("nrows +: int ", dims[1L], "$"), shown)), info = info)
+        expect_true(any(grepl(paste0("ncols +: int ", dims[2L], "$"), shown)), info = info)
+        expect_true(any(grepl(paste0("stacked.*", stacked), shown)), info = info)
+      }
+      expect_identical(reproduce_design(built), built, info = info)
+      expect_identical(do.call(case$fun, built$metadata$parameters), built, info = info)
+      # Its own stacking or none returns the grid; another is refused
+      expect_identical(field_layout(built), built$fieldBook, info = info)
+      expect_identical(field_layout(built, stacked = stacked), built$fieldBook, info = info)
+      for (another in setdiff(c("vertical", "horizontal", "grid_panel"), stacked)) {
+        expect_error(field_layout(built, stacked = another), "built on a fixed",
+                     class = "fieldhub_input_error", info = info)
+      }
+      expect_error(field_layout(built, planter = "cartesian"), "built on a fixed",
+                   class = "fieldhub_input_error", info = info)
+    }
+  }
+})
+
+test_that("dimensions that do not fit the stacking suggest dimensions that do", {
+  x <- RCBD(t = 6, reps = 4, seed = 1)
+  # Four blocks one above another need a multiple of four rows
+  e <- expect_error(field_layout(x, stacked = "vertical", nrows = 6, ncols = 4),
+                    "one above another.*Valid dimensions.*8 x 3, 4 x 6, 12 x 2, 24 x 1",
+                    class = "fieldhub_input_error")
+  expect_false(grepl("6 x 4", conditionMessage(e), fixed = TRUE))
+  expect_error(field_layout(x, stacked = "horizontal", nrows = 4, ncols = 6),
+               "side by side.*Valid dimensions.*3 x 8, 6 x 4, 2 x 12, 1 x 24",
+               class = "fieldhub_input_error")
+  e <- expect_error(RCBD(t = 6, reps = 4, seed = 1, nrows = 8, ncols = 3, stacked = "grid_panel"),
+                    "rows and columns of replicates.*Valid dimensions.*6 x 4.*4 x 6",
+                    class = "fieldhub_input_error")
+  expect_false(grepl("8 x 3", conditionMessage(e), fixed = TRUE))
+  expect_error(incomplete_blocks(t = 12, k = 4, reps = 4, seed = 1, nrows = 6, stacked = "vertical"),
+               "one above another.*Valid dimensions.*8 x 6", class = "fieldhub_input_error")
+  expect_error(latin_square(t = 4, reps = 4, seed = 7, nrows = 8, ncols = 8, stacked = "horizontal"),
+               "side by side.*Valid dimensions.*4 x 16", class = "fieldhub_input_error")
+  # Three replicates cannot lie in rows and columns of replicates
+  expect_error(field_layout(RCBD(t = 6, reps = 3, seed = 1), stacked = "grid_panel", nrows = 3),
+               "grid_panel", class = "fieldhub_input_error")
+  expect_error(RCBD(t = 6, reps = 4, seed = 1, nrows = 4, stacked = "diagonal"), "'stacked'",
+               class = "fieldhub_input_error")
+})
+
+test_that("a stacking is refused where there are no replicates to stack, or no field", {
+  no_replicates <- list(
+    list(fun = CRD, args = list(t = 6, reps = 4, seed = 1)),
+    list(fun = full_factorial, args = list(setfactors = c(2, 3), reps = 4, type = 1, seed = 1)),
+    list(fun = split_plot, args = list(wp = 3, sp = 2, reps = 4, type = 1, seed = 1)),
+    list(fun = split_split_plot, args = list(wp = 2, sp = 2, ssp = 2, reps = 3, type = 1, seed = 1))
+  )
+  for (case in no_replicates) {
+    x <- do.call(case$fun, case$args)
+    expect_error(field_layout(x, stacked = "vertical", nrows = 4), "no replicates",
+                 class = "fieldhub_input_error")
+    expect_error(do.call(case$fun, c(case$args, list(nrows = 4, stacked = "horizontal"))),
+                 "no replicates", class = "fieldhub_input_error")
+    built <- do.call(case$fun, c(case$args, list(nrows = 4)))
+    expect_null(built$metadata$parameters$stacked)
+    expect_null(built$infoDesign$stacked)
+    expect_identical(built$infoDesign$nrows, 4L)
+    expect_true(any(grepl("nrows +: int 4$", capture.output(print(built)))))
+    expect_true(any(grepl("ncols +: int ", capture.output(print(built)))))
+    expect_error(field_layout(built, stacked = "vertical"), "no replicates",
+                 class = "fieldhub_input_error")
+  }
+  # A stacking arranges a field of given dimensions: alone it is refused
+  for (case in stacking_cases) {
+    expect_error(do.call(case$fun, c(case$args, list(stacked = "vertical"))),
+                 "'stacked'.*'nrows'.*'ncols'", class = "fieldhub_input_error")
+  }
+  expect_error(CRD(t = 6, reps = 4, seed = 1, stacked = "vertical"), "'stacked'",
+               class = "fieldhub_input_error")
+  # A stacking that does not exist is named as such, with or without a field
+  expect_error(RCBD(t = 6, reps = 4, seed = 1, stacked = "diagonal"),
+               "'stacked' must be \"vertical\", \"horizontal\" or \"grid_panel\"",
+               class = "fieldhub_input_error")
+})
+
+test_that("without a stacking the most square replicate is chosen", {
+  chosen <- function(x) x$metadata$parameters$stacked
+  # Two blocks of twelve plots: 3 x 4 blocks one above another are more
+  # square than 6 x 2 blocks side by side, and the other way round
+  tall <- RCBD(t = 12, reps = 2, seed = 1, nrows = 6, ncols = 4)
+  expect_identical(chosen(tall), "vertical")
+  expect_identical(replicates_lie(tall$fieldBook), "vertical")
+  expect_identical(replicate_shape(tall$fieldBook), list(c(3, 4)))
+  wide <- RCBD(t = 12, reps = 2, seed = 1, nrows = 4, ncols = 6)
+  expect_identical(chosen(wide), "horizontal")
+  expect_identical(replicate_shape(wide$fieldBook), list(c(4, 3)))
+  # A panel of 2 x 3 blocks is more square than a stack of 1 x 6 blocks
+  panel <- RCBD(t = 6, reps = 4, seed = 1, nrows = 4, ncols = 6)
+  expect_identical(chosen(panel), "grid_panel")
+  expect_identical(replicate_shape(panel$fieldBook), list(c(2, 3)))
+  # A tie goes to the vertical stack: 2 x 4 blocks above, 4 x 2 beside
+  tie <- RCBD(t = 8, reps = 2, seed = 1, nrows = 4, ncols = 4)
+  expect_identical(chosen(tie), "vertical")
+  expect_identical(replicate_shape(tie$fieldBook), list(c(2, 4)))
+  # then to the horizontal one: 2 x 1 blocks side by side, or 1 x 2 in a panel
+  expect_identical(chosen(RCBD(t = 2, reps = 4, seed = 1, nrows = 2, ncols = 4)), "horizontal")
+  # Among the panels that fit, the most square replicate too: twelve 4 x 3
+  # blocks (six rows of two) rather than 6 x 2 blocks (four rows of three)
+  panels <- RCBD(t = 12, reps = 12, seed = 1, nrows = 24, ncols = 6)
+  expect_identical(chosen(panels), "grid_panel")
+  expect_identical(replicate_shape(panels$fieldBook), list(c(4, 3)))
+
+  others <- list(
+    list(split_plot(wp = 3, sp = 2, reps = 2, seed = 11, nrows = 4, ncols = 3), "vertical"),
+    list(split_plot(wp = 3, sp = 2, reps = 2, seed = 11, nrows = 3, ncols = 4), "horizontal"),
+    list(incomplete_blocks(t = 12, k = 4, reps = 4, seed = 1, nrows = 8, ncols = 6), "grid_panel"),
+    list(alpha_lattice(t = 12, k = 3, reps = 2, seed = 1, nrows = 6, ncols = 4), "vertical"),
+    list(latin_square(t = 3, reps = 3, seed = 1, ncols = 9), "horizontal"),
+    list(strip_plot(Hplots = 3, Vplots = 2, reps = 2, seed = 15, nrows = 6), "vertical"),
+    list(full_factorial(setfactors = c(2, 3), reps = 2, type = 2, seed = 9, nrows = 2),
+         "horizontal")
+  )
+  for (case in others) {
+    x <- case[[1L]]
+    unit <- if (inherits(x, "fieldhub_latin_square")) "SQUARE" else "REP"
+    expect_identical(chosen(x), case[[2L]], info = class(x)[1L])
+    expect_identical(x$infoDesign$stacked, case[[2L]], info = class(x)[1L])
+    expect_identical(replicates_lie(x$fieldBook, unit), case[[2L]], info = class(x)[1L])
+    expect_identical(reproduce_design(x), x, info = class(x)[1L])
+    expect_identical(field_layout(x, stacked = case[[2L]]), x$fieldBook, info = class(x)[1L])
+  }
+})
+
+test_that("plot() arranges the replicates of a field as 'stacked' says", {
+  pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  for (name in c("RCBD", "split_plot", "incomplete_blocks", "latin_square")) {
+    case <- stacking_cases[[name]]
+    unit <- if (is.null(case$unit)) "REP" else case$unit
+    x <- do.call(case$fun, case$args)
+    for (stacked in c("vertical", "horizontal", "grid_panel")) {
+      dims <- case[[stacked]]
+      book <- plot(x, stacked = stacked, nrows = dims[1L], ncols = dims[2L])$field_book
+      expect_identical(book, field_layout(x, stacked = stacked, nrows = dims[1L], ncols = dims[2L]),
+                       info = paste(name, stacked))
+      expect_identical(replicates_lie(book, unit), stacked, info = paste(name, stacked))
+      built <- do.call(case$fun, c(case$args, list(nrows = dims[1L], stacked = stacked)))
+      expect_identical(plot(built, stacked = stacked)$field_book, built$fieldBook)
+      expect_identical(plot(built)$field_book, built$fieldBook)
+    }
+  }
+  x <- RCBD(t = 6, reps = 4, seed = 1)
+  # Without a stacking, the most square block: a panel of 2 x 3 blocks
+  expect_identical(replicates_lie(plot(x, nrows = 4)$field_book), "grid_panel")
+  expect_error(plot(x, stacked = "vertical", nrows = 6), "one above another.*Valid dimensions",
+               class = "fieldhub_input_error")
+  expect_error(plot(CRD(t = 6, reps = 4, seed = 1), stacked = "vertical", nrows = 4),
+               "no replicates", class = "fieldhub_input_error")
+  built <- RCBD(t = 6, reps = 4, seed = 1, nrows = 4, stacked = "vertical")
+  expect_error(plot(built, stacked = "grid_panel"), "built on a fixed",
+               class = "fieldhub_input_error")
+})
+
+test_that("plot-number maps of a design follow the plots to the grid", {
+  squares <- latin_square(t = 3, reps = 2, seed = 1, nrows = 3, ncols = 6)
+  book <- squares$fieldBook
+  for (i in 1:2) {
+    square <- book[book$SQUARE == i, ]
+    at <- cbind(match(square$ROW_SQ, unique(square$ROW_SQ)),
+                match(square$COLUMN_SQ, unique(square$COLUMN_SQ)))
+    expect_identical(squares$plotSquares[[i]][at], square$PLOT)
+  }
+  expect_identical(lapply(squares$plotSquares, dim),
+                   lapply(latin_square(t = 3, reps = 2, seed = 1)$plotSquares, dim))
+
+  for (type in 1:2) {
+    split <- split_plot(wp = 3, sp = 2, reps = 2, l = 2, type = type, seed = 11, nrows = 3)
+    for (loc in 1:2) {
+      site <- split$fieldBook[split$fieldBook$LOCATION == loc, ]
+      whole <- site[!duplicated(site$PLOT), ]
+      expect_identical(unname(split$layoutlocations[[loc]][, "PLOT"]), as.character(whole$PLOT))
+      expect_identical(unname(split$layoutlocations[[loc]][, "Whole-plot"]),
+                       as.character(whole$WHOLE_PLOT))
+    }
+  }
+
+  strips <- strip_plot(Hplots = 3, Vplots = 2, reps = 2, l = 2, seed = 1, nrows = 3)
+  for (loc in 1:2) {
+    site <- strips$fieldBook[strips$fieldBook$LOCATION == loc, ]
+    for (rep in 1:2) {
+      plots <- site$PLOT[site$REP == rep]
+      expect_setequal(strips$plotLayouts[[loc]][[rep]], plots)
+      expect_identical(as.vector(t(strips$plotLayouts[[loc]][[rep]])), plots)
+    }
+  }
+})

@@ -17,6 +17,18 @@
 #' @param randomizeH Logical flag: \code{TRUE} to randomize horizontal strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
 #' @param randomizeV Logical flag: \code{TRUE} to randomize vertical strips separately in each replicate; \code{FALSE} to randomize once per location and reuse.
 #' @param data (optional) data frame with the labels of vertical and horizontal plots.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the planting path of the whole field (see
+#'   \code{planter}). See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the replicates of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of replicates). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose replicate
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -94,7 +106,8 @@
 strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = NULL,
                        planter = "serpentine", locationNames = NULL, seed = NULL,
                        factorLabels = TRUE, randomizeH = TRUE, randomizeV = FALSE,
-                       data = NULL, reps = 1) {
+                       data = NULL, reps = 1,
+                       nrows = NULL, ncols = NULL, stacked = NULL) {
   # plotNumber's own default is NULL, so an explicit plotNumber = NULL is
   # indistinguishable from (and must warn the same as) not supplying it.
   plotNumber_supplied <- !missing(plotNumber) && !is.null(plotNumber)
@@ -274,6 +287,11 @@ strip_plot <- function(Hplots = NULL, Vplots = NULL, b = 1, l = 1, plotNumber = 
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(reps = b), exclude = "b"
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "strip_plot", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter,
+                              maps = "plotLayouts", stacked = stacked)
   return(invisible(output))
 }

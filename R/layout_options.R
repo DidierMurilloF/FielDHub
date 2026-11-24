@@ -7,7 +7,9 @@
 # among the options that fit its reps and blocks. layout_options() computes
 # those options for each location, field_layout() returns one of them and
 # plot_layout() draws it. The other designs place their plots when they are
-# built, so their field books already have ROW and COLUMN.
+# built, so their field books already have ROW and COLUMN. The classic
+# designs also store coordinates when they are built with field dimensions
+# (nrows, ncols): R/layout_design_grid.R.
 #-----------------------------------------------------------------------
 
 #' Columns of a field book with coordinates: the identifiers, the
@@ -27,6 +29,43 @@ location_books <- function(x) {
   })
 }
 
+# Dimensions of a new field layout preserve the units at each level.
+design_grid_spec <- function(x) {
+  design <- sub("^fieldhub_", "", class(x)[1L])
+  switch(design,
+    crd = list(),
+    full_factorial = list(groups = if (identical(x$infoDesign$kind, "RCBD")) "REP"),
+    incomplete_blocks = ,
+    alpha_lattice = ,
+    square_lattice = ,
+    rectangular_lattice = list(groups = c("REP", "IBLOCK")),
+    split_plot = ,
+    split_split_plot = list(groups = c(
+      if (identical(x$infoDesign$typeDesign, "RCBD")) "REP",
+      # REP and WHOLE_PLOT identify a whole plot even when whole plots
+      # were randomized together across replicates in a CRD.
+      if (identical(x$infoDesign$typeDesign, "RCBD")) "WHOLE_PLOT" else ".WHOLE_UNIT",
+      if (design == "split_split_plot") "SUB_PLOT"
+    )),
+    latin_square = list(groups = "SQUARE", axes = c("ROW", "COLUMN")),
+    strip_plot = list(groups = "REP", axes = c("HSTRIP", "VSTRIP")),
+    NULL
+  )
+}
+
+has_design_grid <- function(x) {
+  all(c("ROW", "COLUMN") %in% names(x$fieldBook)) &&
+    !is.null(design_grid_spec(x)) &&
+    (!inherits(x, "fieldhub_latin_square") ||
+       all(c("ROW_SQ", "COLUMN_SQ") %in% names(x$fieldBook)))
+}
+
+# A design built with field dimensions: its field book holds the grid
+stores_design_grid <- function(x) {
+  has_design_grid(x) ||
+    (inherits(x, "fieldhub_rcbd") && all(c("ROW", "COLUMN") %in% names(x$fieldBook)))
+}
+
 #' Layout options of a design
 #'
 #' @param x A design result.
@@ -38,6 +77,7 @@ location_books <- function(x) {
 #'   stacking has no layout for the design.
 #' @noRd
 layout_options <- function(x, planter = "serpentine", stacked = "vertical") {
+  if (has_design_grid(x)) return(field_book_layouts(x))
   UseMethod("layout_options")
 }
 
@@ -108,6 +148,7 @@ layout_options.fieldhub_crd <- function(x, planter = "serpentine", stacked = "ve
 #' @export
 #' @noRd
 layout_options.fieldhub_rcbd <- function(x, planter = "serpentine", stacked = "vertical") {
+  if (all(c("ROW", "COLUMN") %in% names(x$fieldBook))) return(field_book_layouts(x))
   n_reps <- dplyr::n_distinct(x$fieldBook$REP)
   n_locs <- dplyr::n_distinct(x$fieldBook$LOCATION)
   rcbd_layouts(x,

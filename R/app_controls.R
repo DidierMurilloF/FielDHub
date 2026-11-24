@@ -38,7 +38,7 @@ fieldhub_control_concepts <- function() {
     checks_note = list(label = NULL),
     l = list(label = "Locations", value = 1, min = 1),
     planter = list(label = "Plot order", value = "serpentine",
-                   choices = c("serpentine", "cartesian")),
+                   choices = c("Serpentine" = "serpentine", "Cartesian" = "cartesian")),
     plot_start = list(label = "Starting plot number", value = "101"),
     plot_by_block = list(label = "Number plots by block", value = FALSE),
     plot_increment = list(label = "Plot number increment between blocks", min = 1),
@@ -54,10 +54,12 @@ fieldhub_control_concepts <- function() {
     blocks = list(label = "Entries per experiment"),
     b = list(label = "Blocks"),
     repsExpt = list(label = "Stacked experiments", min = 1),
-    repsStack = list(label = "Stack experiments", choices = c("vertical", "horizontal")),
-    stacked = list(label = "Blocks layout", choices = c("By Column", "By Row")),
+    repsStack = list(label = "Stack experiments",
+                     choices = c("Vertical" = "vertical", "Horizontal" = "horizontal")),
+    stacked = list(label = "Blocks layout",
+                   choices = c("By column" = "By Column", "By row" = "By Row")),
     copies_per_entry = list(label = "Copies per entry"),
-    location_view = list(label = "Location to view"),
+    location_view = list(label = "Location"),
     expt_name = list(label = "Experiment name", value = "Expt1"),
     year = list(label = "Year (blank = current)"),
     check_direction = list(label = "Each check appears once in every"),
@@ -73,7 +75,7 @@ fieldhub_control_concepts <- function() {
     # Steps of the spatial pages, offered after Generate design or Randomize field
     dimensions = list(label = "Field dimensions"),
     multi_dimension = list(label = "Set different dimensions across locations", value = FALSE),
-    location_dimensions = list(label = "Dimensions for location"),
+    location_dimensions = list(label = "Field dimensions, location"),
     checks_percent = list(label = "Share of checks")
   )
 }

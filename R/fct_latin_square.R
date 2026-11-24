@@ -15,6 +15,18 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Name for the location.
 #' @param data (optional) Data frame with label list of treatments.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the planting path of the whole field (see
+#'   \code{planter}). See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the squares of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of squares). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose square
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -77,7 +89,8 @@
 #'
 #' @export
 latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpentine",
-                         seed = NULL, locationNames = NULL, data = NULL) {
+                         seed = NULL, locationNames = NULL, data = NULL,
+                         nrows = NULL, ncols = NULL, stacked = NULL) {
 
   seed <- resolve_seed(seed)
   local_design_seed(seed)
@@ -205,7 +218,12 @@ latin_square <- function(t = NULL, reps = 1, plotNumber = 101,  planter = "serpe
   output <- list(infoDesign =  parameters, squares = lsd.reps,
                  plotSquares = plotSquares, fieldBook = latin_design)
   reproduction_parameters <- record_design_parameters(environment())
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "latin_square", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter,
+                              maps = "plotSquares", by_location = FALSE, stacked = stacked)
   return(invisible(output))
 }
 

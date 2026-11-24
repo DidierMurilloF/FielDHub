@@ -16,7 +16,10 @@ RCBD(
   data = NULL,
   checks = NULL,
   rep_checks = NULL,
-  spread_checks = TRUE
+  spread_checks = TRUE,
+  nrows = NULL,
+  ncols = NULL,
+  stacked = NULL
 )
 }
 \arguments{
@@ -58,6 +61,23 @@ for every check.}
 repeated copies of each check are spread across the block by placing one
 copy in each of \code{rep_checks} contiguous strata. When \code{FALSE}, the
 whole block is randomized without restriction.}
+
+\item{nrows, ncols}{Optional positive whole numbers: the rows and columns of the
+field at each location. If only one is given, the other follows from the
+number of plots, including repeated checks. The complete blocks are then
+equal rectangles of the field, and the plots are numbered along the planting
+path of the whole field (see \code{planter}): the numbering does not restart
+in each block, so with \code{continuous = FALSE} the hundreds of a plot
+number name the block only where the blocks lie one above the other.
+See \code{\link{field_layout}} for how the blocks are placed.}
+
+\item{stacked}{How the blocks of a field of given dimensions are arranged:
+\code{"vertical"} (one above another, each across all the columns of
+the field), \code{"horizontal"} (side by side, each down all its rows) or
+\code{"grid_panel"} (in rows and columns of blocks). It needs
+\code{nrows} or \code{ncols}. By default the arrangement whose block
+is the most square among those that fit the dimensions; the stacking
+chosen is recorded in the design. See \code{\link{field_layout}}.}
 }
 \value{
 A list with five elements.
@@ -66,12 +86,22 @@ A list with five elements.
     random-number settings and effective input parameters.
   \item \code{infoDesign} is a list with information on the design parameters.
   \item \code{layoutRandom} is the RCBD layout randomization for each location.
-  \item \code{plotNumber} is the plot number layout for each location.
+  \item \code{plotNumber} is the plot number layout for each location: a
+  matrix of blocks by plots, whose cells are the plot numbers of the treatments
+  of \code{layoutRandom}. It has this shape with and without field dimensions.
+  \item \code{plotNumberField}, only when field dimensions are supplied, is the
+  field map of the plot numbers for each location: a matrix of \code{nrows} by
+  \code{ncols} with the first field row in its last row, as the field maps of
+  the other designs. \code{infoDesign} then records \code{nrows} and
+  \code{ncols}.
   \item \code{fieldBook} is a data frame with the RCBD field book design. Without
   \code{checks} it has columns \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP} and
   \code{TREATMENT}. When \code{checks} is supplied it gains \code{ENTRY} and
   \code{CHECKS} columns, ordered \code{ID}, \code{LOCATION}, \code{PLOT}, \code{REP},
   \code{ENTRY}, \code{CHECKS}, \code{TREATMENT}.
+  When field dimensions are supplied, it also includes \code{ROW} and
+  \code{COLUMN} after \code{PLOT}; its rows and treatments are those of the
+  design without dimensions, and only \code{PLOT} differs.
 }
 }
 \description{

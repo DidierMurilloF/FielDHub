@@ -15,6 +15,19 @@
 #'   labels from the original data set otherwise, numeric labels will be
 #'   assigned. Default is \code{factorLabels =TRUE}.
 #' @param data (optional) Data frame with label list of treatments.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the serpentine planting path of the whole
+#'   field. See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the replicates of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of replicates). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose replicate
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
+#'   An error for \code{type = 1}, which has no replicates to stack.
 #' 
 #' 
 #' @author Didier Murillo [aut],
@@ -79,7 +92,8 @@
 #' @export
 split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type = 2, l = 1, plotNumber = 101, 
                              seed = NULL, locationNames = NULL, factorLabels = TRUE,
-                             data = NULL) {
+                             data = NULL,
+                             nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(factorLabels, "factorLabels")
@@ -242,6 +256,10 @@ split_split_plot <- function(wp = NULL, sp = NULL, ssp = NULL, reps = NULL, type
     environment(), overrides = list(wp = args1[[1]], sp = args1[[2]], ssp = args1[[3]],
                                     type = if (crd) 1 else 2)
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "split_split_plot", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }

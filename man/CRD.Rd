@@ -11,7 +11,10 @@ CRD(
   locationName = NULL,
   seed = NULL,
   data = NULL,
-  locationNames = NULL
+  locationNames = NULL,
+  nrows = NULL,
+  ncols = NULL,
+  stacked = NULL
 )
 }
 \arguments{
@@ -32,6 +35,16 @@ are ignored; rows missing either selected value are omitted.}
 
 \item{locationNames}{(optional) Name of the single location. Supply only one
 of \code{locationNames} and \code{locationName}.}
+
+\item{nrows, ncols}{Optional positive whole numbers: the rows and columns of the
+field at each location. If only one is given, the other follows from the
+number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+its plots are numbered along the serpentine planting path of the whole
+field. See \code{\link{field_layout}} for how the design is placed.}
+
+\item{stacked}{The stacking of the replicates of the designs in blocks. A
+completely randomized design has no replicates to stack: giving
+\code{stacked} is an error.}
 }
 \value{
 A list with three elements.

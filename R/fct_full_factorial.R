@@ -22,6 +22,19 @@
 #' @param data (optional) Data frame whose first two columns contain factor
 #'   names and level labels. Levels must be unique within each factor, but a
 #'   label may occur in different factors. Incomplete rows are omitted.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the planting path of the whole field (see
+#'   \code{planter}). See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the replicates of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of replicates). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose replicate
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
+#'   An error for \code{type = 1}, which has no replicates to stack.
 #' 
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -82,7 +95,8 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
                            type = 2, plotNumber = 101, continuous = FALSE,
                            planter = "serpentine", seed = NULL,
                            locationNames = NULL, factorLabels = TRUE,
-                           data = NULL) {
+                           data = NULL,
+                           nrows = NULL, ncols = NULL, stacked = NULL) {
   plotNumber_supplied <- !missing(plotNumber)
   validate_locations(l)
   validate_flag(continuous, "continuous")
@@ -233,7 +247,11 @@ full_factorial <- function(setfactors = NULL, reps = NULL, l = 1,
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(data = if (generated_data) NULL else data)
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "full_factorial", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, planter = planter, stacked = stacked)
   return(invisible(output))
 }
 

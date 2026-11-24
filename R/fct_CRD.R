@@ -19,6 +19,14 @@
 #' @param data (optional) Data frame whose first two columns contain unique
 #' treatment labels and positive whole-number replication counts. Extra columns
 #' are ignored; rows missing either selected value are omitted.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the serpentine planting path of the whole
+#'   field. See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked The stacking of the replicates of the designs in blocks. A
+#'   completely randomized design has no replicates to stack: giving
+#'   \code{stacked} is an error.
 #'
 #'
 #' @author Didier Murillo [aut],
@@ -84,7 +92,8 @@
 #'
 #' @export
 CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
-                seed = NULL, data = NULL, locationNames = NULL) {
+                seed = NULL, data = NULL, locationNames = NULL,
+                nrows = NULL, ncols = NULL, stacked = NULL) {
   locationName <- resolve_argument_alias(
     locationNames, locationName, new = "locationNames", old = "locationName",
     new_supplied = !missing(locationNames), old_supplied = !missing(locationName)
@@ -170,6 +179,10 @@ CRD <- function(t = NULL, reps = NULL, plotNumber = 101, locationName = NULL,
   reproduction_parameters <- record_design_parameters(
     environment(), overrides = list(locationNames = locationName), exclude = "locationName"
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "crd", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }

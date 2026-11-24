@@ -7,16 +7,22 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
   layout <- spec$layout
   # The menu holds plain selects: a selectize list would open a menu inside the menu
   select <- function(...) shiny::selectInput(..., selectize = FALSE)
-  choices <- layout_choice_labels(x, planter = planter, stacked = "vertical")
+  # Only the stackings that have a layout option; the page opens on the first
+  stacking <- if ("stacked" %in% names(layout$ids)) layout_stacking_choices(x, planter = planter)
+  choices <- layout_choice_labels(x, planter = planter, include_grids = TRUE,
+                                  stacked = if (length(stacking)) stacking[[1L]] else "vertical")
   controls <- list(shiny::radioButtons(ns(spec$ids[["plot_type"]]), "Type of plot",
     c("Entries" = 1, "Plots" = 2, "Heatmap" = 3), inline = TRUE))
   if ("stacked" %in% names(layout$ids)) {
-    stacking <- classic_stacking_choices(length(levels(as.factor(x$fieldBook$REP))), grid = layout$grid)
-    controls <- c(controls, list(select(ns(layout$ids[["stacked"]]), "Reps layout", stacking)))
+    replicates <- select(ns(layout$ids[["stacked"]]), "Replicate layout", stacking)
+    # A design without replicates to arrange has one list of fields: the
+    # input stays (the server reads it) but is not shown
+    if (length(stacking) < 2L) replicates <- shiny::div(hidden = NA, replicates)
+    controls <- c(controls, list(replicates))
   }
-  controls <- c(controls, list(select(ns(layout$ids[["layout"]]), "Layout option", choices,
+  controls <- c(controls, list(select(ns(layout$ids[["layout"]]), "Field dimensions", choices,
     # the page opens on the first, the most square field
-    selected = if (length(choices)) choices[[1L]])))
+    selected = app_first_layout_choice(choices))))
   if ("location" %in% names(layout$ids)) {
     if (is.null(locations)) locations <- seq_len(length(levels(as.factor(x$fieldBook$LOCATION))))
     location <- select(ns(layout$ids[["location"]]), "Location", locations,
@@ -27,7 +33,7 @@ app_classic_layout_panel <- function(ns, spec, x, planter = "serpentine", locati
     controls <- c(controls, list(location))
   }
   # The menu is worth a button while it offers a choice
-  useful <- "stacked" %in% names(layout$ids) || length(choices) > 1L || length(locations) > 1L
+  useful <- length(stacking) > 1L || length(choices) > 1L || length(locations) > 1L
   app_layout_toolbar(ns(paste0(layout$output, "_menu")), controls, menu = useful)
 }
 

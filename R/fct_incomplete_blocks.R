@@ -12,6 +12,18 @@
 #' @param seed (optional) Real number that specifies the starting seed to obtain reproducible designs.
 #' @param locationNames (optional) Names for each location.
 #' @param data (optional) Data frame with label list of treatments.
+#' @param nrows,ncols Optional positive whole numbers: the rows and columns of the
+#'   field at each location. If only one is given, the other follows from the
+#'   number of plots. The field book then has \code{ROW} and \code{COLUMN}, and
+#'   its plots are numbered along the serpentine planting path of the whole
+#'   field. See \code{\link{field_layout}} for how the design is placed.
+#' @param stacked How the replicates of a field of given dimensions are arranged:
+#'   \code{"vertical"} (one above another, each across all the columns of
+#'   the field), \code{"horizontal"} (side by side, each down all its rows) or
+#'   \code{"grid_panel"} (in rows and columns of replicates). It needs
+#'   \code{nrows} or \code{ncols}. By default the arrangement whose replicate
+#'   is the most square among those that fit the dimensions; the stacking
+#'   chosen is recorded in the design. See \code{\link{field_layout}}.
 #'
 #' @author Didier Murillo [aut],
 #'         Salvador Gezan [aut],
@@ -62,7 +74,8 @@
 #' @export
 incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 101,
                               locationNames = NULL, seed = NULL, data = NULL,
-                              reps = NULL) {
+                              reps = NULL,
+                              nrows = NULL, ncols = NULL, stacked = NULL) {
   reps <- resolve_argument_alias(
     reps, r, new = "reps", old = "r",
     new_supplied = !missing(reps), old_supplied = !missing(r)
@@ -70,7 +83,8 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
   build_incomplete_blocks(
     t = t, k = k, l = l, plotNumber = plotNumber, locationNames = locationNames,
     seed = seed, data = data, reps = reps, caller = "incomplete_blocks",
-    plotNumber_supplied = !missing(plotNumber)
+    plotNumber_supplied = !missing(plotNumber), nrows = nrows, ncols = ncols,
+    stacked = stacked
   )
 }
 
@@ -96,7 +110,8 @@ incomplete_blocks <- function(t = NULL, k = NULL, r = NULL, l = 1, plotNumber = 
 build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
                                     locationNames = NULL, seed = NULL, data = NULL,
                                     reps = NULL, caller = "incomplete_blocks",
-                                    plotNumber_supplied = TRUE) {
+                                    plotNumber_supplied = TRUE, nrows = NULL, ncols = NULL,
+                                    stacked = NULL) {
   validate_locations(l)
   r <- reps
   seed <- resolve_seed(seed)
@@ -211,7 +226,11 @@ build_incomplete_blocks <- function(t = NULL, k = NULL, l = 1, plotNumber = 101,
   reproduction_parameters <- record_design_parameters(
     environment(), exclude = c("caller", "plotNumber_supplied")
   )
+  if (is.null(nrows) && is.null(ncols)) {
+    reproduction_parameters[c("nrows", "ncols", "stacked")] <- NULL
+  }
   output <- new_fieldhub_design(output, "incomplete_blocks", parameters = reproduction_parameters)
+  output <- store_design_grid(output, nrows, ncols, stacked = stacked)
   return(invisible(output))
 }
 
