@@ -84,9 +84,12 @@ test_that("selecting a grid in Shiny sends one field layout to plots and downloa
                      field_layout(design, layout = as.numeric(layout_choice_labels(
                        design, planter = "cartesian", stacked = "horizontal")[1L]),
                        planter = "cartesian", stacked = "horizontal"))
-    # A grid is drawn with the stacking of its value, whatever the menu says:
-    # the one-row field of the grid panel has its blocks side by side
-    session$setInputs(stacked = "grid_panel", layout = "grid:horizontal:1:36")
+    # The one-row field is a grid of the horizontal menu: its blocks side by
+    # side, the stacking that its value carries
+    expect_identical(layout_choice_labels(design, planter = "cartesian", stacked = "horizontal",
+                                          include_grids = TRUE)[["1 \u00d7 36"]],
+                     "grid:horizontal:1:36")
+    session$setInputs(layout = "grid:horizontal:1:36")
     expect_identical(view()$allSitesFieldbook,
                      field_layout(design, stacked = "horizontal", nrows = 1, planter = "cartesian"))
     expect_identical(view()$layout_metadata$parameters$stacked, "horizontal")
@@ -106,11 +109,6 @@ test_that("the layout menu of a real page follows its 'Replicate layout' to the 
     IBD = incomplete_blocks(t = 12, k = 4, reps = 4, seed = 1),
     Alpha_Lattice = alpha_lattice(t = 12, k = 3, reps = 4, seed = 36)
   )
-  lies <- function(name, menu) {
-    if (grepl("stacked vertically", name)) "vertical" else
-      if (grepl("stacked horizontally", name)) "horizontal" else
-        if (grepl("replicates [0-9]", name)) "grid_panel" else menu
-  }
   options_of <- function(html, id) {
     select <- regmatches(html, regexpr(paste0('(?s)<select[^>]*id="', id, '".*?</select>'), html,
                                        perl = TRUE))
@@ -141,24 +139,23 @@ test_that("the layout menu of a real page follows its 'Replicate layout' to the 
       for (stacked in c("horizontal", "grid_panel", "vertical")) {
         set("stacked", stacked)
         choices <- layout_choice_labels(design, stacked = stacked, include_grids = TRUE)
-        # The vertical and horizontal menus hold no field grid
-        expect_identical(any(grepl("^grid:", choices)), stacked == "grid_panel",
-                         info = paste(module, stacked))
+        # Only the options of a grid panel name their replicates
+        expect_identical(grepl("replicates", names(choices)),
+                         rep(stacked == "grid_panel", length(choices)), info = paste(module, stacked))
         # The stacking opens on its first option, whatever the select still
         # holds; the browser then sets the select to it
-        expect_identical(replicates_lie(view()$allSitesFieldbook, unit),
-                         lies(names(choices)[1L], stacked), info = paste(module, stacked))
+        expect_identical(replicates_lie(view()$allSitesFieldbook, unit), stacked,
+                         info = paste(module, stacked))
         set("layout", paste0(choices[[1L]], ""))
         for (i in seq_along(choices)) {
           set("layout", paste0(choices[[i]], ""))
           info <- paste(module, stacked, names(choices)[i])
           book <- view()$allSitesFieldbook
-          # Every option lies as its menu says or, in the grid panel, as its
-          # own name says
-          expect_identical(replicates_lie(book, unit), lies(names(choices)[i], stacked), info = info)
+          # Every option, numbered or grid, lies as its menu says
+          expect_identical(replicates_lie(book, unit), stacked, info = info)
           if (grepl("^grid:", choices[[i]])) {
             grid <- strsplit(choices[[i]], ":", fixed = TRUE)[[1L]]
-            expect_identical(grid[2L], lies(names(choices)[i], stacked), info = info)
+            expect_identical(grid[2L], stacked, info = info)
             expect_identical(book, field_layout(design, stacked = grid[2L],
                                                 nrows = as.numeric(grid[3L]),
                                                 ncols = as.numeric(grid[4L])), info = info)
@@ -192,7 +189,7 @@ test_that("field grids of every classic design reach the Shiny layout view", {
   for (name in names(designs)) {
     current <- designs[[name]]
     # The first field grid the page offers: in its one list of fields, or
-    # under the grid panel, with the stacking that its value carries
+    # in the menu of its last stacking, the one that its value carries
     menu <- layout_choice_labels(current, include_grids = TRUE,
                                  stacked = utils::tail(layout_stacking_choices(current), 1L))
     grid <- menu[grepl("^grid:", menu)][[1L]]

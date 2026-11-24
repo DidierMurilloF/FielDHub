@@ -2,21 +2,21 @@
 test_that("a 'Replicate layout' is offered only where it has a layout option", {
   base <- c("Vertical" = "vertical", "Horizontal" = "horizontal")
   panel <- c(base, "Grid panel" = "grid_panel")
-  # The grid panel holds every field grid of a design, whatever its stacking,
-  # and its numbered grid panels: two or three blocks have their one-row
-  # field there
+  # A grid panel has rows and columns of replicates, more than one of each:
+  # two, three, five or seven replicates cannot lie so, and have no grid panel
   for (reps in 2:9) {
-    expect_identical(layout_stacking_choices(RCBD(t = 4, reps = reps, seed = 1)), panel,
+    offered <- if (reps %in% c(4, 6, 8, 9)) panel else base
+    expect_identical(layout_stacking_choices(RCBD(t = 4, reps = reps, seed = 1)), offered,
                      info = paste("RCBD", reps))
     expect_identical(layout_stacking_choices(split_plot(wp = 2, sp = 2, reps = reps, seed = 1)),
-                     panel, info = paste("split plot", reps))
-    # Squares stack as their numbered layouts unless they can lie in a panel
+                     offered, info = paste("split plot", reps))
     expect_identical(layout_stacking_choices(latin_square(t = 3, reps = reps, seed = 1)),
-                     if (reps %in% c(4, 6, 8, 9)) panel else base, info = paste("squares", reps))
+                     offered, info = paste("squares", reps))
   }
   for (reps in 2:6) {
     lattice <- alpha_lattice(t = 12, k = 3, reps = reps, seed = 1)
-    expect_identical(layout_stacking_choices(lattice), panel, info = paste("alpha", reps))
+    expect_identical(layout_stacking_choices(lattice), if (reps %in% c(4, 6)) panel else base,
+                     info = paste("alpha", reps))
     for (stacked in layout_stacking_choices(lattice)) {
       expect_gt(length(layout_choice_labels(lattice, stacked = stacked, include_grids = TRUE)), 0L)
     }
@@ -104,23 +104,22 @@ panel_select <- function(html, id) {
        hidden = grepl(paste0('<div hidden>\\s*<div[^>]*>\\s*<label[^>]*for="', id, '"'), html))
 }
 
-test_that("the vertical and horizontal menus hold the numbered layouts, the grid panel the grids", {
+test_that("each menu holds the numbered layouts and the field grids of its own stacking", {
   design <- split_plot(wp = 3, sp = 2, reps = 4, seed = 1)
-  for (stacked in c("vertical", "horizontal")) {
-    numbered <- layout_choice_labels(design, stacked = stacked)
-    menu <- layout_choice_labels(design, stacked = stacked, include_grids = TRUE)
-    expect_identical(menu, stats::setNames(as.character(numbered), names(numbered)))
-    expect_false(any(grepl("grid|replicates", c(menu, names(menu)))))
-  }
-  # Every grid says how its replicates lie, and its value carries the stacking
-  panel <- layout_choice_labels(design, stacked = "grid_panel", include_grids = TRUE)
-  expect_identical(panel[c("12 \u00d7 2 \u00b7 replicates stacked vertically",
-                           "2 \u00d7 12 \u00b7 replicates stacked horizontally",
-                           "4 \u00d7 6 \u00b7 replicates 2 \u00d7 2")],
-                   c("12 \u00d7 2 \u00b7 replicates stacked vertically" = "grid:vertical:12:2",
-                     "2 \u00d7 12 \u00b7 replicates stacked horizontally" = "grid:horizontal:2:12",
-                     "4 \u00d7 6 \u00b7 replicates 2 \u00d7 2" = "1"))
-  expect_true(all(grepl(" \u00b7 replicates ", names(panel), fixed = TRUE)))
+  # A grid is named by its size, as a numbered layout is; its value carries
+  # the stacking of its menu
+  expect_identical(layout_choice_labels(design, stacked = "vertical", include_grids = TRUE),
+                   c("4 \u00d7 6" = "2", "8 \u00d7 3" = "1", "12 \u00d7 2" = "grid:vertical:12:2",
+                     "24 \u00d7 1" = "grid:vertical:24:1"))
+  expect_identical(layout_choice_labels(design, stacked = "horizontal", include_grids = TRUE),
+                   c("6 \u00d7 4" = "grid:horizontal:6:4", "3 \u00d7 8" = "1",
+                     "2 \u00d7 12" = "grid:horizontal:2:12", "1 \u00d7 24" = "grid:horizontal:1:24"))
+  # Every option of the grid panel says how its replicates lie
+  expect_identical(layout_choice_labels(design, stacked = "grid_panel", include_grids = TRUE),
+                   c("4 \u00d7 6 \u00b7 replicates 2 \u00d7 2" = "1",
+                     "6 \u00d7 4 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:6:4",
+                     "2 \u00d7 12 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:2:12",
+                     "12 \u00d7 2 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:12:2"))
 
   spec <- design_app_spec("SPD")$workflow
   html <- as.character(app_classic_layout_panel(identity, spec, design))
@@ -133,7 +132,7 @@ test_that("the vertical and horizontal menus hold the numbered layouts, the grid
   fields <- panel_select(html, spec$layout$ids[["layout"]])
   expect_identical(fields$label, "Field dimensions")
   expect_identical(fields$options, layout_choice_labels(design, include_grids = TRUE))
-  first <- layout_choice_labels(design)[1L]
+  first <- layout_choice_labels(design, include_grids = TRUE)[1L]
   expect_true(grepl(paste0('<option value="', first, '" selected>', names(first), "</option>"),
                     html, fixed = TRUE))
   expect_false(grepl("optgroup|Grid [0-9]", html))
@@ -146,18 +145,33 @@ test_that("the vertical and horizontal menus hold the numbered layouts, the grid
     c("Vertical" = "vertical", "Horizontal" = "horizontal"))
 })
 
-test_that("the grid panel lists every field grid once for each size and stacking", {
+test_that("the grid panel lists only fields with rows and columns of replicates", {
   rcbd <- RCBD(t = 6, reps = 4, seed = 1)
   expect_identical(layout_choice_labels(rcbd, stacked = "grid_panel", include_grids = TRUE),
                    c("4 \u00d7 6 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:4:6",
                      "6 \u00d7 4 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:6:4",
                      "2 \u00d7 12 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:2:12",
-                     "12 \u00d7 2 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:12:2",
-                     "1 \u00d7 24 \u00b7 replicates stacked horizontally" = "grid:horizontal:1:24"))
-  # Three blocks cannot lie in a panel: the one-row field is still a grid
-  expect_identical(layout_choice_labels(RCBD(t = 18, reps = 3, seed = 1), stacked = "grid_panel",
-                                        include_grids = TRUE),
-                   c("1 \u00d7 54 \u00b7 replicates stacked horizontally" = "grid:horizontal:1:54"))
+                     "12 \u00d7 2 \u00b7 replicates 2 \u00d7 2" = "grid:grid_panel:12:2"))
+  # The one-row field has its blocks side by side: it is a horizontal layout
+  expect_identical(layout_choice_labels(rcbd, stacked = "horizontal", include_grids = TRUE)[4L],
+                   c("1 \u00d7 24" = "grid:horizontal:1:24"))
+  # Regression test: the grid panel of three blocks of 24 once listed "1 x 72
+  # (replicates stacked horizontally)", a field that field_layout() refuses
+  # as a grid panel, and the horizontal menu lacked it. Three blocks cannot
+  # lie in a panel: they have no grid panel, and the field is a horizontal one.
+  three <- RCBD(t = 24, reps = 3, seed = 1)
+  expect_identical(layout_stacking_choices(three), c("Vertical" = "vertical", "Horizontal" = "horizontal"))
+  expect_length(layout_choice_labels(three, stacked = "grid_panel", include_grids = TRUE), 0L)
+  horizontal <- layout_choice_labels(three, stacked = "horizontal", include_grids = TRUE)
+  expect_identical(horizontal[["1 \u00d7 72"]], "grid:horizontal:1:72")
+  expect_identical(names(layout_choice_labels(three, stacked = "vertical", include_grids = TRUE))[8L],
+                   "72 \u00d7 1")
+  side_by_side <- app_selected_layout_view(three, horizontal[["1 \u00d7 72"]], "serpentine", 1,
+                                           "horizontal")$allSitesFieldbook
+  expect_identical(replicates_lie(side_by_side), "horizontal")
+  expect_equal(as.vector(tapply(side_by_side$COLUMN, side_by_side$REP, max)), c(24, 48, 72))
+  expect_error(field_layout(three, nrows = 1, ncols = 72, stacked = "grid_panel"),
+               "more than one of each", class = "fieldhub_input_error")
   # Of the panels of one size, the one field_layout() builds: its rows and
   # columns of replicates name it
   twelve <- RCBD(t = 6, reps = 12, seed = 1)
@@ -172,9 +186,13 @@ test_that("the grid panel lists every field grid once for each size and stacking
   expect_gt(length(numbered), 0L)
   expect_true(all(grepl(" \u00b7 replicates [0-9]+ \u00d7 [0-9]+$", names(numbered))))
   expect_identical(panel[names(numbered)], stats::setNames(as.character(numbered), names(numbered)))
-  expect_true(all(c("2 \u00d7 24 \u00b7 replicates 2 \u00d7 2",
-                    "4 \u00d7 12 \u00b7 replicates stacked vertically",
-                    "12 \u00d7 4 \u00b7 replicates stacked horizontally") %in% names(panel)))
+  expect_identical(panel[["2 \u00d7 24 \u00b7 replicates 2 \u00d7 2"]], "grid:grid_panel:2:24")
+  expect_true(all(grepl(" \u00b7 replicates [0-9]+ \u00d7 [0-9]+$", names(panel))))
+  # Its stacks are in the menus of their stackings, by size alone
+  expect_identical(layout_choice_labels(lattice, stacked = "vertical",
+                                        include_grids = TRUE)[["4 \u00d7 12"]], "grid:vertical:4:12")
+  expect_identical(layout_choice_labels(lattice, stacked = "horizontal",
+                                        include_grids = TRUE)[["12 \u00d7 4"]], "grid:horizontal:12:4")
 })
 
 test_that("a layout menu names its options by size and by what tells them apart", {
@@ -190,12 +208,14 @@ test_that("a layout menu names its options by size and by what tells them apart"
                      "16 \u00d7 4 \u00b7 blocks in columns", "16 \u00d7 4 \u00b7 blocks in rows"))
 })
 
-test_that("every option of a 'Replicate layout' menu draws its replicates as its name says", {
+test_that("every option of a 'Replicate layout' menu draws its replicates as its menu says", {
   # Regression test: the field grids were once the same under every
   # stacking, so the vertical menu of an RCBD offered a 1 x 24 field (the
-  # replicates side by side). Every grid now states its own stacking.
+  # replicates side by side); then every grid was under the grid panel,
+  # stacks of replicates too. A menu now lists the grids of its stacking.
   designs <- list(
     RCBD(t = 6, reps = 4, seed = 1),
+    RCBD(t = 24, reps = 3, seed = 1),
     RCBD(t = 6, reps = 6, seed = 1),
     RCBD(t = 6, reps = 12, seed = 1),
     full_factorial(setfactors = c(2, 3), reps = 4, type = 2, seed = 1),
@@ -210,12 +230,6 @@ test_that("every option of a 'Replicate layout' menu draws its replicates as its
     square_lattice(t = 16, k = 4, reps = 4, seed = 1),
     rectangular_lattice(t = 12, k = 3, reps = 4, seed = 1)
   )
-  # What a name promises: the stacking of its menu, or the one it states
-  promised <- function(name, menu) {
-    if (grepl("stacked vertically", name)) "vertical" else
-      if (grepl("stacked horizontally", name)) "horizontal" else
-        if (grepl("replicates [0-9]", name)) "grid_panel" else menu
-  }
   for (design in designs) {
     unit <- if (inherits(design, "fieldhub_latin_square")) "SQUARE" else "REP"
     for (planter in c("serpentine", "cartesian")) {
@@ -226,16 +240,16 @@ test_that("every option of a 'Replicate layout' menu draws its replicates as its
         expect_gt(length(choices), 0L)
         expect_identical(anyDuplicated(names(choices)), 0L, info = info)
         expect_false(any(grepl("^Grid|\\([0-9]+\\)$", names(choices))), info = info)
-        grids <- grepl("^grid:", choices)
-        if (stacked == "grid_panel") {
-          expect_true(all(grepl(" \u00b7 replicates ", names(choices), fixed = TRUE)), info = info)
-        } else {
-          expect_false(any(grids), info = info)
-        }
+        # A grid carries the stacking of its menu; only a panel names its replicates
+        expect_true(all(grepl(paste0("^grid:", stacked, ":"), choices[grepl("^grid:", choices)])),
+                    info = info)
+        expect_identical(grepl(" \u00b7 replicates [0-9]+ \u00d7 [0-9]+", names(choices)),
+                         rep(stacked == "grid_panel", length(choices)), info = info)
+        expect_false(any(grepl("stacked", names(choices))), info = info)
         for (i in seq_along(choices)) {
           book <- app_selected_layout_view(design, choices[[i]], planter, 1,
                                            stacked)$allSitesFieldbook
-          expect_identical(replicates_lie(book, unit), promised(names(choices)[i], stacked),
+          expect_identical(replicates_lie(book, unit), stacked,
                            info = paste(info, names(choices)[i]))
           expect_identical(paste(max(book$ROW), "\u00d7", max(book$COLUMN)),
                            sub(" \u00b7 .*$", "", names(choices)[i]), info = info)

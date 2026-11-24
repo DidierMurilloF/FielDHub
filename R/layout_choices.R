@@ -36,13 +36,11 @@ layout_unit_direction <- function(book, unit, what) {
     paste(what, rows, "\u00d7", columns)
 }
 
-# How the replicates lie in a field: `down` rows of `across` replicates. NA
-# for a single replicate, which has nothing to say.
+# How the replicates of a panel lie in a field: `down` rows of `across`
+# replicates, more than one of each. NA for a field that is not a panel: a
+# stack of replicates is named by its size alone.
 replicates_direction <- function(down, across) {
-  ifelse(down == 1 & across == 1, NA_character_,
-         ifelse(across == 1, "replicates stacked vertically",
-                ifelse(down == 1, "replicates stacked horizontally",
-                       paste("replicates", down, "\u00d7", across))))
+  ifelse(down > 1 & across > 1, paste("replicates", down, "\u00d7", across), NA_character_)
 }
 
 # The replicate (or the square) that a stacking moves, when the design has
@@ -71,12 +69,29 @@ layout_arranges_replicates <- function(x) {
   !is.null(arranged_replicate_unit(x))
 }
 
+# How the replicates of a layout lie, as replicates_direction() says it. NA
+# when they are not rectangles in rows and columns of replicates, more than
+# one of each.
+layout_replicates_direction <- function(book, unit) {
+  if (!unit %in% names(book)) return(NA_character_)
+  one <- book[book[[unit]] == book[[unit]][1L], , drop = FALSE]
+  height <- diff(range(one$ROW)) + 1
+  width <- diff(range(one$COLUMN)) + 1
+  down <- max(book$ROW) / height
+  across <- length(unique(book[[unit]])) / down
+  if (nrow(one) != height * width || down != trunc(down) || across != trunc(across)) {
+    return(NA_character_)
+  }
+  replicates_direction(down, across)
+}
+
 # The numbered options of a stacking: the value, the rows and columns of the
 # field and the name of each. The same layout under two numbers is listed
 # once. Options of one size say what tells them apart: how their incomplete
-# blocks or their whole plots lie. With `replicates`, every option says how
-# its replicates lie (the "Grid panel" menu). NULL when an option has no
-# coordinates.
+# blocks or their whole plots lie. With `replicates`, the menu is that of the
+# grid panel: every option says how its replicates lie, and one whose
+# replicates are not in rows and columns of replicates is left out. NULL when
+# an option has no coordinates.
 numbered_layout_menu <- function(x, planter, stacked, location, replicates = NULL) {
   none <- data.frame(value = integer(), rows = numeric(), cols = numeric(), label = character(),
                      stringsAsFactors = FALSE)
@@ -97,25 +112,15 @@ numbered_layout_menu <- function(x, planter, stacked, location, replicates = NUL
     book
   })
   keep <- which(!duplicated(layouts))
+  if (!is.null(replicates)) {
+    lie <- vapply(layouts[keep], layout_replicates_direction, character(1), unit = replicates)
+    keep <- keep[!is.na(lie)]
+  }
   layouts <- layouts[keep]
   rows <- vapply(layouts, function(book) max(book$ROW), numeric(1))
   cols <- vapply(layouts, function(book) max(book$COLUMN), numeric(1))
   size <- paste(rows, "\u00d7", cols)
-  qualifier <- rep(NA_character_, length(layouts))
-  if (!is.null(replicates)) {
-    qualifier <- vapply(layouts, function(book) {
-      if (!replicates %in% names(book)) return(NA_character_)
-      one <- book[book[[replicates]] == book[[replicates]][1L], , drop = FALSE]
-      height <- diff(range(one$ROW)) + 1
-      width <- diff(range(one$COLUMN)) + 1
-      down <- max(book$ROW) / height
-      across <- length(unique(book[[replicates]])) / down
-      if (nrow(one) != height * width || down != trunc(down) || across != trunc(across)) {
-        return(NA_character_)
-      }
-      replicates_direction(down, across)
-    }, character(1))
-  }
+  qualifier <- if (is.null(replicates)) rep(NA_character_, length(layouts)) else lie[!is.na(lie)]
   label <- ifelse(is.na(qualifier), size, paste0(size, " \u00b7 ", qualifier))
   units <- c(IBLOCK = "blocks", WHOLE_PLOT = "whole plots")
   for (i in which(label %in% label[duplicated(label)])) {
@@ -135,34 +140,29 @@ numbered_layout_menu <- function(x, planter, stacked, location, replicates = NUL
              stringsAsFactors = FALSE)
 }
 
-# The field grids (`nrows` by `ncols` of field_layout()) of the stackings
-# asked for: one for each size and stacking, that of field_grid_plan(), named
-# by its size and by how its replicates lie. `numbered` holds, by stacking,
-# the sizes that the numbered options already have; they are left out. The
-# value of a grid carries its stacking, "grid:<stacking>:<rows>:<columns>"
-# ("none" for a design without replicates).
-field_grid_menu <- function(x, stackings, numbered = list()) {
+# The field grids (`nrows` by `ncols` of field_layout()) of a stacking: one
+# for each size, that of field_grid_plan(). A grid is named by its size, as a
+# numbered option is; a panel says how its replicates lie too. `numbered`
+# holds the sizes that the numbered options of the stacking already have;
+# they are left out. The value of a grid carries its stacking,
+# "grid:<stacking>:<rows>:<columns>" ("none" for a design without
+# replicates).
+field_grid_menu <- function(x, stacked, numbered = character()) {
   none <- data.frame(value = character(), rows = numeric(), cols = numeric(), label = character(),
                      stringsAsFactors = FALSE)
   if (!inherits(x, "fieldhub_rcbd") && is.null(design_grid_spec(x))) return(none)
   if (stores_design_grid(x)) return(none)
-  fields <- field_grid_candidates(x, stackings)
+  fields <- field_grid_candidates(x, stacked)
   if (!nrow(fields)) return(none)
   fields$stacked[is.na(fields$stacked)] <- "none"
   fields$size <- paste(fields$rows, "\u00d7", fields$cols)
-  taken <- vapply(seq_len(nrow(fields)), function(i) {
-    fields$size[i] %in% numbered[[fields$stacked[i]]]
-  }, logical(1))
-  fields <- fields[!taken, , drop = FALSE]
+  fields <- fields[!fields$size %in% numbered, , drop = FALSE]
   # Of the panels of one size, the one with the most square replicate, then
   # with the most rows of replicates: the field that field_layout() builds
   fields <- fields[order(abs(fields$height - fields$width), -fields$down), , drop = FALSE]
-  fields <- fields[!duplicated(fields[c("stacked", "size")]), , drop = FALSE]
+  fields <- fields[!duplicated(fields$size), , drop = FALSE]
   lie <- replicates_direction(fields$down, fields$across)
   fields$label <- ifelse(is.na(lie), fields$size, paste0(fields$size, " \u00b7 ", lie))
-  fields <- fields[order(match(fields$stacked, c(stacking_choices, "none"))), , drop = FALSE]
-  # A single replicate has the same fields under every stacking
-  fields <- fields[!duplicated(fields$label), , drop = FALSE]
   data.frame(value = sprintf("grid:%s:%.0f:%.0f", fields$stacked, fields$rows, fields$cols),
              rows = fields$rows, cols = fields$cols, label = fields$label,
              stringsAsFactors = FALSE)
@@ -177,16 +177,18 @@ field_grid_menu <- function(x, stackings, numbered = list()) {
 #' incomplete blocks or whole plots lie ("21 \u00d7 7 \u00b7 blocks in
 #' rows"); the same layout under two numbers is listed once. Every option of
 #' a grid panel says how its replicates lie ("6 \u00d7 12 \u00b7 replicates
-#' 2 \u00d7 2").
+#' 2 \u00d7 2"), and the grid panel holds only fields with rows and columns of
+#' replicates, more than one of each.
 #' @inheritParams layout_choices
 #' @param include_grids The menu of the application: the field grids
 #'   (\code{nrows} by \code{ncols} of \code{field_layout()}) are listed too.
-#'   A design with replicates to arrange lists them all under the grid panel,
-#'   whatever their stacking, each with how its replicates lie; the vertical
-#'   and horizontal menus hold the numbered options alone. A design without
-#'   replicates to arrange (\code{layout_arranges_replicates()}) lists its
-#'   grids after its numbered options, by size alone. A grid of the size of a
-#'   numbered option of its stacking is left out.
+#'   A menu lists the grids of its own stacking alone, with its numbered
+#'   options: those with the replicates one above another under the vertical
+#'   stacking, side by side under the horizontal one, in rows and columns of
+#'   replicates under the grid panel. A design without replicates to arrange
+#'   (\code{layout_arranges_replicates()}) lists its grids after its numbered
+#'   options. A grid of the size of a numbered option of its stacking is left
+#'   out.
 #' @return Named integer values. With \code{include_grids}, named character
 #'   values for a select: the numbers, and "grid:<stacking>:<rows>:<columns>"
 #'   for a field grid.
@@ -212,16 +214,10 @@ layout_choice_labels <- function(x, planter = "serpentine", stacked = "vertical"
     # One list of fields, with no stacking to tell the grids apart: the
     # numbered options, the first of which a page opens on, then the grids
     only <- if (is.null(grid_replicate_unit(x))) "none" else "vertical"
-    grids <- field_grid_menu(x, only, stats::setNames(list(sizes(menu)), only))
-    menu <- rbind(sorted(menu), sorted(grids))
-  } else if (panel) {
-    numbered <- lapply(stats::setNames(nm = stacking_choices), function(stacking) {
-      if (identical(stacking, stacked)) return(sizes(menu))
-      sizes(numbered_layout_menu(x, planter, stacking, location))
-    })
-    menu <- sorted(rbind(menu, field_grid_menu(x, stacking_choices, numbered)))
+    menu <- rbind(sorted(menu), sorted(field_grid_menu(x, only, sizes(menu))))
   } else {
-    menu <- sorted(menu)
+    # The grids of the stacking of the menu, and of no other
+    menu <- sorted(rbind(menu, field_grid_menu(x, stacked, sizes(menu))))
   }
   named(menu)
 }

@@ -1,9 +1,10 @@
 #' The "Replicate layout" choices of a classic design
 #'
 #' @description The stackings that have a layout option for the design
-#' (\code{layout_choice_labels()}). "Vertical" and "Horizontal" hold the
-#' numbered layouts of each; "Grid panel" is offered when the design has a
-#' field grid, of any stacking, or a numbered grid panel. A design without
+#' (\code{layout_choice_labels()}). Each holds the numbered layouts and the
+#' field grids of its own stacking; "Grid panel" is offered when the design
+#' has a field with rows and columns of replicates, more than one of each (a
+#' design with two or three replicates has none). A design without
 #' replicates to arrange (\code{layout_arranges_replicates()}) has one list
 #' of fields: a single choice, which a page does not show.
 #' @inheritParams layout_choices
