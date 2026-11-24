@@ -110,7 +110,9 @@ knitr::opts_chunk$set(
   offered only to a design that has such a field: two or three replicates
   have none. Fields of one size say what tells them apart ("16 × 4 · blocks in
   rows", "4 × 4 · whole plots in columns") instead of a number, and a layout
-  that was listed twice is listed once. A field grid of the size of a numbered
+  that was listed twice is listed once. Whole plots or blocks that wrap from
+  one row of the field into the next say "whole plots along the path" or
+  "blocks along the path". A field grid of the size of a numbered
   layout is listed when its incomplete blocks or its whole plots lie another
   way, and both say how: four replicates of 16 treatments in blocks of 4 have
   "8 × 8 · replicates 2 × 2 · blocks in columns" (layout 1) and "8 × 8 ·

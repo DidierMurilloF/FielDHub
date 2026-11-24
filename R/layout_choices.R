@@ -20,20 +20,24 @@ layout_choices <- function(x, planter = "serpentine", stacked = "vertical", loca
   seq_along(options[[location]])
 }
 
-# How a unit of a layout (an incomplete block, a whole plot) lies in its
-# field: along a row, along a column, or as a rectangle of plots. The unit is
-# the first of the first replicate. NA for a layout without that unit.
+# How the units of a layout (its incomplete blocks, its whole plots) lie in
+# its field: each along a row, each along a column, or each as a rectangle of
+# plots of one shape. Every unit of every replicate is read: units that are
+# not equal rectangles wrap along the planting path, and the layout says so.
+# NA for a layout without that unit.
 layout_unit_direction <- function(book, unit, what) {
   if (!all(c(unit, "ROW", "COLUMN") %in% names(book))) return(NA_character_)
   replicate <- intersect(c("REP", "SQUARE"), names(book))
-  if (length(replicate)) {
-    book <- book[book[[replicate[1L]]] == book[[replicate[1L]]][1L], , drop = FALSE]
-  }
-  book <- book[book[[unit]] == book[[unit]][1L], , drop = FALSE]
-  rows <- length(unique(book$ROW))
-  columns <- length(unique(book$COLUMN))
-  if (rows == 1L) paste(what, "in rows") else if (columns == 1L) paste(what, "in columns") else
-    paste(what, rows, "\u00d7", columns)
+  key <- as.character(book[[unit]])
+  if (length(replicate)) key <- paste(book[[replicate[1L]]], key)
+  extent <- function(v) diff(range(as.numeric(as.character(v)))) + 1
+  shapes <- unique(vapply(split(book[c("ROW", "COLUMN")], key), function(one) {
+    rows <- extent(one$ROW)
+    columns <- extent(one$COLUMN)
+    if (rows * columns != nrow(one)) "along the path" else if (rows == 1) "in rows" else
+      if (columns == 1) "in columns" else paste(rows, "\u00d7", columns)
+  }, character(1)))
+  paste(what, if (length(shapes) == 1L) shapes else "along the path")
 }
 
 # How the replicates of a panel lie in a field: `down` rows of `across`

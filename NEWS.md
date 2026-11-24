@@ -103,18 +103,19 @@
   panel” is offered only to a design that has such a field: two or three
   replicates have none. Fields of one size say what tells them apart
   (“16 × 4 · blocks in rows”, “4 × 4 · whole plots in columns”) instead
-  of a number, and a layout that was listed twice is listed once. A
-  field grid of the size of a numbered layout is listed when its
-  incomplete blocks or its whole plots lie another way, and both say
-  how: four replicates of 16 treatments in blocks of 4 have “8 × 8 ·
-  replicates 2 × 2 · blocks in columns” (layout 1) and “8 × 8 ·
-  replicates 2 × 2 · blocks in rows” (the field of
-  `nrows = 8, ncols = 8`) under “Grid panel”. A grid with the same field
-  as a numbered layout, or with another path of the plots inside the
-  replicate only, is not listed again. A design without replicates to
-  arrange (a CRD, a factorial or a split plot in a CRD, a single Latin
-  square) has one list of fields, its field grids included, and no
-  “Replicate layout”.
+  of a number, and a layout that was listed twice is listed once. Whole
+  plots or blocks that wrap from one row of the field into the next say
+  “whole plots along the path” or “blocks along the path”. A field grid
+  of the size of a numbered layout is listed when its incomplete blocks
+  or its whole plots lie another way, and both say how: four replicates
+  of 16 treatments in blocks of 4 have “8 × 8 · replicates 2 × 2 ·
+  blocks in columns” (layout 1) and “8 × 8 · replicates 2 × 2 · blocks
+  in rows” (the field of `nrows = 8, ncols = 8`) under “Grid panel”. A
+  grid with the same field as a numbered layout, or with another path of
+  the plots inside the replicate only, is not listed again. A design
+  without replicates to arrange (a CRD, a factorial or a split plot in a
+  CRD, a single Latin square) has one list of fields, its field grids
+  included, and no “Replicate layout”.
 
 - The spatial pages use the same names: field sizes read “18 × 18”, with
   filler plots as “43 × 7 · 1 filler”; “Location to view” is “Location”;

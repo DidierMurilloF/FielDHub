@@ -229,9 +229,16 @@ test_that("a menu opens on a numbered layout and lists the grids after the numbe
 })
 
 test_that("a grid of the size of a numbered layout is listed when its blocks or whole plots lie another way", {
+  # How every unit of every replicate lies: the menu may say "in rows" only
+  # of a field where each of them is a full row of plots
   lies <- function(book, unit) {
-    one <- book[book$REP == book$REP[1L] & book[[unit]] == book[[unit]][1L], ]
-    if (length(unique(one$ROW)) == 1L) "rows" else if (length(unique(one$COLUMN)) == 1L) "columns" else "rectangle"
+    shapes <- unique(vapply(split(book, paste(book$REP, book[[unit]])), function(one) {
+      rows <- diff(range(one$ROW)) + 1
+      columns <- diff(range(one$COLUMN)) + 1
+      if (rows * columns != nrow(one)) "path" else if (rows == 1) "rows" else
+        if (columns == 1) "columns" else paste(rows, "x", columns)
+    }, character(1)))
+    if (length(shapes) == 1L) shapes else "path"
   }
   drawn <- function(design, value, stacked) {
     app_selected_layout_view(design, value, "serpentine", 1, stacked)$allSitesFieldbook
@@ -256,6 +263,15 @@ test_that("a grid of the size of a numbered layout is listed when its blocks or 
   expect_identical(vertical[["8 \u00d7 2 \u00b7 whole plots in rows"]], "grid:vertical:8:2")
   expect_identical(lies(drawn(split, "3", "vertical"), "WHOLE_PLOT"), "columns")
   expect_identical(lies(drawn(split, "grid:vertical:8:2", "vertical"), "WHOLE_PLOT"), "rows")
+  # Regression test: the name read the first whole plot alone, and layout 3
+  # was "whole plots in rows" although its whole plots of 6 wrap from a row
+  # of 9 into the next
+  wrapped <- split_split_plot(wp = 3, sp = 2, ssp = 3, reps = 2, seed = 13)
+  vertical <- layout_choice_labels(wrapped, stacked = "vertical", include_grids = TRUE)
+  expect_identical(vertical[["4 \u00d7 9 \u00b7 whole plots along the path"]], "3")
+  expect_identical(vertical[["4 \u00d7 9 \u00b7 whole plots 2 \u00d7 3"]], "grid:vertical:4:9")
+  expect_identical(lies(drawn(wrapped, "3", "vertical"), "WHOLE_PLOT"), "path")
+  expect_identical(lies(drawn(wrapped, "grid:vertical:4:9", "vertical"), "WHOLE_PLOT"), "2 x 3")
   # A grid that is the field of a numbered layout, or differs from it only in
   # the path of its plots, is listed once: as the numbered layout
   rcbd <- layout_choice_labels(RCBD(t = 6, reps = 4, seed = 1), stacked = "vertical", include_grids = TRUE)
