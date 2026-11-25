@@ -1,8 +1,8 @@
 # Catalogue of fixed-seed calls to every exported design function.
 #
-# Each entry builds one small design. The golden tests snapshot the result of
-# every entry, so any change to a design's output fails a test; a change that
-# is intended is accepted with testthat::snapshot_accept(). Entries set `seed`,
+# Each entry builds one small design. test_scientific_invariants.R and other
+# feature tests check properties of every entry (counts, coordinates, plot
+# numbers, seed reproducibility), never a recorded copy of the output. Entries set `seed`,
 # and `year` where the function has it, so the output does not depend on the
 # clock. Functions without a `seed` argument are called after set.seed().
 
@@ -26,7 +26,7 @@ catalogue <- list(
          plotNumber = 101, seed = 5)
   }),
   RCBD_check_count = list(fun = "RCBD", family = "classic", build = function() {
-    # Task 8: `checks` as a bare count with no pool supplied (`t` is itself a
+    # `checks` as a bare count with no pool supplied (`t` is itself a
     # count) generates its own labels: "CH1".."CHk" checks, "T1".."Tt" tests.
     RCBD(t = 6, reps = 3, checks = 2, rep_checks = c(2, 2),
          plotNumber = 101, seed = 40)
@@ -215,52 +215,3 @@ catalogue_family <- function(family) {
   names(catalogue)[vapply(catalogue, function(e) e$family == family, logical(1))]
 }
 
-# The golden snapshots run on the reference platform (macOS) unless
-# FIELDHUB_GOLDEN is "false", and elsewhere only when it is "true", because
-# floating-point optimizers can pick different designs on other platforms.
-skip_unless_golden_platform <- function() {
-  golden <- Sys.getenv("FIELDHUB_GOLDEN")
-  if (identical(golden, "true")) return(invisible(TRUE))
-  if (identical(golden, "false")) testthat::skip("FIELDHUB_GOLDEN is false")
-  if (!identical(Sys.info()[["sysname"]], "Darwin")) {
-    testthat::skip("golden snapshots are recorded on macOS")
-  }
-  invisible(TRUE)
-}
-
-# What a golden snapshot records: the full result and, for the designs whose
-# field map is built by plot_layout() (id_design 1 to 12), the field book with
-# the ROW and COLUMN coordinates that the app exports.
-golden_view <- function(design) {
-  # The package version changes with every release, not with the design, and
-  # wall-clock timings are not deterministic content (research M3 spec 3.7)
-  if (is.list(design$metadata)) design$metadata$package_version <- NULL
-  if (is.list(design)) design$timing <- NULL
-  # The search statistics are doubles that the JSON snapshot cannot round-trip
-  # at full precision; they are recorded to 6 significant digits
-  if (inherits(design, "fieldhub_augmented_row_column")) {
-    design <- rapply(design, function(v) signif(v, 6), classes = "numeric", how = "replace")
-  }
-  view <- list(design = design)
-  id <- if (inherits(design, "FielDHub")) design$infoDesign$id_design else NULL
-  if (is.numeric(id) && id <= 12) {
-    view$layout <- tryCatch(
-      suppressWarnings(suppressMessages(plot_layout(design, layout = 1)$allSitesFieldbook)),
-      error = function(e) "plot_layout() fails for this design"
-    )
-  }
-  view
-}
-
-# One golden test per catalogue entry of a family
-test_golden_family <- function(family) {
-  for (name in catalogue_family(family)) {
-    local({
-      entry <- name
-      testthat::test_that(paste(entry, "keeps its output"), {
-        skip_unless_golden_platform()
-        testthat::expect_snapshot_value(golden_view(catalogue_design(entry)), style = "json2")
-      })
-    })
-  }
-}

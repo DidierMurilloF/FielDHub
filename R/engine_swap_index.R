@@ -1,9 +1,10 @@
 # Coordinate bookkeeping for the pair-swap optimizer (swap_pairs_core()).
 #
-# Every helper reproduces the arithmetic of the full-field reference functions
-# (.pair_dists_for_geno(), .score_swap(), the per-entry pairs_distance() loop)
-# operation for operation, in the same order and with the same integer/double
-# types, so the optimizer's results stay identical() to master 720449e.
+# Every helper reproduces the arithmetic of the full-field computation it
+# replaces (per-entry pair distances recomputed from the whole matrix, the
+# per-entry pairs_distance() loop) operation for operation, in the same order
+# and with the same integer/double types, so the optimizer's results stay
+# identical() to master 720449e.
 
 #' Duplicate-entry pairs in the order the per-entry reference loop produced them
 #'
@@ -43,8 +44,8 @@
 
 #' Pair distances of one entry from its sorted linear cell indices
 #'
-#' Identical to `.pair_dists_for_geno(X, g)` when `cells` is
-#' `which(X == g)`: same pairs, order, types and arithmetic.
+#' All pairwise distances of entry g in matrix X when `cells` is
+#' `which(X == g)`, pairs taken in `utils::combn()` order.
 #' @noRd
 .pair_dists_from_cells <- function(cells, nr, dist_method, templates) {
   k <- length(cells)
@@ -66,7 +67,13 @@
   templates
 }
 
-#' Score one candidate swap from the cell index (same value as .score_swap())
+#' Score one candidate swap from the cell index
+#'
+#' Returns `list(score, delta)`: `delta` is the change in the summed pair
+#' distances of the two affected entries, and `score` is the updated global
+#' mean pair distance minus `lambda` times the candidate's distance from the
+#' field centre (maximised). The caller updates `base_sum` by `delta` after
+#' applying the best swap; swapping cells never changes `n_pairs`.
 #'
 #' `cells_i` are the sorted cells of the entry at linear cell `a`; `cells_j`
 #' those of the entry at candidate cell `b`; `same` is TRUE when both cells

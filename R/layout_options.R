@@ -584,9 +584,11 @@ iblock_layouts <- function(x, planter = "serpentine", stacked = "vertical") {
         if (sizeIblocks %% 2 == 0) list(with_rows(blocks_in_rows))
       )
     } else if (stacked == "horizontal") {
-      horizontal <- function(coordinates) {
-        with_rows(coordinates, order_by = NULL, per_rep = TRUE,
-                  grid_cols = max(coordinates$COLUMN) / n_Reps)
+      # The plots of each rep are numbered line by line along its grid,
+      # `line_length` plots per line, a serpentine planter going back on
+      # every second line. The lines are the rows of the rep by default.
+      horizontal <- function(coordinates, line_length = max(coordinates$COLUMN) / n_Reps) {
+        with_rows(coordinates, order_by = NULL, per_rep = TRUE, grid_cols = line_length)
       }
       books <- list(horizontal(data.frame(ROW = rep(rep(1:iBlocks, each = sizeIblocks), n_Reps), COLUMN = z)))
       if (sizeIblocks %% 2 == 0 || sqrt(sizeIblocks) %% 1 == 0) {
@@ -611,10 +613,12 @@ iblock_layouts <- function(x, planter = "serpentine", stacked = "vertical") {
           horizontal(data.frame(ROW = rep(unlist(z_rows), times = n_Reps), COLUMN = unlist(z_cols)))
         }))
       }
+      # Each incomplete block is a column of its rep: the planter goes along
+      # the columns, so a line is one block of sizeIblocks plots
       books <- c(books, list(horizontal(data.frame(
         ROW = rep(rep(1:sizeIblocks, times = iBlocks), n_Reps),
         COLUMN = rep(1:(iBlocks * n_Reps), each = sizeIblocks)
-      ))))
+      ), line_length = sizeIblocks)))
     } else if (stacked == "grid_panel") {
       number_units <- length(levels(as.factor(NewBook$IBLOCK)))
       books <- lapply(panel_grid_coordinates(sizeIblocks, n_Reps, iBlocks), with_rows,

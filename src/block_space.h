@@ -63,7 +63,6 @@ class BlockSpace {
   // the identity against the one-way eigenvalues.
   void enable_treatment_form();
   bool treatment_form() const { return form_; }
-  int count(int i, int j) const { return counts_[i + v_ * j]; }
   const std::vector<int>& counts() const { return counts_; }
 
  private:

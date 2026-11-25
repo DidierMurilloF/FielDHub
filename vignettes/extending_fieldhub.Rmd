@@ -36,7 +36,8 @@ to replay, schema, printing, layout or drawing dispatchers.
    `tests/testthat/helper-catalogue.R` and the result-class expectations. Test
    explicit/automatic seeds, errors without RNG leakage, replay, layouts,
    labels containing spaces/punctuation, locations and format round-trips.
-   Review and accept only the new snapshots; existing outputs must stay fixed.
+   Check properties of the output (counts, coordinates, plot numbers, replay),
+   not a recorded copy of it.
 
 The Latin rectangle test also checks the additive row/column/treatment model
 rank independently with `model.matrix()` and `qr()`. Its two-row case is
@@ -85,7 +86,7 @@ with an actionable dependency condition; no automatic installation.
 
 ## Review checklist
 
-Run the scoped tests first, then the complete plain-R suite and macOS goldens,
+Run the scoped tests first, then the complete plain-R suite,
 full package check with vignettes, changed-line lint and unchanged core coverage
 gate. Use the release benchmark comparison when scientific/engine work changes.
 Update both NEWS files, reference validation, architecture guidance and examples.

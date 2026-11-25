@@ -32,7 +32,7 @@ if (is.na(seed_offset)) stop("seed_offset= must be a whole number.")
 if (length(arguments) == 3L) .libPaths(c(normalizePath(arguments[3], mustWork = TRUE), .libPaths()))
 script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1]))
 suppressMessages(library(FielDHub))
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 # optimiser_seconds of the onestage records: the timing trace is opt-in
 if (protocol %in% c("os", "ci") && !nested_trace_onestage()) {

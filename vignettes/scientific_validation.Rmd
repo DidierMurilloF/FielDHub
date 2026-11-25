@@ -25,7 +25,7 @@ that the independent helpers reject missing, repeated, or relabeled units.
 The fixed-seed catalogue covers every design engine, including generated and
 supplied labels, multiple locations, unequal replication, checks, and fillers.
 `tests/testthat/test_scientific_invariants.R` checks the following properties on
-every test platform; it is not restricted to the snapshot reference platform.
+every test platform.
 
 | Design family | Independently checked property |
 |---|---|
@@ -72,7 +72,7 @@ definitions in the NIST/SEMATECH handbook:
 
 The Latin rectangle definition follows
 [Doyle's treatment](https://math.dartmouth.edu/~doyle/docs/latin/latin.pdf).
-`test_latin_rectangle.R` checks consecutive cyclic shifts with independent
+`test_latin.R` checks consecutive cyclic shifts with independent
 row/column/symbol permutations for treatment counts 3 through 8, every supported
 row count and several seeds. A separate model-matrix rank calculation verifies
 connectivity and `(rows - 2) * (t - 1)` residual degrees of freedom. Two-row
@@ -108,20 +108,19 @@ error instead of reporting a misleading positive efficiency.
 Incomplete-block, lattice, onestage and twostage row-column designs, and sparse and p-rep
 allocation across locations, use FielDHub's own compiled block search;
 its efficiencies are checked against the same eigenvalue definitions
-(`test_blocks_engine_designs.R` for a single level of blocks, and
-`test_square_lattice.R` and `test_alpha_lattice.R` for resolvable designs,
-`test_row_column.R` for twostage rows).
+(`test_incomplete_blocks.R` for a single level of blocks and for resolvable
+designs, `test_row_column.R` for twostage rows).
 These checks validate achieved designs, not a claim of global optimality or
 uniform sampling over all possible randomizations.
 
 Spatial simulation tests compare the separable AR1 construction against an
 independent dense covariance/Cholesky calculation, including negative
-correlations and nonsquare fields (`test_separable_spatial.R`). Response tests
+correlations and nonsquare fields (`test_simulation.R`). Response tests
 check the stated treatment-specific model and unequal replication
-(`test_truncated_response_contract.R` and `test_simulation.R`). Design-aware
+(`test_simulation.R`). Design-aware
 simulation tests check, for every design, that responses equal the mean plus
 the stored effects, that each effect is constant within its treatment or
-experimental unit, and that records replay exactly (`test_simulate_design.R`).
+experimental unit, and that records replay exactly (`test_simulation.R`).
 These are computational checks, not evidence that simulated responses fit a
 particular biological experiment.
 

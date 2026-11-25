@@ -1,451 +1,1320 @@
-# Augmented row-column designs: engine tests (fast suite; exhaustive blocks run
-# only when FIELDHUB_ARC_EXHAUSTIVE=true). Research M1 specification, sections
-# 3-7 and 10. Reference values come from Piepho and Williams (2026), Biometrical
-# Journal 68(5):e70182 (CC-BY), and Bailey and Haines (2025), JABES (CC-BY).
+# Augmented row-column designs: augmented_row_column() inputs, results, field
+# books, reported statistics, replay and presentation, and the independent
+# references behind the statistics.
+#
+# Independent references, never the engine's own output:
+# - arc_field_book_oracle() (helper-arc-design.R): a least-squares fit of the
+#   returned field book alone;
+# - published values of Piepho and Williams (2026), Biometrical Journal
+#   68(5):e70182, and Bailey and Haines (2025), JABES (both CC-BY), with the
+#   fixtures in fixtures/augmented-row-column/;
+# - the counts of the exhaustive fixed-replication 6 x 4 enumeration of the
+#   research verification (helper-arc-enumeration.R).
+#
+# Users cannot pass a contraction to augmented_row_column(), so no exported
+# path reaches the published contractions: those checks call the internal
+# scorers behind the reported statistics (arc_final_score() and the paper
+# route arc_evaluate_contraction()) directly. The same holds for the 6 x 4
+# enumeration and the work-bound gate on the staged search.
+#
+# Tiers: FIELDHUB_ARC_SEARCH_SLOW=true runs the slow published-E_aug search
+# and a denser deadline sweep; FIELDHUB_ARC_EXHAUSTIVE=true runs the
+# exhaustive enumeration agreement.
 
-# Task 4: structural checks (spec 4.2) and expansion (spec 3) ----------------
+# ---- Local helpers ---------------------------------------------------------
 
-# Printed Example 1 (v = 12, k = 3, s = 8) and Example 2 (v = 24, k = 5,
-# s = 16) of Piepho and Williams (2026): contractions and expanded layouts.
-arc_ex1_contraction <- matrix(c(
-  3, 7, 9, 1, 10, 8, 2, 6,
-  12, 10, 4, 3, 11, 9, 5, 2,
-  7, 5, 6, 4, 1, 11, 8, 12
-), nrow = 3, byrow = TRUE)
-arc_ex1_layout <- matrix(as.integer(c(
-  1, 10, 19, 73, 75, 46, 55, 64,
-  2, 11, 20, 28, 37, 47, 73, 74,
-  73, 12, 21, 74, 38, 48, 56, 65,
-  3, 13, 74, 75, 39, 49, 57, 66,
-  4, 75, 22, 29, 40, 50, 74, 67,
-  5, 14, 75, 30, 41, 51, 58, 73,
-  75, 73, 23, 31, 42, 52, 59, 68,
-  6, 15, 24, 32, 43, 73, 75, 69,
-  7, 16, 73, 33, 44, 74, 60, 70,
-  8, 74, 25, 34, 73, 53, 61, 71,
-  9, 17, 26, 35, 74, 75, 62, 72,
-  74, 18, 27, 36, 45, 54, 63, 75
-)), nrow = 12, byrow = TRUE)
-arc_ex2_contraction <- matrix(c(
-  13, 20, 7, 8, 19, 15, 9, 23, 11, 2, 3, 18, 10, 24, 16, 1,
-  6, 15, 9, 10, 12, 1, 14, 18, 23, 17, 5, 3, 21, 16, 22, 8,
-  21, 4, 19, 22, 15, 5, 11, 2, 17, 9, 8, 14, 24, 6, 13, 18,
-  20, 9, 5, 23, 21, 10, 13, 6, 7, 24, 17, 15, 4, 8, 18, 12,
-  1, 22, 6, 19, 16, 2, 10, 4, 21, 12, 20, 7, 3, 14, 17, 11
-), nrow = 5, byrow = TRUE)
-arc_ex2_layout <- matrix(as.integer(c(
-  309, 20, 39, 58, 77, 306, 115, 134, 153, 172, 191, 210, 229, 248, 267, 305,
-  1, 21, 40, 59, 78, 309, 116, 307, 154, 305, 192, 211, 230, 249, 268, 286,
-  2, 22, 41, 60, 79, 96, 117, 135, 155, 173, 305, 306, 309, 250, 269, 287,
-  3, 307, 42, 61, 80, 97, 118, 309, 156, 174, 193, 212, 308, 251, 270, 288,
-  4, 23, 308, 62, 81, 307, 119, 136, 157, 175, 306, 213, 231, 252, 271, 289,
-  306, 24, 309, 63, 82, 98, 120, 308, 158, 176, 194, 214, 232, 307, 272, 290,
-  5, 25, 305, 64, 83, 99, 121, 137, 308, 177, 195, 309, 233, 253, 273, 291,
-  6, 26, 43, 305, 84, 100, 122, 138, 159, 178, 307, 215, 234, 308, 274, 306,
-  7, 308, 306, 65, 85, 101, 305, 139, 160, 307, 196, 216, 235, 254, 275, 292,
-  8, 27, 44, 306, 86, 308, 309, 140, 161, 179, 197, 217, 305, 255, 276, 293,
-  9, 28, 45, 66, 87, 102, 307, 141, 305, 180, 198, 218, 236, 256, 277, 309,
-  10, 29, 46, 67, 306, 103, 123, 142, 162, 309, 199, 219, 237, 257, 278, 308,
-  305, 30, 47, 68, 88, 104, 308, 143, 163, 181, 200, 220, 238, 258, 307, 294,
-  11, 31, 48, 69, 89, 105, 306, 144, 164, 182, 201, 307, 239, 309, 279, 295,
-  12, 306, 49, 70, 307, 305, 124, 145, 165, 183, 202, 308, 240, 259, 280, 296,
-  13, 32, 50, 71, 309, 106, 125, 146, 166, 184, 203, 221, 241, 306, 305, 297,
-  14, 33, 51, 72, 90, 107, 126, 147, 307, 306, 308, 222, 242, 260, 309, 298,
-  15, 34, 52, 73, 91, 108, 127, 306, 167, 185, 204, 305, 243, 261, 308, 307,
-  16, 35, 307, 309, 305, 109, 128, 148, 168, 186, 205, 223, 244, 262, 281, 299,
-  308, 305, 53, 74, 92, 110, 129, 149, 169, 187, 309, 224, 245, 263, 282, 300,
-  307, 36, 54, 75, 308, 111, 130, 150, 309, 188, 206, 225, 306, 264, 283, 301,
-  17, 309, 55, 307, 93, 112, 131, 151, 170, 189, 207, 226, 246, 265, 306, 302,
-  18, 37, 56, 308, 94, 113, 132, 305, 306, 190, 208, 227, 247, 266, 284, 303,
-  19, 38, 57, 76, 95, 114, 133, 152, 171, 308, 209, 228, 307, 305, 285, 304
-)), nrow = 24, byrow = TRUE)
+# A 10 x 8 field with 4 checks along the columns: v = 10, s = 8, 48 tests,
+# residual df 12 (no low-df warning)
+arc_call <- list(nrows = 10, ncols = 8, checks = 4,
+                 check_direction = "columns", budget = 600, seed = 2026)
 
-# Balanced (r_h = 3) with row repeats: column-binary only. v = 6, k = 3, s = 6.
-arc_row_repeat_contraction <- matrix(c(
-  6, 2, 3, 3, 5, 1,
-  1, 5, 2, 6, 1, 2,
-  4, 4, 6, 5, 4, 3
-), nrow = 3, byrow = TRUE)
-# Audit counterexample: column-binary, r = (4, 2, 2, 2, 1, 1), v = 6.
-arc_unbalanced_contraction <- matrix(c(
-  1, 4, 4, 1,
-  2, 1, 2, 5,
-  3, 3, 1, 6
-), nrow = 3, byrow = TRUE)
-# No collisions or row repeats, but r = (3, 2, 2, 3, 1, 1) with v = 6 where
-# ks / v = 2: only the restricted replication rule fails.
-arc_unbalanced_rowbinary <- matrix(c(
-  1, 2, 3, 4,
-  2, 1, 4, 5,
-  3, 4, 1, 6
-), nrow = 3, byrow = TRUE)
-
-expect_arc_error <- function(expr, specific, parent) {
-  condition <- tryCatch(expr, error = function(e) e)
-  expect_s3_class(condition, specific)
-  expect_s3_class(condition, parent)
-  expect_identical(class(condition)[1:2], c(specific, parent))
-  invisible(condition)
+arc_run <- function(...) {
+  do.call(augmented_row_column, utils::modifyList(arc_call, list(...)))
 }
 
-test_that("valid printed contractions pass the structural checks", {
-  ok1 <- arc_check_contraction(arc_ex1_contraction, 12, "restricted")
-  expect_identical(ok1$k, 3L)
-  expect_identical(ok1$s, 8L)
-  expect_identical(ok1$v, 12L)
-  expect_identical(ok1$r, rep(2L, 12))
-  expect_identical(ok1$mode, "restricted")
-  ok2 <- arc_check_contraction(arc_ex2_contraction, 24, "restricted")
-  expect_identical(sort(unique(ok2$r)), c(3L, 4L))
-  expect_silent(arc_check_contraction(arc_ex1_contraction, 12L,
-                                      "column_binary"))
-})
-
-test_that("rule 1: malformed contraction, v, or mode is an input error", {
-  input <- c("fieldhub_arc_input_error", "fieldhub_input_error")
-  with_na <- arc_ex1_contraction
-  with_na[2, 3] <- NA
-  non_integral <- arc_ex1_contraction
-  non_integral[1, 1] <- 2.5
-  expect_error(arc_check_contraction(with_na, 12, "restricted"),
-               class = "fieldhub_arc_input_error")
-  expect_arc_error(arc_check_contraction(with_na, 12, "restricted"),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(non_integral, 12, "restricted"),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(as.vector(arc_ex1_contraction), 12,
-                                         "restricted"), input[1], input[2])
-  character_matrix <- arc_ex1_contraction
-  storage.mode(character_matrix) <- "character"
-  expect_arc_error(arc_check_contraction(character_matrix, 12, "restricted"),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, 12.5,
-                                         "restricted"), input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, c(12, 13),
-                                         "restricted"), input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, NA_real_,
-                                         "restricted"), input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, 12),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, 12, "binary"),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, 12, NA),
-                   input[1], input[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction, 12,
-                                         c("restricted", "column_binary")),
-                   input[1], input[2])
-})
-
-test_that("rule 2: k and s outside 2 <= k < v, s >= 2 are dimension errors", {
-  dimension <- c("fieldhub_arc_dimension_error", "fieldhub_dimension_error")
-  expect_error(arc_check_contraction(arc_ex1_contraction[1, , drop = FALSE],
-                                     12, "restricted"),
-               class = "fieldhub_arc_dimension_error")
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction[1, , drop = FALSE],
-                                         12, "restricted"),
-                   dimension[1], dimension[2])
-  expect_arc_error(arc_check_contraction(arc_ex1_contraction[, 1, drop = FALSE],
-                                         12, "column_binary"),
-                   dimension[1], dimension[2])
-  # Three checks but only three field rows, so k < v fails.
-  expect_arc_error(arc_check_contraction(matrix(c(1, 2, 3, 2, 3, 1), 3), 3,
-                                         "restricted"),
-                   dimension[1], dimension[2])
-})
-
-test_that("rule 3: s > v is rejected in both modes", {
-  wide <- matrix(c(1, 2, 2, 3, 3, 1, 1, 2), nrow = 2)
-  for (mode in c("restricted", "column_binary")) {
-    expect_error(arc_check_contraction(wide, 3, mode),
-                 class = "fieldhub_arc_dimension_error")
-    expect_arc_error(arc_check_contraction(wide, 3, mode),
-                     "fieldhub_arc_dimension_error", "fieldhub_dimension_error")
-  }
-})
-
-test_that("rule 4: entries outside 1..v are input errors", {
-  too_large <- arc_ex1_contraction
-  too_large[1, 1] <- 13
-  zero <- arc_ex1_contraction
-  zero[3, 8] <- 0
-  expect_error(arc_check_contraction(too_large, 12, "restricted"),
-               class = "fieldhub_arc_input_error")
-  expect_arc_error(arc_check_contraction(too_large, 12, "restricted"),
-                   "fieldhub_arc_input_error", "fieldhub_input_error")
-  expect_arc_error(arc_check_contraction(zero, 12, "column_binary"),
-                   "fieldhub_arc_input_error", "fieldhub_input_error")
-})
-
-test_that("rule 5: a column repeat is a collision, reported before rule 7", {
-  # Column 1 becomes (3, 7, 7): a collision, and r_7 = 3, r_12 = 1 breaks
-  # the restricted replication rule too. Row 2 has no other 7, so rule 6
-  # does not apply.
-  collided <- arc_ex1_contraction
-  collided[2, 1] <- 7
-  for (mode in c("restricted", "column_binary")) {
-    expect_error(arc_check_contraction(collided, 12, mode),
-                 class = "fieldhub_arc_collision_error")
-    condition <- expect_arc_error(arc_check_contraction(collided, 12, mode),
-                                  "fieldhub_arc_collision_error",
-                                  "fieldhub_input_error")
-    expect_identical(condition$column, 1L)
-  }
-  # Expansion rejects the collision before writing anything.
-  expect_error(arc_expand(collided, 12, "restricted"),
-               class = "fieldhub_arc_collision_error")
-})
-
-test_that("rule 6: restricted rejects a row repeat column-binary accepts", {
-  expect_error(arc_check_contraction(arc_row_repeat_contraction, 6,
-                                     "restricted"),
-               class = "fieldhub_arc_row_repeat_error")
-  condition <- expect_arc_error(
-    arc_check_contraction(arc_row_repeat_contraction, 6, "restricted"),
-    "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
-  expect_identical(condition$row, 1L)
-  ok <- arc_check_contraction(arc_row_repeat_contraction, 6, "column_binary")
-  expect_identical(ok$r, rep(3L, 6))
-  expect_identical(ok$mode, "column_binary")
-})
-
-test_that("rule 7: replication failures are replication errors", {
-  replication <- c("fieldhub_arc_replication_error", "fieldhub_input_error")
-  # r = (3, 2, 2, 3, 1, 1) is unbalanced: restricted rejects, column-binary
-  # accepts.
-  expect_error(arc_check_contraction(arc_unbalanced_rowbinary, 6, "restricted"),
-               class = "fieldhub_arc_replication_error")
-  expect_arc_error(arc_check_contraction(arc_unbalanced_rowbinary, 6,
-                                         "restricted"),
-                   replication[1], replication[2])
-  expect_identical(
-    arc_check_contraction(arc_unbalanced_rowbinary, 6, "column_binary")$r,
-    c(3L, 2L, 2L, 3L, 1L, 1L))
-  # A pseudo-treatment that never occurs (r_6 = 0) fails in both modes.
-  missing_six <- matrix(c(1, 2, 3, 4, 5, 1), nrow = 2, byrow = TRUE)
-  for (mode in c("restricted", "column_binary")) {
-    expect_arc_error(arc_check_contraction(missing_six, 6, mode),
-                     replication[1], replication[2])
-  }
-})
-
-test_that("the unbalanced audit design expands only in column-binary mode", {
-  expanded <- arc_expand(arc_unbalanced_contraction, 6, "column_binary")
-  expect_identical(dim(expanded$codes), c(6L, 4L))
-  expect_type(expanded$codes, "integer")
-  expect_null(expanded$labels)
-  n_tests <- (6L - 3L) * 4L
-  expect_identical(sort(expanded$codes[expanded$codes <= n_tests]),
-                   seq_len(n_tests))
-  expect_identical(as.vector(table(expanded$codes[expanded$codes > n_tests])),
-                   c(4L, 4L, 4L))
-  # Field row h holds r_h checks.
-  expect_identical(unname(rowSums(expanded$codes > n_tests)),
-                   c(4, 2, 2, 2, 1, 1))
-  # Restricted mode: row 1 (1 4 4 1) repeats, and rule 6 precedes rule 7, so
-  # the row-repeat class is reported although r is also unbalanced.
-  expect_error(arc_expand(arc_unbalanced_contraction, 6, "restricted"),
-               class = "fieldhub_arc_row_repeat_error")
-  # Without row repeats, an unbalanced r is a replication error in
-  # restricted mode.
-  expect_error(arc_expand(arc_unbalanced_rowbinary, 6, "restricted"),
-               class = "fieldhub_arc_replication_error")
-})
-
-test_that("Examples 1 and 2 expand to exactly the printed layouts", {
-  ex1 <- arc_expand(arc_ex1_contraction, 12, "restricted")
-  expect_identical(ex1$codes, arc_ex1_layout)
-  expect_null(ex1$labels)
-  ex2 <- arc_expand(arc_ex2_contraction, 24, "restricted")
-  expect_identical(ex2$codes, arc_ex2_layout)
-  storage.mode(arc_ex1_contraction) <- "integer"
-  expect_identical(arc_expand(arc_ex1_contraction, 12L, "column_binary")$codes,
-                   arc_ex1_layout)
-})
-
-# v = 6, k = 2, s = 3, so (v - k)s = 12 tests.
-arc_small_contraction <- matrix(c(1, 2, 3, 4, 5, 6), nrow = 2, byrow = TRUE)
-arc_small_checks <- c("Check A", "Línea ñ ü")
-arc_small_tests <- c("line-01 (x)", " lead", "trail ", "a,b;c", "tab\there",
-                     "Quote\"d", "back\\slash", "été #7", "UPPER",
-                     "upper", "x/y", "中文")
-
-test_that("labels round-trip byte-for-byte", {
-  expanded <- arc_expand(arc_small_contraction, 6, "restricted",
-                         check_labels = arc_small_checks,
-                         test_labels = arc_small_tests)
-  codes <- expanded$codes
-  expect_type(expanded$labels, "character")
-  expect_identical(dim(expanded$labels), c(6L, 3L))
-  expected <- matrix(c(arc_small_tests, arc_small_checks)[codes], 6, 3)
-  expect_identical(expanded$labels, expected)
-  expect_setequal(as.vector(expanded$labels[codes > 12L]), arc_small_checks)
-  expect_setequal(as.vector(expanded$labels[codes <= 12L]), arc_small_tests)
-  check_two <- expanded$labels[codes == 14L][1]
-  expect_identical(check_two, arc_small_checks[2])
-  expect_identical(charToRaw(check_two), charToRaw(arc_small_checks[2]))
-  expect_identical(Encoding(check_two), Encoding(arc_small_checks[2]))
-  expect_identical(charToRaw(expanded$labels[codes == 1L]),
-                   charToRaw("line-01 (x)"))
-  expect_identical(expanded$labels[codes == 2L], " lead")
-  expect_identical(expanded$labels[codes == 3L], "trail ")
-})
-
-test_that("invalid label vectors are input errors", {
-  input <- c("fieldhub_arc_input_error", "fieldhub_input_error")
-  expand_labels <- function(check_labels, test_labels) {
-    arc_expand(arc_small_contraction, 6, "restricted",
-               check_labels = check_labels, test_labels = test_labels)
-  }
-  # Test-label count other than (v - k)s = 12, and check count other than k.
-  expect_error(expand_labels(arc_small_checks, arc_small_tests[-1]),
-               class = "fieldhub_arc_input_error")
-  expect_arc_error(expand_labels(arc_small_checks, arc_small_tests[-1]),
-                   input[1], input[2])
-  expect_arc_error(expand_labels(arc_small_checks, c(arc_small_tests, "extra")),
-                   input[1], input[2])
-  expect_arc_error(expand_labels(c(arc_small_checks, "Check C"),
-                                 arc_small_tests), input[1], input[2])
-  # Duplicates within checks and within tests.
-  expect_arc_error(expand_labels(c("Check A", "Check A"), arc_small_tests),
-                   input[1], input[2])
-  duplicated_tests <- arc_small_tests
-  duplicated_tests[12] <- duplicated_tests[1]
-  expect_arc_error(expand_labels(arc_small_checks, duplicated_tests),
-                   input[1], input[2])
-  # A label shared by a check and a test.
-  shared <- arc_small_tests
-  shared[5] <- "Check A"
-  expect_arc_error(expand_labels(arc_small_checks, shared), input[1], input[2])
-  # Only one of the two label vectors.
-  expect_arc_error(expand_labels(arc_small_checks, NULL), input[1], input[2])
-  expect_arc_error(expand_labels(NULL, arc_small_tests), input[1], input[2])
-  # Non-character and missing labels.
-  expect_arc_error(expand_labels(c(1, 2), arc_small_tests), input[1], input[2])
-  expect_arc_error(expand_labels(c("Check A", NA), arc_small_tests),
-                   input[1], input[2])
-})
-
-# Task 5: connectivity, df, and recoloring (spec 4.2, 4.3, 5) ----------------
-
-# Preserved false-QR design of spike 2b (v = 54, s = 14, k = 5): balanced
-# (r = 1 or 2) and row-binary, with df_formula = -1.
-arc_false_qr_contraction <- matrix(c(
-  37, 6, 46, 17, 49, 53, 47, 32, 8, 9, 11, 19, 45, 28,
-  48, 4, 2, 52, 18, 31, 6, 10, 54, 5, 51, 24, 7, 37,
-  26, 19, 44, 42, 30, 14, 13, 35, 27, 25, 12, 16, 33, 18,
-  3, 20, 47, 48, 29, 21, 35, 43, 45, 24, 22, 44, 38, 15,
-  36, 42, 50, 34, 53, 30, 40, 22, 39, 12, 3, 41, 1, 23
-), nrow = 5, byrow = TRUE)
-
-# Whether `recolored` is row-binary and keeps every column set of `original`
-# and the replication vector.
-arc_recoloring_ok <- function(recolored, original, v) {
-  identical(dim(recolored), dim(original)) &&
-    all(apply(recolored, 1L, anyDuplicated) == 0L) &&
-    all(vapply(seq_len(ncol(original)), function(j) {
-      setequal(recolored[, j], original[, j]) &&
-        length(recolored[, j]) == length(unique(recolored[, j]))
-    }, logical(1))) &&
-    identical(tabulate(recolored, nbins = v), tabulate(original, nbins = v))
+# Physical dimensions of a v x s design laid out along `direction`
+arc_dims <- function(v, s, direction) {
+  if (identical(direction, "columns")) c(nrows = v, ncols = s)
+  else c(nrows = s, ncols = v)
 }
 
-test_that("the spectrum classifier applies both thresholds at the boundary", {
-  cases <- list(
-    list(x = 0, connected = FALSE, near = FALSE),
-    list(x = 0.5e-8, connected = FALSE, near = FALSE),
-    list(x = 1e-8, connected = TRUE, near = TRUE),
-    list(x = 2e-8, connected = TRUE, near = TRUE),
-    list(x = 0.5e-6, connected = TRUE, near = TRUE),
-    list(x = 1e-6, connected = TRUE, near = FALSE),
-    list(x = 2e-6, connected = TRUE, near = FALSE)
-  )
-  for (case in cases) {
-    # Any order is accepted.
-    for (lambda in list(c(case$x, 0.3, 1), c(1, case$x, 0.3))) {
-      out <- arc_classify_spectrum(lambda)
-      info <- paste("lambda_min_rel =", case$x)
-      expect_identical(names(out), c("connected", "lambda_min_rel",
-                                     "near_singular"), info = info)
-      expect_identical(out$connected, case$connected, info = info)
-      expect_identical(out$near_singular, case$near, info = info)
-      expect_identical(out$lambda_min_rel, case$x, info = info)
+# The 10 x 8 design laid out along `direction`
+arc_oriented <- function(direction, ...) {
+  dims <- arc_dims(10L, 8L, direction)
+  arc_run(nrows = dims[["nrows"]], ncols = dims[["ncols"]],
+          check_direction = direction, ...)
+}
+
+arc_location_book <- function(x, location) {
+  x$fieldBook[x$fieldBook$LOCATION == location, , drop = FALSE]
+}
+
+# The deterministic content of a result: everything but timing and the
+# package version
+arc_view <- function(x) {
+  x[["timing"]] <- NULL
+  x[["metadata"]][["package_version"]] <- NULL
+  x
+}
+
+arc_rng <- function() get(".Random.seed", envir = globalenv())
+
+arc_muffle_low_df <- function(expr) {
+  withCallingHandlers(expr, fieldhub_arc_low_df_warning = function(w) {
+    invokeRestart("muffleWarning")
+  })
+}
+
+# Evaluate `expr` with `opts` set, restoring the previous options
+arc_with_options <- function(opts, expr) {
+  if (length(opts)) {
+    old <- options(opts)
+    on.exit(options(old), add = TRUE)
+  }
+  expr
+}
+
+arc_manifest <- function() {
+  utils::read.csv(test_path("fixtures", "augmented-row-column", "manifest.csv"),
+                  stringsAsFactors = FALSE)
+}
+
+# The coordinate checks on one field book, from arc_reconstruct(): one plot
+# per cell; every check exactly once in every line along CHECK_DIRECTION;
+# at most one check per cross-line plot set, and floor or ceiling of k s / v
+# checks in each cross-line.
+arc_placement_ok <- function(fb) {
+  rec <- arc_reconstruct(fb)
+  bounds <- c(floor(rec$k * rec$s / rec$v), ceiling(rec$k * rec$s / rec$v))
+  all(rec$cells == 1L) && all(rec$by_line == 1L) &&
+    all(rec$by_cross <= 1L) && all(rec$cross_checks %in% bounds) &&
+    all(rec$cross_checks >= 1L) && sum(rec$cross_checks) == rec$k * rec$s
+}
+
+# Printed output as the app shows it, one location's details block, and the
+# number printed after "<name> = "
+arc_printed <- function(x) utils::capture.output(print(x, n = 6))
+arc_summarised <- function(x) utils::capture.output(print(summary(x)))
+arc_details_block <- function(lines, site) {
+  start <- match(paste0("Location ", site, ":"), lines)
+  if (is.na(start)) return(character())
+  end <- start
+  while (end < length(lines) && startsWith(lines[end + 1L], "  ")) end <- end + 1L
+  lines[start:end]
+}
+arc_printed_value <- function(line, name) {
+  as.numeric(sub(paste0(".*\\b", name, " = ([-+.0-9e]+).*"), "\\1", line))
+}
+
+arc_metrics <- c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
+
+# Brute-force move counts of a restricted contraction m (rows are checks,
+# columns field lines, entries cross-lines). A row move exchanges two checks'
+# cross-lines on a proper, non-empty set of field lines; a cross-line swap
+# exchanges two cells in different field lines that hold different
+# cross-lines (equal ones would leave the design as it is). A move is
+# feasible when no field line and no check repeats a cross-line afterwards.
+# Both sets are unchanged by the randomization of lines, cross-lines and
+# check labels.
+arc_restricted <- function(m) {
+  all(apply(m, 1L, anyDuplicated) == 0L) &&
+    all(apply(m, 2L, anyDuplicated) == 0L)
+}
+arc_row_moves <- function(m) {
+  s <- ncol(m)
+  n <- 0L
+  for (i in seq_len(nrow(m) - 1L)) for (ii in (i + 1L):nrow(m)) {
+    for (code in seq_len(2^s - 2)) {
+      on <- bitwAnd(code, 2^(seq_len(s) - 1L)) > 0
+      x <- m
+      x[c(i, ii), on] <- m[c(ii, i), on]
+      if (arc_restricted(x)) n <- n + 1L
     }
   }
-  # The ratio is relative to the largest eigenvalue.
-  scaled <- arc_classify_spectrum(c(2e-8, 0.6, 2))
-  expect_equal(scaled$lambda_min_rel, 1e-8)
-  expect_true(scaled$connected)
-  expect_silent(arc_classify_spectrum(c(0, 0.3, 1)))
-  # Custom thresholds are honoured with the same boundary semantics.
-  custom <- arc_classify_spectrum(c(0.01, 0.3, 1), tau_rank = 0.01,
-                                  tau_warn = 0.1)
-  expect_true(custom$connected)
-  expect_true(custom$near_singular)
+  n
+}
+arc_cross_line_swaps <- function(m) {
+  line <- col(m)
+  n <- 0L
+  for (p in seq_len(length(m) - 1L)) for (q in (p + 1L):length(m)) {
+    if (line[p] == line[q] || m[p] == m[q]) next
+    x <- m
+    x[c(p, q)] <- m[c(q, p)]
+    if (arc_restricted(x)) n <- n + 1L
+  }
+  n
+}
+
+# ---- Input validation ------------------------------------------------------
+
+test_that("invalid inputs are rejected by class before a seed is drawn", {
+  arc_local_seed(303) # restores the session's RNG when this test ends
+  input <- "fieldhub_input_error"
+  arc_input <- "fieldhub_arc_input_error"
+  dimension <- "fieldhub_arc_dimension_error"
+  labels4 <- c("A", "B", "C", "D")
+  tests48 <- paste0("T", 1:48)
+  upload <- data.frame(ENTRY = 1:52, NAME = c(labels4, tests48))
+  # args override arc_call; drop removes arguments; class NULL = accepted
+  cases <- list(
+    list(drop = "check_direction", class = arc_input),
+    list(drop = "nrows", class = arc_input),
+    list(drop = "checks", class = arc_input),
+    list(args = list(check_direction = "Columns"), class = arc_input),
+    list(args = list(check_direction = NA_character_), class = arc_input),
+    list(args = list(check_direction = c("columns", "rows")), class = arc_input),
+    # s > v in the mapped orientation
+    list(args = list(nrows = 8, ncols = 10), class = dimension),
+    list(args = list(check_direction = "rows"), class = dimension),
+    list(args = list(nrows = 0), class = input),
+    list(args = list(nrows = 10.5), class = input),
+    list(args = list(ncols = "8"), class = input),
+    list(args = list(method = "anneal"), class = arc_input),
+    list(args = list(method = c("staged", "staged")), class = arc_input),
+    list(args = list(objective = "v_tt"), class = arc_input),
+    list(args = list(objective = "A-opt"), class = arc_input),
+    list(args = list(objective = c("V_tt", "E_aug")), class = arc_input),
+    list(args = list(objective = NA_character_), class = arc_input),
+    list(args = list(checks = 1), class = input),
+    list(args = list(checks = 2.5), class = input),
+    list(args = list(checks = c(1, 2, 3, 4)), class = arc_input),
+    list(args = list(checks = "A"), class = arc_input),
+    list(args = list(checks = c("A", "A", "B", "C")), class = arc_input),
+    list(args = list(checks = c("A", NA, "B", "C")), class = input),
+    list(args = list(checks = c("A", "", "B", "C")), class = input),
+    list(args = list(checks = c("A", "  ", "B", "C")), class = input),
+    list(args = list(checks = TRUE), class = arc_input),
+    list(args = list(checks = factor(labels4)), class = arc_input),
+    # k >= v: no test in a line
+    list(args = list(checks = 10), class = dimension),
+    # residual df below 1: -2 here, 0 for 6 x 6 with 2 checks
+    list(args = list(checks = 2), class = "fieldhub_arc_infeasible_error"),
+    list(args = list(nrows = 6, ncols = 6, checks = 2),
+         class = "fieldhub_arc_df_error"),
+    # entries: counts, labels and types
+    list(args = list(entries = 47), class = arc_input),
+    list(args = list(entries = 0), class = input),
+    list(args = list(entries = tests48[-1]), class = arc_input),
+    # a trailing space makes a distinct label: accepted
+    list(args = list(entries = c(tests48[-1], "T1 "), budget = 100),
+         class = NULL),
+    list(args = list(entries = c(tests48[-48], "T1")), class = arc_input),
+    list(args = list(entries = c(tests48[-48], NA)), class = input),
+    list(args = list(entries = c(48, 1)), class = arc_input),
+    list(args = list(entries = TRUE), class = arc_input),
+    # check and test labels must be disjoint, also with generated labels
+    list(args = list(checks = labels4, entries = c("A", tests48[-1])),
+         class = arc_input),
+    list(args = list(checks = c("G5", "X", "Y", "Z")), class = arc_input),
+    # data: conflicts, columns, identifiers, labels and rows
+    list(args = list(data = upload, entries = tests48), class = arc_input),
+    list(args = list(data = upload, checks = labels4), class = arc_input),
+    list(args = list(data = upload[, "NAME", drop = FALSE]), class = arc_input),
+    list(args = list(data = cbind(upload, BLOCK = 1)), class = arc_input),
+    list(args = list(data = "upload.csv"), class = arc_input),
+    list(args = list(data = transform(upload, ENTRY = ENTRY + 0.5)),
+         class = arc_input),
+    list(args = list(data = transform(upload, ENTRY = c(1:51, 1L))),
+         class = arc_input),
+    list(args = list(data = transform(upload, ENTRY = 0:51)), class = arc_input),
+    list(args = list(data = transform(upload, ENTRY = c(NA, 2:52))),
+         class = arc_input),
+    list(args = list(data = transform(upload, NAME = 1:52)), class = arc_input),
+    list(args = list(data = transform(upload,
+                                      NAME = c("A", "A", NAME[-(1:2)]))),
+         class = arc_input),
+    list(args = list(data = transform(upload, NAME = c(" ", NAME[-1]))),
+         class = input),
+    list(args = list(data = upload[-52, ]), class = arc_input),
+    # search and layout controls
+    list(args = list(budget = 0), class = input),
+    list(args = list(budget = 10.5), class = input),
+    list(args = list(budget = "600"), class = input),
+    list(args = list(time_limit = 0), class = arc_input),
+    list(args = list(time_limit = -1), class = arc_input),
+    list(args = list(time_limit = Inf), class = arc_input),
+    list(args = list(time_limit = NA_real_), class = arc_input),
+    list(args = list(time_limit = c(1, 2)), class = arc_input),
+    list(args = list(time_limit = "5"), class = arc_input),
+    list(args = list(l = 0), class = input),
+    list(args = list(l = 1.5), class = input),
+    list(args = list(planter = "zigzag"), class = input),
+    list(args = list(plotNumber = 0), class = arc_input),
+    list(args = list(plotNumber = 10.5), class = input),
+    list(args = list(plotNumber = c(1, 101)), class = arc_input),
+    list(args = list(plotNumber = .Machine$integer.max - 10), class = arc_input),
+    list(args = list(locationNames = c("A", "B")), class = arc_input),
+    list(args = list(l = 2, locationNames = c("A", "A")), class = input),
+    list(args = list(l = 2, locationNames = c("A", "")), class = input),
+    list(args = list(exptName = c("E1", "E2")), class = arc_input),
+    list(args = list(exptName = ""), class = input),
+    list(args = list(year = c(2025, 2026)), class = input),
+    list(args = list(seed = "2026"), class = input),
+    list(args = list(seed = NA_real_), class = input)
+  )
+  rng_moved <- character()
+  for (case in cases) {
+    arguments <- utils::modifyList(arc_call, as.list(case$args))
+    arguments[case$drop] <- NULL
+    label <- paste(deparse(c(case$args, drop = case$drop), width.cutoff = 500L),
+                   collapse = "")
+    before <- arc_rng()
+    if (is.null(case$class)) {
+      expect_no_error(do.call(augmented_row_column, arguments))
+      next
+    }
+    expect_error(do.call(augmented_row_column, arguments), class = case$class,
+                 label = label)
+    if (!identical(arc_rng(), before)) rng_moved <- c(rng_moved, label)
+  }
+  expect(length(rng_moved) == 0L,
+         sprintf("a rejected call drew from the RNG: %s", rng_moved[1]))
 })
 
-test_that("the df formula is integer and -1 for the false-QR design", {
-  expect_identical(arc_df_formula(54, 14, 5), -1L)
-  expect_identical(arc_df_formula(12, 8, 3), 3L)
-  expect_identical(arc_df_formula(24, 16, 5), 37L)
+test_that("rejections name the fix in their message and condition fields", {
+  cases <- list(
+    wide = list(args = list(nrows = 8, ncols = 10),
+                class = "fieldhub_dimension_error", fields = list(),
+                messages = "check_direction = \"rows\""),
+    long = list(args = list(check_direction = "rows"),
+                class = "fieldhub_dimension_error", fields = list(),
+                messages = "check_direction = \"columns\""),
+    infeasible = list(args = list(checks = 2),
+                      class = "fieldhub_arc_infeasible_error",
+                      fields = list(df_formula = -2L),
+                      messages = c("Add a check", "rows and columns")),
+    saturated = list(args = list(nrows = 6, ncols = 6, checks = 2),
+                     class = "fieldhub_arc_df_error",
+                     fields = list(df_formula = 0L), messages = "at least 1"),
+    count = list(args = list(entries = 47), class = "fieldhub_arc_input_error",
+                 fields = list(argument = "entries", required = 48L),
+                 messages = "48 test plots"),
+    method = list(args = list(method = "multistart"),
+                  class = "fieldhub_arc_input_error",
+                  fields = list(options = "staged"), messages = character()),
+    objective = list(args = list(objective = "A"),
+                     class = "fieldhub_arc_input_error",
+                     fields = list(options = c("E_aug", "V_tt", "V_tc")),
+                     messages = character()),
+    overlap = list(args = list(checks = c("G5", "X", "Y", "Z")),
+                   class = "fieldhub_arc_input_error",
+                   fields = list(labels = "G5"), messages = character()),
+    conflict = list(args = list(data = data.frame(ENTRY = 1:52,
+                                                  NAME = paste0("N", 1:52)),
+                                entries = 48),
+                    class = "fieldhub_arc_input_error", fields = list(),
+                    messages = "not both")
+  )
+  for (nm in names(cases)) {
+    case <- cases[[nm]]
+    e <- tryCatch(do.call(arc_run, case$args), error = identity)
+    got <- list(class = inherits(e, case$class),
+                fields = unname(e[names(case$fields)]),
+                messages = all(vapply(case$messages, grepl, logical(1),
+                                      x = conditionMessage(e), fixed = TRUE)))
+    want <- list(class = TRUE, fields = unname(case$fields), messages = TRUE)
+    expect_identical(got, want, info = nm)
+  }
 })
 
-test_that("the false-QR design is disconnected by the M-tilde spectrum", {
-  # Row-binary and balanced, so restricted mode applies.
-  checked <- arc_check_contraction(arc_false_qr_contraction, 54, "restricted")
-  expect_identical(sort(unique(checked$r)), c(1L, 2L))
-  # The df check is bypassed here: the classifier alone must say no.
-  mats <- arc_contraction_matrices(arc_false_qr_contraction, 54)
-  lambda <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
-  verdict <- arc_classify_spectrum(lambda)
-  expect_false(verdict$connected)
-  expect_false(verdict$near_singular)
-  expect_lt(verdict$lambda_min_rel, 1e-12)
+test_that("low residual df warns once, before the seed is drawn", {
+  # 12 x 8 with 3 checks: residual df 3
+  warnings <- list()
+  x <- withCallingHandlers(
+    arc_run(nrows = 12, ncols = 8, checks = 3, l = 2, budget = 300),
+    fieldhub_arc_low_df_warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 1L)
+  msg <- conditionMessage(warnings[[1L]])
+  expect_identical(
+    list(warnings[[1L]]$df_formula,
+         vapply(c("only 3 residual degrees", "adding a check",
+                  "rows or columns"), grepl, logical(1), x = msg, fixed = TRUE),
+         grepl("optimi|search|longer|iteration|budget", msg, ignore.case = TRUE),
+         x$infoDesign$residual_df, x$statistics$residual_df),
+    list(3L, c("only 3 residual degrees" = TRUE, "adding a check" = TRUE,
+               "rows or columns" = TRUE), FALSE, 3L, c(3L, 3L))
+  )
+  # A warning turned into an error leaves the caller's RNG alone
+  arc_local_seed(5)
+  before <- arc_rng()
+  expect_error(withCallingHandlers(
+    arc_run(nrows = 12, ncols = 8, checks = 3, seed = NULL),
+    fieldhub_arc_low_df_warning = function(w) {
+      rlang::abort("as error", class = "arc_warning_as_error")
+    }
+  ), class = "arc_warning_as_error")
+  expect_identical(arc_rng(), before)
+  expect_no_warning(arc_run(budget = 100))
 })
 
-test_that("Example 1 is connected and well conditioned", {
-  arc_check_contraction(arc_ex1_contraction, 12, "restricted")
-  mats <- arc_contraction_matrices(arc_ex1_contraction, 12)
-  lambda <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
-  verdict <- arc_classify_spectrum(lambda)
-  expect_true(verdict$connected)
-  expect_false(verdict$near_singular)
+# ---- Results and field books -----------------------------------------------
+
+test_that("results have the documented class, parameters and field book", {
+  x <- arc_run(l = 2, locationNames = c("North", "South"),
+               plotNumber = c(1, 1001))
+  expect_s3_class(x, c("fieldhub_augmented_row_column", "FielDHub"),
+                  exact = TRUE)
+  expect_identical(
+    x$infoDesign,
+    list(nrows = 10L, ncols = 8L, check_direction = "columns", v = 10L,
+         s = 8L, k = 4L, checks = paste0("CH", 1:4), entries = 48L,
+         locations = 2, locationNames = c("North", "South"),
+         residual_df = 12L, objective = "V_tt", method = "staged",
+         budget = 600, seed = 2026, id_design = "augmented_row_column")
+  )
+  # The parameters name every argument, with effective values
+  expect_identical(
+    x$metadata$parameters,
+    list(nrows = 10, ncols = 8, checks = 4, check_direction = "columns",
+         entries = NULL, objective = "V_tt", method = "staged", budget = 600,
+         time_limit = NULL, l = 2, plotNumber = c(1, 1001),
+         planter = "serpentine", locationNames = c("North", "South"),
+         exptName = "Expt1", year = format(Sys.Date(), "%Y"), seed = 2026,
+         data = NULL)
+  )
+  fb <- x$fieldBook
+  expect_identical(
+    list(names(fb), rownames(fb), fb$LOCATION, fb$PLOT, fb$ID,
+         x$statistics$LOCATION),
+    list(c("ID", "EXPT", "LOCATION", "YEAR", "PLOT", "ROW", "COLUMN",
+           "CHECKS", "ENTRY", "TREATMENT", "CHECK_DIRECTION"),
+         as.character(seq_len(160L)), rep(c("North", "South"), each = 80L),
+         c(1 + 0:79, 1001 + 0:79), rep(seq_len(80L), 2L), c("North", "South"))
+  )
 })
 
-test_that("contraction matrices have the null space spanned by Q0", {
+test_that("field books have the column types and the planter's planting order", {
+  cases <- expand.grid(direction = c("columns", "rows"),
+                       planter = c("serpentine", "cartesian"),
+                       stringsAsFactors = FALSE)
+  for (i in seq_len(nrow(cases))) {
+    direction <- cases$direction[i]
+    planter <- cases$planter[i]
+    nm <- paste(direction, planter)
+    x <- arc_oriented(direction, planter = planter, plotNumber = 1001,
+                      budget = 100, seed = 3)
+    fb <- x$fieldBook
+    n <- nrow(fb)
+    types <- vapply(fb[c("ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT")],
+                    typeof, "")
+    expect_identical(types, c(ROW = "integer", COLUMN = "integer",
+                              CHECKS = "integer", ENTRY = "integer",
+                              TREATMENT = "character"), info = nm)
+    expect_identical(
+      list(fb$ID, fb$PLOT, unique(fb$CHECK_DIRECTION), unique(fb$EXPT),
+           unique(fb$YEAR)),
+      list(seq_len(n), 1001 + (seq_len(n) - 1), direction, "Expt1",
+           format(Sys.Date(), "%Y")),
+      info = nm
+    )
+    # Planting order: row by row from row 1, column 1; a serpentine planter
+    # goes back along every second row
+    nrows <- max(fb$ROW)
+    ncols <- max(fb$COLUMN)
+    row <- rep(seq_len(nrows), each = ncols)
+    column <- rep(seq_len(ncols), times = nrows)
+    if (identical(planter, "serpentine")) {
+      back <- row %% 2L == 0L
+      column[back] <- ncols + 1L - column[back]
+    }
+    expect_identical(list(fb$ROW, fb$COLUMN), list(row, column), info = nm)
+  }
+})
+
+test_that("returned field books pass the placement checks and match the oracle", {
+  odd_checks <- c("Check A", "std-2 (local); \"B\"", "Cé #3", "D/4")
+  odd_tests <- sprintf("Line %02d / x.%s, y", 1:48,
+                       rep_len(c("a", " b", "c'"), 48))
+  # v cross-lines and s lines along check_direction; options select the
+  # scorer route above the plot cap and the worst-pair block size
+  # (block b = floor(sqrt(mib 2^20 / 8)): 1 and 7, which does not divide the
+  # 48 test plots)
+  cases <- list(
+    list(name = "labelled columns V_tt", v = 10, s = 8, k = 4,
+         direction = "columns", objective = "V_tt", labels = TRUE, l = 2),
+    list(name = "labelled rows V_tt", v = 10, s = 8, k = 4,
+         direction = "rows", objective = "V_tt", labels = TRUE, l = 2),
+    list(name = "labelled columns E_aug", v = 10, s = 8, k = 4,
+         direction = "columns", objective = "E_aug", labels = TRUE, l = 2),
+    list(name = "labelled rows E_aug", v = 10, s = 8, k = 4,
+         direction = "rows", objective = "E_aug", labels = TRUE, l = 2),
+    list(name = "14 x 9 V_tc", v = 14, s = 9, k = 4, direction = "columns",
+         objective = "V_tc", seed = 7),
+    list(name = "11 x 7 rows", v = 11, s = 7, k = 4, direction = "rows",
+         objective = "V_tt", seed = 8),
+    list(name = "12 x 8 with residual df 3", v = 12, s = 8, k = 3,
+         direction = "columns", objective = "E_aug", seed = 9),
+    list(name = "20 x 12 with 5 checks", v = 20, s = 12, k = 5,
+         direction = "rows", objective = "V_tt", seed = 10),
+    list(name = "single-matrix authority, block 1", v = 10, s = 8, k = 4,
+         direction = "columns", objective = "V_tt", seed = 11,
+         options = list(FielDHub.arc_oracle_max_plots = 50,
+                        FielDHub.arc_worst_pair_block_mib = 1e-9),
+         authority = "single_matrix"),
+    list(name = "single-matrix authority, block 7", v = 10, s = 8, k = 4,
+         direction = "rows", objective = "E_aug", seed = 12,
+         options = list(FielDHub.arc_oracle_max_plots = 50,
+                        FielDHub.arc_worst_pair_block_mib = 49 * 8 / 2^20),
+         authority = "single_matrix"),
+    # On a 5 x 4 field with 3 checks the search ends on a design with no
+    # row move but some cross-line swaps (other designs of this size have
+    # row moves): the row phases must certify an empty neighbourhood and
+    # the polish a local optimum
+    list(name = "5 x 4 with no row move", v = 5, s = 4, k = 3,
+         direction = "columns", objective = "V_tt", budget = 3000,
+         stops = TRUE),
+    # A 6 x 3 field with 4 checks and residual df 1, where the annealing
+    # proposes disconnected candidates
+    list(name = "6 x 3 with disconnected candidates", v = 6, s = 3, k = 4,
+         direction = "columns", objective = "V_tt")
+  )
+  # Absolute agreement of well-conditioned (lambda_min_rel > 0.1) O(1-10)
+  # quantities from two independent factorizations of matrices of size at
+  # most 245: rounding is about 1e-13
+  tol <- 1e-10
+  for (case in cases) {
+    labels <- isTRUE(case$labels)
+    l <- if (is.null(case$l)) 1L else case$l
+    dims <- arc_dims(case$v, case$s, case$direction)
+    n_tests <- (case$v - case$k) * case$s
+    x <- arc_with_options(case$options, arc_muffle_low_df(augmented_row_column(
+      nrows = dims[["nrows"]], ncols = dims[["ncols"]],
+      checks = if (labels) odd_checks else case$k,
+      check_direction = case$direction,
+      entries = if (labels) odd_tests else NULL,
+      objective = case$objective, l = l,
+      budget = if (is.null(case$budget)) 300 else case$budget,
+      seed = if (is.null(case$seed)) 41 else case$seed
+    )))
+    checks <- if (labels) odd_checks else paste0("CH", seq_len(case$k))
+    tests <- if (labels) odd_tests else paste0("G", case$k + seq_len(n_tests))
+    df <- case$k * case$s - case$k - case$v - case$s + 2
+    authority <- if (is.null(case$authority)) "full_layout" else case$authority
+    for (site in seq_len(l)) {
+      nm <- paste(case$name, "location", site)
+      fb <- arc_location_book(x, site)
+      rec <- arc_reconstruct(fb)
+      # Placement from coordinates, and the returned contraction is that
+      # placement
+      expect(arc_placement_ok(fb) &&
+               identical(c(rec$v, rec$s, rec$k),
+                         as.integer(c(case$v, case$s, case$k))) &&
+               identical(rec$contraction, x$contraction[[site]]),
+             sprintf("case %s: placement checks fail", nm))
+      # Every test once; each check s times; labels bound to identifiers
+      on_test <- fb$CHECKS == 0L
+      expect(identical(sort(fb$TREATMENT[on_test], method = "radix"),
+                       sort(tests, method = "radix")) &&
+               all(table(factor(fb$TREATMENT[!on_test], levels = checks)) ==
+                     case$s) &&
+               identical(fb$TREATMENT, c(checks, tests)[fb$ENTRY]) &&
+               identical(fb$CHECKS[!on_test], fb$ENTRY[!on_test]),
+             sprintf("case %s: labels are not bound to their entries", nm))
+      oracle <- arc_field_book_oracle(fb)
+      stats <- x$statistics[site, ]
+      expect_identical(
+        list(oracle$connected, stats$residual_df, oracle$residual_df,
+             oracle$residual_df_svd, stats$authority),
+        list(TRUE, as.integer(df), as.integer(df), as.integer(df), authority),
+        info = nm
+      )
+      dev <- abs(unlist(stats[arc_metrics]) - unlist(oracle[arc_metrics]))
+      expect(all(dev <= tol),
+             sprintf("case %s: %s got %.12g, oracle %.12g", nm,
+                     arc_metrics[which.max(dev)],
+                     stats[[arc_metrics[which.max(dev)]]],
+                     oracle[[arc_metrics[which.max(dev)]]]))
+      # Weighted-variance identity on the reported statistics:
+      # n (v* - 1) / E_aug equals the sum over treatment pairs of
+      # u_i u_j Var(tau_i - tau_j), tests replicated once and checks s times.
+      # Both sides are sums of O(1e4) positive terms: relative rounding is
+      # far below 1e-10.
+      lhs <- case$v * case$s * (n_tests + case$k - 1) / stats$E_aug
+      rhs <- choose(n_tests, 2) * stats$V_tt +
+        case$s * n_tests * case$k * stats$V_tc +
+        case$s^2 * choose(case$k, 2) * stats$V_cc
+      expect_lt(abs(lhs - rhs) / lhs, 1e-10, label = nm)
+      # Stop claims checked against brute-force move counts of the result
+      if (isTRUE(case$stops)) {
+        m <- x$contraction[[site]]
+        phases <- unlist(x$diagnostics[[site]]$phases)
+        expect_identical(
+          list("empty_neighbourhood" %in% phases, arc_row_moves(m) == 0L,
+               "local_optimum" %in% phases, arc_cross_line_swaps(m) > 0L),
+          list(TRUE, TRUE, TRUE, TRUE), info = nm
+        )
+      }
+    }
+  }
+})
+
+# ---- Seeds, replay and locations -------------------------------------------
+
+test_that("reproduce_design() and the recorded call replay the deterministic content", {
+  for (direction in c("columns", "rows")) {
+    x <- arc_oriented(direction, checks = c("A 1", "B-2", "C.3", "D,4"),
+                      l = 2, seed = 47, planter = "cartesian", budget = 300,
+                      locationNames = c("Field 1", "Field 2"),
+                      exptName = "Trial 26", year = 2025)
+    direct <- do.call(augmented_row_column, x$metadata$parameters)
+    expect_identical(list(arc_view(reproduce_design(x)), arc_view(direct)),
+                     list(arc_view(x), arc_view(x)), info = direction)
+  }
+})
+
+test_that("explicit seeds are recorded and leave the caller's RNG alone", {
+  arc_local_seed(71) # restores the session's RNG when this test ends
+  before <- arc_rng()
+  x <- arc_run(seed = 5, budget = 200)
+  other <- arc_run(seed = 6, budget = 200)
+  expect_identical(arc_rng(), before)
+  expect_identical(list(x$metadata$seed, x$infoDesign$seed,
+                        x$diagnostics[[1]]$seed), list(5, 5, 5))
+  # Different seeds give different placements
+  expect_false(identical(other$fieldBook$TREATMENT, x$fieldBook$TREATMENT))
+})
+
+test_that("an automatic seed consumes exactly one recorded draw and replays", {
+  # Each helper seeds and restores the RNG in its own frame
+  automatic_run <- function() {
+    arc_local_seed(72)
+    x <- arc_run(seed = NULL, budget = 200)
+    list(x = x, after = arc_rng())
+  }
+  one_draw <- function() {
+    arc_local_seed(72)
+    seed <- sample.int(.Machine$integer.max, 1L)
+    list(seed = seed, after = arc_rng())
+  }
+  run <- automatic_run()
+  expected <- one_draw()
+  expect_identical(
+    list(run$x$infoDesign$seed, run$x$metadata$parameters$seed, run$after),
+    list(expected$seed, expected$seed, expected$after)
+  )
+  expect_identical(arc_view(reproduce_design(run$x)), arc_view(run$x))
+})
+
+test_that("locations are independent runs with offset seeds", {
+  x <- arc_run(l = 3, seed = 100, locationNames = c("A", "B", "C"),
+               budget = 300)
+  expect_identical(vapply(x$diagnostics, `[[`, numeric(1), "seed"),
+                   c(A = 100, B = 101, C = 102))
+  layout <- c("ROW", "COLUMN", "CHECKS", "ENTRY", "TREATMENT")
+  for (i in 1:3) {
+    site <- c("A", "B", "C")[i]
+    alone <- arc_run(seed = 99 + i, budget = 300)
+    fb <- arc_location_book(x, site)
+    rownames(fb) <- NULL
+    expect_identical(
+      list(fb[layout], x$contraction[[site]], x$diagnostics[[site]][-1]),
+      list(alone$fieldBook[layout], alone$contraction[[1]],
+           alone$diagnostics[[1]][-1]),
+      info = site
+    )
+    expect_identical(x$statistics[i, -1], alone$statistics[1, -1],
+                     ignore_attr = TRUE, info = site)
+  }
+  expect_false(identical(x$contraction$A, x$contraction$B))
+})
+
+# ---- Search controls -------------------------------------------------------
+
+test_that("the evaluation budget is respected and NULL records the size rule's budget", {
+  for (budget in c(150, 450)) {
+    x <- arc_run(budget = budget, l = 2)
+    calls <- vapply(x$diagnostics, function(d) {
+      d$objective_calls + d$proxy_calls
+    }, numeric(1))
+    expect(all(calls <= budget) &&
+             all(vapply(x$diagnostics, `[[`, numeric(1), "objective_calls") > 0),
+           sprintf("budget %d: %g calls used", budget, max(calls)))
+  }
+  # NULL resolves by field size (v s <= budget_cells), recorded as the
+  # effective budget; the rule's budgets are made small so the search is fast
+  local_mocked_bindings(arc_design_defaults = function() {
+    list(objective = "V_tt", methods = "staged", budget_cells = 600,
+         budget_small = 120, budget_large = 160)
+  })
+  small <- arc_run(budget = NULL)
+  large <- arc_run(nrows = 26, ncols = 24, checks = 5, budget = NULL)
+  expect_identical(
+    list(small$infoDesign$budget, small$metadata$parameters$budget,
+         small$diagnostics[[1]]$objective_calls +
+           small$diagnostics[[1]]$proxy_calls <= 120,
+         large$infoDesign$budget),
+    list(120, 120, TRUE, 160)
+  )
+  expect_identical(arc_view(reproduce_design(large)), arc_view(large))
+})
+
+test_that("the default objective is recorded and written into the call code", {
+  x <- arc_run(budget = 100)
+  code <- paste(design_call_code(x), collapse = "\n")
+  expect_identical(
+    list(x$infoDesign$objective, x$metadata$parameters$objective,
+         grepl("objective = \"V_tt\"", code, fixed = TRUE),
+         grepl("budget = 100", code, fixed = TRUE)),
+    list("V_tt", "V_tt", TRUE, TRUE)
+  )
+})
+
+test_that("time_limit cuts each location's search and verification still runs", {
+  # A clock that advances 0.01 s on every reading makes the cutoff
+  # deterministic
+  clock <- arc_fake_clock()
+  local_mocked_bindings(arc_clock = function() clock$advance(0.01))
+  full <- arc_run(budget = 2000, seed = 3)
+  expect_false(full$diagnostics[[1]]$time_limit_hit)
+  limit <- full$timing$search / 2
+  limited <- arc_run(budget = 2000, seed = 3, time_limit = limit, l = 2)
+  expect_identical(limited$metadata$parameters$time_limit, limit)
+  # Deadlines (fake seconds from a fresh clock) that fall between an
+  # annealing phase's stop check and its next objective call, and inside the
+  # neighbourhood scan of a 5 x 4 field with no row move, where the cut scan
+  # must not certify an empty neighbourhood
+  cases <- list(
+    list(name = "halfway", x = limited, limit = limit, budget = 2000, l = 2),
+    list(name = "before an objective call", limit = 22.2,
+         args = list(budget = 2000, seed = 3)),
+    list(name = "inside a scan", limit = 1.32, uncertified = TRUE,
+         args = list(nrows = 5, ncols = 4, checks = 3, budget = 300,
+                     seed = 41))
+  )
+  for (case in cases) {
+    if (is.null(case$x)) {
+      clock <- arc_fake_clock()
+      case$x <- arc_muffle_low_df(do.call(arc_run, c(case$args,
+                                                     time_limit = case$limit)))
+      case$budget <- case$args$budget
+      case$l <- 1L
+    }
+    for (site in seq_len(case$l)) {
+      nm <- paste(case$name, "location", site)
+      d <- case$x$diagnostics[[site]]
+      fb <- arc_location_book(case$x, site)
+      oracle <- arc_field_book_oracle(fb)
+      # Stopped at the deadline (give or take one scored step of the fake
+      # clock), then verified, randomized and assembled
+      expect_identical(
+        list(d$time_limit_hit, "time_limit" %in% d$phases, d$status,
+             d$objective_calls + d$proxy_calls < case$budget,
+             case$x$timing$search[site] >= case$limit,
+             case$x$timing$search[site] < case$limit + 1,
+             case$x$timing$verification[site] > 0,
+             case$x$timing$total[site] > case$x$timing$search[site],
+             arc_placement_ok(fb), oracle$connected,
+             !isTRUE(case$uncertified) ||
+               "sampling_exhausted" %in% d$phases),
+        list(TRUE, TRUE, "ok", TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE,
+             TRUE),
+        info = nm
+      )
+      # Scale of V_tt is O(1); see the oracle-agreement test for the
+      # tolerance
+      expect_lt(abs(case$x$statistics$V_tt[site] - oracle$V_tt), 1e-10,
+                label = paste("V_tt deviation at", nm))
+    }
+  }
+  # A cutoff before any design exists is a classed search error
+  arc_local_seed(9)
+  before <- arc_rng()
+  expect_error(arc_run(budget = 2000, time_limit = 0.001),
+               class = "fieldhub_arc_search_error")
+  early <- tryCatch(arc_run(budget = 2000, time_limit = 0.001),
+                    error = identity)
+  expect_identical(list(inherits(early, "fieldhub_search_error"),
+                        early$time_limit_hit, arc_rng()),
+                   list(TRUE, TRUE, before))
+})
+
+test_that("a search without a design raises a classed error, never a fallback", {
+  arc_local_seed(11)
+  before <- arc_rng()
+  expect_error(arc_run(budget = 1), class = "fieldhub_arc_search_error")
+  tiny <- tryCatch(arc_run(budget = 1), error = identity)
+  expect_identical(list(tiny$status, tiny$time_limit_hit,
+                        grepl("Increase budget", conditionMessage(tiny),
+                              fixed = TRUE), arc_rng()),
+                   list("no_design", FALSE, TRUE, before))
+  local_mocked_bindings(arc_random_start = function(...) NULL)
+  expect_error(arc_run(l = 2), class = "fieldhub_arc_search_error")
+  exhausted <- tryCatch(arc_run(l = 2), error = identity)
+  expect_identical(list(exhausted$status, exhausted$location, arc_rng()),
+                   list("start_search_exhausted", 1L, before))
+})
+
+# ---- Recorded labels and uploads -------------------------------------------
+
+test_that("exptName, year and locationNames are recorded as effective values", {
+  x <- arc_run(l = 2, budget = 100)
+  this_year <- format(Sys.Date(), "%Y")
+  expect_identical(
+    list(x$metadata$parameters$exptName, x$metadata$parameters$year,
+         x$metadata$parameters$locationNames, x$infoDesign$locationNames,
+         unique(x$fieldBook$EXPT), unique(x$fieldBook$YEAR),
+         unique(x$fieldBook$LOCATION)),
+    list("Expt1", this_year, 1:2, 1:2, "Expt1", this_year, 1:2)
+  )
+  named <- arc_run(budget = 100, exptName = "AYT 26", year = 2027,
+                   locationNames = "Casselton")
+  expect_identical(list(named$metadata$parameters$year,
+                        unique(named$fieldBook$EXPT),
+                        unique(named$fieldBook$LOCATION)),
+                   list("2027", "AYT 26", "Casselton"))
+  # Replay in a later year reproduces the recorded YEAR
+  local_mocked_bindings(resolve_year = function(year) {
+    if (is.null(year)) "2099" else as.character(year)
+  })
+  expect_identical(arc_run(budget = 100)$fieldBook$YEAR[1], "2099")
+  expect_identical(arc_view(reproduce_design(x)), arc_view(x))
+})
+
+test_that("standard-template uploads are recorded as labels", {
+  checks <- c("Check one", "Check two", "Check three", "Check four")
+  tests <- paste("Line", 1:48)
+  upload <- data.frame(ENTRY = 1:52, NAME = c(checks, tests))
+  x <- arc_run(checks = 4, data = upload, budget = 200)
+  expect_identical(
+    list(x$metadata$parameters$data, x$metadata$parameters$checks,
+         x$metadata$parameters$entries, x$infoDesign$checks,
+         x$fieldBook$ENTRY),
+    list(NULL, checks, tests, checks, match(x$fieldBook$TREATMENT, upload$NAME))
+  )
+  # The same call with labels, the replay, and double identifiers with factor
+  # labels all give the same deterministic content
+  as_factor <- data.frame(ENTRY = as.numeric(1:52),
+                          NAME = factor(upload$NAME, levels = upload$NAME))
+  expect_identical(
+    list(arc_view(arc_run(checks = checks, entries = tests, budget = 200)),
+         arc_view(reproduce_design(x)),
+         arc_view(arc_run(checks = 4, data = as_factor, budget = 200))),
+    rep(list(arc_view(x)), 3L)
+  )
+})
+
+test_that("non-standard identifiers keep data and the checks' input order", {
+  checks <- paste0("C", 1:4)
+  tests <- paste0("T", 1:48)
+  ids <- c(905L, 17L, 300L, 41L, 2000L - 1:48)
+  upload <- data.frame(NAME = c(checks, tests), ENTRY = ids)
+  for (direction in c("columns", "rows")) {
+    x <- arc_oriented(direction, checks = 4, data = upload, budget = 300)
+    fb <- x$fieldBook
+    expect_identical(
+      list(x$metadata$parameters$data, x$metadata$parameters$checks,
+           x$metadata$parameters$entries, fb$ENTRY, fb$CHECKS),
+      list(upload, 4, NULL, ids[match(fb$TREATMENT, upload$NAME)],
+           ifelse(fb$TREATMENT %in% checks, fb$ENTRY, 0L)),
+      info = direction
+    )
+    # Checks keep their input order, not their identifiers' order, so labels
+    # give the same design
+    labelled <- arc_oriented(direction, checks = checks, entries = tests,
+                             budget = 300)
+    expect_identical(
+      list(x$contraction, x$statistics, fb[c("ROW", "COLUMN", "TREATMENT")],
+           arc_view(reproduce_design(x))),
+      list(labelled$contraction, labelled$statistics,
+           labelled$fieldBook[c("ROW", "COLUMN", "TREATMENT")], arc_view(x)),
+      info = direction
+    )
+  }
+})
+
+test_that("a field-scale standard upload gives standalone code that replays", {
+  # 48 x 16 with 5 checks, 688 tests (693 entry rows); a reduced budget
+  # checks the recording route, not search quality
+  upload <- data.frame(ENTRY = 1:693,
+                       NAME = c(paste("Check", LETTERS[1:5]),
+                                sprintf("BRD-%04d", 1:688)))
+  x <- augmented_row_column(nrows = 48, ncols = 16, checks = 5,
+                            check_direction = "columns", data = upload,
+                            budget = 300, seed = 112660)
+  code <- design_call_code(x)
+  text <- paste(code, collapse = "\n")
+  expect_identical(
+    list(nrow(x$fieldBook), x$infoDesign$residual_df,
+         x$metadata$parameters$data, attr(code, "reason"),
+         grepl("data =", text, fixed = TRUE),
+         grepl("entries = c(", text, fixed = TRUE)),
+    list(768L, 13L, NULL, NULL, FALSE, TRUE)
+  )
+  rebuilt <- eval(parse(text = code), envir = new.env(parent = baseenv()))
+  expect_identical(arc_view(rebuilt), arc_view(x))
+})
+
+test_that("a non-standard upload over 200 rows falls back to the saved result", {
+  # 24 x 12 with 5 checks: 228 tests, 233 entry rows
+  upload <- data.frame(ENTRY = 5000L + 1:233,
+                       NAME = c(paste0("CK", 1:5), paste0("L", 1:228)))
+  x <- augmented_row_column(nrows = 24, ncols = 12, checks = 5,
+                            check_direction = "columns", data = upload,
+                            budget = 200, seed = 15)
+  code <- design_call_code(x)
+  section <- design_call_section(x)
+  expect_identical(
+    list(x$metadata$parameters$data, length(code),
+         grepl("more than 200 rows", attr(code, "reason"), fixed = TRUE),
+         grepl("Standalone call unavailable", section[1], fixed = TRUE),
+         grepl("saved RDS", section[2], fixed = TRUE)),
+    list(upload, 0L, TRUE, TRUE, TRUE)
+  )
+  # The saved result still replays
+  expect_identical(arc_view(reproduce_design(x)), arc_view(x))
+  # Up to 200 rows a non-standard upload keeps standalone code
+  small <- arc_run(checks = 4, budget = 100,
+                   data = data.frame(ENTRY = 100L + 1:52,
+                                     NAME = paste0("E", 1:52)))
+  small_code <- design_call_code(small)
+  expect_identical(
+    arc_view(eval(parse(text = small_code), envir = new.env(parent = baseenv()))),
+    arc_view(small)
+  )
+})
+
+# ---- Presentation ----------------------------------------------------------
+
+test_that("print() and summary() show each location's statistics, as the app does", {
+  df <- 4L * 8L - 4L - 10L - 8L + 2L
+  sites <- c("Fargo", "Casselton")
+  cases <- expand.grid(direction = c("columns", "rows"),
+                       objective = c("V_tt", "E_aug"), stringsAsFactors = FALSE)
+  for (i in seq_len(nrow(cases))) {
+    direction <- cases$direction[i]
+    objective <- cases$objective[i]
+    x <- arc_oriented(direction, objective = objective, l = 2, budget = 300,
+                      locationNames = sites)
+    printed <- arc_printed(x)
+    summarised <- arc_summarised(x)
+    sense <- if (objective == "E_aug") "maximized" else "minimized"
+    # The statistics follow the title, before the design parameters; no
+    # low-df notice at twelve residual df
+    expect_identical(
+      list(printed[1:3], summarised[1:3],
+           match("Location Casselton:", printed) <
+             match("Information on the design parameters: ", printed),
+           match("Location Casselton:", summarised) <
+             match("1. Information on the design parameters: ", summarised),
+           any(grepl("Notice", c(printed, summarised), fixed = TRUE))),
+      list(c("Augmented Row-Column Design ", "",
+             "Statistics by location (variances in units of the residual variance):"),
+           c("Augmented Row-Column Design ", "",
+             "Statistics by location (variances in units of the residual variance):"),
+           TRUE, TRUE, FALSE),
+      info = paste(direction, objective)
+    )
+    for (site in sites) {
+      nm <- paste(direction, objective, site)
+      block <- arc_details_block(printed, site)
+      expect_identical(
+        list(length(block), arc_details_block(summarised, site), block[2],
+             grepl(paste0("^  Optimized objective: ", objective,
+                          " = [-+.0-9e]+ \\(", sense, "\\)$"), block[3]),
+             block[6]),
+        list(6L, block, paste0("  Residual df: ", df), TRUE,
+             "  Search status: ok"),
+        info = nm
+      )
+      # Printed to 4 significant digits: each shown value is within half a
+      # unit of the fourth digit, at most 5e-4 relative, of the independent
+      # oracle (the oracle itself agrees to 1e-10)
+      oracle <- arc_field_book_oracle(arc_location_book(x, site))
+      shown <- c(arc_printed_value(block[3], objective),
+                 vapply(c("E_aug", "V_tt", "V_tc"), arc_printed_value, 0,
+                        line = block[4]),
+                 vapply(c("max_tt", "max_tc"), arc_printed_value, 0,
+                        line = block[5]))
+      want <- unlist(oracle[c(objective, "E_aug", "V_tt", "V_tc", "max_tt",
+                              "max_tc")])
+      rel <- abs(unname(shown) - unname(want)) / abs(unname(want))
+      expect(length(rel) == 6L && !anyNA(rel) && all(rel <= 5e-4 + 1e-9),
+             sprintf("case %s: printed %s = %s, oracle %.8g", nm,
+                     names(want)[which.max(rel)], shown[which.max(rel)],
+                     want[which.max(rel)]))
+    }
+  }
+})
+
+test_that("a low-df design shows the notice on every print and summary", {
+  notice <- c(
+    "  Notice: only 3 residual degrees of freedom (fewer than 10). Only adding a",
+    "  check or changing the number of rows or columns raises them."
+  )
+  for (direction in c("columns", "rows")) {
+    # A 12 x 8 field with 3 checks: k s - k - v - s + 2 = 3 residual df
+    dims <- arc_dims(12L, 8L, direction)
+    expect_warning(
+      x <- arc_run(nrows = dims[["nrows"]], ncols = dims[["ncols"]],
+                   checks = 3, check_direction = direction, l = 2,
+                   budget = 300),
+      class = "fieldhub_arc_low_df_warning"
+    )
+    # Persistent: shown each time, with no further warning
+    for (time in 1:2) {
+      expect_no_warning(printed <- arc_printed(x))
+      expect_no_warning(summarised <- arc_summarised(x))
+      blocks <- lapply(1:2, function(site) arc_details_block(printed, site))
+      expect_identical(
+        list(lapply(blocks, `[`, 2), lapply(blocks, utils::tail, 2L),
+             lapply(1:2, function(site) arc_details_block(summarised, site))),
+        list(rep(list("  Residual df: 3"), 2), rep(list(notice), 2), blocks),
+        info = paste(direction, time)
+      )
+    }
+  }
+})
+
+test_that("a location stopped by time_limit says so when printed", {
+  clock <- arc_fake_clock()
+  local_mocked_bindings(arc_clock = function() clock$advance(0.01))
+  full <- arc_run(budget = 600, seed = 3)
+  limited <- arc_run(budget = 600, seed = 3,
+                     time_limit = full$timing$search / 2)
+  expect_identical(
+    list(arc_details_block(arc_printed(full), 1)[6],
+         arc_details_block(arc_printed(limited), 1)[6]),
+    list("  Search status: ok", "  Search status: ok (time limit reached)")
+  )
+})
+
+test_that("field_layout(), plot() and draw_layout() work in both orientations", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  planters <- c("serpentine", "cartesian")
+  cases <- expand.grid(direction = c("columns", "rows"), planter = planters,
+                       stringsAsFactors = FALSE)
+  for (i in seq_len(nrow(cases))) {
+    direction <- cases$direction[i]
+    nm <- paste(direction, cases$planter[i])
+    dims <- arc_dims(10L, 8L, direction)
+    title <- paste0("Augmented Row-Column Design ", dims[["nrows"]], " × ",
+                    dims[["ncols"]])
+    x <- arc_oriented(direction, planter = cases$planter[i], l = 2,
+                      budget = 100, locationNames = c("A", "B"))
+    # Plots are placed at construction: every planter returns the field book
+    # as it is; there is only one layout option
+    expect_identical(lapply(planters, function(p) field_layout(x, planter = p)),
+                     list(x$fieldBook, x$fieldBook), info = nm)
+    expect_error(field_layout(x, layout = 2), class = "fieldhub_input_error")
+    plotted <- plot(x, l = 2)
+    book <- arc_location_book(x, "B")
+    rownames(book) <- NULL
+    view <- plot_layout(x, l = 2)
+    drawn <- draw_layout(x, book)
+    maps <- list(drawn$p1, drawn$p2, view$out_layout, view$out_layoutPlots)
+    expect_identical(
+      list(inherits(plotted$p, "ggplot"), plotted$field_book,
+           view$fieldBookXY, drawn$data,
+           vapply(maps, function(m) inherits(m, "ggplot"), logical(1)),
+           vapply(maps, function(m) m$labels$title, "")),
+      list(TRUE, x$fieldBook, book, book, rep(TRUE, 4), rep(title, 4)),
+      info = nm
+    )
+    # The plot-number map labels every plot with its number
+    built <- ggplot2::ggplot_build(drawn$p2)$data
+    text <- built[[length(built)]]
+    expect_identical(text$label[match(paste(book$COLUMN, book$ROW),
+                                      paste(text$x, text$y))],
+                     sprintf("%d", as.integer(book$PLOT)), info = nm)
+  }
+})
+
+test_that("the entry map labels entries and colours each check", {
+  checks <- c("Check A", "B", "C", "D")
+  for (direction in c("columns", "rows")) {
+    x <- arc_oriented(direction, checks = checks, budget = 100, seed = 17)
+    book <- x$fieldBook
+    p1 <- draw_layout(x, book)$p1
+    built <- ggplot2::ggplot_build(p1)$data
+    geoms <- vapply(p1$layers, function(layer) class(layer$geom)[1L], "")
+    tiles <- built[[match("GeomTile", geoms)]]
+    text <- built[[match("GeomText", geoms)]]
+    at <- paste(book$COLUMN, book$ROW)
+    fill <- tiles$fill[match(at, paste(tiles$x, tiles$y))]
+    test <- book$CHECKS == 0L
+    # Each plot shows its entry number; tests on the shared neutral fill and
+    # each check in its own colour
+    expect_identical(
+      list(text$label[match(at, paste(text$x, text$y))],
+           unique(fill[test]), fill[!test], length(unique(fill[!test]))),
+      list(as.character(book$ENTRY), fieldhub_layout_neutral(),
+           expected_check_fills(book$CHECKS[!test]), length(checks)),
+      info = direction
+    )
+  }
+})
+
+test_that("latin_rectangle print and summary output is unchanged by details", {
+  # The output of print() and summary() rebuilt from base functions
+  x <- latin_rectangle(c("No nitrogen", "A*B", "e 3", "4", "five"), 3, l = 2,
+                       locationNames = c("Fargo", " CASSELTON"), seed = 7)
+  for (n in c(10L, 6L)) {
+    expected <- utils::capture.output({
+      cat("Latin Rectangle Design", "\n\n")
+      cat("Information on the design parameters:", "\n")
+      str(x$infoDesign[names(x$infoDesign) != "id_design"])
+      cat("\n", n, "First observations of the data frame with the latin_rectangle field book:",
+          "\n")
+      print(head(x$fieldBook, n = n))
+    })
+    expect_identical(utils::capture.output(print(x, n = n)), expected,
+                     info = n)
+  }
+  expected <- utils::capture.output({
+    cat("Latin Rectangle Design", "\n\n")
+    cat("1. Information on the design parameters:", "\n")
+    str(x$infoDesign)
+    cat("\n")
+    cat("2. Structure of the field book:", "\n\n")
+    str(x$fieldBook)
+  })
+  expect_identical(utils::capture.output(print(summary(x))), expected)
+})
+
+# ---- Published values (internal scorer: no exported path takes a contraction)
+
+# Contraction of a Bailey and Haines (2025) square layout: row of check i in
+# each column, checks coded 109 to 111
+arc_bh_contraction <- function(file) {
+  codes <- arc_fixture(file)
+  t(vapply(109:111, function(code) {
+    apply(codes == code, 2L, which)
+  }, integer(ncol(codes))))
+}
+
+# Half a unit in the last printed decimal, plus rounding slack
+arc_published_tol <- function(decimals) 0.5 * 10^(-decimals) + 1e-12
+
+test_that("the reported-statistics scorer reproduces published values", {
+  # Piepho and Williams (2026) Examples 1 and 2: E_aug printed to 4 decimals
+  # and the residual df k s - k - v - s + 2. Bailey and Haines (2025)
+  # Table 1: C(3,4,5) has A_tt = 4.0341 and A_ct = 2.0910 (4 decimals) and
+  # A_cc = 1/6; C(4,4,4) is disconnected and gets no objectives.
+  cases <- list(
+    example1 = list(contraction = arc_fixture("example1-contraction.csv"),
+                    v = 12, want = list(connected = TRUE, df_formula = 3L),
+                    values = c(E_aug = 0.3881), tol = arc_published_tol(4)),
+    example2 = list(contraction = arc_fixture("example2-contraction.csv"),
+                    v = 24, want = list(connected = TRUE, df_formula = 37L),
+                    values = c(E_aug = 0.6031), tol = arc_published_tol(4)),
+    bh_c345 = list(contraction = arc_bh_contraction("bailey-haines-c-3-4-5.csv"),
+                   v = 12, want = list(connected = TRUE),
+                   values = c(V_tt = 4.0341, V_tc = 2.0910),
+                   tol = arc_published_tol(4)),
+    bh_c345_cc = list(contraction = arc_bh_contraction("bailey-haines-c-3-4-5.csv"),
+                      v = 12, want = list(connected = TRUE),
+                      values = c(V_cc = 1 / 6), tol = 1e-10),
+    bh_c444 = list(contraction = arc_bh_contraction("bailey-haines-c-4-4-4.csv"),
+                   v = 12, want = list(connected = FALSE),
+                   absent = c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt",
+                              "max_tc"),
+                   values = numeric(), tol = 0)
+  )
+  for (nm in names(cases)) {
+    case <- cases[[nm]]
+    got <- arc_final_score(case$contraction, case$v, "restricted")
+    reported <- unlist(got[names(case$values)])
+    dev <- if (length(reported) == length(case$values)) {
+      abs(reported - case$values)
+    } else {
+      Inf # a published quantity is not reported
+    }
+    expect(identical(got[names(case$want)], case$want) &&
+             !anyNA(dev) && all(dev <= case$tol) &&
+             !any(case$absent %in% names(got)),
+           sprintf("case %s: fields %s, worst deviation %g", nm,
+                   paste(names(case$want), collapse = "/"),
+                   if (length(dev)) max(dev) else 0))
+  }
+})
+
+test_that("the paper route reproduces every row of Table 1", {
+  # Piepho and Williams (2026) Table 1 (supplement contractions): E_aug to 6
+  # decimals, Cbar_v and Cbar_s to 4, and the full-precision reference
+  # (independent least-squares oracle) to 1e-10
+  manifest <- arc_manifest()
+  table1 <- manifest[startsWith(manifest$file, "table1-"), ]
+  expect_identical(nrow(table1), 21L)
+  for (i in seq_len(nrow(table1))) {
+    entry <- table1[i, ]
+    result <- arc_evaluate_contraction(arc_fixture(entry$file), entry$v,
+                                       entry$mode)
+    dev <- c(E_aug = abs(result$E_aug - entry$pub_E_aug) -
+               arc_published_tol(entry$pub_E_aug_dec),
+             ref = abs(result$E_aug - entry$ref_E_aug) - 1e-10,
+             Cbar_v = abs(result$Cbar_v - entry$pub_Cbar_v) -
+               arc_published_tol(entry$pub_Cbar_v_dec),
+             Cbar_s = abs(result$Cbar_s - entry$pub_Cbar_s) -
+               arc_published_tol(entry$pub_Cbar_s_dec))
+    # all four quantities must be reported: c() drops a missing one
+    expect(isTRUE(result$connected) && length(dev) == 4L && !anyNA(dev) &&
+             all(dev < 0),
+           sprintf("%s: %s outside its published tolerance by %g", entry$file,
+                   names(dev)[which.max(dev)], max(dev)))
+  }
+})
+
+test_that("Cbar_s projects out the trivial eigenvalue instead of dropping the smallest", {
+  # Example 1: dropping the smallest eigenvalue of the corrected eq. (4)
+  # bracket (whose trivial eigenvalue is 1) gives 0.5600, not the published
+  # Cbar_s = 0.4828
+  contraction <- arc_fixture("example1-contraction.csv")
   v <- 12
-  s <- 8
-  k <- 3
-  mats <- arc_contraction_matrices(arc_ex1_contraction, v)
-  expect_identical(dim(mats$nc), c(12L, 8L))
-  expect_identical(dim(mats$nr), c(12L, 3L))
-  expect_true(all(mats$nc %in% c(0, 1)))
-  expect_identical(as.vector(colSums(mats$nc)), rep(k, s))
-  expect_identical(as.vector(rowSums(mats$nr)), as.numeric(mats$r))
-  expect_identical(as.integer(mats$r), rep(2L, 12))
-  expect_equal(mats$w, mats$nr %*% t(mats$nr))
-  expect_identical(dim(mats$M), c(20L, 20L))
-  expect_identical(dim(mats$Q0), c(20L, 2L))
-  expect_true(isSymmetric(mats$M))
-  expect_true(isSymmetric(mats$M_tilde))
-  expect_equal(mats$M_tilde, mats$M + mats$Q0 %*% t(mats$Q0))
-  expect_equal(crossprod(mats$Q0), diag(2))
-  ev <- eigen(mats$M, symmetric = TRUE, only.values = TRUE)$values
-  rel <- abs(ev) / max(ev)
-  expect_identical(sum(rel < 1e-12), 2L)
-  expect_gt(sort(rel)[3], 1e-8)
-  ones_rows <- c(rep(1, v), rep(0, s))
-  ones_cols <- c(rep(0, v), rep(1, s))
-  expect_lt(max(abs(mats$M %*% ones_rows)), 1e-12)
-  expect_lt(max(abs(mats$M %*% ones_cols)), 1e-12)
-  ev_tilde <- eigen(mats$M_tilde, symmetric = TRUE, only.values = TRUE)$values
-  expect_gt(min(ev_tilde), 1e-8 * max(ev_tilde))
+  k <- nrow(contraction)
+  s <- ncol(contraction)
+  mats <- arc_contraction_matrices(contraction, v)
+  m12 <- mats$nc - outer(mats$r, rep(1, s)) / s
+  row_block <- diag(mats$r) - mats$w / s + matrix(1, v, v)
+  bracket <- diag(s) - crossprod(m12, solve(row_block, m12)) / k
+  lambda <- eigen((bracket + t(bracket)) / 2, symmetric = TRUE,
+                  only.values = TRUE)$values
+  naive <- (s - 1) / sum(1 / lambda[seq_len(s - 1)])
+  expect_lt(abs(naive - 0.5600), arc_published_tol(4))
+  result <- arc_evaluate_contraction(contraction, v, "restricted")
+  expect_lt(abs(result$Cbar_s - 0.4828), arc_published_tol(4))
 })
 
-test_that("all 85 fixed-replication 6 x 4 column multisets recolor", {
+test_that("layouts confounded with rows or columns have zero information", {
+  # C = 0 exactly: the rank decision must not be relative to the rounding
+  # noise of an all-zero spectrum. Residual df = n - rank(Z), never -1.
+  two <- matrix(c(1L, 2L, 1L, 2L), nrow = 2L)
+  one <- matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 1L)
+  cases <- list(
+    # 1 1 / 2 2: n = 4, rank(Z) = 3, residual df 1
+    rows = list(layouts = list(two, two[2:1, ], two[, 2:1], t(two)), df = 1L),
+    # six rows, one column: rank(Z) = 6, residual df 0
+    column = list(layouts = list(one, one[c(6, 3, 1, 5, 2, 4), , drop = FALSE],
+                                 t(one)), df = 0L)
+  )
+  absent <- c("cefs", "E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
+  for (nm in names(cases)) {
+    ok <- vapply(cases[[nm]]$layouts, function(codes) {
+      r <- arc_evaluate_layout(codes)
+      !r$connected && identical(r$rank_C, 0L) &&
+        identical(r$residual_df_rank, cases[[nm]]$df) &&
+        !any(absent %in% names(r))
+    }, logical(1))
+    expect(all(ok), sprintf("case %s: layout %d reports information", nm,
+                            which(!ok)[1]))
+  }
+})
+
+# ---- Exhaustive 6 x 4 enumeration (research verification counts) ----------
+# v = 6 pseudo treatments, each replicated twice, k = 3, s = 4
+
+arc_enum <- local({
+  cache <- NULL
+  function() {
+    if (is.null(cache)) {
+      all <- arc_enumerate_6x4()
+      cache <<- list(all = all,
+                     restricted = all[vapply(all, arc_is_row_binary, logical(1))])
+    }
+    cache
+  }
+})
+arc_enum_objectives <- function(reps, mode) {
+  lapply(reps, arc_evaluate_objectives, v = 6L, mode = mode)
+}
+arc_enum_layouts <- function(reps, mode, evaluator) {
+  lapply(reps, function(m) evaluator(arc_expand(m, 6L, mode)$codes))
+}
+arc_enum_connected <- function(results) {
+  vapply(results, function(r) isTRUE(r$connected), logical(1))
+}
+# Counts and value classes: classes are the distinct (E_aug, V_tt) pairs of
+# connected designs, rounded to 10 decimals; opposite counts class pairs
+# that E_aug and V_tt rank in opposite order
+arc_enum_summary <- function(results) {
+  connected <- arc_enum_connected(results)
+  values <- do.call(rbind, lapply(results[connected], function(r) {
+    round(c(r$E_aug, r$V_tt), 10)
+  }))
+  classes <- unique(values)
+  pairs <- utils::combn(nrow(classes), 2L)
+  opposite <- sign(classes[pairs[1, ], 1] - classes[pairs[2, ], 1]) *
+    sign(classes[pairs[2, ], 2] - classes[pairs[1, ], 2]) < 0
+  list(n = length(results), disconnected = sum(!connected),
+       classes = nrow(classes), best = round(max(classes[, 1]), 9),
+       opposite = sum(opposite), pairs = ncol(pairs))
+}
+
+test_that("the 6 x 4 enumeration reproduces the research counts in both modes", {
+  enum <- arc_enum()
+  cases <- list(
+    column_binary = list(reps = enum$all,
+                         want = list(n = 18360L, disconnected = 5880L,
+                                     classes = 25L, best = 0.450643777,
+                                     opposite = 10L, pairs = 300L)),
+    restricted = list(reps = enum$restricted,
+                      want = list(n = 1920L, disconnected = 240L,
+                                  classes = 6L, best = 0.450643777,
+                                  opposite = 0L, pairs = 15L))
+  )
+  for (mode in names(cases)) {
+    # best is rounded to the 9 printed decimals of the reference, so it must
+    # equal it: relative 1e-9 is below one unit of the ninth decimal (2.2e-9
+    # relative) and far above rounding; the counts are integers
+    expect_equal(arc_enum_summary(arc_enum_objectives(cases[[mode]]$reps, mode)),
+                 cases[[mode]]$want, tolerance = 1e-9, info = mode)
+  }
+})
+
+test_that("contraction and full-layout connectivity agree on a stratified sample", {
+  # every restricted disconnected design, plus every 36th column-binary one
+  enum <- arc_enum()
+  restricted_connected <- arc_enum_connected(
+    arc_enum_objectives(enum$restricted, "restricted"))
+  cases <- list(
+    restricted = enum$restricted[!restricted_connected],
+    column_binary = enum$all[seq(36L, length(enum$all), by = 36L)]
+  )
+  for (mode in names(cases)) {
+    reps <- cases[[mode]]
+    expect_identical(
+      arc_enum_connected(arc_enum_layouts(reps, mode, arc_evaluate_layout)),
+      arc_enum_connected(arc_enum_objectives(reps, mode)), info = mode)
+  }
+})
+
+test_that("exhaustive: contraction, layout and oracle agree on every representative", {
+  skip_if_not(identical(Sys.getenv("FIELDHUB_ARC_EXHAUSTIVE"), "true"),
+              "exhaustive suite")
+  enum <- arc_enum()
+  cases <- list(column_binary = list(reps = enum$all, disconnected = 5880L),
+                restricted = list(reps = enum$restricted, disconnected = 240L))
+  for (mode in names(cases)) {
+    reps <- cases[[mode]]$reps
+    objectives <- arc_enum_objectives(reps, mode)
+    layouts <- arc_enum_layouts(reps, mode, arc_evaluate_layout)
+    oracles <- arc_enum_layouts(reps, mode, arc_oracle)
+    verdict <- arc_enum_connected(objectives)
+    expect_identical(list(arc_enum_connected(layouts),
+                          arc_enum_connected(oracles), sum(!verdict)),
+                     list(verdict, verdict, cases[[mode]]$disconnected),
+                     info = mode)
+    e_of <- function(results) {
+      vapply(results[verdict], function(r) r$E_aug, numeric(1))
+    }
+    # E_aug of 6 x 4 designs from independent factorizations: 1e-10
+    e <- e_of(objectives)
+    dev <- max(abs(e_of(layouts) - e), abs(e_of(oracles) - e))
+    expect(dev <= 1e-10 && abs(max(e) - 0.450643777) <= 1e-9,
+           sprintf("%s: deviation %g, best %.10f", mode, dev, max(e)))
+  }
+})
+
+test_that("every fixed-replication 6 x 4 column multiset recolours row-binary", {
+  # The 85 sorted column multisets of the enumeration: recolouring rows keeps
+  # each column's set and the replication and removes every row repeat
   v <- 6L
   s <- 4L
-  k <- 3L
-  subsets <- utils::combn(v, k, simplify = FALSE)
+  subsets <- utils::combn(v, 3L, simplify = FALSE)
   multisets <- list()
   extend <- function(start, chosen, counts) {
     if (length(chosen) == s) {
@@ -459,1096 +1328,69 @@ test_that("all 85 fixed-replication 6 x 4 column multisets recolor", {
     }
   }
   extend(1L, integer(0), integer(v))
-  expect_identical(length(multisets), 85L)
-  recolored_ok <- 0L
-  for (chosen in multisets) {
-    columns <- do.call(cbind, subsets[chosen])
-    recolored <- arc_recolor_rows(columns, v)
-    if (arc_recoloring_ok(recolored, columns, v)) {
-      recolored_ok <- recolored_ok + 1L
-    }
-  }
-  expect_identical(recolored_ok, 85L)
+  ok <- vapply(multisets, function(chosen) {
+    original <- do.call(cbind, subsets[chosen])
+    recolored <- arc_recolor_rows(original, v)
+    identical(dim(recolored), dim(original)) &&
+      all(apply(recolored, 1L, anyDuplicated) == 0L) &&
+      all(vapply(seq_len(s), function(j) {
+        setequal(recolored[, j], original[, j]) &&
+          !anyDuplicated(recolored[, j])
+      }, logical(1))) &&
+      identical(tabulate(recolored, v), tabulate(original, v))
+  }, logical(1))
+  expect(length(ok) == 85L && all(ok),
+         sprintf("%d multisets, multiset %d fails", length(ok), which(!ok)[1]))
 })
 
-test_that("random column-binary designs recolor with sets and r unchanged", {
-  global <- globalenv()
-  had_seed <- exists(".Random.seed", envir = global, inherits = FALSE)
-  if (had_seed) saved <- get(".Random.seed", envir = global, inherits = FALSE)
-  on.exit({
-    if (had_seed) {
-      assign(".Random.seed", saved, envir = global)
-    } else if (exists(".Random.seed", envir = global, inherits = FALSE)) {
-      rm(".Random.seed", envir = global)
-    }
-  })
-  set.seed(20261010)
-  # Random fill, then random swaps until no column repeats a label.
-  random_column_binary <- function(k, s, r) {
-    repeat {
-      m <- matrix(sample(rep(seq_along(r), r)), k, s)
-      for (iteration in seq_len(2000L)) {
-        bad <- which(apply(m, 2L, anyDuplicated) > 0L)
-        if (length(bad) == 0L) return(m)
-        j <- bad[1L]
-        i <- anyDuplicated(m[, j])
-        i2 <- sample(k, 1L)
-        j2 <- sample(s, 1L)
-        held <- m[i, j]
-        m[i, j] <- m[i2, j2]
-        m[i2, j2] <- held
+# ---- Search deadline: work bound (hard gate) -------------------------------
+# After the deadline is observed passed, the staged search performs at most
+# one further operation (an objective or proxy evaluation, a proposal, a scan
+# move, a recolouring or a completed random start). Counted, never timed: the
+# injected clock of arc_work_bound_run() (helper-arc-search.R) makes the
+# deadline pass at a chosen read.
+
+test_that("the staged search does at most one operation after the deadline", {
+  skip_on_cran() # about 4 s of repeated searches
+  stride <- if (identical(Sys.getenv("FIELDHUB_ARC_SEARCH_SLOW"), "true")) 1L else 6L
+  cases <- list(rectangular = list(v = 12, s = 8),
+                square = list(v = 12, s = 12))
+  for (nm in names(cases)) {
+    args <- cases[[nm]]
+    # Switch reads: every stride-th read up to the natural end, plus every
+    # read within 2 of each restart start and recolouring of an unswitched run
+    full <- do.call(arc_work_bound_run, c(list("staged", Inf), args))
+    last <- max(full$ops$read)
+    marks <- full$ops$read[full$ops$kind %in% c("start", "recolour")]
+    near <- unlist(lapply(marks, function(m) seq.int(m - 2L, m + 2L)))
+    points <- sort(unique(c(seq.int(2L, last, by = stride), near, last)))
+    points <- points[points >= 2L & points <= last]
+    bad <- character()
+    for (n in points) {
+      r <- do.call(arc_work_bound_run, c(list("staged", n), args))
+      if (nrow(r$after) > 1L || !r$result$status %in% c("ok", "no_design")) {
+        bad <- c(bad, sprintf("read %d: %d operations (%s), status %s", n,
+                              nrow(r$after), paste(r$after$kind, collapse = ","),
+                              r$result$status))
       }
     }
-  }
-  parameter_sets <- list(
-    list(v = 24L, s = 16L, k = 5L, r = rep(c(4L, 3L), c(8L, 16L))),
-    list(v = 7L, s = 5L, k = 3L, r = c(3L, 3L, 2L, 2L, 2L, 2L, 1L)),
-    list(v = 10L, s = 6L, k = 4L, r = c(4L, 3L, 3L, 3L, 2L, 2L, 2L, 2L, 2L,
-                                        1L)),
-    list(v = 12L, s = 12L, k = 4L, r = rep(4L, 12L)),
-    list(v = 30L, s = 24L, k = 5L, r = rep(4L, 30L))
-  )
-  per_set <- 80L
-  generated <- 0L
-  recolored_ok <- 0L
-  row_repeats_seen <- 0L
-  for (p in parameter_sets) {
-    for (draw in seq_len(per_set)) {
-      columns <- random_column_binary(p$k, p$s, p$r)
-      generated <- generated + 1L
-      if (any(apply(columns, 1L, anyDuplicated) > 0L)) {
-        row_repeats_seen <- row_repeats_seen + 1L
-      }
-      recolored <- arc_recolor_rows(columns, p$v)
-      if (arc_recoloring_ok(recolored, columns, p$v)) {
-        recolored_ok <- recolored_ok + 1L
-      }
-    }
-  }
-  expect_identical(generated, 400L)
-  expect_gte(generated, 300L)
-  expect_identical(recolored_ok, generated)
-  # The inputs genuinely needed recoloring.
-  expect_gt(row_repeats_seen, 0L)
-})
-
-test_that("recoloring is deterministic and leaves row-binary input valid", {
-  first <- arc_recolor_rows(arc_row_repeat_contraction, 6)
-  expect_identical(arc_recolor_rows(arc_row_repeat_contraction, 6), first)
-  expect_true(arc_recoloring_ok(first, arc_row_repeat_contraction, 6))
-  expect_type(first, "integer")
-  ex1 <- arc_recolor_rows(arc_ex1_contraction, 12)
-  expect_true(arc_recoloring_ok(ex1, arc_ex1_contraction, 12))
-})
-
-test_that("recoloring needs max(r) <= k and s <= v", {
-  condition <- expect_arc_error(
-    arc_recolor_rows(arc_unbalanced_contraction, 6),
-    "fieldhub_arc_recolor_error", "fieldhub_input_error")
-  expect_identical(condition$r, c(4L, 2L, 2L, 2L, 1L, 1L))
-  expect_identical(condition$k, 3L)
-  expect_error(arc_recolor_rows(arc_unbalanced_contraction, 6),
-               class = "fieldhub_arc_recolor_error")
-  wide <- matrix(c(1, 2, 2, 3, 3, 1, 1, 2), nrow = 2)
-  expect_arc_error(arc_recolor_rows(wide, 3), "fieldhub_arc_dimension_error",
-                   "fieldhub_dimension_error")
-  # Column collisions are rejected by the structural checks first.
-  collided <- arc_ex1_contraction
-  collided[2, 1] <- 7
-  expect_error(arc_recolor_rows(collided, 12),
-               class = "fieldhub_arc_collision_error")
-})
-
-# Task 6: public validator (spec 4.1, 4.3, 4.4) -------------------------------
-
-# A restricted 6 x 4, k = 3 design with every r_h = 2 and df_formula = 1 that
-# is disconnected: columns 1-2 hold field rows 1-3 and columns 3-4 hold field
-# rows 4-6, so the row-column graph splits into two components. Found by
-# recoloring the 85 fixed-replication 6 x 4 column multisets (10 of them are
-# disconnected) and taking the first disconnected one.
-arc_disconnected_contraction <- matrix(c(
-  3, 1, 6, 4,
-  1, 2, 4, 5,
-  2, 3, 5, 6
-), nrow = 3, byrow = TRUE)
-
-test_that("validator: malformed input raises the structural condition", {
-  collided <- arc_ex1_contraction
-  collided[2, 1] <- 7
-  expect_arc_error(arc_validate_contraction(collided, 12),
-                   "fieldhub_arc_collision_error", "fieldhub_input_error")
-})
-
-test_that("validator: negative df is infeasible without matrix work", {
-  condition <- expect_arc_error(
-    arc_validate_contraction(arc_fixture("false-qr.csv"), 54),
-    "fieldhub_arc_infeasible_error", "fieldhub_dimension_error")
-  expect_identical(condition$df_formula, -1L)
-  expect_true(is.na(condition$lambda_min_rel))
-  expect_identical(c(condition$v, condition$s, condition$k), c(54L, 14L, 5L))
-  expect_match(condition$message, "connected design")
-})
-
-test_that("validator: a df-feasible disconnected design is rejected", {
-  # Independent check with the test oracle on the expanded layout.
-  codes <- arc_expand(arc_disconnected_contraction, 6,
-                      mode = "restricted")$codes
-  expect_false(arc_oracle(codes)$connected)
-  expect_identical(arc_df_formula(6, 4, 3), 1L)
-
-  condition <- expect_arc_error(
-    arc_validate_contraction(arc_disconnected_contraction, 6),
-    "fieldhub_arc_disconnected_error", "fieldhub_input_error")
-  expect_identical(condition$df_formula, 1L)
-  expect_lt(condition$lambda_min_rel, 1e-8)
-  expect_identical(c(condition$v, condition$s, condition$k), c(6L, 4L, 3L))
-})
-
-test_that("validator: a connected design with zero df is a df error", {
-  condition <- expect_arc_error(
-    arc_validate_contraction(arc_fixture("zero-df.csv"), 6),
-    "fieldhub_arc_df_error", "fieldhub_dimension_error")
-  expect_identical(condition$df_formula, 0L)
-  expect_gt(condition$lambda_min_rel, 1e-6)
-  expect_identical(c(condition$v, condition$s, condition$k), c(6L, 6L, 2L))
-})
-
-test_that("validator: low df warns with the df and how to raise it", {
-  contraction <- arc_fixture("example1-contraction.csv")
-  expect_warning(result <- arc_validate_contraction(contraction, 12),
-                 class = "fieldhub_arc_low_df_warning")
-  expect_identical(result$df_formula, 3L)
-  expect_true(result$connected)
-
-  condition <- tryCatch(arc_validate_contraction(contraction, 12),
-                        fieldhub_arc_low_df_warning = function(w) w)
-  expect_s3_class(condition, "fieldhub_warning")
-  expect_identical(condition$df_formula, 3L)
-  expect_match(condition$message, "3", fixed = TRUE)
-  expect_match(condition$message, "about 82%", fixed = TRUE)
-  expect_match(condition$message, "adding a check", fixed = TRUE)
-  expect_match(condition$message, "rows or columns", fixed = TRUE)
-  expect_no_match(condition$message, "optimi|search|longer|iteration",
-                  ignore.case = TRUE)
-})
-
-test_that("validator: a healthy design returns diagnostics without warning", {
-  expect_no_warning(
-    result <- arc_validate_contraction(arc_fixture("example2-contraction.csv"),
-                                       24)
-  )
-  expect_identical(result$df_formula, 37L)
-  expect_true(result$connected)
-  expect_gt(result$lambda_min_rel, 1e-6)
-  expect_identical(c(result$v, result$s, result$k), c(24L, 16L, 5L))
-  # ks / v = 80 / 24, so every r_h is 3 or 4 and they sum to 80.
-  expect_true(all(result$r %in% c(3L, 4L)))
-  expect_identical(sum(result$r), 80L)
-  expect_length(result$r, 24L)
-  expect_identical(result$mode, "restricted")
-})
-
-test_that("validator: near-singular spectra warn, others do not", {
-  contraction <- arc_fixture("example2-contraction.csv")
-  local({
-    local_mocked_bindings(arc_classify_spectrum = function(lambda, ...) {
-      list(connected = TRUE, lambda_min_rel = 5e-7, near_singular = TRUE)
-    })
-    expect_warning(result <- arc_validate_contraction(contraction, 24),
-                   class = "fieldhub_arc_near_singular_warning")
-    expect_identical(result$lambda_min_rel, 5e-7)
-  })
-  local({
-    local_mocked_bindings(arc_classify_spectrum = function(lambda, ...) {
-      list(connected = TRUE, lambda_min_rel = 2e-6, near_singular = FALSE)
-    })
-    expect_no_warning(arc_validate_contraction(contraction, 24),
-                      class = "fieldhub_arc_near_singular_warning")
-  })
-})
-
-test_that("validator: mode passes through to the structural checks", {
-  square <- arc_fixture("square-a.csv")
-  expect_arc_error(arc_validate_contraction(square, 6),
-                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
-  # Column-binary mode reaches the df stage: connected with df 5 (manifest).
-  expect_warning(result <- arc_validate_contraction(square, 6,
-                                                    mode = "column_binary"),
-                 class = "fieldhub_arc_low_df_warning")
-  expect_true(result$connected)
-  expect_identical(result$df_formula, 5L)
-  expect_identical(result$mode, "column_binary")
-})
-
-# Task 7: full-layout evaluator (spec 7.1) ------------------------------------
-
-# Every fixture of the manifest with its field layout: "layout" files are the
-# layout itself; contractions are expanded with the manifest mode.
-arc_layout_manifest <- function() {
-  utils::read.csv(
-    test_path("fixtures", "augmented-row-column", "manifest.csv"),
-    stringsAsFactors = FALSE
-  )
-}
-
-arc_manifest_codes <- function(entry) {
-  fixture <- arc_fixture(entry$file)
-  if (identical(entry$kind, "layout")) {
-    return(fixture)
-  }
-  arc_expand(fixture, entry$v, mode = entry$mode)$codes
-}
-
-arc_objective_names <- c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
-
-test_that("layout evaluator reproduces every manifest reference", {
-  manifest <- arc_layout_manifest()
-  for (i in seq_len(nrow(manifest))) {
-    entry <- manifest[i, ]
-    result <- arc_evaluate_layout(arc_manifest_codes(entry))
-    label <- entry$file
-    expect_identical(result$connected, entry$ref_connected, label = label)
-    expect_equal(result$residual_df_rank, entry$ref_residual_df_rank,
-                 tolerance = 0, label = label)
-    if (entry$ref_connected) {
-      for (name in arc_objective_names) {
-        expect_lt(abs(result[[name]] - entry[[paste0("ref_", name)]]), 1e-10,
-                  label = paste(label, name))
-      }
-    } else {
-      for (name in c("cefs", arc_objective_names)) {
-        expect_null(result[[name]], label = paste(label, name))
-      }
-    }
+    expect(length(points) > 20L && length(bad) == 0L,
+           sprintf("case %s, %d switch reads: %s", nm, length(points),
+                   paste(utils::head(bad, 3L), collapse = "; ")))
   }
 })
 
-test_that("layout evaluator agrees with the independent oracle", {
-  manifest <- arc_layout_manifest()
-  subset <- c("example1-layout.csv", "example1-contraction.csv",
-              "example2-layout.csv", "example2-contraction.csv",
-              "restricted-12x8-a.csv", "restricted-12x8-b.csv", "zero-df.csv",
-              "square-a.csv", "square-b.csv", "recoloring-counterexample.csv",
-              "cyclic-5x5-k4.csv", "bailey-haines-c-4-4-4.csv")
-  expect_true(all(subset %in% manifest$file))
-  for (file in subset) {
-    codes <- arc_manifest_codes(manifest[manifest$file == file, ])
-    result <- arc_evaluate_layout(codes)
-    reference <- arc_oracle(codes)
-    expect_identical(result$connected, reference$connected, label = file)
-    expect_equal(result$residual_df_rank, reference$residual_df_rank,
-                 tolerance = 0, label = file)
-    if (reference$connected) {
-      for (name in arc_objective_names) {
-        expect_lt(abs(result[[name]] - reference[[name]]), 1e-10,
-                  label = paste(file, name))
-      }
-      expect_length(result$cefs, length(unique(as.vector(codes))) - 1L)
-      expect_identical(result$rank_C, length(result$cefs))
-    }
-  }
-})
+# ---- Slow tier -------------------------------------------------------------
 
-test_that("Bailey-Haines C(4,4,4) is disconnected and gets no objectives", {
-  result <- arc_evaluate_layout(arc_fixture("bailey-haines-c-4-4-4.csv"))
-  expect_false(result$connected)
-  expect_equal(result$residual_df_rank, 14, tolerance = 0)
-  expect_identical(names(result),
-                   c("connected", "rank_C", "residual_df_rank"))
-  for (name in c("cefs", arc_objective_names)) {
-    expect_null(result[[name]])
-  }
-})
-
-test_that("the false-QR layout is disconnected with zero rank-based df", {
-  codes <- arc_expand(arc_fixture("false-qr.csv"), 54, "restricted")$codes
-  result <- arc_evaluate_layout(codes)
-  expect_false(result$connected)
-  expect_equal(result$residual_df_rank, 0, tolerance = 0)
-  expect_null(result$E_aug)
-})
-
-test_that("a transposed Example 1 layout gives identical objectives", {
-  codes <- arc_fixture("example1-layout.csv")
-  original <- arc_evaluate_layout(codes)
-  transposed <- arc_evaluate_layout(t(codes))
-  expect_true(transposed$connected)
-  for (name in arc_objective_names) {
-    expect_lt(abs(transposed[[name]] - original[[name]]), 1e-10, label = name)
-  }
-})
-
-test_that("integral doubles and explicit check codes are accepted", {
-  codes <- arc_fixture("example1-layout.csv")
-  as_integer <- arc_evaluate_layout(codes)
-  as_double <- arc_evaluate_layout(codes + 0, check_codes = c(73, 74, 75))
-  expect_identical(as_double$connected, TRUE)
-  for (name in arc_objective_names) {
-    expect_lt(abs(as_double[[name]] - as_integer[[name]]), 1e-12, label = name)
-  }
-})
-
-test_that("malformed layouts raise fieldhub_arc_layout_error", {
-  layout <- c("fieldhub_arc_layout_error", "fieldhub_input_error")
-  codes <- arc_fixture("example1-layout.csv")
-
-  # Test code 2 also replaces test 1 at cell (1, 1), so code 2 occurs twice.
-  duplicated <- codes
-  duplicated[1, 1] <- 2L
-  expect_arc_error(arc_evaluate_layout(duplicated, check_codes = 73:75),
-                   layout[1], layout[2])
-  # With check_codes = NULL a duplicated code is by definition a check (spec
-  # 7.1 inference rule), so the same matrix is a valid layout with four
-  # checks (2, 73, 74, 75) and 70 tests (v* = 74). It is evaluated without
-  # error and matches the oracle, which applies the same rule.
-  inferred <- arc_evaluate_layout(duplicated)
-  reference <- arc_oracle(duplicated)
-  expect_identical(inferred$connected, reference$connected)
-  expect_length(inferred$cefs, 73L)
-  for (name in arc_objective_names) {
-    expect_lt(abs(inferred[[name]] - reference[[name]]), 1e-10, label = name)
-  }
-
-  # Exactly one check: keep check 73 and turn every 74 and 75 into new tests.
-  one_check <- codes
-  others <- which(one_check %in% c(74L, 75L))
-  one_check[others] <- 100L + seq_along(others)
-  expect_arc_error(arc_evaluate_layout(one_check), layout[1], layout[2])
-  expect_arc_error(arc_evaluate_layout(one_check, check_codes = 73L),
-                   layout[1], layout[2])
-
-  with_na <- codes
-  with_na[2, 3] <- NA_integer_
-  expect_arc_error(arc_evaluate_layout(with_na), layout[1], layout[2])
-  expect_arc_error(arc_evaluate_layout(codes + 0.5), layout[1], layout[2])
-  expect_arc_error(arc_evaluate_layout(as.vector(codes)), layout[1],
-                   layout[2])
-  expect_arc_error(arc_evaluate_layout(codes, check_codes = c(73, 74, 999)),
-                   layout[1], layout[2])
-  expect_arc_error(arc_evaluate_layout(codes, check_codes = c(73, NA)),
-                   layout[1], layout[2])
-})
-
-test_that("layouts above the plot cap raise before evaluation", {
-  codes <- arc_fixture("example1-layout.csv")
-  before <- getOption("FielDHub.arc_oracle_max_plots")
-  local({
-    old <- options(FielDHub.arc_oracle_max_plots = 50)
-    on.exit(options(old), add = TRUE)
-    condition <- expect_arc_error(arc_evaluate_layout(codes),
-                                  "fieldhub_arc_size_error",
-                                  "fieldhub_dimension_error")
-    expect_identical(condition$n, 96L)
-    expect_identical(condition$cap, 50)
-  })
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), before)
-  expect_true(arc_evaluate_layout(codes)$connected)
-})
-
-# Task 8: paper-route contraction evaluator (spec 7.2) ------------------------
-
-# Contraction fixtures of the manifest that are connected (every contraction
-# fixture except the false-QR design).
-arc_connected_contractions <- function() {
-  manifest <- arc_layout_manifest()
-  manifest[manifest$kind == "contraction" & manifest$ref_connected, ]
-}
-
-arc_published_tol <- function(decimals) 0.5 * 10^(-decimals) + 1e-12
-
-arc_paper_fields <- c("Cbar_v", "Cbar_s", "E_aug", "a", "b")
-
-test_that("paper route reproduces the published Examples 1 and 2", {
-  manifest <- arc_layout_manifest()
-  for (name in c("example1-contraction.csv", "example2-contraction.csv")) {
-    entry <- manifest[manifest$file == name, ]
-    result <- arc_evaluate_contraction(arc_fixture(name), entry$v, entry$mode)
-    expect_true(result$connected, label = name)
-    expect_identical(result$df_formula, as.integer(entry$ref_df_formula),
-                     label = name)
-    expect_lt(abs(result$Cbar_v - entry$pub_Cbar_v),
-              arc_published_tol(entry$pub_Cbar_v_dec), label = name)
-    expect_lt(abs(result$Cbar_s - entry$pub_Cbar_s),
-              arc_published_tol(entry$pub_Cbar_s_dec), label = name)
-    expect_lt(abs(result$E_aug - entry$ref_E_aug), 1e-10, label = name)
-  }
-  example1 <- arc_evaluate_contraction(arc_ex1_contraction, 12, "restricted")
-  expect_lt(abs(example1$Cbar_v - 0.5739), 5e-5 + 1e-12)
-  expect_lt(abs(example1$Cbar_s - 0.4828), 5e-5 + 1e-12)
-})
-
-test_that("paper route reproduces all 21 rows of Table 1", {
-  manifest <- arc_layout_manifest()
-  table1 <- manifest[startsWith(manifest$file, "table1-"), ]
-  expect_identical(nrow(table1), 21L)
-  for (i in seq_len(nrow(table1))) {
-    entry <- table1[i, ]
-    label <- entry$file
-    result <- arc_evaluate_contraction(arc_fixture(entry$file), entry$v,
-                                       entry$mode)
-    expect_true(result$connected, label = label)
-    expect_lt(abs(result$E_aug - entry$pub_E_aug),
-              arc_published_tol(entry$pub_E_aug_dec), label = label)
-    expect_lt(abs(result$E_aug - entry$ref_E_aug), 1e-10, label = label)
-    expect_lt(abs(result$Cbar_v - entry$pub_Cbar_v),
-              arc_published_tol(entry$pub_Cbar_v_dec), label = label)
-    expect_lt(abs(result$Cbar_s - entry$pub_Cbar_s),
-              arc_published_tol(entry$pub_Cbar_s_dec), label = label)
-  }
-})
-
-test_that("the trivial eigenvalue is projected out, not dropped as smallest", {
-  contraction <- arc_ex1_contraction
-  v <- 12
-  k <- nrow(contraction)
-  s <- ncol(contraction)
-  # The corrected eq. (4) bracket, built here without the projection P_s.
-  mats <- arc_contraction_matrices(contraction, v)
-  m12 <- mats$nc - outer(mats$r, rep(1, s)) / s
-  row_block <- diag(mats$r) - mats$w / s + matrix(1, v, v)
-  bracket <- diag(s) - crossprod(m12, solve(row_block, m12)) / k
-  lambda <- eigen((bracket + t(bracket)) / 2, symmetric = TRUE,
-                  only.values = TRUE)$values
-  # Its trivial eigenvalue is 1 (eigenvector 1_s), not the smallest one.
-  expect_lt(min(abs(lambda - 1)), 1e-10)
-  naive <- (s - 1) / sum(1 / lambda[seq_len(s - 1)])
-  expect_lt(abs(naive - 0.5600), 5e-5)
-
-  result <- arc_evaluate_contraction(contraction, v, "restricted")
-  expect_gt(abs(result$Cbar_s - naive), 1e-3)
-  expect_lt(abs(result$Cbar_s - 0.4828), 5e-5 + 1e-12)
-})
-
-test_that("paper route agrees with the full-layout evaluator on E_aug", {
-  fixtures <- arc_connected_contractions()
-  expect_gt(nrow(fixtures), 25L)
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    contraction <- arc_fixture(entry$file)
-    paper <- arc_evaluate_contraction(contraction, entry$v, entry$mode)
-    layout <- arc_evaluate_layout(
-      arc_expand(contraction, entry$v, mode = entry$mode)$codes
-    )
-    expect_true(paper$connected, label = entry$file)
-    expect_lt(abs(paper$E_aug - layout$E_aug), 1e-10, label = entry$file)
-    expect_lt(abs(paper$E_aug - entry$ref_E_aug), 1e-10, label = entry$file)
-  }
-})
-
-test_that("a and b satisfy the 1/E_aug identity, equal or unequal r", {
-  fixtures <- arc_connected_contractions()
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    v <- entry$v
-    s <- entry$s
-    k <- entry$k
-    result <- arc_evaluate_contraction(arc_fixture(entry$file), v, entry$mode)
-    v_star <- (v - k) * s + k
-    lhs <- (v_star - 1) / result$E_aug
-    rhs <- v_star - v - s + 1 + s * result$a + v * result$b
-    expect_lt(abs(lhs - rhs), 1e-9, label = entry$file)
-    # The two halves separately: s a and v b against the eq. (5) terms.
-    expect_lt(abs(s * result$a - (v / k) * (v - 1) / result$Cbar_v), 1e-9,
-              label = entry$file)
-    expect_lt(abs(v * result$b - (v / k) * (s - 1) / result$Cbar_s), 1e-9,
-              label = entry$file)
-  }
-})
-
-test_that("paper route passes the mode through to the structural checks", {
-  square <- arc_fixture("square-a.csv")
-  expect_arc_error(arc_evaluate_contraction(square, 6, "restricted"),
-                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
-  manifest <- arc_layout_manifest()
-  reference <- manifest$ref_E_aug[manifest$file == "square-a.csv"]
-  result <- arc_evaluate_contraction(square, 6, "column_binary")
-  expect_true(result$connected)
-  expect_lt(abs(result$E_aug - reference), 1e-10)
-})
-
-test_that("paper route returns early for a negative df", {
-  result <- arc_evaluate_contraction(arc_fixture("false-qr.csv"), 54,
-                                     "restricted")
-  expect_identical(names(result),
-                   c("connected", "df_formula", "lambda_min_rel"))
-  expect_false(result$connected)
-  expect_identical(result$df_formula, -1L)
-  expect_identical(result$lambda_min_rel, NA_real_)
-  expect_null(result$E_aug)
-})
-
-test_that("paper route gives a disconnected design diagnostics only", {
-  result <- arc_evaluate_contraction(arc_disconnected_contraction, 6,
-                                     "restricted")
-  expect_identical(names(result),
-                   c("connected", "df_formula", "lambda_min_rel"))
-  expect_false(result$connected)
-  expect_identical(result$df_formula, 1L)
-  expect_true(is.finite(result$lambda_min_rel))
-  expect_lt(result$lambda_min_rel, 1e-8)
-  for (name in arc_paper_fields) {
-    expect_null(result[[name]], label = name)
-  }
-})
-
-# Task 9: single-matrix evaluator (spec 6, 7.3) ------------------------------
-
-arc_mean_names <- c("E_aug", "V_tt", "V_tc", "V_cc")
-
-test_that("single-matrix route reproduces every connected contraction", {
-  fixtures <- arc_connected_contractions()
-  expect_gt(nrow(fixtures), 25L)
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    label <- entry$file
-    contraction <- arc_fixture(entry$file)
-    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
-                                      worst_pair = TRUE)
-    layout <- arc_evaluate_layout(
-      arc_expand(contraction, entry$v, mode = entry$mode)$codes
-    )
-    expect_true(result$connected, label = label)
-    expect_identical(result$df_formula, as.integer(entry$ref_df_formula),
-                     label = label)
-    expect_gte(result$lambda_min_rel, 1e-8, label = label)
-    for (name in arc_objective_names) {
-      expect_lt(abs(result[[name]] - entry[[paste0("ref_", name)]]), 1e-10,
-                label = paste(label, name, "reference"))
-      expect_lt(abs(result[[name]] - layout[[name]]), 1e-10,
-                label = paste(label, name, "layout"))
-    }
-  }
-})
-
-test_that("single-matrix route agrees with the independent oracle", {
-  manifest <- arc_layout_manifest()
-  subset <- c("example1-contraction.csv", "example2-contraction.csv",
-              "restricted-12x8-a.csv", "restricted-12x8-b.csv", "zero-df.csv",
-              "square-a.csv", "square-b.csv", "recoloring-counterexample.csv",
-              "cyclic-5x5-k4.csv")
-  expect_true(all(subset %in% manifest$file))
-  for (file in subset) {
-    entry <- manifest[manifest$file == file, ]
-    contraction <- arc_fixture(file)
-    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
-                                      worst_pair = TRUE)
-    reference <- arc_oracle(
-      arc_expand(contraction, entry$v, mode = entry$mode)$codes
-    )
-    expect_true(reference$connected, label = file)
-    expect_identical(result$connected, reference$connected, label = file)
-    for (name in arc_objective_names) {
-      expect_lt(abs(result[[name]] - reference[[name]]), 1e-10,
-                label = paste(file, name))
-    }
-  }
-})
-
-test_that("the restricted 12 x 8 pair reverses E_aug and V_tt", {
-  manifest <- arc_layout_manifest()
-  a <- arc_evaluate_objectives(arc_fixture("restricted-12x8-a.csv"), 12,
-                               "restricted")
-  b <- arc_evaluate_objectives(arc_fixture("restricted-12x8-b.csv"), 12,
-                               "restricted")
-  expect_gt(a$E_aug, b$E_aug)
-  expect_lt(b$V_tt, a$V_tt)
-  expect_lt(abs(a$E_aug - 0.366768940288), 1e-10)
-  expect_lt(abs(a$V_tt - 5.575452716298), 1e-10)
-  expect_lt(abs(b$E_aug - 0.366429008708), 1e-10)
-  expect_lt(abs(b$V_tt - 5.566184662506), 1e-10)
-  for (pair in list(list(a, "restricted-12x8-a.csv"),
-                    list(b, "restricted-12x8-b.csv"))) {
-    entry <- manifest[manifest$file == pair[[2]], ]
-    expect_lt(abs(pair[[1]]$E_aug - entry$ref_E_aug), 1e-10)
-    expect_lt(abs(pair[[1]]$V_tt - entry$ref_V_tt), 1e-10)
-  }
-})
-
-test_that("the weighted-variance identity holds, equal or unequal r", {
-  fixtures <- arc_connected_contractions()
-  unequal <- 0L
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    v <- entry$v
-    s <- entry$s
-    k <- entry$k
-    contraction <- arc_fixture(entry$file)
-    if (length(unique(tabulate(contraction, nbins = v))) > 1L) {
-      unequal <- unequal + 1L
-    }
-    result <- arc_evaluate_objectives(contraction, v, entry$mode)
-    n_tests <- (v - k) * s
-    v_star <- n_tests + k
-    # Pair weights u_i u_j: 1 (test-test), s (test-check), s^2 (check-check)
-    weighted <- choose(n_tests, 2) * result$V_tt +
-      s * n_tests * k * result$V_tc + s^2 * choose(k, 2) * result$V_cc
-    lhs <- v * s * (v_star - 1) / result$E_aug
-    expect_lt(abs(lhs - weighted) / abs(lhs), 1e-8, label = entry$file)
-  }
-  # Example 2 and the recoloring counterexample have unequal replication.
-  expect_gte(unequal, 2L)
-})
-
-test_that("V_tt has the equal-replication closed form", {
-  fixtures <- arc_connected_contractions()
-  checked <- 0L
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    v <- entry$v
-    s <- entry$s
-    k <- entry$k
-    contraction <- arc_fixture(entry$file)
-    r <- tabulate(contraction, nbins = v)
-    if (length(unique(r)) > 1L) {
-      next
-    }
-    checked <- checked + 1L
-    paper <- arc_evaluate_contraction(contraction, v, entry$mode)
-    result <- arc_evaluate_objectives(contraction, v, entry$mode)
-    n_tests <- (v - k) * s
-    closed <- 2 + 2 / (n_tests - 1) *
-      ((s - mean(r)) * paper$a + (v + k) * paper$b - 2 * (s - 1))
-    expect_lt(abs(result$V_tt - closed), 1e-10, label = entry$file)
-  }
-  expect_gt(checked, 20L)
-})
-
-test_that("the recoloring counterexample has E_aug = 1/6", {
-  result <- arc_evaluate_objectives(arc_fixture("recoloring-counterexample.csv"),
-                                    6, "column_binary")
-  expect_true(result$connected)
-  expect_lt(abs(result$E_aug - 1 / 6), 1e-10)
-})
-
-test_that("single-matrix route returns early for a negative df", {
-  result <- arc_evaluate_objectives(arc_fixture("false-qr.csv"), 54,
-                                    "restricted", worst_pair = TRUE)
-  expect_identical(names(result),
-                   c("connected", "df_formula", "lambda_min_rel"))
-  expect_false(result$connected)
-  expect_identical(result$df_formula, -1L)
-  expect_identical(result$lambda_min_rel, NA_real_)
-})
-
-test_that("single-matrix route gives a disconnected design diagnostics only", {
-  result <- arc_evaluate_objectives(arc_disconnected_contraction, 6,
-                                    "restricted", worst_pair = TRUE)
-  expect_identical(names(result),
-                   c("connected", "df_formula", "lambda_min_rel"))
-  expect_false(result$connected)
-  expect_identical(result$df_formula, 1L)
-  expect_true(is.finite(result$lambda_min_rel))
-  expect_lt(result$lambda_min_rel, 1e-8)
-})
-
-test_that("worst-pair maxima are returned only on request", {
-  plain <- arc_evaluate_objectives(arc_ex2_contraction, 24, "restricted")
-  expect_identical(names(plain),
-                   c("connected", "df_formula", "lambda_min_rel",
-                     arc_mean_names))
-  full <- arc_evaluate_objectives(arc_ex2_contraction, 24, "restricted",
-                                  worst_pair = TRUE)
-  expect_identical(names(full), c(names(plain), "max_tt", "max_tc"))
-  for (name in arc_mean_names) {
-    expect_identical(full[[name]], plain[[name]], label = name)
-  }
-})
-
-# Task 2 (M2): blockwise worst pairs (spec 6.4) -------------------------------
-
-# Inputs of arc_worst_pair_maxima() rebuilt from the contraction matrices, and
-# a dense reference formed here from the full T x T kernel (the M1 code).
-arc_worst_pair_inputs <- function(contraction, v) {
-  matrices <- arc_contraction_matrices(contraction, v)
-  s <- ncol(contraction)
-  k <- nrow(contraction)
-  omega <- chol2inv(chol(matrices$M_tilde)) - tcrossprod(matrices$Q0)
-  omega <- (omega + t(omega)) / 2
-  h_c <- cbind(t(matrices$nr), matrix(1, k, s)) / s
-  omega_h_c <- omega %*% t(h_c)
-  cells <- which(1 - matrices$nc == 1, arr.ind = TRUE)
-  a <- unname(cells[, "row"])
-  b <- v + unname(cells[, "col"])
-  quad_c <- colSums(t(h_c) * omega_h_c)
-  kernel_tt <- omega[a, a, drop = FALSE] + omega[a, b, drop = FALSE] +
-    omega[b, a, drop = FALSE] + omega[b, b, drop = FALSE]
-  quad_t <- diag(kernel_tt)
-  pairs_tt <- 2 + outer(quad_t, quad_t, `+`) - 2 * kernel_tt
-  diag(pairs_tt) <- -Inf
-  kernel_tc <- omega_h_c[a, , drop = FALSE] + omega_h_c[b, , drop = FALSE]
-  pairs_tc <- 1 + 1 / s + outer(quad_t, quad_c, `+`) - 2 * kernel_tc
-  list(omega = omega, a = a, b = b, omega_h_c = omega_h_c, quad_c = quad_c,
-       s = s, n = length(a), dense_tt = max(pairs_tt),
-       dense_tc = max(pairs_tc))
-}
-
-arc_worst_pair_blocked <- function(inputs, block_size) {
-  arc_worst_pair_maxima(inputs$omega, inputs$a, inputs$b, inputs$omega_h_c,
-                        inputs$quad_c, inputs$s, block_size)
-}
-
-# Block sizes 1, 2, 7, T - 1, T, T + 5 and an exact divisor of T in 3..T-1
-# (the middle one, as in the spike), when T has one.
-arc_worst_pair_sizes <- function(n) {
-  divisors <- Filter(function(d) n %% d == 0L, seq.int(3L, max(3L, n - 1L)))
-  divisors <- divisors[divisors < n]
-  sizes <- c(1L, 2L, 7L, n - 1L, n, n + 5L)
-  if (length(divisors) > 0L) {
-    sizes <- c(sizes, divisors[ceiling(length(divisors) / 2)])
-  }
-  unique(sizes[sizes >= 1L])
-}
-
-test_that("blocked worst pairs equal the dense reference on every fixture", {
-  fixtures <- arc_connected_contractions()
-  expect_gt(nrow(fixtures), 25L)
-  with_divisor <- 0L
-  for (i in seq_len(nrow(fixtures))) {
-    entry <- fixtures[i, ]
-    inputs <- arc_worst_pair_inputs(arc_fixture(entry$file), entry$v)
-    sizes <- arc_worst_pair_sizes(inputs$n)
-    inner <- sizes[sizes >= 3L & sizes < inputs$n - 1L]
-    if (any(inputs$n %% inner == 0L)) {
-      with_divisor <- with_divisor + 1L
-    }
-    for (size in sizes) {
-      label <- paste(entry$file, "block", size)
-      blocked <- arc_worst_pair_blocked(inputs, size)
-      expect_lt(abs(blocked$max_tt - inputs$dense_tt) /
-                  max(1, abs(inputs$dense_tt)), 1e-12,
-                label = paste(label, "max_tt"))
-      expect_lt(abs(blocked$max_tc - inputs$dense_tc) /
-                  max(1, abs(inputs$dense_tc)), 1e-12,
-                label = paste(label, "max_tc"))
-      # The argmax is a distinct pair p < q of test cells
-      p <- blocked$argmax_tt[1L]
-      q <- blocked$argmax_tt[2L]
-      expect_true(p >= 1L && p < q && q <= inputs$n, label = label)
-    }
-  }
-  expect_gt(with_divisor, 20L)
-})
-
-test_that("the evaluator reports the blocked maxima at the option's size", {
-  entry <- arc_connected_contractions()
-  entry <- entry[entry$file == "example2-contraction.csv", ]
-  contraction <- arc_fixture(entry$file)
-  inputs <- arc_worst_pair_inputs(contraction, entry$v)
-  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
-  on.exit(options(old), add = TRUE)
-  for (mib in c(1e-9, 1e-4, 64)) {
-    options(FielDHub.arc_worst_pair_block_mib = mib)
-    result <- arc_evaluate_objectives(contraction, entry$v, entry$mode,
-                                      worst_pair = TRUE)
-    expect_lt(abs(result$max_tt - inputs$dense_tt), 1e-12, label = mib)
-    expect_lt(abs(result$max_tc - inputs$dense_tc), 1e-12, label = mib)
-  }
-})
-
-test_that("the block size follows the MiB budget", {
-  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
-  on.exit(options(old), add = TRUE)
-  expect_identical(arc_worst_pair_block_size(), 2896)
-  options(FielDHub.arc_worst_pair_block_mib = 1)
-  expect_identical(arc_worst_pair_block_size(), 362)
-  options(FielDHub.arc_worst_pair_block_mib = 1e-9)
-  expect_identical(arc_worst_pair_block_size(), 1)
-})
-
-test_that("an invalid worst-pair block budget is a classed input error", {
-  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
-  on.exit(options(old), add = TRUE)
-  for (bad in list(0, -1, NA_real_, Inf, NaN, "64", c(1, 2), TRUE,
-                   matrix(1))) {
-    options(FielDHub.arc_worst_pair_block_mib = bad)
-    expect_arc_error(arc_worst_pair_block_size(), "fieldhub_arc_input_error",
-                     "fieldhub_input_error")
-    expect_arc_error(arc_evaluate_objectives(arc_ex2_contraction, 24,
-                                             "restricted", worst_pair = TRUE),
-                     "fieldhub_arc_input_error", "fieldhub_input_error")
-  }
-  # Without worst pairs the option is not read
-  expect_true(arc_evaluate_objectives(arc_ex2_contraction, 24,
-                                      "restricted")$connected)
-})
-
-test_that("worst pairs match an explicit distinct-pair enumeration", {
-  # Every unordered distinct test pair and every test-check pair, scored
-  # from x_p = e_a + e_(v + b) and h_i one at a time. Each distinct test-test
-  # variance is 2 + h' Omega h >= 2, so the maximum is at least 2.
-  contraction <- arc_fixture("example1-contraction.csv")
-  v <- 12
-  inputs <- arc_worst_pair_inputs(contraction, v)
-  matrices <- arc_contraction_matrices(contraction, v)
-  s <- inputs$s
-  k <- nrow(contraction)
-  n <- inputs$n
-  x <- matrix(0, n, v + s)
-  x[cbind(seq_len(n), inputs$a)] <- 1
-  x[cbind(seq_len(n), inputs$b)] <- 1
-  h_c <- cbind(t(matrices$nr), matrix(1, k, s)) / s
-  variance_tt <- function(p, q) {
-    d <- x[p, ] - x[q, ]
-    2 + drop(crossprod(d, inputs$omega %*% d))
-  }
-  best_tt <- -Inf
-  for (p in seq_len(n - 1L)) {
-    for (q in (p + 1L):n) {
-      best_tt <- max(best_tt, variance_tt(p, q))
-    }
-  }
-  best_tc <- -Inf
-  for (p in seq_len(n)) {
-    for (i in seq_len(k)) {
-      d <- x[p, ] - h_c[i, ]
-      best_tc <- max(best_tc,
-                     1 + 1 / s + drop(crossprod(d, inputs$omega %*% d)))
-    }
-  }
-  expect_gte(best_tt, 2)
-  for (size in arc_worst_pair_sizes(n)) {
-    blocked <- arc_worst_pair_blocked(inputs, size)
-    expect_lt(abs(blocked$max_tt - best_tt), 1e-12, label = size)
-    expect_lt(abs(blocked$max_tc - best_tc), 1e-12, label = size)
-    p <- blocked$argmax_tt[1L]
-    q <- blocked$argmax_tt[2L]
-    expect_true(p >= 1L && p < q && q <= n, label = size)
-    expect_lt(abs(variance_tt(p, q) - best_tt), 1e-12, label = size)
-  }
-})
-
-test_that("a 96 x 96 layout gets worst pairs without a T x T allocation", {
+test_that("slow: the search reaches Example 1's published E_aug", {
   arc_skip_unless_search_slow()
-  # Cyclic restricted contraction: column j holds rows j, j + 19, ..., mod 96
-  v <- 96L
-  s <- 96L
-  k <- 5L
-  contraction <- outer(19L * (seq_len(k) - 1L), seq_len(s) - 1L, `+`) %% v + 1L
-  n_tests <- (v - k) * s
-  dense_bytes <- n_tests^2 * 8
-  old <- options(FielDHub.arc_worst_pair_block_mib = NULL)
-  on.exit(options(old), add = TRUE)
-  # Every allocation of at least a quarter of a T x T double matrix is logged
-  # (the default 64 MiB sub-kernel is about 0.11 of it at T = 8,736)
-  profile <- tempfile(fileext = ".txt")
-  on.exit(unlink(profile), add = TRUE)
-  baseline <- gc(reset = TRUE)
-  profiling <- isTRUE(capabilities("profmem"))
-  if (profiling) Rprofmem(profile, threshold = dense_bytes / 4)
-  elapsed <- system.time(
-    result <- arc_evaluate_objectives(contraction, v, "restricted",
-                                      worst_pair = TRUE)
-  )[["elapsed"]]
-  if (profiling) Rprofmem(NULL)
-  memory <- gc()
-  peak_mib <- sum(memory[, ncol(memory)]) - sum(baseline[, 2L])
-  expect_true(result$connected)
-  expect_true(is.finite(result$max_tt) && result$max_tt >= 2)
-  expect_true(is.finite(result$max_tc))
-  if (profiling) {
-    logged <- readLines(profile)
-    sizes <- as.numeric(sub("^([0-9]+) :.*$", "\\1",
-                            grep("^[0-9]+ :", logged, value = TRUE)))
-    expect_identical(sizes[sizes >= dense_bytes / 4], numeric(0))
-  }
-  # Peak growth stays below the T x T matrix alone (about 582 MiB)
-  expect_lt(peak_mib, dense_bytes / 2^20)
-  # A different block size gives the same maxima
-  options(FielDHub.arc_worst_pair_block_mib = 8)
-  other <- arc_evaluate_objectives(contraction, v, "restricted",
-                                   worst_pair = TRUE)
-  expect_lt(abs(other$max_tt - result$max_tt), 1e-12)
-  expect_lt(abs(other$max_tc - result$max_tc), 1e-12)
-  message(sprintf("96 x 96 worst pairs: T = %d, %.2f s, peak %.0f MiB",
-                  n_tests, elapsed, peak_mib))
-})
-
-test_that("single-matrix route passes the mode through", {
-  square <- arc_fixture("square-a.csv")
-  expect_arc_error(arc_evaluate_objectives(square, 6, "restricted"),
-                   "fieldhub_arc_row_repeat_error", "fieldhub_input_error")
-})
-
-# Task 10: final scoring (spec 7.4, section 5 cross-check) ---------------------
-
-arc_final_connected_names <- c("connected", "authority", "df_formula",
-                               "lambda_min_rel", "E_aug", "V_tt", "V_tc",
-                               "V_cc", "max_tt", "max_tc")
-arc_final_disconnected_names <- c("connected", "authority", "df_formula",
-                                  "lambda_min_rel", "residual_df_rank")
-
-# Final score with the plot cap set locally; the option is restored on exit.
-arc_final_score_capped <- function(contraction, v, mode, cap) {
-  old <- options(FielDHub.arc_oracle_max_plots = cap)
-  on.exit(options(old), add = TRUE)
-  arc_final_score(contraction, v, mode)
-}
-
-test_that("final score keeps fields and values when the authority changes", {
-  prior <- getOption("FielDHub.arc_oracle_max_plots")
-  manifest <- arc_layout_manifest()
-  entry <- manifest[manifest$file == "example2-contraction.csv", ]
-  contraction <- arc_fixture("example2-contraction.csv")
-  expect_identical(entry$v * entry$s, 384L)
-
-  below <- arc_final_score(contraction, 24, "restricted")
-  above <- arc_final_score_capped(contraction, 24, "restricted", 100)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-
-  expect_identical(below$authority, "full_layout")
-  expect_identical(above$authority, "single_matrix")
-  expect_identical(names(below), arc_final_connected_names)
-  expect_identical(names(above), names(below))
-  expect_true(below$connected)
-  expect_true(above$connected)
-  expect_identical(below$df_formula, 37L)
-  expect_identical(above$df_formula, 37L)
-  expect_lt(abs(below$lambda_min_rel - above$lambda_min_rel), 1e-12)
-  for (name in arc_objective_names) {
-    expect_lt(abs(below[[name]] - above[[name]]), 1e-10, label = name)
-    reference <- entry[[paste0("ref_", name)]]
-    expect_lt(abs(below[[name]] - reference), 1e-10,
-              label = paste("below", name))
-    expect_lt(abs(above[[name]] - reference), 1e-10,
-              label = paste("above", name))
-  }
-})
-
-test_that("final score raises on an E_aug disagreement below the cap", {
-  prior <- getOption("FielDHub.arc_oracle_max_plots")
-  real <- asNamespace("FielDHub")$arc_evaluate_objectives
-  local_mocked_bindings(arc_evaluate_objectives = function(...) {
-    result <- real(...)
-    result$E_aug <- result$E_aug + 1e-6
-    result
-  })
-  condition <- expect_arc_error(
-    arc_final_score(arc_ex2_contraction, 24, "restricted"),
-    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
-  expect_identical(condition$authority, "full_layout")
-  expect_lt(abs(condition$cross_E_aug - condition$authority_E_aug - 1e-6),
-            1e-12)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-})
-
-test_that("final score raises on an E_aug disagreement above the cap", {
-  prior <- getOption("FielDHub.arc_oracle_max_plots")
-  real <- asNamespace("FielDHub")$arc_evaluate_contraction
-  local_mocked_bindings(arc_evaluate_contraction = function(...) {
-    result <- real(...)
-    result$E_aug <- result$E_aug + 1e-6
-    result
-  })
-  condition <- expect_arc_error(
-    arc_final_score_capped(arc_ex2_contraction, 24, "restricted", 100),
-    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
-  expect_identical(condition$authority, "single_matrix")
-  expect_lt(abs(condition$cross_E_aug - condition$authority_E_aug - 1e-6),
-            1e-12)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-})
-
-test_that("final score raises on a connectivity disagreement", {
-  prior <- getOption("FielDHub.arc_oracle_max_plots")
-  # Captured before any mock is installed.
-  real <- asNamespace("FielDHub")$arc_evaluate_objectives
-  local_mocked_bindings(
-    arc_evaluate_objectives = function(...) {
-      list(connected = FALSE, df_formula = 37L, lambda_min_rel = 1e-12)
-    },
-    arc_evaluate_contraction = function(...) {
-      list(connected = FALSE, df_formula = 37L, lambda_min_rel = 1e-12)
-    }
-  )
-  below <- expect_arc_error(
-    arc_final_score(arc_ex2_contraction, 24, "restricted"),
-    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
-  expect_true(below$authority_connected)
-  expect_false(below$cross_connected)
-  expect_identical(below$lambda_min_rel, 1e-12)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-
-  # Above the cap the mocked single matrix is the authority (disconnected)
-  # and the mocked paper route agrees, so restore the real authority there.
-  local_mocked_bindings(arc_evaluate_objectives = real)
-  above <- expect_arc_error(
-    arc_final_score_capped(arc_ex2_contraction, 24, "restricted", 100),
-    "fieldhub_arc_numerical_error", "fieldhub_numerical_error")
-  expect_true(above$authority_connected)
-  expect_false(above$cross_connected)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-})
-
-test_that("final score gives disconnected designs diagnostics only", {
-  prior <- getOption("FielDHub.arc_oracle_max_plots")
-  false_qr <- arc_final_score(arc_fixture("false-qr.csv"), 54, "restricted")
-  expect_identical(names(false_qr), arc_final_disconnected_names)
-  expect_false(false_qr$connected)
-  expect_identical(false_qr$authority, "full_layout")
-  expect_identical(false_qr$df_formula, -1L)
-  expect_identical(false_qr$lambda_min_rel, NA_real_)
-  expect_equal(false_qr$residual_df_rank, 0, tolerance = 0)
-  expect_null(false_qr$E_aug)
-
-  small <- arc_final_score(arc_disconnected_contraction, 6, "restricted")
-  expect_identical(names(small), arc_final_disconnected_names)
-  expect_false(small$connected)
-  expect_identical(small$authority, "full_layout")
-  expect_identical(small$df_formula, 1L)
-  expect_lt(small$lambda_min_rel, 1e-8)
-  expect_null(small$E_aug)
-
-  capped <- arc_final_score_capped(arc_disconnected_contraction, 6,
-                                   "restricted", 10)
-  expect_identical(names(capped), arc_final_disconnected_names)
-  expect_false(capped$connected)
-  expect_identical(capped$authority, "single_matrix")
-  expect_identical(capped$df_formula, 1L)
-  expect_identical(capped$residual_df_rank, NA_integer_)
-  expect_null(capped$E_aug)
-  expect_identical(getOption("FielDHub.arc_oracle_max_plots"), prior)
-})
-
-# ---- Zero-information layouts (M1 gate review, P1) -------------------------
-# Treatments completely confounded with rows or columns give C = 0 exactly, so
-# no contrast is estimable. The rank decision must not be relative to the
-# rounding noise of an all-zero spectrum (specification section 5).
-
-expect_zero_information <- function(result, residual_df) {
-  expect_false(result$connected)
-  expect_identical(result$rank_C, 0L)
-  expect_identical(result$residual_df_rank, as.integer(residual_df))
-  for (field in c("cefs", "E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")) {
-    expect_null(result[[field]])
-  }
-}
-
-test_that("a layout confounded with rows has zero information", {
-  # 1 1 / 2 2: each treatment indicator is a row indicator. n = 4,
-  # rank(Z) = 2 + 2 - 1 = 3, rank(C) = 0, so residual df = 1.
-  codes <- matrix(c(1L, 2L, 1L, 2L), nrow = 2L)
-  expect_zero_information(arc_evaluate_layout(codes), 1L)
-  expect_zero_information(arc_evaluate_layout(codes[2:1, ]), 1L)
-  expect_zero_information(arc_evaluate_layout(codes[, 2:1]), 1L)
-  expect_zero_information(arc_evaluate_layout(t(codes)), 1L)
-})
-
-test_that("a single-column layout spanned by rows has zero information", {
-  # Six rows, one column: the row effects span all six plots, so rank(Z) = 6,
-  # rank(C) = 0, and residual df = 0 (never -1).
-  codes <- matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 1L)
-  expect_zero_information(arc_evaluate_layout(codes), 0L)
-  expect_zero_information(arc_evaluate_layout(codes[c(6, 3, 1, 5, 2, 4), , drop = FALSE]), 0L)
-  expect_zero_information(arc_evaluate_layout(t(codes)), 0L)
-})
-
-test_that("dimensions beyond the integer range are classed input errors", {
-  contraction <- arc_fixture("example1-contraction.csv")
-  expect_error(arc_check_contraction(contraction, 2^31, "restricted"),
-               class = "fieldhub_arc_input_error")
-  codes <- matrix(c(1, 1, 2, 2, 2^31, 4), ncol = 2L)
-  expect_error(arc_evaluate_layout(codes), class = "fieldhub_arc_layout_error")
-  expect_error(arc_evaluate_layout(matrix(c(1L, 1L, 2L, 2L, 3L, 4L), ncol = 2L),
-                                   check_codes = c(1, 2^31)),
-               class = "fieldhub_arc_layout_error")
+  # Piepho and Williams (2026) Example 1: 12 x 8 with 3 checks, optimum
+  # E_aug printed as 0.3881; at least 4 of 5 seeds reach it
+  hits <- vapply(1:5, function(seed) {
+    x <- arc_muffle_low_df(augmented_row_column(
+      nrows = 12, ncols = 8, checks = 3, check_direction = "columns",
+      objective = "E_aug", budget = 20000, seed = seed))
+    abs(x$statistics$E_aug - 0.3881) <= arc_published_tol(4)
+  }, logical(1))
+  expect_gte(sum(hits), 4L)
 })

@@ -5,7 +5,8 @@
 #' @param nrows Number of rows in the field.
 #' @param ncols Number of columns in the field.
 #' @param lines Number of genotypes, experimental lines or treatments.
-#' @param checks Number of genotypes checks. 
+#' @param checks Number of genotypes checks, or a vector of their entry numbers
+#' (distinct consecutive whole numbers in increasing order, e.g. \code{c(301, 302)}).
 #' @param kindExpt Type of diagonal design, with single options: Single Un-replicated Diagonal Checks
 #' \code{'SUDC'} and Decision Blocks Un-replicated Design with Diagonal Checks \code{'DBUDC'} 
 #' for multiple experiments. By default \code{kindExpt = 'SUDC'}.
@@ -336,10 +337,11 @@ diagonal_arrangement <- function(
             dim_data_1 = getData$dim_data_1[[sites]],
             Block_Fillers = NULL
         )
+        # `checks` may be a count or the check entries; use the count here
+        n_checks <- length(getData$checksEntries[[sites]])
         if (is.null(checks_percentages) & !is.null(getData$data_entry[[sites]])) {
-            checks <- as.numeric(checks)
             total_entries <- as.numeric(getData$dim_data_entry[[sites]])
-            lines <- total_entries - checks
+            lines <- total_entries - n_checks
             # The same candidate sizes the app offers (field_dimensions())
             size_range <- field_size_range(lines)
             t1 <- size_range[1]
@@ -356,7 +358,7 @@ diagonal_arrangement <- function(
                                     " plots: all those numbers are prime.")
             )
         }
-        new_lines <- nrow(getData$data_entry[[sites]]) - checks
+        new_lines <- nrow(getData$data_entry[[sites]]) - n_checks
         infoP <- as.data.frame(checks_percentages$P)
         infoP$V7 <- nrows*ncols - infoP[,6]
         minLines <- min(infoP$V7)

@@ -100,12 +100,14 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
 3. Open the RStudio project file (`.Rproj`).
 4. Make your changes:
     * Add a plain-R regression test that fails before fixing a defect, then
-      implement the fix. Keep scientific logic out of Shiny modules; do not add
-      Shiny server or browser tests.
-    * Run the full tests with `NOT_CRAN=true FIELDHUB_GOLDEN=true`. Golden
-      snapshots are recorded on macOS. Review deliberate scientific output
-      changes and announce affected inputs in NEWS; never accept snapshots
-      blindly.
+      implement the fix. Keep scientific logic out of Shiny modules. Test app
+      behaviour through the plain functions a page calls, or with
+      `shiny::testServer()` for a module's reactive contract; do not add
+      browser tests (shinytest2, screenshots).
+    * Run the full tests with `NOT_CRAN=true`. Tests check properties of the
+      output (counts, coordinates, efficiencies against independent
+      references), not recorded copies of it. Announce deliberate scientific
+      output changes and the affected inputs in NEWS.
     * For output-preserving refactors, compare complete fixed-seed results with
       the previous implementation using `identical()`. Preserve supplied labels,
       field-book column types, RNG state, and process options.
@@ -203,8 +205,10 @@ Three files are exceptions:
 - `globals.R` declares the column names used in non-standard evaluation.
 - `run_app.R` holds `run_app()`, the exported launcher of the Shiny app.
 
-Tests live in `tests/testthat/test_<topic>.R` and are plain R: never Shiny
-server or browser tests. `test_source_layout.R` checks this layout (prefixes,
+Tests live in `tests/testthat/test_<feature>.R`, one table-driven file per
+feature, and check user-facing contracts only. They are plain R: app logic is
+tested through plain functions or `shiny::testServer()`, never through a
+browser. `test_package_hygiene.R` checks the source layout (prefixes,
 one `fct_` file per exported function, no core reference to the Shiny
 layer, no dependency cycle between core files). Structural checks that must
 also run under `R CMD check`, where `R/` is not installed, inspect the
