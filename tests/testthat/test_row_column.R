@@ -429,7 +429,7 @@ test_that("row and column A-Bounds are valid for the reported coding", {
 
 # Quality floors from FielDHub 1.7.0 ------------------------------------------
 
-test_that("row_column() reaches the efficiencies recorded from FielDHub 1.7.0", {
+test_that("row_column() reaches the efficiencies the previous release recorded", {
   # Engine results can differ across platforms and builds.
   skip_on_cran()
   # Rows: arguments, seeds, level, efficiency column, recorded value.
