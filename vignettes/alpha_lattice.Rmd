@@ -1,5 +1,6 @@
 ---
 title: "Alpha Lattice Design"
+description: "Resolvable incomplete blocks for a flexible number of treatments and block sizes."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Alpha Lattice Design}
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **Alpha Lattice Design** using both the FielDHub Shiny App and the scripting function `alpha_lattice()` from the `FielDHub` package.
+This vignette shows how to generate an **alpha lattice design** using both the FielDHub Shiny App and the scripting function `alpha_lattice()` from the `FielDHub` package.
 
 ## 1. Using the FielDHub Shiny App
 

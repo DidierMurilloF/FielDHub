@@ -1,5 +1,6 @@
 ---
 title: "Rectangular Lattice Design"
+description: "Resolvable incomplete blocks for k(k + 1) treatments in blocks of size k."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Rectangular Lattice Design}

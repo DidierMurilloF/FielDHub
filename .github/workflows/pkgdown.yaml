@@ -3,6 +3,20 @@ on:
   push:
     branches: [master]
   pull_request:
+    paths:
+      - "vignettes/**"
+      - "man/**"
+      - "index.Rmd"
+      - "NEWS.md"
+      - "README.Rmd"
+      - "CONTRIBUTING.md"
+      - "website/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - "tools/build-site.R"
+      - "tools/prepare-site.py"
+      - "tools/check-site.py"
+      - ".github/workflows/pkgdown.yaml"
   workflow_dispatch:
 concurrency:
   group: pages-${{ github.ref }}

@@ -1,5 +1,6 @@
 ---
 title: "Partially Replicated (p-rep) Design"
+description: "Some entries are replicated and the rest appear once, at one or several locations."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >
@@ -18,8 +19,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **partially replicated (p-rep) design** 
-using both the FielDHub Shiny App and the scripting function `partially_replicated()` 
+This vignette shows how to generate a **partially replicated (p-rep) design**,
+also written prep, using both the FielDHub Shiny App and the scripting function `partially_replicated()` 
 from the `FielDHub` R package.
 
 ## Overview

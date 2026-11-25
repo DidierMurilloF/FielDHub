@@ -27,41 +27,40 @@ for page in root.rglob("*.md"):
         return "](" + url + ")"
     text = re.sub(r"\]\(([^)]+)\)", link, text)
     page.write_text(text)
+def front_matter(path):
+    text = path.read_text()
+    return (yaml.safe_load(text.split("---", 2)[1]) or {}) if text.startswith("---") else {}
+
 def page_title(path):
     text = path.read_text()
-    if text.startswith("---"):
-        metadata = yaml.safe_load(text.split("---", 2)[1]) or {}
-        if metadata.get("title"):
-            return metadata["title"]
-    heading = re.search(r"^#{1,6} (.+)$", text, re.MULTILINE)
+    title = front_matter(path).get("title")
+    if title:
+        return title
+    heading = re.search(r"^#{1,6} (.+?)(?: \{#[^}]*\})?$", text, re.MULTILINE)
     return heading.group(1) if heading else path.stem
 
 references = sorted(p.name for p in (root / "reference").glob("*.md") if p.name != "index.md")
-(root / "reference/index.md").write_text("# Reference\n\n" + "\n".join(
-    f"- [{Path(name).stem} — {page_title(root / 'reference' / name)}]({name})" for name in references))
-(root / "articles/index.md").write_text("# Articles\n\n" + "\n".join(
-    f"- [{p.stem}]({p.name})" for p in sorted((root / "articles").glob("*.md")) if p.name != "index.md"))
+topics = list(csv.DictReader((root / "topics.csv").open()))
 config = yaml.safe_load(Path("mkdocs.yml").read_text())
-background = ["methods", "scientific_validation", "architecture", "extending_fieldhub"]
-articles = [p.stem for p in (root / "articles").glob("*.md") if p.stem not in background + ["index"]]
-config["nav"] = [
-    {"Home": "index.md"}, {"Get started": "get-started.md"},
-    {"Designs": [{"Articles": "articles/index.md"}] + [{name.replace("_", " ").title(): f"articles/{name}.md"} for name in sorted(articles)]},
-    {"Background": [{name.replace("_", " ").title(): f"articles/{name}.md"} for name in background]},
-    {"Reference": [{"Overview": "reference/index.md"}] + [{Path(name).stem: f"reference/{name}"} for name in references]},
-    {"News": [{"Changelog": "news/index.md"}] + [{page_title(p): str(p.relative_to(root))} for p in sorted((root / "articles/news").glob("*.md"))]}]
-Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
 
-if (root / "topics.csv").exists():
-    groups = {}
-    for row in csv.DictReader((root / "topics.csv").open()):
-        group = groups.setdefault(row["group"], [])
-        target = row["guide"].removeprefix(base).replace(".html", ".md")
-        entry = {row["label"].removeprefix("New - "): target}
-        if not any(target in item.values() for item in group):
-            group.append(entry)
-    config["nav"][2] = {"Designs": [{key: value} for key, value in groups.items()]}
-    Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
+# Designs are grouped as in the app's menus. Each has a guide: an article, or
+# its reference page when no article has been written yet.
+design_groups = {}
+functions = {}
+for row in topics:
+    guide = row["guide"].removeprefix(base).replace(".html", ".md")
+    group = design_groups.setdefault(row["group"], [])
+    if not any(guide in item.values() for item in group):
+        group.append({row["label"].removeprefix("New - "): guide})
+        functions[guide] = row["engine"]
+
+# Every other vignette is a background article.
+background = ["methods", "simulating_traits", "scientific_validation", "architecture", "extending_fieldhub"]
+background += sorted(p.stem for p in (root / "articles").glob("*.md")
+                     if p.stem not in background + ["index"] and f"articles/{p.name}" not in functions)
+background = [{page_title(root / f"articles/{name}.md"): f"articles/{name}.md"} for name in background]
+news = [{"Changelog": "news/index.md"}] + [
+    {page_title(p): str(p.relative_to(root))} for p in sorted((root / "articles/news").glob("*.md"), reverse=True)]
 
 reference_groups = {
     "Designs": [],
@@ -72,7 +71,7 @@ reference_groups = {
 }
 allocation = {"do_optim", "swap_pairs", "split_families"}
 io = {"read_design", "write_design", "reproduce_design", "reproduce_simulation", "design_formats"}
-designs = {row["engine"] for row in csv.DictReader((root / "topics.csv").open())}
+designs = {row["engine"] for row in topics}
 for name in references:
     topic = Path(name).stem
     if topic in allocation:
@@ -86,6 +85,76 @@ for name in references:
     else:
         group = "Results and shared arguments"
     reference_groups[group].append({topic: f"reference/{name}"})
-config["nav"][4] = {"Reference": [{"Overview": "reference/index.md"}] +
-    [{group: items} for group, items in reference_groups.items() if items]}
+reference_groups = {group: items for group, items in reference_groups.items() if items}
+
+# A page has one place in the menus, so the Designs menu lists the articles
+# only; a design whose guide is its reference page is found under Reference.
+config["nav"] = [
+    {"Home": "index.md"},
+    {"Get started": "get-started.md"},
+    {"Articles": "articles/index.md"},
+    {"Designs": [{group: [item for item in items if "".join(item.values()).startswith("articles/")]}
+                 for group, items in design_groups.items()]},
+    {"Background": background},
+    {"Reference": [{"Overview": "reference/index.md"}] + [{group: items} for group, items in reference_groups.items()]},
+    {"News": news},
+    {"About": [{"Authors and citation": "authors.md"}, {"Contributing": "CONTRIBUTING.md"},
+               {"Code of conduct": "CODE_OF_CONDUCT.md"}, {"License": "LICENSE.md"},
+               {"Releasing": "RELEASING.md"}]}]
 Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
+
+# The reference index lists every topic with its title, grouped as in the menu.
+index = ["---", "title: Function reference", "---", "# Reference", "",
+         "Every exported function and help topic. The same pages are available in R with `help()`.",
+         "", '<div class="fieldhub-reference" markdown>']
+for group, items in reference_groups.items():
+    index += ["", f"## {group}", "", "| Topic | Description |", "|---|---|"]
+    for item in items:
+        (topic, target), = item.items()
+        index.append(f"| [`{topic}`]({Path(target).name}) | {page_title(root / target).rstrip('.')} |")
+(root / "reference/index.md").write_text("\n".join(index + ["", "</div>"]) + "\n")
+
+# The Articles page shows every vignette as a card, grouped as in the menus.
+def cards(items, fallback=""):
+    out = ['<div class="grid cards fieldhub-cards" markdown>', ""]
+    for item in items:
+        (title, target), = item.items()
+        text = front_matter(root / target).get("description") or fallback or page_title(root / target)
+        out += [f"-   [{title}]({os.path.relpath(target, 'articles')})", "", f"    {text.rstrip('.')}.", ""]
+        if target in functions:
+            out += [f"    `{functions[target]}()`", ""]
+    return out + ["</div>", ""]
+
+articles = ["---", "title: Articles",
+            "description: Guides for every FielDHub design, background articles and release notes.",
+            "---", "# Articles", "",
+            "Each design has a guide that builds it twice: in the Shiny app and with its R function.", "",
+            "## Designs", ""]
+for group, items in design_groups.items():
+    articles += [f"### {group}", ""] + cards(items)
+articles += ["## Background", ""] + cards(background)
+articles += ["## News", ""] + cards(news[:1], "Every change in every release.") + cards(news[1:], "Release announcement.")
+(root / "articles/index.md").write_text("\n".join(articles))
+
+# Search titles and descriptions: a design guide or reference page says what it
+# is, that it works in R and Shiny, and which function makes it.
+def set_meta(path, **values):
+    text = path.read_text()
+    meta, body = (front_matter(path), text.split("---", 2)[2]) if text.startswith("---") else ({}, "\n" + text)
+    meta.update(values)
+    path.write_text("---\n" + yaml.safe_dump(meta, sort_keys=False, allow_unicode=True) + "---" + body)
+
+for target, engine in functions.items():
+    if target.startswith("articles/"):
+        path = root / target
+        title = page_title(path)
+        summary = front_matter(path).get("description", "").rstrip(".")
+        set_meta(path, seo_title=f"{title} in R and Shiny | FielDHub",
+                 description=f"{title} in R and Shiny with FielDHub's {engine}(). {summary}.")
+
+for name in references:
+    path = root / "reference" / name
+    topic = Path(name).stem
+    title = page_title(path).rstrip(".")
+    set_meta(path, seo_title=f"{topic}: {title} | FielDHub R package",
+             description=f"{title}. Reference for {topic} in the FielDHub R package: arguments, value and examples.")

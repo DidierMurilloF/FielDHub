@@ -1,5 +1,6 @@
 ---
 title: "Architecture and compatibility contracts"
+description: "The layers of the package, what each one does, and the contracts between them."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Architecture and compatibility contracts}

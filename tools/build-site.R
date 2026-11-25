@@ -28,12 +28,10 @@ build_site <- function() {
     dir.create(dirname(destination), recursive = TRUE, showWarnings = FALSE)
     input <- file.path(dirname(destination), basename(source))
     file.copy(source, input, overwrite = TRUE)
-    title <- rmarkdown::yaml_front_matter(input)$title
-    if (is.null(title)) {
-      headings <- grep("^#{1,6} ", readLines(input, warn = FALSE), value = TRUE)
-      title <- if (length(headings)) sub("^#{1,6} ", "", headings[[1]]) else "FielDHub"
-    }
+    front <- rmarkdown::yaml_front_matter(input)
     knitr::opts_chunk$set(error = FALSE, fig.retina = 2)
+    # Printed output goes in its own block, so it is not highlighted as R code.
+    knitr::opts_hooks$set(collapse = function(options) { options$collapse <- FALSE; options })
     rmarkdown::render(input,
       output_format = rmarkdown::md_document(
         variant = "gfm+raw_html", fig_retina = 2,
@@ -41,9 +39,10 @@ build_site <- function() {
                         "--lua-filter", file.path(root, "website/math.lua"))),
       output_file = basename(destination), envir = new.env(), quiet = TRUE)
     content <- readLines(destination, warn = FALSE)
-    writeLines(c("---", yaml::as.yaml(list(title = title,
-      version = as.character(packageVersion("FielDHub")), description = paste(title, "— examples and documentation for FielDHub."))),
-      "---", content), destination)
+    # A vignette's title is its page heading; pages without one bring their own.
+    meta <- c(list(version = as.character(packageVersion("FielDHub"))), front[c("title", "description")])
+    heading <- if (is.null(front$title)) character() else c(paste("#", front$title), "")
+    writeLines(c("---", yaml::as.yaml(Filter(Negate(is.null), meta)), "---", heading, content), destination)
     unlink(input)
   }
   render("index.Rmd", file.path(docs, "index.md"))
@@ -55,6 +54,7 @@ build_site <- function() {
     file.copy("vignettes/references.bib", file.path(dirname(destination), "references.bib"), overwrite = TRUE)
     render(source, destination)
   }
+  unlink(list.files(docs, pattern = "^references[.]bib$", recursive = TRUE, full.names = TRUE))
   # pkgdown executes examples and resolves Rd cross-references using the package index.
   pkgdown::build_reference(pkg = pkgdown::as_pkgdown(root, override = list(destination = file.path(work, "reference-site"))),
                            lazy = FALSE, examples = TRUE, devel = FALSE)
@@ -74,7 +74,12 @@ build_site <- function() {
   assets <- assets[!grepl("[.](html|md)$", assets)]
   file.copy(assets, file.path(docs, "reference"), recursive = TRUE)
   dir.create(file.path(docs, "news"))
-  file.copy("NEWS.md", file.path(docs, "news/index.md"))
+  # One page heading: the releases become sections of the changelog.
+  news <- readLines("NEWS.md", warn = FALSE)
+  in_code <- cumsum(grepl("^```", news)) %% 2 == 1
+  demote <- !in_code & grepl("^#+ ", news) & news != "# Changelog"
+  news[demote] <- paste0("#", news[demote])
+  writeLines(news, file.path(docs, "news/index.md"))
   for (source in c("CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "LICENSE.md", "RELEASING.md")) {
     file.copy(source, docs)
   }

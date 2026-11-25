@@ -1,5 +1,6 @@
 ---
 title: "Methods in FielDHub"
+description: "What print(), summary() and plot() show for a FielDHub design."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Methods in FielDHub}
@@ -32,21 +33,21 @@ experiment <- RCBD(
 )
 ```
 
-# `print()`
+## `print()`
 
 The `print()` function prints the design parameters of the experiment and the first 10 rows of the field book. The first 10 rows of the field book are saved if the output of this function is assigned to a variable. 
 ```{r}
 print(experiment)
 ```
 
-# `summary()`
+## `summary()`
 
 The `summary()` function outputs a list of the design parameters and the layout randomization with plot numbers.
 ```{r}
 summary(experiment)
 ```
 
-# `plot()`
+## `plot()`
 
 The `plot()` function plots the field for the input design, as it would be displayed in FielDHub. This can also be saved to a variable. This function has parameters for location and layout, if applicable.
 

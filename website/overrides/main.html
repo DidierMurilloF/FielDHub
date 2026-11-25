@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{% block htmltitle %}
+  {% if page.is_homepage %}
+    <title>FielDHub: Design of Experiments in R and Shiny for Field Trials</title>
+  {% elif page.meta and page.meta.seo_title %}
+    <title>{{ page.meta.seo_title }}</title>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block extrahead %}
   {{ super() }}
   {% if page and page.canonical_url %}
@@ -14,18 +24,35 @@
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     {% if page.is_homepage %}
+      <meta name="keywords" content="{{ config.extra.keywords | join(', ') | e }}">
       <script type="application/ld+json">
         {{ {
           "@context": "https://schema.org",
-          "@type": "SoftwareSourceCode",
+          "@type": ["SoftwareApplication", "SoftwareSourceCode"],
           "name": config.site_name,
           "url": page.canonical_url,
           "description": description,
+          "keywords": config.extra.keywords | join(", "),
+          "applicationCategory": "ScientificApplication",
+          "operatingSystem": "Windows, macOS, Linux",
+          "isAccessibleForFree": true,
+          "license": "https://opensource.org/licenses/MIT",
           "codeRepository": config.repo_url,
           "programmingLanguage": "R",
           "runtimePlatform": "R and Shiny",
           "version": page.meta.version,
           "citation": "https://doi.org/10.21105/joss.03122"
+        } | tojson }}
+      </script>
+    {% else %}
+      <script type="application/ld+json">
+        {{ {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": title,
+          "description": description,
+          "url": page.canonical_url,
+          "isPartOf": {"@type": "WebSite", "name": config.site_name, "url": config.site_url}
         } | tojson }}
       </script>
     {% endif %}

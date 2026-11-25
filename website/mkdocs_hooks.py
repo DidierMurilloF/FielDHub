@@ -32,6 +32,7 @@ def on_post_build(config):
             shutil.copy2(source, target)
 
 def on_page_markdown(markdown, *, page, config, files):
-    if not page.meta.get("description"):
+    # The home page uses the site description.
+    if not page.is_homepage and not page.meta.get("description"):
         page.meta["description"] = f"{page.title} — FielDHub R package and Shiny documentation."
     return markdown

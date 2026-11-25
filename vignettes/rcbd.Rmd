@@ -1,5 +1,6 @@
 ---
 title: "Randomized Complete Block Design"
+description: "Every treatment once in each complete block, at one or several locations."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Randomized Complete Block Design}

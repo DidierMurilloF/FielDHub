@@ -1,5 +1,6 @@
 ---
 title: "Split-Plot Design"
+description: "Two factors, one on whole plots and one on sub-plots."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Split-Plot Design}
@@ -37,7 +38,7 @@ Once the app is running, go to **Other Designs** > **Split-Plot Design**
 
 Then, follow the following steps where we show how to generate this kind of design by an example with 3 whole plots, 2 sub-plots and 3 reps. We will run this experiment in just one location.
 
-# Inputs
+## Inputs
 
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment/genotypes based on the user inputs.

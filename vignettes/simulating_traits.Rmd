@@ -1,5 +1,6 @@
 ---
 title: "Simulating Trait Data on a Field Design"
+description: "Simulate trait data on any design with simulate(), with optional spatial correlation."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Simulating Trait Data on a Field Design}

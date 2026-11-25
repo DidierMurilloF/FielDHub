@@ -4,7 +4,7 @@ output:
     html_preview: false
 ---
 
-<!-- index.md is the pkgdown home page, generated from index.Rmd. Keep it in step with README.Rmd -->
+<!-- The website home page. Keep its content in step with README.Rmd -->
 
 ```{r, include = FALSE}
 library(FielDHub)
@@ -16,9 +16,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-<img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
-
-# FielDHub
+<div class="fieldhub-hero">
+<div>
+<h1>FielDHub</h1>
+<p class="fieldhub-tagline">Design of experiments for life sciences</p>
+<p>An R package and Shiny app that randomizes field, greenhouse and laboratory experiments, with a field map and a field book for every design.</p>
+<p class="fieldhub-actions"><a class="md-button md-button--primary" href="get-started.html">Get started</a> <a class="md-button" href="articles/index.html">Browse the designs</a></p>
+</div>
+<img class="fieldhub-hex" src="man/figures/fieldhub-logo.png" alt="FielDHub hex logo">
+</div>
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/package=FielDHub)
@@ -29,14 +35,14 @@ knitr::opts_chunk$set(
 [![JOSS](https://joss.theoj.org/papers/10.21105/joss.03122/status.svg)](https://doi.org/10.21105/joss.03122)
 <!-- badges: end -->
 
-## Design of experiments for life sciences
-
-FielDHub is an R package and Shiny app that randomizes field, greenhouse and
-laboratory experiments. It covers classic designs, such as completely
-randomized, complete block, Latin square, factorial and split-plot designs, and
-the unreplicated, augmented and partially replicated designs used in plant
-breeding. It serves agriculture, plant breeding, forestry, and animal and
-biological sciences.
+FielDHub is a free, open-source R package and Shiny app for the design of
+experiments. It randomizes field, greenhouse and laboratory experiments:
+completely randomized (CRD), randomized complete block (RCBD), Latin square,
+factorial, split-plot, split-split-plot and strip-plot designs; square,
+rectangular and alpha lattices, incomplete block and row-column designs; and the
+unreplicated, augmented, partially replicated (p-rep) and sparse designs used in
+plant breeding and multi-location trials. It serves agriculture, plant breeding,
+forestry, and animal and biological sciences.
 
 Every design comes with a field map and a field book. Every design in the app is
 also an R function with the same arguments, so a script can reproduce what the

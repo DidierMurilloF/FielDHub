@@ -29,12 +29,14 @@ knitr::opts_chunk$set(
 
 ## Design of experiments for life sciences
 
-FielDHub is an R package and Shiny app that randomizes field, greenhouse and
-laboratory experiments. It covers classic designs, such as completely
-randomized, complete block, Latin square, factorial and split-plot designs, and
-the unreplicated, augmented and partially replicated designs used in plant
-breeding. It serves agriculture, plant breeding, forestry, and animal and
-biological sciences.
+FielDHub is a free, open-source R package and Shiny app for the design of
+experiments. It randomizes field, greenhouse and laboratory experiments:
+completely randomized (CRD), randomized complete block (RCBD), Latin square,
+factorial, split-plot, split-split-plot and strip-plot designs; square,
+rectangular and alpha lattices, incomplete block and row-column designs; and the
+unreplicated, augmented, partially replicated (p-rep) and sparse designs used in
+plant breeding and multi-location trials. It serves agriculture, plant breeding,
+forestry, and animal and biological sciences.
 
 Every design comes with a field map and a field book. Every design in the app is
 also an R function with the same arguments, so a script can reproduce what the

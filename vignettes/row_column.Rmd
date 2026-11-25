@@ -1,5 +1,6 @@
 ---
 title: "Row-Column Design"
+description: "Resolvable designs that block in two directions, by rows and by columns."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

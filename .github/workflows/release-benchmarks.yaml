@@ -7,20 +7,6 @@ on:
         description: "Optional compatible benchmark baseline: full commit SHA (f06aaf0 or later)"
         required: false
         type: string
-  pull_request:
-    branches: [main, master]
-    paths:
-      - "R/**"
-      - "DESCRIPTION"
-      - "tools/benchmark-*.R"
-      - "tools/run-benchmarks.R"
-      - "tools/compare-benchmarks.R"
-      - "tools/check-benchmark-comparison.R"
-      - "tools/check-release-tools.R"
-      - "tools/check-launchers.R"
-      - "dev/run_dev.R"
-      - "app.R"
-      - ".github/workflows/**"
 
 permissions:
   contents: read

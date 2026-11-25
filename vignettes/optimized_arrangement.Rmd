@@ -1,5 +1,6 @@
 ---
 title: "Un-replicated Optimized Arrangement Design"
+description: "Unreplicated entries with checks placed at random and spread across the field."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

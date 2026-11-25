@@ -1,5 +1,6 @@
 ---
 title: "Split-Split Plot Design"
+description: "Three factors, on whole plots, sub-plots and sub-sub-plots."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Split-Split Plot Design}
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **split-split plot design** using both the FielDHub Shiny App and the scripting function `split_plot()` from the `FielDHub` package.
+This vignette shows how to generate a **split-split plot design** using both the FielDHub Shiny App and the scripting function `split_split_plot()` from the `FielDHub` package.
 
 ## 1. Using the FielDHub Shiny App
 
@@ -37,7 +38,7 @@ Once the app is running, go to **Other Designs** > **Split-Split Plot Design**
 
 Then, follow the following steps where we show how to generate this kind of design by an example with 3 whole plots, 2 sub-plots, 4 sub-sub plots and 3 reps. We will run this experiment in just one location.
 
-# Inputs
+## Inputs
 
 1. **Import entries' list?** Choose whether to import a list with entry numbers and names for treatments.
     * If the selection is `No`, that means the app is going to generate synthetic data for entries and names of the treatment based on the user inputs.
