@@ -108,6 +108,41 @@ arc_printed_value <- function(line, name) {
 
 arc_metrics <- c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
 
+# Brute-force move counts of a restricted contraction m (rows are checks,
+# columns field lines, entries cross-lines). A row move exchanges two checks'
+# cross-lines on a proper, non-empty set of field lines; a cross-line swap
+# exchanges two cells in different field lines. A move is feasible when no
+# field line and no check repeats a cross-line afterwards. Both sets are
+# unchanged by the randomization of lines, cross-lines and check labels.
+arc_restricted <- function(m) {
+  all(apply(m, 1L, anyDuplicated) == 0L) &&
+    all(apply(m, 2L, anyDuplicated) == 0L)
+}
+arc_row_moves <- function(m) {
+  s <- ncol(m)
+  n <- 0L
+  for (i in seq_len(nrow(m) - 1L)) for (ii in (i + 1L):nrow(m)) {
+    for (code in seq_len(2^s - 2)) {
+      on <- bitwAnd(code, 2^(seq_len(s) - 1L)) > 0
+      x <- m
+      x[c(i, ii), on] <- m[c(ii, i), on]
+      if (arc_restricted(x)) n <- n + 1L
+    }
+  }
+  n
+}
+arc_cross_line_swaps <- function(m) {
+  line <- col(m)
+  n <- 0L
+  for (p in seq_len(length(m) - 1L)) for (q in (p + 1L):length(m)) {
+    if (line[p] == line[q]) next
+    x <- m
+    x[c(p, q)] <- m[c(q, p)]
+    if (arc_restricted(x)) n <- n + 1L
+  }
+  n
+}
+
 # ---- Input validation ------------------------------------------------------
 
 test_that("invalid inputs are rejected by class before a seed is drawn", {
@@ -422,7 +457,17 @@ test_that("returned field books pass the placement checks and match the oracle",
          direction = "rows", objective = "E_aug", seed = 12,
          options = list(FielDHub.arc_oracle_max_plots = 50,
                         FielDHub.arc_worst_pair_block_mib = 49 * 8 / 2^20),
-         authority = "single_matrix")
+         authority = "single_matrix"),
+    # A 5 x 4 field with 3 checks admits no row move but some cross-line
+    # swaps: the row phases must certify an empty neighbourhood and the
+    # polish a local optimum
+    list(name = "5 x 4 with no row move", v = 5, s = 4, k = 3,
+         direction = "columns", objective = "V_tt", budget = 3000,
+         stops = TRUE),
+    # A 6 x 3 field with 4 checks and residual df 1, where the annealing
+    # proposes disconnected candidates
+    list(name = "6 x 3 with disconnected candidates", v = 6, s = 3, k = 4,
+         direction = "columns", objective = "V_tt")
   )
   # Absolute agreement of well-conditioned (lambda_min_rel > 0.1) O(1-10)
   # quantities from two independent factorizations of matrices of size at
@@ -438,7 +483,8 @@ test_that("returned field books pass the placement checks and match the oracle",
       checks = if (labels) odd_checks else case$k,
       check_direction = case$direction,
       entries = if (labels) odd_tests else NULL,
-      objective = case$objective, l = l, budget = 300,
+      objective = case$objective, l = l,
+      budget = if (is.null(case$budget)) 300 else case$budget,
       seed = if (is.null(case$seed)) 41 else case$seed
     )))
     checks <- if (labels) odd_checks else paste0("CH", seq_len(case$k))
@@ -489,6 +535,16 @@ test_that("returned field books pass the placement checks and match the oracle",
         case$s * n_tests * case$k * stats$V_tc +
         case$s^2 * choose(case$k, 2) * stats$V_cc
       expect_lt(abs(lhs - rhs) / lhs, 1e-10, label = nm)
+      # Stop claims checked against brute-force move counts of the result
+      if (isTRUE(case$stops)) {
+        m <- x$contraction[[site]]
+        phases <- unlist(x$diagnostics[[site]]$phases)
+        expect_identical(
+          list("empty_neighbourhood" %in% phases, arc_row_moves(m) == 0L,
+               "local_optimum" %in% phases, arc_cross_line_swaps(m) > 0L),
+          list(TRUE, TRUE, TRUE, TRUE), info = nm
+        )
+      }
     }
   }
 })
@@ -614,26 +670,52 @@ test_that("time_limit cuts each location's search and verification still runs", 
   limit <- full$timing$search / 2
   limited <- arc_run(budget = 2000, seed = 3, time_limit = limit, l = 2)
   expect_identical(limited$metadata$parameters$time_limit, limit)
-  for (site in 1:2) {
-    d <- limited$diagnostics[[site]]
-    fb <- arc_location_book(limited, site)
-    oracle <- arc_field_book_oracle(fb)
-    # Stopped at the deadline (give or take one scored step of the fake
-    # clock), then verified, randomized and assembled
-    expect_identical(
-      list(d$time_limit_hit, "time_limit" %in% d$phases, d$status,
-           d$objective_calls + d$proxy_calls < 2000,
-           limited$timing$search[site] >= limit,
-           limited$timing$search[site] < limit + 1,
-           limited$timing$verification[site] > 0,
-           limited$timing$total[site] > limited$timing$search[site],
-           arc_placement_ok(fb), oracle$connected),
-      list(TRUE, TRUE, "ok", TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-      info = site
-    )
-    # Scale of V_tt is O(1); see the oracle-agreement test for the tolerance
-    expect_lt(abs(limited$statistics$V_tt[site] - oracle$V_tt), 1e-10,
-              label = paste("V_tt deviation at location", site))
+  # Deadlines (fake seconds from a fresh clock) that fall between an
+  # annealing phase's stop check and its next objective call, and inside the
+  # neighbourhood scan of a 5 x 4 field with no row move, where the cut scan
+  # must not certify an empty neighbourhood
+  cases <- list(
+    list(name = "halfway", x = limited, limit = limit, budget = 2000, l = 2),
+    list(name = "before an objective call", limit = 22.2,
+         args = list(budget = 2000, seed = 3)),
+    list(name = "inside a scan", limit = 1.32, uncertified = TRUE,
+         args = list(nrows = 5, ncols = 4, checks = 3, budget = 300,
+                     seed = 41))
+  )
+  for (case in cases) {
+    if (is.null(case$x)) {
+      clock <- arc_fake_clock()
+      case$x <- arc_muffle_low_df(do.call(arc_run, c(case$args,
+                                                     time_limit = case$limit)))
+      case$budget <- case$args$budget
+      case$l <- 1L
+    }
+    for (site in seq_len(case$l)) {
+      nm <- paste(case$name, "location", site)
+      d <- case$x$diagnostics[[site]]
+      fb <- arc_location_book(case$x, site)
+      oracle <- arc_field_book_oracle(fb)
+      # Stopped at the deadline (give or take one scored step of the fake
+      # clock), then verified, randomized and assembled
+      expect_identical(
+        list(d$time_limit_hit, "time_limit" %in% d$phases, d$status,
+             d$objective_calls + d$proxy_calls < case$budget,
+             case$x$timing$search[site] >= case$limit,
+             case$x$timing$search[site] < case$limit + 1,
+             case$x$timing$verification[site] > 0,
+             case$x$timing$total[site] > case$x$timing$search[site],
+             arc_placement_ok(fb), oracle$connected,
+             !isTRUE(case$uncertified) ||
+               "sampling_exhausted" %in% d$phases),
+        list(TRUE, TRUE, "ok", TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE,
+             TRUE),
+        info = nm
+      )
+      # Scale of V_tt is O(1); see the oracle-agreement test for the
+      # tolerance
+      expect_lt(abs(case$x$statistics$V_tt[site] - oracle$V_tt), 1e-10,
+                label = paste("V_tt deviation at", nm))
+    }
   }
   # A cutoff before any design exists is a classed search error
   arc_local_seed(9)
