@@ -169,7 +169,7 @@ test_that("block efficiencies of degenerate block models are exact", {
   )
   for (nm in names(cases)) {
     case <- cases[[nm]]
-    expect_no_warning(result <- blockEstEffics(case[[1]], case[[2]]))
+    expect_no_warning(result <- block_incidence_efficiency(block_incidence(case[[1]], case[[2]])))
     expect_equal(unlist(result), c(Deffic = case[[3]], Aeffic = case[[3]]),
                  tolerance = 1e-12, info = nm)
   }

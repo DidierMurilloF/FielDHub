@@ -30,17 +30,6 @@ block_model_connected <- function(incidence) {
   FALSE
 }
 
-#' Canonical block efficiencies from normalized incidence counts
-#'
-#' Removing the mean from D_r^(-1/2) N D_k^(-1/2) leaves treatment/block
-#' association. Its nontrivial squared singular values are losses relative to
-#' complete randomization. Use the smaller singular system, not plot-by-plot
-#' projection matrices. Disconnected comparisons have zero overall efficiency.
-#' @noRd
-blockEstEffics <- function(TF, BF) {
-  block_incidence_efficiency(block_incidence(TF, BF))
-}
-
 #' Treatments or blocks (the smaller count) above which the efficiency worker
 #' reads the canonical efficiencies from the Gram matrix of the smaller side
 #' (`block_incidence_gram_values()`). Up to this size the singular value
@@ -95,7 +84,12 @@ block_incidence_gram_values <- function(incidence, replication, block_size, tota
   sort(eigen(gram, symmetric = TRUE, only.values = TRUE)$values, decreasing = TRUE)
 }
 
-#' Efficiency worker reusing the validated report incidence table
+#' Canonical block efficiencies from an incidence table
+#'
+#' Removing the mean from D_r^(-1/2) N D_k^(-1/2) leaves treatment/block
+#' association. Its nontrivial squared singular values are losses relative to
+#' complete randomization. Use the smaller singular system, not plot-by-plot
+#' projection matrices. Disconnected comparisons have zero overall efficiency.
 #'
 #' `digits = NULL` returns the unrounded values. `gram` chooses how the
 #' squared singular values are computed: TRUE from the Gram matrix of the
