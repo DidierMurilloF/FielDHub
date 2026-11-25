@@ -39,8 +39,6 @@ def page_title(path):
 references = sorted(p.name for p in (root / "reference").glob("*.md") if p.name != "index.md")
 (root / "reference/index.md").write_text("# Reference\n\n" + "\n".join(
     f"- [{Path(name).stem} — {page_title(root / 'reference' / name)}]({name})" for name in references))
-(root / "articles/index.md").write_text("# Articles\n\n" + "\n".join(
-    f"- [{p.stem}]({p.name})" for p in sorted((root / "articles").glob("*.md")) if p.name != "index.md"))
 config = yaml.safe_load(Path("mkdocs.yml").read_text())
 background = ["methods", "scientific_validation", "architecture", "extending_fieldhub"]
 articles = [p.stem for p in (root / "articles").glob("*.md") if p.stem not in background + ["index"]]
@@ -100,4 +98,20 @@ for name in references:
     reference_groups[group].append({topic: f"reference/{name}"})
 config["nav"][4] = {"Reference": [{"Overview": "reference/index.md"}] +
     [{group: items} for group, items in reference_groups.items() if items]}
+Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
+
+# The Vignettes page lists every vignette by title, grouped as in the menu.
+def lines(items, depth):
+    out = []
+    for item in items:
+        (title, target), = item.items()
+        if isinstance(target, list):
+            out += ["", "#" * depth + " " + title, ""] + lines(target, depth + 1)
+        else:
+            out.append(f"- [{title}]({os.path.relpath(target, 'articles')})")
+    return out
+
+sections = [entry for entry in config["nav"] if next(iter(entry)) in ("Designs", "Background", "News")]
+(root / "articles/index.md").write_text("# Vignettes\n" + "\n".join(lines(sections, 2)) + "\n")
+config["nav"].insert(2, {"Vignettes": "articles/index.md"})
 Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))

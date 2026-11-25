@@ -52,6 +52,7 @@ copyright: "<a href=\"https://www.ndsu.edu/agricultural-data-analytics\">\xA9 Ag
 nav:
 - Home: index.md
 - Get started: get-started.md
+- Vignettes: articles/index.md
 - Designs:
   - Unreplicated Designs:
     - Single Diagonal Arrangement: articles/diagonal_arrangement.md
