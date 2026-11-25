@@ -226,6 +226,47 @@ test_that("the checks table of a diagonal location lists each check and its plot
   expect_equal(sum(view$TIMES), sum(design$fieldBook$CHECKS != 0))
 })
 
+test_that("the Design block shows the chosen field and spacing reports show each location's own measures", {
+  # what a reader sees: the text of the page, without its markup
+  text <- function(html) trimws(gsub("[[:space:]]+", " ", gsub("<[^>]+>", " ", as.character(html))))
+  # smallest Euclidean distance between two plots of the same entry, from the field book alone
+  min_same <- function(plots) {
+    sprintf("%.2f", min(unlist(lapply(split(plots, plots$ENTRY), function(d) stats::dist(cbind(d$ROW, d$COLUMN))))))
+  }
+  spec <- design_app_spec("pREPS")
+  raw <- utils::modifyList(design_control_defaults(spec),
+                           list(l = 2, location_names = "North,South", plot_start = "1,1001", seed = 7))
+  seen <- new.env()
+  shiny::testServer(mod_design_server, args = list(spec = spec), {
+    do.call(session$setInputs, raw)
+    session$setInputs(run = 1, dimensions = "15 x 20")
+    seen$facts <- text(output$design_facts$html)
+    session$setInputs(randomize = 1)
+    session$setInputs(location_view = "1")
+    for (i in 1:5) { session$flushReact(); later::run_now(0.02) }
+    seen$report <- text(output$design_report$html)
+    seen$book <- session$returned$design()$fieldBook
+  })
+  sites <- split(seen$book, factor(seen$book$LOCATION, levels = unique(seen$book$LOCATION)))
+  unoptimized <- diagonal_arrangement(nrows = 15, ncols = 20, lines = 270, checks = 4, seed = 8)
+  checks <- unoptimized$fieldBook[unoptimized$fieldBook$CHECKS != 0, ]
+  cases <- list(
+    # before Randomize!, the field chosen in the select and the fillers it leaves
+    "p-rep Design block" = list(seen$facts, "Field 15 \u00d7 20 Fillers 0 Locations 2"),
+    # each location's minimum, in the order of the locations
+    "p-rep replicate spacing" = list(seen$report, paste0("Replicate spacing .*",
+      paste("Minimum same-entry distance", vapply(sites, min_same, ""), collapse = " .*"))),
+    # without the check search there is one value per measure, not a before and an after
+    "unoptimized check spacing" = list(text(app_design_report("check_spacing", unoptimized)),
+                                       paste("Optimization Off", ".*Measure Value Minimum same-check distance",
+                                             min_same(checks)))
+  )
+  found <- vapply(cases, function(case) grepl(case[[2]], case[[1]]), logical(1))
+  bad <- c(which(!found), 1L)[1L]
+  expect(all(found), sprintf("case %s: '%s' not shown in '%s'", names(cases)[bad], cases[[bad]][[2]],
+                             cases[[bad]][[1]]))
+})
+
 test_that("multiple diagonal pages show the entries per experiment and each experiment's plots", {
   entries <- data.frame(ENTRY = 1:7, BLOCK = c("ALL", "1", "1", "2", "2", "2", "2"))
   expect_identical(block_frequency_view(entries),

@@ -1089,6 +1089,9 @@ test_that("field sizes and percentages of checks are read once they hold a curre
                                list(checksPercent = 9.6)),
     # a select still holding a value of earlier choices is waited for
     "old size" = list(read_design_steps(steps, list(dimensions = "6 x 1"), list(l = 2), choices), NULL),
+    # a select that has not sent a value yet is waited for too
+    "no size yet" = list(read_design_steps(one, list(), list(l = 1),
+                                           list(dimensions = list(choices = c("15 x 20", "20 x 15")))), NULL),
     "old size of a location" = list(read_design_steps(steps, list(dimensions = "3 x 2", multi_dimension = TRUE,
                                                                   location_dimensions = list("2 x 3", "9 x 9")),
                                                       list(l = 2), choices), NULL),
@@ -1504,4 +1507,38 @@ test_that("the diagonal page shows the design of the latest choices, cached or n
   same <- mapply(function(a, b) isTRUE(all.equal(a, b)), seen$got, seen$want)
   expect(length(seen$got) == length(seen$want) && all(same),
          paste("the page does not show the expected design for:", paste(names(seen$got)[!same], collapse = ", ")))
+})
+
+test_that("with workers, the diagonal page shows a percentage prepared in the background as soon as it is chosen", {
+  for (package in c(app_dependencies(), "mirai")) skip_if_not_installed(package)
+  skip_on_cran()
+  runtime <- app_worker_lifecycle(2L)
+  stops <- list()
+  runtime$start(register_stop = function(callback) stops[[length(stops) + 1L]] <<- callback)
+  on.exit(for (callback in stops) callback(), add = TRUE)
+  skip_if_not(identical(runtime$backend, "mirai"), "workers could not start")
+  session <- shiny::MockShinySession$new()
+  session$userData$fieldhub_task_runtime <- runtime
+  raw <- page_raw("Diagonal", lines = 60, seed = 5, dist_method = "manhattan")
+  seen <- new.env()
+  shiny::testServer(mod_design_server, args = list(spec = design_app_spec("Diagonal")), session = session, {
+    shown <- function() tryCatch(session$returned$design()$fieldBook, error = function(e) NULL)
+    do.call(session$setInputs, raw)
+    session$setInputs(run = 1, dimensions = "7 x 10")
+    session$setInputs(randomize = 1)
+    seen$offered <- session$returned$design_choices()$checks_percent$choices
+    # the selected percentage first, then the others on the idle workers
+    for (i in 1:100) { later::run_now(0.05); session$flushReact() }
+    # each other percentage is shown in the same flush that chooses it, with no worker round trip
+    seen$got <- lapply(utils::head(seen$offered, -1L), function(percent) {
+      session$setInputs(checks_percent = as.character(percent))
+      shown()
+    })
+  })
+  want <- lapply(utils::head(seen$offered, -1L), function(percent) {
+    diagonal_arrangement(nrows = 7, ncols = 10, lines = 60, checks = 4, l = 1, plotNumber = 1, seed = 5,
+                         exptName = "Expt1", locationNames = "FARGO", checksPercent = percent,
+                         spread_checks = TRUE, dist_method = "manhattan")$fieldBook
+  })
+  expect_equal(seen$got, want)
 })
