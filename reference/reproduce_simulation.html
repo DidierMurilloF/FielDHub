@@ -2905,6 +2905,34 @@
   
   
     <li class="md-nav__item">
+      <a href="print.fieldhub_simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    print.fieldhub_simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="print.summary.FielDHub.html" class="md-nav__link">
         
   
@@ -2913,6 +2941,34 @@
     
   
     print.summary.FielDHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulate.FielDHub.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    simulate.FielDHub
   
 
     
@@ -3242,7 +3298,7 @@
 <p><span id="main"></span></p>
 <h1 id="reconstruct-recorded-simulated-responses">Reconstruct recorded simulated responses<a class="headerlink" href="#reconstruct-recorded-simulated-responses" title="Permanent link">&para;</a></h1>
 <p>Source: <a href="https://github.com/DidierMurilloF/FielDHub/blob/master/R/fct_reproduce_simulation.R" class="external-link"><code>R/fct_reproduce_simulation.R</code></a></p>
-<p>Replays a classic truncated-normal or spatial AR1-by-AR1 simulation using its saved input field book, parameters, seed, and RNG settings.</p>
+<p>Replays a design-based Gaussian, classic truncated-normal or spatial AR1-by-AR1 simulation using its saved input field book, parameters, seed, and RNG settings.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nf">reproduce_simulation</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </code></pre></div>
@@ -3252,7 +3308,7 @@ A simulation record containing <code>input_field_book</code>, <code>field_book</
 <h2 id="value">Value<a class="headerlink" href="#value" title="Permanent link">&para;</a></h2>
 <p>The reconstructed simulation record, invisibly.</p>
 <h2 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h2>
-<p>This reconstructs the responses, not the experimental design or its layout: it starts from the exact saved input field book. Use <a href="reproduce_design.html"><code>reproduce_design()</code></a> separately to reconstruct the experimental design. The caller's RNG settings and <code>.Random.seed</code> are restored on exit. Recorded arguments are passed as values rather than evaluated as R code. A changed FielDHub version signals a <code>fieldhub_reproduction_warning</code>; reproduction across software versions or platforms is not guaranteed.</p>
+<p>This reconstructs the responses, not the experimental design or its layout: it starts from the exact saved input field book. Use <a href="reproduce_design.html"><code>reproduce_design()</code></a> separately to reconstruct the experimental design. The caller's RNG settings and <code>.Random.seed</code> are restored on exit. R cannot save the normal value that Box-Muller holds in reserve, so when the caller uses Box-Muller normals, replaying a record made under another normal generator discards that reserved value and the caller's next <a href="https://rdrr.io/r/stats/Normal.html" class="external-link"><code>rnorm()</code></a> draw differs. Records made by <a href="https://rdrr.io/r/stats/simulate.html" class="external-link"><code>simulate()</code></a> under Box-Muller use a private stream and leave it untouched. Recorded arguments are passed as values rather than evaluated as R code. A changed FielDHub version signals a <code>fieldhub_reproduction_warning</code>; reproduction across software versions or platforms is not guaranteed.</p>
 <p>Spatial <code>min_value</code> and <code>max_value</code> determine the model's center and genetic-effect scale, not hard response bounds. Spatial records retain unrounded per-location simulation values separately from the field book, whose responses are rounded to two decimal places. Classic records use a truncated-normal model, with rounding also applied to the field book.</p>
 <h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
 <p><a href="reproduce_design.html"><code>reproduce_design()</code></a></p>

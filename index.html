@@ -73,7 +73,7 @@
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "SoftwareSourceCode", "citation": "https://doi.org/10.21105/joss.03122", "codeRepository": "https://github.com/DidierMurilloF/FielDHub", "description": "FielDHub \u2014 examples and documentation for FielDHub.", "name": "FielDHub", "programmingLanguage": "R", "runtimePlatform": "R and Shiny", "url": "https://didiermurillof.github.io/FielDHub/", "version": "1.7.0"}
+        {"@context": "https://schema.org", "@type": "SoftwareSourceCode", "citation": "https://doi.org/10.21105/joss.03122", "codeRepository": "https://github.com/DidierMurilloF/FielDHub", "description": "FielDHub \u2014 examples and documentation for FielDHub.", "name": "FielDHub", "programmingLanguage": "R", "runtimePlatform": "R and Shiny", "url": "https://didiermurillof.github.io/FielDHub/", "version": "1.7.5"}
       </script>
     
   
@@ -450,6 +450,17 @@
     <span class="md-ellipsis">
       
         Design of experiments for life sciences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#whats-new-in-1.7.5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What’s new in 1.7.5
       
     </span>
   </a>
@@ -2977,6 +2988,34 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/print.fieldhub_simulation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    print.fieldhub_simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/print.summary.FielDHub.html" class="md-nav__link">
         
   
@@ -2985,6 +3024,34 @@
     
   
     print.summary.FielDHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/simulate.FielDHub.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    simulate.FielDHub
   
 
     
@@ -3248,6 +3315,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#whats-new-in-1.7.5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What’s new in 1.7.5
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#whats-new-in-1.7.0" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3398,6 +3476,11 @@
 <h2 id="design-of-experiments-for-life-sciences">Design of experiments for life sciences<a class="headerlink" href="#design-of-experiments-for-life-sciences" title="Permanent link">&para;</a></h2>
 <p>FielDHub is an R package and Shiny app that randomizes field, greenhouse and laboratory experiments. It covers classic designs, such as completely randomized, complete block, Latin square, factorial and split-plot designs, and the unreplicated, augmented and partially replicated designs used in plant breeding. It serves agriculture, plant breeding, forestry, and animal and biological sciences.</p>
 <p>Every design comes with a field map and a field book. Every design in the app is also an R function with the same arguments, so a script can reproduce what the app made.</p>
+<h2 id="whats-new-in-1.7.5">What’s new in 1.7.5<a class="headerlink" href="#whats-new-in-1.7.5" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Design-aware trait simulation.</strong> <code>stats::simulate(x)</code> generates trait data for all 21 field designs using their treatment and experimental units.</li>
+<li><strong>Optional spatial correlation.</strong> Simulate field variation on physical row and column coordinates. The Shiny app uses the same simulator for tables, heatmaps, and downloads.</li>
+</ul>
 <h2 id="whats-new-in-1.7.0">What’s new in 1.7.0<a class="headerlink" href="#whats-new-in-1.7.0" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>A new design.</strong> <code>augmented_row_column()</code> builds augmented row-column designs, in which every check appears once in every row or every column of the field. It has its own page in the app under Unreplicated Designs.</li>
