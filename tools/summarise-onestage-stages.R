@@ -8,7 +8,7 @@
 # Defaults: ~/fieldhub-libs/runs/phase2/proto (the proto-*.csv shards written
 # by tools/prototype-onestage.R), tools/nested-goldens-os-baseline.csv.gz and
 # tools/onestage-stage-measurements.csv.gz. It needs no package: only base R
-# and tests/testthat/helper-nested-goldens.R. Nothing here draws random
+# and tools/nested-goldens-helpers.R. Nothing here draws random
 # numbers, so two runs on the same inputs give the same file.
 #
 # What is compared. The prototype models `iterations = 200`, so each
@@ -44,7 +44,7 @@ argument <- function(i, default) if (length(arguments) >= i) arguments[i] else d
 proto_dir <- path.expand(argument(1, "~/fieldhub-libs/runs/phase2/proto"))
 baseline_path <- argument(2, file.path(script_dir, "nested-goldens-os-baseline.csv.gz"))
 out_path <- argument(3, file.path(script_dir, "onestage-stage-measurements.csv.gz"))
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 options(width = 200, stringsAsFactors = FALSE)
 
 efficiencies <- c("row_D", "row_A", "col_D", "col_A", "joint_D", "joint_A")

@@ -1,5 +1,5 @@
 # Golden efficiencies of the block-design callers (spec 7). The tools under
-# tools/ source this file; the CI test uses the same code. It only calls the
+# tools/ source this file (the CI golden test that used it was removed). It only calls the
 # public functions, so it measures the same thing before and after an engine
 # change.
 #

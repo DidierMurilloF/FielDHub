@@ -83,7 +83,7 @@ suppressMessages(library(FielDHub))
 if (dir.exists(file.path(find.package("FielDHub"), "src"))) {
   stop("FielDHub is loaded from a source tree; measure an installed build instead.")
 }
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 Sys.setenv(FIELDHUB_ENGINE_DEBUG = "seconds")
 ns <- asNamespace("FielDHub")

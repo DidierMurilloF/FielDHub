@@ -28,7 +28,7 @@ suppressMessages(library(FielDHub))
 if (dir.exists(file.path(find.package("FielDHub"), "src"))) {
   stop("FielDHub is loaded from a source tree; time an installed build instead.")
 }
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 ns <- asNamespace("FielDHub")
 reference <- new.env(parent = ns)

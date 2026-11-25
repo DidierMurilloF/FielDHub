@@ -25,7 +25,7 @@ if (file.exists(file.path(find.package("FielDHub"), "DESCRIPTION")) &&
     dir.exists(file.path(find.package("FielDHub"), "src"))) {
   stop("FielDHub is loaded from a source tree; time an installed build instead.")
 }
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 
 grid <- nested_golden_grid("full")

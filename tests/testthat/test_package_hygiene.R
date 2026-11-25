@@ -60,8 +60,7 @@ test_that("FielDHub has no dependency on blocksdesign", {
 
   loaders <- c("requireNamespace", "loadNamespace", "getFromNamespace",
                "skip_if_not_installed", "library", "require")
-  allowed <- c("test-package-hygiene.R", "test-app-shell.R", "test-app-design-page.R",
-               "test_app_dependencies.R", "test_design_args_parity.R")
+  allowed <- c("test_package_hygiene.R", "test_app_shell.R", "test_app_design_page.R")
   test_offenders <- character()
   tests <- list.files(testthat::test_path("."), pattern = "[.][Rr]$", full.names = TRUE)
   for (path in tests[!basename(tests) %in% allowed]) {

@@ -296,7 +296,7 @@ test_that("row_column() rejects invalid iteration budgets before randomization",
   for (value in values) {
     expect_error(row_column(t = 12, nrows = 3, reps = 2, seed = 27, method = "twostage",
                             iterations = value),
-                 class = "fieldhub_input_error")
+                 class = "fieldhub_input_error", info = paste("iterations =", deparse(value)))
   }
   expect_identical(.Random.seed, before)
 })
@@ -468,7 +468,7 @@ test_that("row-column labels and supplied entries fail with input conditions", {
   # internal error.
   for (bad in list(c("A", NA, "C", "D"), c("A", " ", "C", "D"), list(1, 2, 3, 4))) {
     expect_error(row_column(t = bad, nrows = 2, reps = 2, seed = 41, iterations = 1),
-                 class = "fieldhub_input_error")
+                 class = "fieldhub_input_error", info = paste("t =", deparse(bad)))
   }
   expect_error(row_column(t = 12, nrows = 3, reps = 2, seed = 41, iterations = 1,
                           data = data.frame(ENTRY = 1:12)), class = "fieldhub_input_error")

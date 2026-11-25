@@ -1,5 +1,5 @@
-# App/API parity helpers shared by test_design_args_parity.R and
-# test_design_module.R.
+# App/API parity helpers used by test_app_design_page.R and
+# test_app_spatial.R.
 
 #' `values` as Shiny can deliver them: every whole number as an integer
 #'

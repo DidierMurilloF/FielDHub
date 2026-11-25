@@ -102,10 +102,10 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
     * Add a plain-R regression test that fails before fixing a defect, then
       implement the fix. Keep scientific logic out of Shiny modules; do not add
       Shiny server or browser tests.
-    * Run the full tests with `NOT_CRAN=true FIELDHUB_GOLDEN=true`. Golden
-      snapshots are recorded on macOS. Review deliberate scientific output
-      changes and announce affected inputs in NEWS; never accept snapshots
-      blindly.
+    * Run the full tests with `NOT_CRAN=true`. Tests check properties of the
+      output (counts, coordinates, efficiencies against independent
+      references), not recorded copies of it. Announce deliberate scientific
+      output changes and the affected inputs in NEWS.
     * For output-preserving refactors, compare complete fixed-seed results with
       the previous implementation using `identical()`. Preserve supplied labels,
       field-book column types, RNG state, and process options.
@@ -204,7 +204,7 @@ Three files are exceptions:
 - `run_app.R` holds `run_app()`, the exported launcher of the Shiny app.
 
 Tests live in `tests/testthat/test_<topic>.R` and are plain R: never Shiny
-server or browser tests. `test_source_layout.R` checks this layout (prefixes,
+server or browser tests. `test_package_hygiene.R` checks the source layout (prefixes,
 one `fct_` file per exported function, no core reference to the Shiny
 layer, no dependency cycle between core files). Structural checks that must
 also run under `R CMD check`, where `R/` is not installed, inspect the

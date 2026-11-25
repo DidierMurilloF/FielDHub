@@ -381,7 +381,7 @@ tmax <- opt("tmax", 100)
 .libPaths(c(normalizePath(library_path, mustWork = TRUE), .libPaths()))
 script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1]))
 suppressMessages(library(FielDHub))
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 
 TOL <- 1.5e-7

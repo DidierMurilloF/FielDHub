@@ -22,7 +22,7 @@
 # both codings, iterations 20 and 200. Seeds 1..seeds per row (default 10),
 # 1..5 at t = 500. shard=i/k runs shard i of k (rows spread by
 # longest-processing-time on (t r)^2 x seeds). Judge the result with
-# nested_speed() (tests/testthat/helper-nested-goldens.R).
+# nested_speed() (tools/nested-goldens-helpers.R).
 #
 # <pairs.csv>.meta.rds records the provenance of the run: the version and
 # library path of FielDHub and of blocksdesign (which the reference builder
@@ -48,7 +48,7 @@ suppressMessages(library(FielDHub))
 if (dir.exists(file.path(find.package("FielDHub"), "src"))) {
   stop("FielDHub is loaded from a source tree; time an installed build instead.")
 }
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 reference <- new.env(parent = asNamespace("FielDHub"))
 sys.source(file.path(script_dir, "reference-onestage.R"), envir = reference)

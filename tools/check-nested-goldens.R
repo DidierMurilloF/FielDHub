@@ -42,7 +42,7 @@ if (length(arguments) < 2L || length(arguments) > 4L || length(write_accepted) >
   stop("Usage: Rscript tools/check-nested-goldens.R baseline.csv.gz candidate.csv [pairs.csv] [accepted-loss.csv] [write-accepted=<out.csv>]")
 }
 script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1]))
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 baseline <- nested_summary(utils::read.csv(arguments[1], stringsAsFactors = FALSE))
 candidate <- nested_summary(utils::read.csv(arguments[2], stringsAsFactors = FALSE))
 pairs <- NULL

@@ -134,12 +134,12 @@ test_that("incomplete-block designs keep the treatment labels they are given", {
 test_that("designs reject duplicated treatment labels", {
   labels <- c("A", "A", paste0("V", 1:10))
   calls <- list(
-    function() incomplete_blocks(t = labels, k = 4, reps = 2, seed = 1),
-    function() row_column(t = labels, nrows = 3, reps = 2, seed = 1),
-    function() RCBD(t = c("A", "A", "B"), reps = 2, seed = 1),
-    function() CRD(t = c("A", "A", "B"), reps = 2, seed = 1)
+    incomplete_blocks = function() incomplete_blocks(t = labels, k = 4, reps = 2, seed = 1),
+    row_column = function() row_column(t = labels, nrows = 3, reps = 2, seed = 1),
+    RCBD = function() RCBD(t = c("A", "A", "B"), reps = 2, seed = 1),
+    CRD = function() CRD(t = c("A", "A", "B"), reps = 2, seed = 1)
   )
-  for (call in calls) expect_error(call(), class = "fieldhub_input_error")
+  for (nm in names(calls)) expect_error(calls[[nm]](), class = "fieldhub_input_error", info = nm)
 })
 
 test_that("incomplete_blocks() keeps supplied entries and labels once per replicate", {

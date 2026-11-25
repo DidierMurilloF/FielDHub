@@ -27,17 +27,15 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          # The golden snapshots (tests/testthat/_snaps) are recorded on macOS
-          - {os: macos-latest, r: 'release', golden: 'true'}
-          - {os: ubuntu-latest, r: 'release', golden: 'false'}
-          - {os: windows-latest, r: 'release', golden: 'false'}
+          - {os: macos-latest, r: 'release'}
+          - {os: ubuntu-latest, r: 'release'}
+          - {os: windows-latest, r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       # Run the tests skipped on CRAN, too
       NOT_CRAN: true
-      FIELDHUB_GOLDEN: ${{ matrix.config.golden }}
 
     steps:
       - uses: actions/checkout@v7

@@ -75,7 +75,7 @@ if (is.na(n_seeds) || n_seeds < 1L || is.na(tmax) || anyNA(tset) || is.na(tseeds
 .libPaths(c(normalizePath(library_path, mustWork = TRUE), .libPaths()))
 script_dir <- dirname(sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1]))
 suppressMessages(library(FielDHub))
-source(file.path(script_dir, "..", "tests", "testthat", "helper-nested-goldens.R"))
+source(file.path(script_dir, "nested-goldens-helpers.R"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 
 EPS <- 1e-6          # repair regulariser, relative to C/r (spec 6.1)
