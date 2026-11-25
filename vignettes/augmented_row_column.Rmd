@@ -1,5 +1,6 @@
 ---
 title: "Augmented Row-Column Design"
+description: "Unreplicated entries with every check once in each row or each column of the field."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

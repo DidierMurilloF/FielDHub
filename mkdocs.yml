@@ -32,13 +32,17 @@ hooks:
 - website/mkdocs_hooks.py
 markdown_extensions:
 - attr_list
+- def_list
+- md_in_html
 - tables
-- pymdownx.highlight
+- pymdownx.highlight:
+    pygments_lang_class: true
 - pymdownx.superfences
 - toc:
     permalink: true
 - pymdownx.arithmatex:
     generic: true
+not_in_nav: LICENSE-text.md
 validation:
   links:
     absolute_links: relative_to_docs
@@ -71,7 +75,6 @@ nav:
     - Completely Randomized Design (CRD): articles/crd.md
     - Randomized Complete Block Designs (RCBD): articles/rcbd.md
     - Latin Square Design (LSD): articles/latin_square.md
-    - Latin Rectangle Design: reference/latin_rectangle.md
     - Factorial Designs: articles/full_factorial.md
     - Split-Plot Design: articles/split_plot.md
     - Split-Split-Plot Design: articles/split_split_plot.md
@@ -79,11 +82,11 @@ nav:
     - Incomplete Blocks Design (IBD): articles/incomplete_blocks.md
     - Resolvable Row-Column Design (RRCD): articles/row_column.md
 - Background:
-  - Methods: articles/methods.md
-  - Scientific Validation: articles/scientific_validation.md
-  - Architecture: articles/architecture.md
-  - Extending Fieldhub: articles/extending_fieldhub.md
+  - Methods in FielDHub: articles/methods.md
   - Simulating Trait Data on a Field Design: articles/simulating_traits.md
+  - Scientific validation and computational limits: articles/scientific_validation.md
+  - Architecture and compatibility contracts: articles/architecture.md
+  - Adding designs and formats: articles/extending_fieldhub.md
 - Reference:
   - Overview: reference/index.md
   - Designs:
@@ -132,9 +135,15 @@ nav:
     - summary.FielDHub: reference/summary.FielDHub.md
 - News:
   - Changelog: news/index.md
-  - FielDHub 0.1.0: articles/news/fieldhub-0-1-0.md
-  - FielDHub 1.2.0: articles/news/fieldhub-1-2-0.md
   - FielDHub 1.3.1: articles/news/fieldhub-1-3-1.md
+  - FielDHub 1.2.0: articles/news/fieldhub-1-2-0.md
+  - FielDHub 0.1.0: articles/news/fieldhub-0-1-0.md
+- About:
+  - Authors and citation: authors.md
+  - Contributing: CONTRIBUTING.md
+  - Code of conduct: CODE_OF_CONDUCT.md
+  - License: LICENSE.md
+  - Releasing: RELEASING.md
 extra_javascript:
 - assets/mathjax.js
 - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js

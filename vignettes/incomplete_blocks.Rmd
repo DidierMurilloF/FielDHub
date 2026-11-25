@@ -1,5 +1,6 @@
 ---
 title: "Incomplete Block Design"
+description: "Resolvable incomplete blocks for a chosen number of treatments, replicates and block size."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Incomplete Block Design}
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **incomplete block design** using both the FielDHub Shiny App and the scripting function `incomplete_blocks()` from the `FielDHub` package.
+This vignette shows how to generate an **incomplete block design** using both the FielDHub Shiny App and the scripting function `incomplete_blocks()` from the `FielDHub` package.
 
 ## 1. Using the FielDHub Shiny App
 

@@ -1,5 +1,6 @@
 ---
 title: "Scientific validation and computational limits"
+description: "The snapshot, structural and numerical checks behind every design, and the limits on design size."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Scientific validation and computational limits}

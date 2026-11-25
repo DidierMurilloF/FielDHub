@@ -1,5 +1,6 @@
 ---
 title: "Completely Randomized Design"
+description: "Treatments assigned to plots completely at random."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Completely Randomized Design}

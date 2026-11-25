@@ -56,7 +56,7 @@ Noticed a typo on the website? Think a function could use a better example? Good
 
 #### The website
 
-[This website][website] is generated with [`pkgdown`](http://pkgdown.r-lib.org/). That means we don't have to write any html: content is pulled together from documentation in the code, vignettes, [Markdown](https://guides.github.com/features/mastering-markdown/) files, the package `DESCRIPTION` and `_pkgdown.yml` settings. If you know your way around `pkgdown`, you can [propose a file change](https://help.github.com/articles/editing-files-in-another-user-s-repository/) to improve documentation. If not, [report an issue][new_issue] and we can point you in the right direction.
+[This website][website] is generated with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) from the documentation in the code, the vignettes and the [Markdown](https://guides.github.com/features/mastering-markdown/) files of the repository; see [Preview the MkDocs website](#preview-the-mkdocs-website). You can [propose a file change](https://help.github.com/articles/editing-files-in-another-user-s-repository/) to improve documentation, or [report an issue][new_issue] and we can point you in the right direction.
 
 #### Function documentation
 

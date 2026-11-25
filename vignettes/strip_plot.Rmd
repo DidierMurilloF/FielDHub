@@ -1,5 +1,6 @@
 ---
 title: "Strip-Plot Design"
+description: "Two factors applied in horizontal and vertical strips that cross in each block."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Strip-Plot Design}
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate a **Strip-Plot Design** using both the FielDHub Shiny App and the scripting function `srip_plot()` from the `FielDHub` package.
+This vignette shows how to generate a **Strip-Plot Design** using both the FielDHub Shiny App and the scripting function `strip_plot()` from the `FielDHub` package.
 
 ## 1. Using the FielDHub Shiny App
 

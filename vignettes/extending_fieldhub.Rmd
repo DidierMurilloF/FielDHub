@@ -1,5 +1,6 @@
 ---
 title: "Adding designs and formats"
+description: "How to add a design or a file format, with latin_rectangle() as the worked example."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Adding designs and formats}

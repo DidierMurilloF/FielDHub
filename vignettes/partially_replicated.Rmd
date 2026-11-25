@@ -1,5 +1,6 @@
 ---
 title: "Partially Replicated (p-rep) Design"
+description: "Some entries are replicated and the rest appear once, at one or several locations."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

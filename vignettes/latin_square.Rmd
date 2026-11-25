@@ -1,5 +1,6 @@
 ---
 title: "Latin Square Design"
+description: "Every treatment once in each row and each column of a square."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Latin Square Design}

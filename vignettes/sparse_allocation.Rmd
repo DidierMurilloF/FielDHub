@@ -1,5 +1,6 @@
 ---
 title: "Sparse Allocation"
+description: "Each entry is tested at a subset of the locations, in an unreplicated design at each one."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

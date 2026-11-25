@@ -1,5 +1,6 @@
 ---
 title: "Optimized Multi-Location P-rep Design"
+description: "Optimizes how the copies of each entry are shared among locations, then builds a p-rep design at each one."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

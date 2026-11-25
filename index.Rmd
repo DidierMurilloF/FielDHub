@@ -4,7 +4,7 @@ output:
     html_preview: false
 ---
 
-<!-- index.md is the pkgdown home page, generated from index.Rmd. Keep it in step with README.Rmd -->
+<!-- The website home page. Keep its content in step with README.Rmd -->
 
 ```{r, include = FALSE}
 library(FielDHub)
@@ -16,9 +16,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-<img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/>
-
-# FielDHub
+<div class="fieldhub-hero">
+<div>
+<h1>FielDHub</h1>
+<p class="fieldhub-tagline">Design of experiments for life sciences</p>
+<p>An R package and Shiny app that randomizes field, greenhouse and laboratory experiments, with a field map and a field book for every design.</p>
+<p class="fieldhub-actions"><a class="md-button md-button--primary" href="get-started.html">Get started</a> <a class="md-button" href="articles/index.html">Browse the designs</a></p>
+</div>
+<img class="fieldhub-hex" src="man/figures/fieldhub-logo.png" alt="FielDHub hex logo">
+</div>
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/FielDHub)](https://cran.r-project.org/package=FielDHub)
@@ -28,8 +34,6 @@ knitr::opts_chunk$set(
 [![CRAN downloads, total](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)](https://cranlogs.r-pkg.org/badges/grand-total/FielDHub)
 [![JOSS](https://joss.theoj.org/papers/10.21105/joss.03122/status.svg)](https://doi.org/10.21105/joss.03122)
 <!-- badges: end -->
-
-## Design of experiments for life sciences
 
 FielDHub is an R package and Shiny app that randomizes field, greenhouse and
 laboratory experiments. It covers classic designs, such as completely

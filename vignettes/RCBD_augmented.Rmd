@@ -1,5 +1,6 @@
 ---
 title: "Augmented Randomized Complete Block Design"
+description: "The same checks in every block, with unreplicated entries distributed among the blocks."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Augmented Randomized Complete Block Design}
@@ -16,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows how to generate an **augmented randomized complete block design ** using both the FielDHub Shiny App and the scripting function `RCBD_augmented()` from the `FielDHub` package.
+This vignette shows how to generate an **augmented randomized complete block design** using both the FielDHub Shiny App and the scripting function `RCBD_augmented()` from the `FielDHub` package.
 
 ## Overview
 

@@ -1,5 +1,6 @@
 ---
 title: "Unreplicated Diagonal Arrangement Design"
+description: "Unreplicated entries with checks on diagonals, in one field or split among several experiments."
 output: rmarkdown::html_vignette
 bibliography: references.bib
 vignette: >

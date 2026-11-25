@@ -1,5 +1,6 @@
 ---
 title: "Full Factorial Design"
+description: "All combinations of the levels of two or more factors, as a CRD or an RCBD."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Full Factorial Design}
