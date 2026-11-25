@@ -181,7 +181,6 @@ arc_budget_new <- function(max_evals = Inf, seconds = Inf,
   b$proposals <- 0
   b$failed <- 0
   b$disconnected <- 0
-  b$events <- character(0)
   b$trace <- list()
   b$max_consec_fail <- as.integer(max_consec_fail)
   b$proposal_factor <- as.double(proposal_factor)
@@ -252,15 +251,6 @@ arc_budget_secs_left <- function(b) b$deadline - b$now()
 #' @param b Budget environment.
 #' @noRd
 arc_budget_elapsed <- function(b) b$now() - b$t_start
-
-#' Append an event message
-#' @param b Budget environment.
-#' @param ... Pieces pasted together with `paste0()`.
-#' @noRd
-arc_budget_log <- function(b, ...) {
-  b$events <- c(b$events, paste0(...))
-  invisible(b)
-}
 
 #' Append a one-row trace data frame
 #' @param b Budget environment.
@@ -1157,7 +1147,7 @@ arc_local_search <- function(budget, start, score_start, score_fn,
 #' nor a finite deadline is refused: nothing would stop it. The contents of
 #' `starts` are checked after the entry check by `arc_search_check_starts()`.
 #'
-#' @inheritParams arc_search_multistart
+#' @inheritParams arc_search_staged
 #' @noRd
 arc_search_check_common <- function(max_evals, seconds, starts,
                                     max_start_tries, now) {
@@ -1182,7 +1172,7 @@ arc_search_check_common <- function(max_evals, seconds, starts,
 #' `arc_check_contraction(..., v, "restricted")`; any failure is raised as
 #' the classed search input error.
 #'
-#' @inheritParams arc_search_multistart
+#' @inheritParams arc_search_staged
 #' @return The starts as integer matrices.
 #' @noRd
 arc_search_check_starts <- function(starts, v, s, k) {
@@ -1378,139 +1368,6 @@ arc_search_fail_status <- function(last_start) {
   else "no_design"
 }
 
-#' Multistart first-improvement local search
-#'
-#' Specification section 7.1: first-improvement local search over the full
-#' A/B/C/K neighbourhood from fresh random starts until the single global
-#' budget (evaluation cap, deadline, or both) is spent. Restart i uses
-#' `starts[[i]]` as its first candidate start when supplied. Final
-#' verification by `arc_final_score()` is outside the budget.
-#'
-#' @param v,s,k Field rows, columns and checks per column.
-#' @param objective One of `arc_search_objectives`.
-#' @param max_evals Global cap on objective plus proxy calls (`Inf` for
-#'   equal-time runs).
-#' @param seconds Seconds until the global deadline (`Inf` allowed when
-#'   `max_evals` is finite).
-#' @param seed `NULL` or a single number (FielDHub seed contract).
-#' @param starts `NULL` or a list of k x s restricted contractions for
-#'   matched-start experiments.
-#' @param max_start_tries Scored starts allowed per restart.
-#' @param now Clock function (seconds).
-#' @return A search result (`arc_search_result()` fields plus `objective`,
-#'   `algorithm` and `search_score`).
-#' @noRd
-arc_search_multistart <- function(v, s, k, objective = "E_aug",
-                                  max_evals = 60000, seconds = Inf,
-                                  seed = NULL, starts = NULL,
-                                  max_start_tries = 20L, now = arc_clock) {
-  arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
-  seed <- resolve_seed(seed)
-  local_design_seed(seed)
-  status <- arc_search_entry(v, s, k, objective)
-  if (!is.na(status)) {
-    return(c(arc_search_result(status = status, seed = seed),
-             list(objective = objective, algorithm = "multistart",
-                  search_score = NA_real_)))
-  }
-  starts <- arc_search_check_starts(starts, v, s, k)
-  budget <- arc_budget_new(max_evals, seconds, now = now)
-  prep <- arc_search_prep(v, s, k)
-  score_fn <- function(x) arc_search_score(x, prep, objective)
-  best <- NULL
-  phases <- character(0)
-  last_start <- NA_character_
-  restart <- 0L
-  while (is.na(arc_budget_out(budget))) {
-    restart <- restart + 1L
-    tag <- paste0("r", restart, ":")
-    start <- arc_search_start(budget, v, s, k, score_fn, "objective",
-                              max_start_tries,
-                              arc_search_supplied(starts, restart))
-    phases[[paste0(tag, "start")]] <- start$status
-    if (is.null(start$contraction)) {
-      last_start <- start$status
-      break
-    }
-    if (arc_search_better(start, best)) best <- start
-    res <- arc_search_polish(budget, start$contraction, start$score,
-                             score_fn, paste0(tag, "local"))
-    phases[[paste0(tag, "local")]] <- res$status
-    if (arc_search_better(res, best)) best <- res
-  }
-  arc_search_finish(budget, best, v, objective, phases, seed, "multistart",
-                    arc_search_fail_status(last_start))
-}
-
-#' Plain annealing on A/B/C/K moves, then polish
-#'
-#' Specification sections 7.1 and 7.4: one annealing run with
-#' `1 - polish_share` of the budget (Kempe share `kempe_share`, end-to-start
-#' temperature ratio `t_ratio`), then first-improvement polish with the
-#' rest. In equal-time mode (`max_evals = Inf`) the polish share of the
-#' remaining time is reserved through a temporary deadline.
-#'
-#' @inheritParams arc_search_multistart
-#' @param polish_share Share of the budget for polish, in [0, 1].
-#' @param kempe_share Kempe-move probability of the joint sampler, in [0, 1].
-#' @param t_ratio End-to-start temperature ratio, in (0, 1].
-#' @noRd
-arc_search_anneal <- function(v, s, k, objective = "E_aug",
-                              max_evals = 60000, seconds = Inf, seed = NULL,
-                              starts = NULL, max_start_tries = 20L,
-                              now = arc_clock, polish_share = 0.1,
-                              kempe_share = 0.3, t_ratio = 1e-3) {
-  arc_search_check_common(max_evals, seconds, starts, max_start_tries, now)
-  arc_search_check(arc_is_number(polish_share) && polish_share >= 0 &&
-                     polish_share <= 1,
-                   "polish_share must be a single number in [0, 1].")
-  arc_search_check(arc_is_number(kempe_share) && kempe_share >= 0 &&
-                     kempe_share <= 1,
-                   "kempe_share must be a single number in [0, 1].")
-  arc_search_check(arc_is_number(t_ratio) && t_ratio > 0 && t_ratio <= 1,
-                   "t_ratio must be a single number in (0, 1].")
-  seed <- resolve_seed(seed)
-  local_design_seed(seed)
-  status <- arc_search_entry(v, s, k, objective)
-  if (!is.na(status)) {
-    return(c(arc_search_result(status = status, seed = seed),
-             list(objective = objective, algorithm = "anneal",
-                  search_score = NA_real_)))
-  }
-  starts <- arc_search_check_starts(starts, v, s, k)
-  budget <- arc_budget_new(max_evals, seconds, now = now)
-  prep <- arc_search_prep(v, s, k)
-  score_fn <- function(x) arc_search_score(x, prep, objective)
-  phases <- character(0)
-  start <- arc_search_start(budget, v, s, k, score_fn, "objective",
-                            max_start_tries, arc_search_supplied(starts, 1L))
-  phases[["r1:start"]] <- start$status
-  if (is.null(start$contraction)) {
-    return(arc_search_finish(budget, NULL, v, objective, phases, seed,
-                             "anneal", arc_search_fail_status(start$status)))
-  }
-  left <- arc_budget_left(budget)
-  if (is.finite(left)) {
-    phase_evals <- floor((1 - polish_share) * left)
-    deadline <- Inf
-  } else {
-    phase_evals <- Inf
-    deadline <- budget$now() + (1 - polish_share) * arc_budget_secs_left(budget)
-  }
-  annealed <- arc_search_with_deadline(budget, deadline, arc_anneal_phase(
-    budget, start$contraction, start$score, score_fn,
-    function(x) arc_propose_joint(x, kempe_share = kempe_share),
-    phase_evals, "joint", t_ratio = t_ratio, label = "r1:joint"
-  ))
-  phases[["r1:joint"]] <- annealed$status
-  best <- if (arc_search_better(annealed, start)) annealed else start
-  polished <- arc_search_polish(budget, best$contraction, best$score,
-                                score_fn, "r1:polish")
-  phases[["r1:polish"]] <- polished$status
-  if (arc_search_better(polished, best)) best <- polished
-  arc_search_finish(budget, best, v, objective, phases, seed, "anneal")
-}
-
 #' Staged annealing with recolouring restarts
 #'
 #' Specification sections 7.1 and 7.4. `restarts` restarts share the single
@@ -1533,7 +1390,19 @@ arc_search_anneal <- function(v, s, k, objective = "E_aug",
 #' which starts from an optimized state that the calibrated value would turn
 #' into a random walk.
 #'
-#' @inheritParams arc_search_anneal
+#' @param v,s,k Field rows, columns and checks per column.
+#' @param objective One of `arc_search_objectives`.
+#' @param max_evals Global cap on objective plus proxy calls (`Inf` for
+#'   equal-time runs).
+#' @param seconds Seconds until the global deadline (`Inf` allowed when
+#'   `max_evals` is finite).
+#' @param seed `NULL` or a single number (FielDHub seed contract).
+#' @param starts `NULL` or a list of k x s restricted contractions for
+#'   matched-start experiments.
+#' @param max_start_tries Scored starts allowed per restart.
+#' @param now Clock function (seconds).
+#' @return A search result (`arc_search_result()` fields plus `objective`,
+#'   `algorithm` and `search_score`).
 #' @param restarts Whole number >= 1 (R).
 #' @param recolourings Whole number >= 1 (m), recolourings per restart.
 #' @param shares Named non-negative shares `column`, `row`, `joint`,
