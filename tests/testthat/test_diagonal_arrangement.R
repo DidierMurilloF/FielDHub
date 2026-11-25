@@ -315,6 +315,35 @@ test_that("no single exchange of two check plots improves the spread layout", {
   }
 })
 
+test_that("check spreading stops where the documentation says", {
+  # @details: one check identity, or checks occurring once, leave the layout
+  # unchanged; a location stops after 100,000 candidate evaluations. The two
+  # evaluation-limit fields reach the limit with an improving exchange still
+  # pending (seed 1) and inside a scan that finds none (seed 2).
+  large <- list(nrows = 16, ncols = 40, lines = 560, checks = 6)
+  cases <- list(
+    one_check = list(args = list(nrows = 10, ncols = 20, lines = 180, checks = 1), seed = 1,
+                     want = list(unchanged = TRUE, stop_reason = "no_exchange")),
+    checks_once = list(args = list(nrows = 5, ncols = 6, lines = 24, checks = 6), seed = 1,
+                       want = list(unchanged = TRUE, stop_reason = "no_repeated_checks")),
+    evaluation_limit_pending = list(args = large, seed = 1,
+                                    want = list(evaluations = 100000L, stop_reason = "evaluation_limit")),
+    evaluation_limit_in_scan = list(args = large, seed = 2,
+                                    want = list(evaluations = 100000L, stop_reason = "evaluation_limit"))
+  )
+  for (nm in names(cases)) {
+    case <- cases[[nm]]
+    args <- c(case$args, list(seed = case$seed))
+    after <- do.call(diagonal_arrangement, c(args, spread_checks = TRUE))
+    diagnostics <- after$infoDesign$check_optimization[[1L]]
+    got <- if (isTRUE(case$want$unchanged)) {
+      list(unchanged = identical(after$layoutRandom, do.call(diagonal_arrangement, args)$layoutRandom),
+           stop_reason = diagnostics$stop_reason)
+    } else diagnostics[c("evaluations", "stop_reason")]
+    expect_identical(got, case$want, info = nm)
+  }
+})
+
 test_that("multiple locations and supplied check names stay consistent under check spreading", {
   data <- data.frame(ENTRY = c(101:104, 1001:1287),
                      NAME = c("Check A", "Check B", "Check C", "Check D", paste0("Line ", 1001:1287)))

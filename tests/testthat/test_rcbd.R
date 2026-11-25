@@ -215,11 +215,23 @@ test_that("RCBD() warns about defaulted check replication and check-heavy blocks
     # warning must not describe a stratified-placement constraint.
     check_heavy_unspread = list(
       args = list(t = 2, reps = 2, checks = "CK1", rep_checks = 4, spread_checks = FALSE, seed = 1),
-      class = "fieldhub_design_warning", ck1_per_block = 4, not_said = "stratified")
+      class = "fieldhub_design_warning", ck1_per_block = 4, not_said = "stratified"),
+    # No block of 78 plots holds copies 20, 19, 19, 19 one per stratum: the
+    # block falls back to an unrestricted shuffle with its own warning.
+    strata_impossible = list(
+      args = list(t = 1, reps = 2, checks = paste0("CK", 1:4), rep_checks = c(20, 19, 19, 19), seed = 1),
+      class = "fieldhub_design_warning", ck1_per_block = 20, warnings = 3L)
   )
   for (nm in names(cases)) {
     case <- cases[[nm]]
-    w <- expect_warning(d <- do.call(RCBD, case$args), class = case$class)
+    warnings <- list()
+    d <- withCallingHandlers(do.call(RCBD, case$args), warning = function(w) {
+      warnings[[length(warnings) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    })
+    expect_identical(vapply(warnings, inherits, logical(1), what = case$class),
+                     rep(TRUE, if (is.null(case$warnings)) 1L else case$warnings), info = nm)
+    w <- warnings[[1L]]
     fb <- d$fieldBook
     expect_equal(as.vector(table(fb$REP[fb$TREATMENT == "CK1"])),
                  rep(case$ck1_per_block, case$args$reps), info = nm)

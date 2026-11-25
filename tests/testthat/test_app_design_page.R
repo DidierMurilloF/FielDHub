@@ -1012,6 +1012,11 @@ test_that("dependent selects offer the block sizes that fit the entries, typed o
     "controls read without an upload" = list(design_control_choices(b_page, b, list(lines = 50L, checks = 3L))$choices,
                                              list(lines = 50L, checks = 3L)),
     "block sizes" = list(block_size_choices(49, "square_lattice"), list(choices = 7L, selected = 7L)),
+    # A rectangular lattice of t = k (k + 1) entries has blocks of k
+    "rectangular block size" = list(block_size_choices(42, "rectangular_lattice"),
+                                    list(choices = 6L, selected = 6L)),
+    "no rectangular block size" = list(block_size_choices(40, "rectangular_lattice"),
+                                       list(choices = "No Options Available", selected = "No Options Available")),
     "no block size" = list(block_size_choices(13, "row_column"),
                            list(choices = "No Options Available", selected = "No Options Available"))
   )

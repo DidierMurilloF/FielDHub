@@ -187,7 +187,7 @@ test_that("swap_pairs() rejects malformed fields and controls, leaving the calle
     candidate_sample_size = list(Inf, NA_real_, 0, -1, 1.5, c(1, 2), "4", .Machine$integer.max + 1),
     dist_method = list(NULL, NA_character_, c("euclidean", "manhattan"), 1),
     X = list(matrix(1:9, 3), matrix(c(1, 1, 2, Inf), 2), matrix(c(1.5, 1.5, 1, 2), 2),
-             matrix(c(rep(.Machine$integer.max + 1, 2), 1, 2), 2)),
+             matrix(c(rep(.Machine$integer.max + 1, 2), 1, 2), 2), matrix(NA_real_, 2, 2)),
     seed = list("18"),
     rowcol_penalty = list(-1, NA_real_, NaN, "a", c(1, 2), matrix(1)),
     rowcol_scope = list("rows", NA_character_, c("pairs", "all"), 1)
