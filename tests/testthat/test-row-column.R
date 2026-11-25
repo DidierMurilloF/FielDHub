@@ -70,6 +70,37 @@ convexity_a_bound <- function(v, r, b, rank) {
   (v - 1) / (v - 1 - m + m^2 / (m - T))
 }
 
+# Closed forms of the tighter A-bounds of v treatments replicated r times in b
+# blocks of k plots, from the second moment of the concurrences. mu_i are the
+# v - 1 non-trivial eigenvalues of N N' / (r k); the efficiency factors are
+# 1 - mu_i, sum(mu) = T = b / r - 1 and sum(mu^2) = S.
+least_squares <- function(a, n) n * (a %/% n)^2 + (2 * (a %/% n) + 1) * (a %% n)
+# Blocks shared by the replicates (k <= v): |N N'|^2 = |N' N|^2 is at least
+# the sum of squares of the most even integer rows of either matrix (row
+# sums r k; diagonals r and k), which gives S. For any y in [0, 1/2],
+# 1 / (1 - mu) >= 1 + ((1 - 2 y) mu + mu^2) / (1 - y)^2 (equality at mu = 0
+# and mu = y), so sum(1 / (1 - mu)) >= v - 1 + ((1 - 2 y) T + S) / (1 - y)^2;
+# y = min(S / T, 1/2) is the tightest.
+shared_a_bound <- function(v, r, b) {
+  k <- v * r / b
+  T <- b / r - 1
+  S <- max(v * (r^2 + least_squares(r * k - r, v - 1)),
+           b * (k^2 + least_squares(r * k - k, b - 1))) / (r * k)^2 - 1
+  y <- min(S / T, 0.5)
+  (v - 1) / (v - 1 + ((1 - 2 * y) * T + S) / (1 - y)^2)
+}
+# Blocks nested in two complete replicates of s = v / k blocks: with M the
+# s x s matrix of block intersections, the non-zero mu pair as (1 +- c_i) / 2
+# for the p = s - 1 non-trivial singular values c_i of M / k, and
+# sum(c^2) = |M|^2 / k^2 - 1 >= q (most even intersections). Then
+# sum(1 / (1 - mu)) = v - 1 - 2 p + sum(4 / (1 - c^2)) >= v - 1 - 2 p + 4 p^2 / (p - q).
+paired_a_bound <- function(v, k) {
+  s <- v / k
+  p <- s - 1
+  q <- s * least_squares(k, s) / k^2 - 1
+  (v - 1) / (v - 1 - 2 * p + 4 * p^2 / (p - q))
+}
+
 # Valid designs and methods ---------------------------------------------------
 
 test_that("row_column() returns valid resolvable designs for each method", {
@@ -367,8 +398,10 @@ test_that("row and column A-Bounds are valid for the reported coding", {
   # Latinized rows and columns are shared across the replicates (rank of the
   # incidence at most b); nested ones lie within replicates that hold every
   # entry once (rank at most b - r + 1). For t = 24 in 6 rows and 4 columns and
-  # 2 replicates the bound is at most the convexity bound of its coding and at
-  # least the reported efficiency; the replicate factor's bound is 1.
+  # 2 replicates the bound is the smaller of the convexity bound of its coding
+  # and the second-moment bound (shared_a_bound() when latinized,
+  # paired_a_bound() when nested) and at least the reported efficiency; the
+  # replicate factor's bound is 1.
   coding <- list(
     latinized = list(Row = c(b = 6, k = 8, rank = 6), Column = c(b = 4, k = 12, rank = 4)),
     nested = list(Row = c(b = 12, k = 4, rank = 11), Column = c(b = 8, k = 6, rank = 7))
@@ -381,12 +414,15 @@ test_that("row and column A-Bounds are valid for the reported coding", {
   for (nm in names(cases)) {
     bm <- cases[[nm]]$blocksModel[[1]]
     code <- coding[[if (nm == "latinized") "latinized" else "nested"]]
-    limit <- c(Rep = 1, vapply(code, function(x) convexity_a_bound(24, 2, x[["b"]], x[["rank"]]), 1))
+    limit <- c(Rep = 1, vapply(code, function(x) {
+      min(convexity_a_bound(24, 2, x[["b"]], x[["rank"]]),
+          if (nm == "latinized") shared_a_bound(24, 2, x[["b"]]) else paired_a_bound(24, x[["k"]]))
+    }, 1))
     bound <- setNames(bm[["A-Bound"]], bm$Level)[names(limit)]
     a <- setNames(bm[["A-Efficiency"]], bm$Level)[names(limit)]
-    ok <- a <= bound + round_tol & bound <= limit + round_tol
-    expect(all(ok) && abs(bound[["Rep"]] - 1) <= round_tol,
-           sprintf("%s: %s A %.7f, A-Bound %.7f, convexity bound %.7f", nm, names(limit)[which.min(ok)],
+    ok <- a <= bound + round_tol & abs(bound - limit) <= round_tol
+    expect(all(ok),
+           sprintf("%s: %s A %.7f, A-Bound %.7f, closed form %.7f", nm, names(limit)[which.min(ok)],
                    a[which.min(ok)], bound[which.min(ok)], limit[which.min(ok)]))
   }
 })

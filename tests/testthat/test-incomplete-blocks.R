@@ -44,6 +44,28 @@ a_square <- function(s, r) (s^2 - 1) / ((s + 1 - r) * (s - 1) + r^2 * (s - 1) / 
 # Its D-efficiency, from the same efficiency factors.
 d_square <- function(s, r) ((r - 1) / r)^(r / (s + 1))
 
+# Least sum of squares of n non-negative integers that sum to a.
+least_squares <- function(a, n) n * (a %/% n)^2 + (2 * (a %/% n) + 1) * (a %% n)
+# Concurrence bound on the A-efficiency of a resolvable design of v = s k
+# treatments in r replicates of s blocks of k plots. The efficiency factors
+# are 1 - mu_i for the v - 1 non-trivial eigenvalues mu_i of N N' / (r k);
+# sum(mu) = T = s - 1 and sum(mu^2) = S = |N'N|^2 / (r k)^2 - 1. By
+# Cauchy-Schwarz sum(mu / (1 - mu)) >= T^2 / (T - S), so
+# A <= (v - 1) / (v - 1 + T^2 / (T - S)), which falls as S grows. S is at
+# least each of: the blocks' side (a block meets the s blocks of another
+# replicate in k plots, as evenly as possible), the treatments' side (a
+# treatment's r (k - 1) concurrences spread evenly over the other v - 1) and
+# T^2 / m for the m = min(v, r s - r + 1) - 1 non-zero mu (the rank of N).
+# A square lattice gives a_square(s, r).
+a_resolvable <- function(v, k, r) {
+  s <- v / k
+  T <- s - 1
+  S <- max((s + (r - 1) * s * least_squares(k, s) / k^2) / r,
+           v * (r^2 + least_squares(r * (k - 1), v - 1)) / (r * k)^2,
+           1 + T^2 / (min(v, r * s - r + 1) - 1)) - 1
+  (v - 1) / (v - 1 + T^2 / (T - S))
+}
+
 # Block sizes ---------------------------------------------------------------
 
 test_that("block-design functions accept exactly their feasible block sizes", {
@@ -200,16 +222,20 @@ test_that("weakly connected designs (blocks of two, two replicates) stay connect
 
 test_that("the reported A-Bound is a valid bound, attained where the optimum is known", {
   # Valid: every design's A is at most its Level 2 bound, and the complete
-  # replicates (Level 1) have bound 1. Attained: the square lattice
-  # (closed form), the two-replicate rectangular lattice 12/3/2.
+  # replicates (Level 1) have bound 1. The Level 2 bound is the closed-form
+  # concurrence bound a_resolvable() (176/257 for 12/3/3, 95/127 for 20/4/3;
+  # the treatments' side decides 12/3/6); with two replicates a tighter
+  # pairing bound applies, attained by the rectangular lattice 12/3/2, and
+  # equal to a_square() for the square lattice.
   cases <- list(
     list(x = rectangular_lattice(t = 12, k = 3, reps = 2, seed = 1), attained = TRUE),
-    list(x = rectangular_lattice(t = 12, k = 3, reps = 3, seed = 1)),
-    list(x = rectangular_lattice(t = 20, k = 4, reps = 3, seed = 1)),
-    list(x = rectangular_lattice(t = 42, k = 6, reps = 4, seed = 1)),
-    list(x = alpha_lattice(t = 30, k = 5, reps = 3, seed = 1)),
+    list(x = rectangular_lattice(t = 12, k = 3, reps = 3, seed = 1), bound = a_resolvable(12, 3, 3)),
+    list(x = rectangular_lattice(t = 20, k = 4, reps = 3, seed = 1), bound = a_resolvable(20, 4, 3)),
+    list(x = rectangular_lattice(t = 42, k = 6, reps = 4, seed = 1), bound = a_resolvable(42, 6, 4)),
+    list(x = alpha_lattice(t = 30, k = 5, reps = 3, seed = 1), bound = a_resolvable(30, 5, 3)),
+    list(x = alpha_lattice(t = 12, k = 3, reps = 6, seed = 1), bound = a_resolvable(12, 3, 6)),
     list(x = square_lattice(t = 16, k = 4, reps = 2, seed = 1), bound = a_square(4, 2)),
-    list(x = incomplete_blocks(t = 50, k = 5, reps = 3, seed = 2))
+    list(x = incomplete_blocks(t = 50, k = 5, reps = 3, seed = 2), bound = a_resolvable(50, 5, 3))
   )
   for (i in seq_along(cases)) {
     case <- cases[[i]]
@@ -221,7 +247,9 @@ test_that("the reported A-Bound is a valid bound, attained where the optimum is 
       expect_lte(abs(m[["A-Efficiency"]] - m[["A-Bound"]]), recorded_tol, label = paste("case", i))
     }
     if (!is.null(case$bound)) {
-      expect_lte(abs(m[["A-Bound"]] - case$bound), round_tol, label = paste("case", i))
+      expect_lte(abs(m[["A-Bound"]] - case$bound), round_tol,
+                 label = sprintf("case %d: A-Bound %.7f, closed form %.7f; difference", i,
+                                 m[["A-Bound"]], case$bound))
     }
   }
   # The one-way bound of the (7, 3, 1) BIBD is its efficiency 7/9, which the
@@ -292,15 +320,21 @@ test_that("square lattices reach the closed-form A-bound", {
   expect_s3_class(square_lattice(t = 36, k = 6, reps = 4, seed = 1), "FielDHub")
 })
 
-test_that("incomplete blocks on lattice shapes reach the lattice's D-efficiency", {
+test_that("incomplete blocks and allocations on lattice shapes reach the lattice's D-efficiency", {
   # 100 treatments in blocks of 10: the square lattice's D is
-  # ((r - 1) / r)^(r / (s + 1)) for s = 10.
+  # ((r - 1) / r)^(r / (s + 1)) for s = 10. The allocation of 100 lines with r
+  # copies to 10 r locations has the same shape without replicates (the D
+  # blocksdesign 4.9 recorded for it, 0.8953135 and 0.8815913, is the
+  # lattice's); its D is computed here from the incidence, good to 1e-13.
   for (r in 2:3) {
     d <- vapply(1:3, function(seed) {
-      level2(incomplete_blocks(t = 100, k = 10, reps = r, seed = seed))[["D-Efficiency"]]
-    }, numeric(1))
+      c(level2(incomplete_blocks(t = 100, k = 10, reps = r, seed = seed))[["D-Efficiency"]],
+        incidence_efficiency(allocation_of("sparse", 100, 10 * r, r, seed, force_balance = FALSE))[["D"]])
+    }, numeric(2))
+    worst <- which(d == min(d), arr.ind = TRUE)[1, ]
     expect(all(d >= d_square(10, r) - round_tol),
-           sprintf("r = %d: seed %d D = %.7f, lattice %.7f", r, which.min(d), min(d), d_square(10, r)))
+           sprintf("r = %d: %s seed %d D = %.7f, lattice %.7f", r,
+                   c("incomplete_blocks", "allocation")[worst[1]], worst[2], min(d), d_square(10, r)))
   }
 })
 
