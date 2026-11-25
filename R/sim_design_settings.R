@@ -1,7 +1,7 @@
 #' Validate trait simulation scales and spatial coordinates
 #' @noRd
 simulation_number <- function(value, name, nonnegative = FALSE) {
-  if (!is.numeric(value) || is.complex(value) || !is.null(dim(value)) ||
+  if (!is.numeric(value) || is.complex(value) || !is.null(dim(value)) || !is.null(names(value)) ||
       length(value) != 1L || !is.finite(value) || (nonnegative && value < 0)) {
     fieldhub_abort("'", name, "' must be one finite ",
                    if (nonnegative) "nonnegative " else "", "number.")
@@ -61,8 +61,10 @@ check_simulation_axes <- function(design) {
     c("ROW_REP", "COLUMN_REP")
   }
   if (!all(experimental_axes %in% names(design$fieldBook))) {
-    fieldhub_abort("Spatial simulation requires physical ROW and COLUMN. Use ",
-                   "the field book returned by field_layout() to retain the experimental axes.")
+    fieldhub_abort("Spatial simulation of this design needs its physical layout. Run ",
+                   "`x$fieldBook <- field_layout(x)` first, then `simulate(x, spatial = TRUE)`; ",
+                   "the layout keeps the experimental axes as ",
+                   paste(experimental_axes, collapse = " and "), ".")
   }
 }
 

@@ -250,6 +250,7 @@ test_that("core code selects field-book columns by name, not position", {
     pos("strip_plot", "Hplots.random[, 1]", "internal layout matrix column"),
     pos("strip_plot", "Vplots.random[, 1]", "internal layout matrix column"),
     pos("new_design_option_queue", "pending[[1L]]", "first queued request, not a data-frame column"),
+    pos("print.fieldhub_simulation", "x$effects[[1L]]", "list-element access, not a data-frame column"),
     pos("swap_pairs_core", "active_pos[, 1L]", "internal plot-coordinate matrix column"),
     pos("swap_pairs_core", "active_pos[, 2L]", "internal plot-coordinate matrix column"),
     pos("swap_pairs_core", "designs[[1L]]", "list-element access, not a data-frame column"),

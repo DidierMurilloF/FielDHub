@@ -24,13 +24,17 @@ test_that("spatial workflow books preserve simulation records separately from di
                class = "fieldhub_input_error")
 })
 
+correlation_ids <- function(spec) {
+  vapply(spatial_correlation_spec(spec$correlation_suffix), `[[`, character(1), "inputId")
+}
+
 test_that("spatial workflows keep per-module view and correlation identifiers", {
   registry <- fieldhub_spatial_workflows()
   expect_identical(names(registry), c("Diagonal", "diagonal_multiple", "Optim", "RCBD_augmented",
                                       "Augmented_RowCol", "pREPS", "multi_loc_preps", "sparse_allocation"))
   for (module in names(registry)) {
     spec <- spatial_workflow_spec(module)
-    expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids, spec$correlation_ids,
+    expect_identical(anyDuplicated(c(spec$ids, spec$simulation_ids, correlation_ids(spec),
                                       spec$heatmap_checkbox)), 0L)
     code <- spatial_server_body(module)
     expect_identical(sum(all.names(code) == "app_spatial_workflow"), 1L)
@@ -53,7 +57,7 @@ test_that("shared spatial dialogs preserve controls and use trait terminology", 
     spec <- spatial_workflow_spec(module)
     for (spatial in c(FALSE, TRUE)) {
       html <- as.character(app_spatial_simulation_modal(shiny::NS("example"), spec, spatial_available = spatial))
-      for (id in c(spec$simulation_ids, if (spatial) spec$correlation_ids, spec$heatmap_checkbox)) {
+      for (id in c(spec$simulation_ids, if (spatial) correlation_ids(spec), spec$heatmap_checkbox)) {
         expect_match(html, paste0('id="example-', id, '"'), fixed = TRUE)
       }
       expect_match(html, "Trait name", fixed = TRUE)

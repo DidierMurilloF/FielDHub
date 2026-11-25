@@ -48,6 +48,16 @@ test_that("the default simulator covers the 21 field designs", {
     planted <- result$metadata$parameters$terms$planted
     expect_true(all(is.finite(result$field_book$YIELD[planted])), info = name)
     expect_true(all(is.na(result$field_book$YIELD[!planted])), info = name)
+    expect_equal(result$field_book$YIELD[planted],
+      (100 + Reduce(`+`, result$effects[[1L]]))[planted], info = name)
+    terms <- result$metadata$parameters$terms
+    groups <- c(terms$treatment, terms$design)
+    mixed <- names(groups)[!vapply(names(groups), function(term) {
+      unit <- groups[[term]] > 0L
+      all(tapply(result$effects[[1L]][[term]][unit], groups[[term]][unit],
+                 function(effect) length(unique(effect)) == 1L))
+    }, logical(1))]
+    expect_identical(mixed, character(0), info = name)
     expect_identical(reproduce_simulation(result), result)
   }
 })
@@ -71,6 +81,9 @@ test_that("treatment effects follow entry identity while location and block foll
     draw$treatment + draw$block + draw$residual)
   expect_false(identical(result$responses[[1L]], result$responses[[2L]]))
   expect_identical(reproduce_simulation(result), result)
+  printed <- capture.output(print(result))
+  expect_true(length(printed) < 20L && any(grepl("Design effects: block", printed)),
+              info = paste(printed, collapse = "\n"))
 })
 
 test_that("physical coordinates control only the optional spatial component", {
@@ -99,26 +112,8 @@ test_that("a seeded simulation preserves caller randomness and validates overrid
   expect_error(stats::simulate(x, residual_sd = -1), "nonnegative")
   expect_error(stats::simulate(x, trait = "ID"), "already present")
   expect_error(stats::simulate(x, nsim = 0), "nsim")
+  expect_error(stats::simulate(x, treatment_sd = c(a = 1)), class = "fieldhub_input_error")
   expect_identical(.Random.seed, previous)
-})
-
-test_that("the app uses package responses for the displayed field book", {
-  x <- RCBD(6, 3, nrows = 3, seed = 1)
-  book <- x$fieldBook
-  settings <- list(trait = "HEIGHT", mean = 6, residual_sd = 0.4, spatial = TRUE)
-  expected <- do.call(stats::simulate, c(list(object = x, seed = 7), settings))
-  actual <- app_trait_simulation(x, book, settings, seed = 7, renumber_display = TRUE)
-  expect_identical(actual$simulation, expected)
-  expect_identical(actual$df$HEIGHT, expected$field_book$HEIGHT)
-
-  rc <- row_column(12, nrows = 3, reps = 3, seed = 1)
-  layout <- field_layout(rc, stacked = "horizontal")
-  result <- app_trait_simulation(rc, layout, settings, seed = 7)
-  source <- rc$fieldBook[match(layout$ID, rc$fieldBook$ID), ]
-  expect_identical(result$df[names(layout)], layout)
-  expect_identical(result$simulation$input_field_book$ROW_REP, source$ROW)
-  expect_identical(result$simulation$input_field_book$ROW, layout$ROW)
-  expect_true("spatial" %in% names(result$simulation$effects[[1L]]))
 })
 
 test_that("row-column effects follow the realized nested or shared axes", {
@@ -143,14 +138,15 @@ test_that("changing the residual scale rescales the default trait effects", {
 })
 
 test_that("spatial correlation retains grid distances across unplanted gaps", {
-  book <- data.frame(LOCATION = "A", ROW = c(1, 1, 7, 7), COLUMN = c(1, 3, 1, 3))
+  x <- CRD(2, 2, seed = 1)
+  x$fieldBook$ROW <- c(1, 1, 7, 7)
+  x$fieldBook$COLUMN <- c(1, 4, 1, 4)
   spec <- list(sd = 1, rho_row = .8, rho_col = -.7)
-  patch <- simulation_spatial_patches(book, rep(1L, 4), spec)[[1L]]
-  set.seed(104)
-  draws <- replicate(4000, simulation_spatial_draw(patch, spec))
-  expected <- spec$rho_row ^ abs(outer(book$ROW, book$ROW, "-")) *
-    spec$rho_col ^ abs(outer(book$COLUMN, book$COLUMN, "-"))
-  expect_equal(unname(stats::cov(t(draws))), expected, tolerance = .06)
+  result <- stats::simulate(x, nsim = 4000, seed = 104, mean = 0, residual_sd = 0,
+                            treatment_sd = 0, spatial = spec)
+  expected <- spec$rho_row ^ abs(outer(x$fieldBook$ROW, x$fieldBook$ROW, "-")) *
+    spec$rho_col ^ abs(outer(x$fieldBook$COLUMN, x$fieldBook$COLUMN, "-"))
+  expect_equal(unname(stats::cov(t(as.matrix(result$responses)))), expected, tolerance = .06)
 })
 
 test_that("augmented RCBD blocks and entries use their realized identities", {
@@ -169,7 +165,7 @@ test_that("augmented RCBD blocks and entries use their realized identities", {
                          effects$treatment[match(4, book$ENTRY)]))
 })
 
-test_that("row-column field layouts preserve shared experimental axes in the API and app", {
+test_that("row-column field layouts preserve shared experimental axes", {
   x <- row_column(24, nrows = 6, reps = 2, seed = 21, iterations = 30,
                   method = "onestage", latinize = TRUE)
   layout <- field_layout(x, stacked = "horizontal")
@@ -177,14 +173,10 @@ test_that("row-column field layouts preserve shared experimental axes in the API
   expect_identical(layout$ROW_REP, x$fieldBook$ROW[indexes])
   expect_identical(layout$COLUMN_REP, x$fieldBook$COLUMN[indexes])
   expect_error(stats::simulate(x, spatial = TRUE), "field_layout")
-  settings <- list(trait = "YIELD", mean = 100, residual_sd = 8, spatial = TRUE)
-  app <- app_trait_simulation(x, layout, settings, seed = 42)
   x$fieldBook <- layout
   sim <- stats::simulate(x, spatial = TRUE, seed = 42)
   expect_length(unique(sim$effects[[1L]]$column), 4L)
-  expect_identical(app$df$YIELD, sim$field_book$YIELD)
-  expect_error(simulation_request(100, 8, "Other", "ROW_REP", field_book = layout),
-               "already present")
+  expect_true("spatial" %in% names(sim$effects[[1L]]))
 })
 
 test_that("numeric Latin-square experimental labels require a physical layout", {

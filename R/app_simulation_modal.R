@@ -10,8 +10,8 @@ app_simulation_modal <- function(ns, ids, spatial_available = FALSE,
     shiny::conditionalPanel(paste0("input['", ids[["trait"]], "'] == 'Other'"), ns = ns,
       shiny::textInput(ns(ids[["other"]]), label = "Trait name", value = NULL)),
     shiny::fluidRow(
-      shiny::column(6, shiny::numericInput(ns(ids[["minimum"]]), "Trait mean", value = 100)),
-      shiny::column(6, shiny::numericInput(ns(ids[["maximum"]]), "Plot-to-plot SD",
+      shiny::column(6, shiny::numericInput(ns(ids[["mean"]]), "Trait mean", value = 100)),
+      shiny::column(6, shiny::numericInput(ns(ids[["sd"]]), "Plot-to-plot SD",
                                           value = 8, min = 0))
     ),
     if (spatial_available) shiny::tagList(

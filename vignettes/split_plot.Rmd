@@ -82,7 +82,7 @@ After you run a split-plot design in FielDHub, there are several ways to display
 ### Field Layout
 
 When you first click the run button on a split-plot design, FielDHub displays the Field Layout tab, which shows the entries and their arrangement in the field. In the box below the display, you can change the layout of the field. 
-You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can enter what variable you want to simulate along with minimum and maximum values. 
+You can also display a heatmap over the field by changing **Type of Plot** to `Heatmap`. To view a heatmap, you must first simulate an experiment over the described field with the **Simulate!** button. A pop-up window will appear where you can choose the trait to simulate and enter its mean and plot-error (residual) standard deviation (SD). The simulated values include the treatment and design effects of the layout. 
 
 ### Field Book
 

@@ -22,7 +22,7 @@ app_simulation_controls <- function(input, session, ids, field_book,
                           rho_row = read(correlations$correlation_y))
         }
         simulation_request(
-          mean = input[[ids[["minimum"]]]], residual_sd = input[[ids[["maximum"]]]],
+          mean = input[[ids[["mean"]]]], residual_sd = input[[ids[["sd"]]]],
           trait = input[[ids[["trait"]]]], other = input[[ids[["other"]]]],
           field_book = book, spatial = spatial
         )

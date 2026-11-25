@@ -10,7 +10,7 @@ test_that("classic and spatial Shiny workflows export the package simulation", {
   simulation_inputs <- function(spec) {
     ids <- spec$simulation_ids
     stats::setNames(list("YIELD", 6, 0.4, TRUE, 1L),
-      c(ids["trait"], ids["minimum"], ids["maximum"], simulation_spatial_id(ids), ids["submit"]))
+      c(ids["trait"], ids["mean"], ids["sd"], simulation_spatial_id(ids), ids["submit"]))
   }
 
   shiny::testServer(function(input, output, session) {
@@ -43,11 +43,15 @@ test_that("classic and spatial Shiny workflows export the package simulation", {
   })
 })
 
-test_that("the row-column simulation form rejects experimental axis names", {
+test_that("row-column simulation uses the physical layout and rejects experimental axis names", {
   spec <- classic_workflow_spec("RowCol")
   ids <- spec$simulation_ids
   x <- row_column(12, nrows = 3, reps = 3, seed = 1)
   view <- checked_layout_view(x, layout = 1, location = 1)
+  physical <- x
+  physical$fieldBook <- field_layout(x)
+  reference <- stats::simulate(physical, seed = 1, mean = 6, residual_sd = 0.4,
+                               spatial = TRUE)$field_book
   shiny::testServer(function(input, output, session) {
     state <- app_classic_workflow(input, output, session,
       design = function() x, layout = function() view,
@@ -55,10 +59,11 @@ test_that("the row-column simulation form rejects experimental axis names", {
       simulation_ready = function() TRUE)
   }, {
     session$flushReact()
-    do.call(session$setInputs, setNames(list("YIELD", 6, 0.4, 1L),
-      ids[c("trait", "minimum", "maximum", "submit")]))
+    do.call(session$setInputs, setNames(list("YIELD", 6, 0.4, TRUE, 1L),
+      c(ids[c("trait", "mean", "sd")], simulation_spatial_id(ids), ids["submit"])))
     accepted <- state$book()
-    expect_identical(state$settings()$trait, "YIELD")
+    book <- accepted$df
+    expect_identical(book$YIELD, reference$YIELD[match(book$ID, reference$ID)])
     do.call(session$setInputs, setNames(list("Other", "ROW_REP", 2L),
       ids[c("trait", "other", "submit")]))
     expect_identical(state$settings()$trait, "YIELD")

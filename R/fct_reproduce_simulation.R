@@ -12,6 +12,11 @@
 #' layout: it starts from the exact saved input field book. Use
 #' \code{reproduce_design()} separately to reconstruct the experimental design.
 #' The caller's RNG settings and \code{.Random.seed} are restored on exit.
+#' R cannot save the normal value that Box-Muller holds in reserve, so when
+#' the caller uses Box-Muller normals, replaying a record made under another
+#' normal generator discards that reserved value and the caller's next
+#' \code{rnorm()} draw differs. Records made by \code{simulate()} under
+#' Box-Muller use a private stream and leave it untouched.
 #' Recorded arguments are passed as values rather than evaluated as R code.
 #' A changed FielDHub version signals a \code{fieldhub_reproduction_warning};
 #' reproduction across software versions or platforms is not guaranteed.

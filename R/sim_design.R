@@ -28,11 +28,18 @@
 #'   Defaults to 0.625 times the typical residual SD.
 #' @param spatial `FALSE` (default), `TRUE` for defaults, or a named list
 #'   overriding `sd` (half the typical residual SD), `rho_row` (0.5) and
-#'   `rho_col` (0.5). Spatial
-#'   correlation requires physical `ROW` and `COLUMN` in the field book,
-#'   with unique coordinate pairs within each location. For Latin squares
-#'   and resolvable row-column designs, use the field book returned by
-#'   [field_layout()] so the experimental axes are retained separately.
+#'   `rho_col` (0.5). The spatial effect is a separable AR1 x AR1 field
+#'   with standard deviation `sd`: `rho_row` is the correlation between
+#'   plots in adjacent rows of the same column, `rho_col` between plots in
+#'   adjacent columns of the same row, and plots `dr` rows and `dc` columns
+#'   apart have correlation `rho_row^dr * rho_col^dc`. Spatial correlation
+#'   requires physical `ROW` and `COLUMN` in the field book, with unique
+#'   coordinate pairs within each location. A Latin square or row-column
+#'   design stores its experimental rows and columns there, so first
+#'   replace its field book with the physical layout:
+#'   `x$fieldBook <- field_layout(x)`, then `simulate(x, spatial = TRUE)`.
+#'   The layout keeps the experimental axes as `ROW_SQ`/`COLUMN_SQ` or
+#'   `ROW_REP`/`COLUMN_REP`, so the design effects are unchanged.
 #'
 #' @details The typical residual SD is the arithmetic mean of the location
 #'   residual SDs. These defaults scale the trait signal and the effects of
@@ -49,6 +56,12 @@
 #' sim <- stats::simulate(x, seed = 42, mean = 6, residual_sd = 0.4,
 #'                        treatment_sd = 0.6, design_sd = 0.3)
 #' head(sim$field_book)
+#'
+#' # Spatial simulation of a row-column design on its physical layout
+#' rc <- row_column(t = 12, nrows = 3, reps = 2, seed = 1)
+#' rc$fieldBook <- field_layout(rc)
+#' sim_rc <- stats::simulate(rc, seed = 7, spatial = list(rho_row = 0.6, rho_col = 0.3))
+#' sim_rc
 #' @md
 #' @importFrom stats simulate
 #' @export
@@ -172,4 +185,56 @@ simulation_response_names <- function(trait, nsim, field_book) {
     fieldhub_abort("A simulated response name is already present in the field book or is reserved.")
   }
   response_names
+}
+
+#' Print a design-aware trait simulation
+#'
+#' Summarize the simulation settings and show the first rows of the
+#' simulated field book. The full results stay in the object: `field_book`,
+#' `responses`, `effects` (the plot-aligned effects behind each draw) and
+#' `metadata`.
+#'
+#' @param x A `fieldhub_simulation` returned by [simulate.FielDHub()].
+#' @param n Number of field-book rows to show.
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @md
+#' @export
+print.fieldhub_simulation <- function(x, n = 6L, ...) {
+  meta <- x$metadata
+  p <- meta$parameters
+  responses <- names(x$responses)
+  draws <- length(responses)
+  locations <- length(unique(x$field_book$LOCATION))
+  number <- function(v) vapply(v, format, character(1), digits = 4)
+  values <- function(v) {
+    text <- number(v)
+    if (!is.null(names(v))) text <- paste(names(v), "=", text)
+    paste(text, collapse = ", ")
+  }
+  line <- function(...) cat("  ", paste0(...), "\n", sep = "")
+  cat("FielDHub trait simulation (", meta$model, ")\n", sep = "")
+  line("Plots: ", nrow(x$field_book), "  Locations: ", locations,
+       "  Draws: ", draws, "  Seed: ", meta$seed)
+  line("Trait: ", p$trait, if (draws > 1L) paste0(" (", responses[1L], " ... ", responses[draws], ")"))
+  line("Mean: ", values(p$mean), "  Residual SD: ", values(p$residual_sd))
+  line("Treatment SD: ", values(p$treatment_sd),
+       if (locations > 1L && is.null(names(p$mean))) paste0("  Location SD: ", values(p$location_sd)))
+  design <- names(p$terms$design)
+  # A unit that is alone at its location has no within-location contrast.
+  inactive <- design[!vapply(p$terms$design, function(group) any(group > 0L), logical(1))]
+  line("Design effects: ", if (length(design)) values(p$design_sd[design]) else "none",
+       if (length(inactive)) paste0(" (no effect: ", paste(inactive, collapse = ", "), ")"))
+  line("Spatial: ", if (identical(p$spatial, FALSE)) "none" else
+    paste0("sd = ", number(p$spatial$sd), ", rho_row = ", p$spatial$rho_row,
+           ", rho_col = ", p$spatial$rho_col))
+  line("Effects behind each draw: x$effects[[i]] (", paste(names(x$effects[[1L]]), collapse = ", "), ")")
+  cat("\n")
+  shown <- c(setdiff(names(x$field_book), responses), utils::head(responses, 3L))
+  print(utils::head(x$field_book[shown], n))
+  if (nrow(x$field_book) > n || draws > 3L) {
+    cat("... x$field_book has ", nrow(x$field_book), " rows and ", draws,
+        if (draws == 1L) " draw" else " draws", "\n", sep = "")
+  }
+  invisible(x)
 }

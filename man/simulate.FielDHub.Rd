@@ -52,11 +52,18 @@ Defaults to 0.625 times the typical residual SD.}
 
 \item{spatial}{\code{FALSE} (default), \code{TRUE} for defaults, or a named list
 overriding \code{sd} (half the typical residual SD), \code{rho_row} (0.5) and
-\code{rho_col} (0.5). Spatial
-correlation requires physical \code{ROW} and \code{COLUMN} in the field book,
-with unique coordinate pairs within each location. For Latin squares
-and resolvable row-column designs, use the field book returned by
-\code{\link[=field_layout]{field_layout()}} so the experimental axes are retained separately.}
+\code{rho_col} (0.5). The spatial effect is a separable AR1 x AR1 field
+with standard deviation \code{sd}: \code{rho_row} is the correlation between
+plots in adjacent rows of the same column, \code{rho_col} between plots in
+adjacent columns of the same row, and plots \code{dr} rows and \code{dc} columns
+apart have correlation \code{rho_row^dr * rho_col^dc}. Spatial correlation
+requires physical \code{ROW} and \code{COLUMN} in the field book, with unique
+coordinate pairs within each location. A Latin square or row-column
+design stores its experimental rows and columns there, so first
+replace its field book with the physical layout:
+\code{x$fieldBook <- field_layout(x)}, then \code{simulate(x, spatial = TRUE)}.
+The layout keeps the experimental axes as \code{ROW_SQ}/\code{COLUMN_SQ} or
+\code{ROW_REP}/\code{COLUMN_REP}, so the design effects are unchanged.}
 }
 \value{
 A \code{fieldhub_simulation} list with the field book augmented by
@@ -81,6 +88,12 @@ x <- RCBD(t = 6, reps = 3, nrows = 3, seed = 20)
 sim <- stats::simulate(x, seed = 42, mean = 6, residual_sd = 0.4,
                        treatment_sd = 0.6, design_sd = 0.3)
 head(sim$field_book)
+
+# Spatial simulation of a row-column design on its physical layout
+rc <- row_column(t = 12, nrows = 3, reps = 2, seed = 1)
+rc$fieldBook <- field_layout(rc)
+sim_rc <- stats::simulate(rc, seed = 7, spatial = list(rho_row = 0.6, rho_col = 0.3))
+sim_rc
 }
 \seealso{
 \code{\link[=reproduce_simulation]{reproduce_simulation()}}
