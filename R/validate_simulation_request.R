@@ -13,7 +13,7 @@ simulation_request <- function(mean, residual_sd, trait, other = NULL,
   spatial <- simulation_spatial_spec(spatial, default_sd = 0.5 * residual_sd)
   if (!identical(spatial, FALSE)) {
     site <- match(field_book$LOCATION, unique(field_book$LOCATION))
-    simulation_spatial_patches(field_book, site, spatial)
+    simulation_spatial_patches(field_book, site)
   }
   list(mean = as.numeric(mean), residual_sd = as.numeric(residual_sd),
        trait = trait, spatial = spatial)

@@ -187,6 +187,24 @@ rc$fieldBook <- field_layout(rc)
 simulate(rc, spatial = TRUE)
 ```
 
+### When you do not know the field
+
+You rarely know how strongly neighbouring plots are correlated. Give a range
+instead of a value, and every simulated trial gets its own correlations,
+drawn uniformly from that range. With several locations, each location gets
+its own pair. The true values are returned in `spatial_draws`:
+
+```{r}
+sim_many <- simulate(prep, nsim = 4, seed = 4,
+                     spatial = list(sd = 8, rho_row = c(0.3, 0.9), rho_col = c(0.1, 0.6)))
+sim_many$spatial_draws
+```
+
+A correlation you leave out is drawn from 0.15 to 0.9, and so are both with
+`spatial = TRUE`. A single number, such as `rho_row = 0.6`, stays fixed.
+This is useful when you test an analysis or a design: it should work over a
+range of fields, not only the one you guessed.
+
 ## More options
 
 * **Several draws**: `nsim = 50` gives `YIELD_1`, ..., `YIELD_50`.

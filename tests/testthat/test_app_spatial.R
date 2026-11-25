@@ -653,7 +653,9 @@ test_that("classic and spatial Shiny workflows export the package simulation", {
   spatial_design <- diagonal_arrangement(15, 20, 270, 4, seed = 12)
   view <- checked_layout_view(classic_design, layout = 1, location = 1)
   expected <- function(design) {
-    stats::simulate(design, seed = 12, mean = 6, residual_sd = 0.4, spatial = TRUE)$field_book
+    # The dialog's default correlations; spatial = TRUE would draw them
+    stats::simulate(design, seed = 12, mean = 6, residual_sd = 0.4,
+                    spatial = list(rho_row = 0.5, rho_col = 0.5))$field_book
   }
   simulation_inputs <- function(spec) {
     ids <- spec$simulation_ids
@@ -697,7 +699,7 @@ test_that("row-column simulation uses the physical layout and rejects experiment
   physical <- x
   physical$fieldBook <- field_layout(x)
   reference <- stats::simulate(physical, seed = 1, mean = 6, residual_sd = 0.4,
-                               spatial = TRUE)$field_book
+                               spatial = list(rho_row = 0.5, rho_col = 0.5))$field_book
   shiny::testServer(function(input, output, session) {
     state <- app_classic_workflow(input, output, session,
       design = function() x, layout = function() view,

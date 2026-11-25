@@ -51,12 +51,20 @@ typical residual SD.}
 Defaults to 0.625 times the typical residual SD.}
 
 \item{spatial}{\code{FALSE} (default), \code{TRUE} for defaults, or a named list
-overriding \code{sd} (half the typical residual SD), \code{rho_row} (0.5) and
-\code{rho_col} (0.5). The spatial effect is a separable AR1 x AR1 field
+overriding \code{sd} (half the typical residual SD), \code{rho_row} and \code{rho_col}.
+The spatial effect is a separable AR1 x AR1 field
 with standard deviation \code{sd}: \code{rho_row} is the correlation between
 plots in adjacent rows of the same column, \code{rho_col} between plots in
 adjacent columns of the same row, and plots \code{dr} rows and \code{dc} columns
-apart have correlation \code{rho_row^dr * rho_col^dc}. Spatial correlation
+apart have correlation \code{rho_row^dr * rho_col^dc}. Each correlation is
+either one fixed value or a range \code{c(low, high)}, strictly between -1
+and 1. A range is drawn from uniformly for every draw and every
+location, so each location of each simulated trial has its own field.
+The drawn values depend only on \code{seed}, \code{nsim} and the number of
+locations, so two layouts simulated with the same seed share them.
+A correlation that is not given is drawn from \code{c(0.15, 0.9)}; so is
+every correlation with \code{spatial = TRUE}. The values used are returned
+in \code{spatial_draws}. Spatial correlation
 requires physical \code{ROW} and \code{COLUMN} in the field book, with unique
 coordinate pairs within each location. A Latin square or row-column
 design stores its experimental rows and columns there, so first
@@ -68,7 +76,10 @@ The layout keeps the experimental axes as \code{ROW_SQ}/\code{COLUMN_SQ} or
 \value{
 A \code{fieldhub_simulation} list with the field book augmented by
 the responses, the input field book, the response data frame, one list
-of plot-aligned effect contributions per draw, and replay metadata.
+of plot-aligned effect contributions per draw, \code{spatial_draws} (with a
+spatial effect: the true \code{rho_row} and \code{rho_col} of every \code{draw} and
+\code{LOCATION}, whether drawn or fixed; otherwise \code{NULL}), and replay
+metadata.
 Standard deviations are in trait units and the Gaussian response is
 unbounded.
 }
@@ -94,6 +105,11 @@ rc <- row_column(t = 12, nrows = 3, reps = 2, seed = 1)
 rc$fieldBook <- field_layout(rc)
 sim_rc <- stats::simulate(rc, seed = 7, spatial = list(rho_row = 0.6, rho_col = 0.3))
 sim_rc
+
+# Correlations drawn for each trial: the true values are in spatial_draws
+sim_drawn <- stats::simulate(rc, nsim = 3, seed = 7,
+                             spatial = list(rho_row = c(0.3, 0.9), rho_col = c(0.1, 0.5)))
+sim_drawn$spatial_draws
 }
 \seealso{
 \code{\link[=reproduce_simulation]{reproduce_simulation()}}

@@ -19,6 +19,6 @@
 \description{
 Summarize the simulation settings and show the first rows of the
 simulated field book. The full results stay in the object: \code{field_book},
-\code{responses}, \code{effects} (the plot-aligned effects behind each draw) and
-\code{metadata}.
+\code{responses}, \code{effects} (the plot-aligned effects behind each draw),
+\code{spatial_draws} (the true spatial correlations) and \code{metadata}.
 }

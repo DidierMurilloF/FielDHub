@@ -41,7 +41,7 @@ simulation_design_sd <- function(value, terms, default) {
 
 simulation_spatial_spec <- function(spatial, default_sd) {
   if (identical(spatial, FALSE)) return(FALSE)
-  defaults <- list(sd = default_sd, rho_row = 0.5, rho_col = 0.5)
+  defaults <- list(sd = default_sd, rho_row = simulation_rho_range, rho_col = simulation_rho_range)
   if (identical(spatial, TRUE)) return(defaults)
   if (!is.list(spatial) || is.data.frame(spatial) || is.null(names(spatial)) ||
       anyDuplicated(names(spatial)) || !all(names(spatial) %in% names(defaults))) {
@@ -49,8 +49,35 @@ simulation_spatial_spec <- function(spatial, default_sd) {
   }
   defaults[names(spatial)] <- spatial
   simulation_number(defaults$sd, "spatial$sd", nonnegative = TRUE)
-  check_spatial_grid(1, 1, defaults$rho_col, defaults$rho_row)
+  simulation_rho(defaults$rho_row, "rho_row")
+  simulation_rho(defaults$rho_col, "rho_col")
   defaults
+}
+
+# The range a correlation is drawn from when the user gives none
+simulation_rho_range <- c(0.15, 0.9)
+
+# A correlation is one fixed value or a range c(low, high) to draw from
+simulation_rho <- function(value, name) {
+  if (!is.numeric(value) || is.complex(value) || !is.null(dim(value)) ||
+      !length(value) %in% 1:2 || any(!is.finite(value)) || any(abs(value) >= 1) ||
+      (length(value) == 2L && value[1L] >= value[2L])) {
+    fieldhub_abort("'spatial$", name, "' must be one correlation, or a range c(low, high) ",
+                   "with low < high, strictly between -1 and 1.")
+  }
+  invisible(value)
+}
+
+# The correlations of one draw at one location: a fixed value is kept, a range
+# is drawn from uniformly with the simulation's own stream
+simulation_spatial_rho <- function(spatial, draw_uniform) {
+  pick <- function(value) {
+    if (length(value) == 1L) return(value)
+    value[1L] + (value[2L] - value[1L]) * draw_uniform(1L)
+  }
+  rho_row <- pick(spatial$rho_row)
+  rho_col <- pick(spatial$rho_col)
+  list(sd = spatial$sd, rho_row = rho_row, rho_col = rho_col)
 }
 
 check_simulation_axes <- function(design) {
@@ -68,7 +95,7 @@ check_simulation_axes <- function(design) {
   }
 }
 
-simulation_spatial_patches <- function(book, site, spatial) {
+simulation_spatial_patches <- function(book, site) {
   axes <- c("ROW", "COLUMN")
   if (!all(axes %in% names(book))) {
     fieldhub_abort("Spatial simulation requires physical ROW and COLUMN in the field book.")
@@ -99,8 +126,7 @@ simulation_spatial_patches <- function(book, site, spatial) {
     field_rows <- sort(unique(row))
     field_cols <- sort(unique(col))
     list(rows = rows, observed = split(seq_along(rows), match(row, field_rows)),
-         row_rho = spatial$rho_row ^ diff(field_rows),
-         col_rho = spatial$rho_col ^ diff(field_cols), column = match(col, field_cols),
+         row_gap = diff(field_rows), col_gap = diff(field_cols), column = match(col, field_cols),
          ncols = length(field_cols))
   })
 }
@@ -115,13 +141,15 @@ simulation_spatial_draw <- function(patch, spatial, draw_normal = stats::rnorm) 
   }
   draw <- numeric(length(patch$rows))
   row <- numeric(patch$ncols)
-  column_sd <- sqrt(1 - patch$col_rho^2)
+  row_rho <- spatial$rho_row ^ patch$row_gap
+  col_rho <- spatial$rho_col ^ patch$col_gap
+  column_sd <- sqrt(1 - col_rho^2)
   for (i in seq_along(patch$observed)) {
     innovation <- draw_normal(patch$ncols)
-    for (j in seq_along(patch$col_rho)) {
-      innovation[j + 1L] <- patch$col_rho[j] * innovation[j] + column_sd[j] * innovation[j + 1L]
+    for (j in seq_along(col_rho)) {
+      innovation[j + 1L] <- col_rho[j] * innovation[j] + column_sd[j] * innovation[j + 1L]
     }
-    rho <- if (i == 1L) 0 else patch$row_rho[i - 1L]
+    rho <- if (i == 1L) 0 else row_rho[i - 1L]
     row <- rho * row + sqrt(1 - rho^2) * innovation
     plots <- patch$observed[[i]]
     draw[plots] <- spatial$sd * row[patch$column[plots]]

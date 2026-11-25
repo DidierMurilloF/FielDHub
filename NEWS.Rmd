@@ -18,6 +18,33 @@ knitr::opts_chunk$set(
 
 # Changelog
 
+# FielDHub 1.7.6
+
+## Spatial correlations drawn for each simulated trial
+
+- In `stats::simulate(x, spatial = ...)`, `rho_row` and `rho_col` each take
+  one fixed value or a range `c(low, high)`. A range is drawn from uniformly
+  for every draw and every location, so each location of each simulated
+  trial has its own spatial field. A correlation that is not given is drawn
+  from 0.15 to 0.9.
+- The true correlations of every draw and location are returned in the new
+  `spatial_draws` table of the result (`draw`, `LOCATION`, `rho_row`,
+  `rho_col`) and shown when the simulation is printed.
+  `reproduce_simulation()` draws the same values again.
+- The drawn correlations depend only on the seed, `nsim` and the number of
+  locations, so two layouts simulated with the same seed, even of different
+  designs, share them.
+
+## Changes to results and outputs
+
+* `simulate(x, spatial = TRUE)` now draws both correlations from 0.15 to
+  0.9 for each draw and location; in 1.7.5 it fixed them at 0.5. Give
+  `spatial = list(rho_row = 0.5, rho_col = 0.5)` for the 1.7.5 values.
+  Simulations with fixed correlations give the same values as in 1.7.5 for
+  the same seed.
+* The Shiny app is unchanged: its **Add spatial correlation** option always
+  uses the correlations selected in the dialog.
+
 # FielDHub 1.7.5
 
 ## Design-aware trait simulation

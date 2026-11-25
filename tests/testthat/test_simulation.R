@@ -129,13 +129,18 @@ test_that("a seeded simulation preserves caller randomness and validates overrid
   set.seed(22)
   previous <- .Random.seed
   zero <- stats::simulate(x, seed = 4, mean = -2, treatment_sd = 0, residual_sd = 0)
+  grid <- RCBD(6, 3, nrows = 3, seed = 1)
   expect_identical(zero$field_book$YIELD, rep(-2, nrow(x$fieldBook)))
   bad <- list(
     `design_sd for a term the design lacks` = function() stats::simulate(x, seed = 4, design_sd = c(block = 0)),
     `negative residual_sd` = function() stats::simulate(x, residual_sd = -1),
     `trait already in the field book` = function() stats::simulate(x, trait = "ID"),
     `nsim = 0` = function() stats::simulate(x, nsim = 0),
-    `named treatment_sd` = function() stats::simulate(x, treatment_sd = c(a = 1))
+    `named treatment_sd` = function() stats::simulate(x, treatment_sd = c(a = 1)),
+    # On a design with field coordinates, so only the correlation can be refused
+    `correlation range given high to low` = function() stats::simulate(grid, spatial = list(rho_row = c(.8, .2))),
+    `three correlation values` = function() stats::simulate(grid, spatial = list(rho_col = c(.1, .2, .3))),
+    `correlation range reaching 1` = function() stats::simulate(grid, spatial = list(rho_row = c(.5, 1)))
   )
   for (name in names(bad)) expect_error(bad[[name]](), class = "fieldhub_input_error", info = name)
   expect_identical(.Random.seed, previous)
@@ -176,6 +181,108 @@ test_that("spatial correlation retains grid distances across unplanted gaps", {
   # Sample covariances of 4000 unit-variance draws have standard error about
   # 1 / sqrt(4000) = 0.016; 0.06 is under four standard errors.
   expect_equal(unname(stats::cov(t(as.matrix(result$responses)))), expected, tolerance = .06)
+})
+
+test_that("spatial correlations are drawn for each draw and location and reported", {
+  x <- RCBD(t = 6, reps = 3, l = 2, nrows = 3, ncols = 6, seed = 1)
+  cases <- list(
+    default = list(spatial = TRUE, row = c(.15, .9), col = c(.15, .9)),
+    range_and_fixed = list(spatial = list(rho_row = c(.3, .4), rho_col = -.2),
+                           row = c(.3, .4), col = c(-.2, -.2))
+  )
+  for (name in names(cases)) {
+    case <- cases[[name]]
+    d <- stats::simulate(x, nsim = 100, seed = 8, spatial = case$spatial)$spatial_draws
+    within <- function(v, range) all(v >= range[1L] & v <= range[2L])
+    distinct <- function(v, range) length(unique(v)) == if (range[1L] < range[2L]) 200L else 1L
+    # 200 uniform draws all miss the outer 5% at one end with probability 0.95^200 < 1e-4
+    spans <- function(v, range) {
+      edge <- 0.05 * (range[2L] - range[1L])
+      range[1L] == range[2L] || (min(v) < range[1L] + edge && max(v) > range[2L] - edge)
+    }
+    ok <- c(
+      one_row_per_draw_and_location = identical(paste(d$draw, d$LOCATION),
+                                                paste(rep(1:100, each = 2), c("loc1", "loc2"))),
+      rho_row_in_range = within(d$rho_row, case$row), rho_col_in_range = within(d$rho_col, case$col),
+      rho_row_spans_range = spans(d$rho_row, case$row), rho_col_spans_range = spans(d$rho_col, case$col),
+      # A range gives every draw and location its own value; a fixed value is kept
+      rho_row_drawn_or_fixed = distinct(d$rho_row, case$row),
+      rho_col_drawn_or_fixed = distinct(d$rho_col, case$col)
+    )
+    expect(all(ok), paste0(name, ": ", failed_checks(ok)))
+  }
+})
+
+test_that("the reported drawn correlation is the one behind the spatial field", {
+  # One long line of plots, down a column or along a row: the lag-1
+  # autocorrelation of its spatial effects estimates the correlation used
+  # along that line in each draw
+  x <- CRD(4, 100, seed = 1)
+  cases <- list(
+    rho_row = list(row = seq_len(400), col = rep(1, 400), along = "ROW",
+                   spatial = list(sd = 1, rho_row = c(.1, .9), rho_col = .5)),
+    rho_col = list(row = rep(1, 400), col = seq_len(400), along = "COLUMN",
+                   spatial = list(sd = 1, rho_row = .5, rho_col = c(.1, .9)))
+  )
+  for (name in names(cases)) {
+    case <- cases[[name]]
+    x$fieldBook$ROW <- case$row
+    x$fieldBook$COLUMN <- case$col
+    sim <- stats::simulate(x, nsim = 10, seed = 5, mean = 0, residual_sd = 0, treatment_sd = 0,
+                           spatial = case$spatial)
+    estimate <- vapply(sim$effects, function(e) {
+      s <- e$spatial[order(sim$field_book[[case$along]])]
+      stats::cor(s[-1L], s[-400L])
+    }, numeric(1))
+    # The estimate's standard error is about sqrt((1 - rho^2) / 400) <= 0.05;
+    # 0.2 is four standard errors
+    reported <- sim$spatial_draws[[name]]
+    error <- abs(estimate - reported)
+    expect(max(error) < .2, sprintf("%s, draw %d: estimated %.3f, reported %.3f", name,
+                                    which.max(error), estimate[which.max(error)], reported[which.max(error)]))
+  }
+})
+
+test_that("fixed correlations give the values of FielDHub 1.7.5", {
+  # Values from FielDHub 1.7.5 (master 8feaab5) for this call: fixed
+  # correlations must consume no extra random numbers
+  x <- RCBD(6, 3, nrows = 3, seed = 1)
+  sim <- stats::simulate(x, nsim = 2, seed = 11, spatial = list(rho_row = .5, rho_col = .3))
+  expect_equal(unname(unlist(sim$responses[c(1, 9, 18), ])),
+               c(89.2420240921, 94.1475130999, 97.6314915472, 90.1732757525, 105.1410087041,
+                 90.0072121455), tolerance = 1e-9)
+  # Values taken from a named vector, accepted by 1.7.5, give the same draws
+  pars <- c(rho_row = .5, rho_col = .3)
+  named <- stats::simulate(x, nsim = 2, seed = 11,
+                           spatial = list(rho_row = pars["rho_row"], rho_col = pars["rho_col"]))
+  expect_identical(named$responses, sim$responses)
+})
+
+test_that("layouts simulated with one seed share their drawn spatial fields", {
+  x <- RCBD(6, 3, nrows = 3, seed = 1)
+  # The same design with treatments rearranged within blocks and the field
+  # book rows in another order
+  y <- x
+  book <- y$fieldBook
+  book$TREATMENT <- unsplit(lapply(split(book$TREATMENT, book$REP), rev), book$REP)
+  y$fieldBook <- book[c(18:1), ]
+  # Another design on the same grid
+  z <- CRD(6, 3, seed = 2)
+  z$fieldBook$ROW <- x$fieldBook$ROW
+  z$fieldBook$COLUMN <- x$fieldBook$COLUMN
+  run <- function(d) stats::simulate(d, nsim = 3, seed = 21, spatial = TRUE)
+  sx <- run(x)
+  sy <- run(y)
+  sz <- run(z)
+  by_plot <- function(s, part) unlist(lapply(s$effects, function(e) e[[part]][order(s$field_book$ID)]))
+  rho <- function(s) s$spatial_draws[c("rho_row", "rho_col")]
+  ok <- c(
+    same_design_same_correlations = identical(rho(sx), rho(sy)),
+    same_design_same_spatial_field = identical(by_plot(sx, "spatial"), by_plot(sy, "spatial")),
+    same_design_same_plot_errors = identical(by_plot(sx, "residual"), by_plot(sy, "residual")),
+    other_design_same_correlations = identical(rho(sx), rho(sz))
+  )
+  expect(all(ok), failed_checks(ok))
 })
 
 test_that("augmented RCBD blocks and entries use their realized identities", {

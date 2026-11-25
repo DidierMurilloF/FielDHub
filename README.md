@@ -33,6 +33,13 @@ Every design comes with a field map and a field book. Every design in
 the app is also an R function with the same arguments, so a script can
 reproduce what the app made.
 
+## What’s new in 1.7.6
+
+- **Spatial correlations drawn for each trial.** In `simulate()`, give
+  `rho_row` and `rho_col` as a range, or leave them out, and every
+  simulated trial and location gets its own correlations. The true
+  values are returned in `spatial_draws`.
+
 ## What’s new in 1.7.5
 
 - **Design-aware trait simulation.** `stats::simulate(x)` generates
