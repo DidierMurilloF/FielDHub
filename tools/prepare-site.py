@@ -63,6 +63,18 @@ if (root / "topics.csv").exists():
     config["nav"][2] = {"Designs": [{key: value} for key, value in groups.items()]}
     Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
 
+def targets(node):
+    if isinstance(node, str):
+        return {node}
+    return set().union(*map(targets, node.values() if isinstance(node, dict) else node))
+
+# Every vignette gets a page: articles that are not design guides go to Background.
+listed = targets(config["nav"])
+config["nav"][3]["Background"] += [
+    {page_title(root / f"articles/{name}.md"): f"articles/{name}.md"}
+    for name in sorted(articles) if f"articles/{name}.md" not in listed]
+Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
+
 reference_groups = {
     "Designs": [],
     "Allocation and optimization": [],

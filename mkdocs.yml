@@ -82,6 +82,7 @@ nav:
   - Scientific Validation: articles/scientific_validation.md
   - Architecture: articles/architecture.md
   - Extending Fieldhub: articles/extending_fieldhub.md
+  - Simulating Trait Data on a Field Design: articles/simulating_traits.md
 - Reference:
   - Overview: reference/index.md
   - Designs:
@@ -124,7 +125,9 @@ nav:
     - plot.FielDHub: reference/plot.FielDHub.md
     - print.FielDHub: reference/print.FielDHub.md
     - print.fieldLayout: reference/print.fieldLayout.md
+    - print.fieldhub_simulation: reference/print.fieldhub_simulation.md
     - print.summary.FielDHub: reference/print.summary.FielDHub.md
+    - simulate.FielDHub: reference/simulate.FielDHub.md
     - summary.FielDHub: reference/summary.FielDHub.md
 - News:
   - Changelog: news/index.md
