@@ -111,9 +111,11 @@ arc_metrics <- c("E_aug", "V_tt", "V_tc", "V_cc", "max_tt", "max_tc")
 # Brute-force move counts of a restricted contraction m (rows are checks,
 # columns field lines, entries cross-lines). A row move exchanges two checks'
 # cross-lines on a proper, non-empty set of field lines; a cross-line swap
-# exchanges two cells in different field lines. A move is feasible when no
-# field line and no check repeats a cross-line afterwards. Both sets are
-# unchanged by the randomization of lines, cross-lines and check labels.
+# exchanges two cells in different field lines that hold different
+# cross-lines (equal ones would leave the design as it is). A move is
+# feasible when no field line and no check repeats a cross-line afterwards.
+# Both sets are unchanged by the randomization of lines, cross-lines and
+# check labels.
 arc_restricted <- function(m) {
   all(apply(m, 1L, anyDuplicated) == 0L) &&
     all(apply(m, 2L, anyDuplicated) == 0L)
@@ -135,7 +137,7 @@ arc_cross_line_swaps <- function(m) {
   line <- col(m)
   n <- 0L
   for (p in seq_len(length(m) - 1L)) for (q in (p + 1L):length(m)) {
-    if (line[p] == line[q]) next
+    if (line[p] == line[q] || m[p] == m[q]) next
     x <- m
     x[c(p, q)] <- m[c(q, p)]
     if (arc_restricted(x)) n <- n + 1L
@@ -458,9 +460,10 @@ test_that("returned field books pass the placement checks and match the oracle",
          options = list(FielDHub.arc_oracle_max_plots = 50,
                         FielDHub.arc_worst_pair_block_mib = 49 * 8 / 2^20),
          authority = "single_matrix"),
-    # A 5 x 4 field with 3 checks admits no row move but some cross-line
-    # swaps: the row phases must certify an empty neighbourhood and the
-    # polish a local optimum
+    # On a 5 x 4 field with 3 checks the search ends on a design with no
+    # row move but some cross-line swaps (other designs of this size have
+    # row moves): the row phases must certify an empty neighbourhood and
+    # the polish a local optimum
     list(name = "5 x 4 with no row move", v = 5, s = 4, k = 3,
          direction = "columns", objective = "V_tt", budget = 3000,
          stops = TRUE),
