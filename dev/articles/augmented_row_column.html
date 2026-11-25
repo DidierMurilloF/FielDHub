@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Augmented Row-Column Design — examples and documentation for FielDHub.">
+        <meta name="description" content="Augmented Row-Column Design in R and Shiny with FielDHub's augmented_row_column(). Unreplicated entries with every check once in each row or each column of the field.">
       
       
       
@@ -26,10 +26,10 @@
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
-      
-        <title>Augmented Row-Column Design - FielDHub</title>
-      
-    
+  
+    <title>Augmented Row-Column Design in R and Shiny | FielDHub</title>
+  
+
     
       <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
@@ -68,11 +68,15 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Augmented Row-Column Design">
-    <meta property="og:description" content="Augmented Row-Column Design — examples and documentation for FielDHub.">
+    <meta property="og:description" content="Augmented Row-Column Design in R and Shiny with FielDHub&#39;s augmented_row_column(). Unreplicated entries with every check once in each row or each column of the field.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/augmented_row_column.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
+    
+      <script type="application/ld+json">
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Augmented Row-Column Design in R and Shiny with FielDHub\u0027s augmented_row_column(). Unreplicated entries with every check once in each row or each column of the field.", "headline": "Augmented Row-Column Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/augmented_row_column.html"}
+      </script>
     
   
 
@@ -93,7 +97,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#augmented-row-column-design" class="md-skip">
           Skip to content
         </a>
       
@@ -242,6 +246,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Articles
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -325,6 +348,26 @@
   
   
   News
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../authors.html" class="md-tabs__link">
+          
+  
+  
+  About
 
         </a>
       </li>
@@ -437,6 +480,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Articles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -456,10 +526,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -477,8 +547,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -508,10 +578,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
             
   
   
@@ -529,8 +599,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -637,6 +707,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -678,6 +750,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -1142,10 +1216,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
             
   
   
@@ -1163,8 +1237,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1256,10 +1330,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
             
   
   
@@ -1277,8 +1351,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1398,10 +1472,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
             
   
   
@@ -1419,8 +1493,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1501,34 +1575,6 @@
     
   
     Latin Square Design (LSD)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/latin_rectangle.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Latin Rectangle Design
   
 
     
@@ -1743,10 +1789,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1764,8 +1810,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1789,7 +1835,35 @@
   <span class="md-ellipsis">
     
   
-    Methods
+    Methods in FielDHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulating_traits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulating Trait Data on a Field Design
   
 
     
@@ -1817,7 +1891,7 @@
   <span class="md-ellipsis">
     
   
-    Scientific Validation
+    Scientific validation and computational limits
   
 
     
@@ -1845,7 +1919,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture
+    Architecture and compatibility contracts
   
 
     
@@ -1873,7 +1947,7 @@
   <span class="md-ellipsis">
     
   
-    Extending Fieldhub
+    Adding designs and formats
   
 
     
@@ -1912,10 +1986,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -1933,8 +2007,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1990,10 +2064,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
             
   
   
@@ -2011,8 +2085,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2260,7 +2334,7 @@
   <span class="md-ellipsis">
     
   
-    Latin Rectangle Design
+    latin_rectangle
   
 
     
@@ -2608,10 +2682,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
             
   
   
@@ -2629,8 +2703,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2750,10 +2824,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
             
   
   
@@ -2771,8 +2845,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2948,10 +3022,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
         
           
-          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
             
   
   
@@ -2969,8 +3043,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3034,10 +3108,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_6" >
         
           
-          <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
             
   
   
@@ -3055,8 +3129,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3379,10 +3453,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -3400,8 +3474,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3446,14 +3520,14 @@
   
   
     <li class="md-nav__item">
-      <a href="news/fieldhub-0-1-0.html" class="md-nav__link">
+      <a href="news/fieldhub-1-3-1.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 0.1.0
+    FielDHub 1.3.1
   
 
     
@@ -3502,14 +3576,211 @@
   
   
     <li class="md-nav__item">
-      <a href="news/fieldhub-1-3-1.html" class="md-nav__link">
+      <a href="news/fieldhub-0-1-0.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 1.3.1
+    FielDHub 0.1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authors and citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CODE_OF_CONDUCT.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LICENSE.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
   
 
     
@@ -3546,6 +3817,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -3967,8 +4240,7 @@
   
 
 
-  <h1>Augmented Row-Column</h1>
-
+<h1 id="augmented-row-column-design">Augmented Row-Column Design<a class="headerlink" href="#augmented-row-column-design" title="Permanent link">&para;</a></h1>
 <p>This vignette shows how to generate an <strong>augmented row-column design</strong> using both the FielDHub Shiny App and the scripting function <code>augmented_row_column()</code> from the <code>FielDHub</code> package.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>In early-generation trials there is usually seed for only one plot of each test entry. Augmented designs replicate a small number of checks across the field so that field trends and the residual variance can be estimated and the unreplicated tests can be compared.</p>
@@ -4136,10 +4408,10 @@
 <p>A breeding program needs to test 80 lines with four checks at two locations, FARGO and CASSELTON, in a field of 12 rows and 10 columns at each location. Every check must appear once in every field column. The field has <span class="arithmatex">\(12 \times 10 = 120\)</span> plots: each of the four checks takes one plot in each of the 10 columns (40 check plots), and the 80 lines fill the remaining plots. The design has <span class="arithmatex">\(4 \cdot 10 - 4 - 12 - 10 + 2 = 16\)</span> residual degrees of freedom.</p>
 <h2 id="running-the-shiny-app">Running the Shiny App<a class="headerlink" href="#running-the-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>
-<div class="highlight"><pre><span></span><code><span class="n">FielDHub</span><span class="o">::</span><span class="nf">run_app</span><span class="p">()</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">FielDHub</span><span class="o">::</span><span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 <span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="headerlink" href="#using-the-fieldhub-shiny-app" title="Permanent link">&para;</a></h2>
@@ -4340,7 +4612,7 @@ Line 007
 <p>The design can be downloaded as a saved result (RDS) or as a standalone R script; the section “Reproducing a design” explains what the script reproduces.</p>
 <h2 id="using-the-fieldhub-function-augmented_row_column">2. Using the <code>FielDHub</code> function: <code>augmented_row_column()</code><a class="headerlink" href="#using-the-fieldhub-function-augmented_row_column" title="Permanent link">&para;</a></h2>
 <p>First, load the package.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="inputs-of-augmented_row_column">Inputs of <code>augmented_row_column()</code><a class="headerlink" href="#inputs-of-augmented_row_column" title="Permanent link">&para;</a></h3>
 <ul>
@@ -4352,7 +4624,7 @@ Line 007
 <li><code>exptName</code> defaults to <code>"Expt1"</code>, <code>year</code> to the current year, <code>locationNames</code> to <code>1..l</code>; the effective values are recorded, so a later replay reproduces them.</li>
 </ul>
 <p>Then, you can enter the information describing the above design like this. A small <code>budget</code> keeps this example fast; the objective and method are given explicitly so the example does not depend on the defaults.</p>
-<div class="highlight"><pre><span></span><code><span class="n">arc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">arc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">,</span>
@@ -4383,100 +4655,104 @@ Line 007
 </ul>
 <h3 id="print-arc-output">Print arc output<a class="headerlink" href="#print-arc-output" title="Permanent link">&para;</a></h3>
 <p><code>print()</code> shows, for every location, the residual df, the value of the optimized objective, all three objectives, the worst-case variances and the search status.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
-<span class="n">Augmented</span><span class="w"> </span><span class="n">Row</span><span class="o">-</span><span class="n">Column</span><span class="w"> </span><span class="n">Design</span><span class="w"> </span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Augmented Row-Column Design
 
-<span class="n">Statistics</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="nf">location </span><span class="p">(</span><span class="n">variances</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">units</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">variance</span><span class="p">)</span><span class="o">:</span>
-<span class="n">Location</span><span class="w"> </span><span class="n">FARGO</span><span class="o">:</span>
-<span class="w">  </span><span class="n">Residual</span><span class="w"> </span><span class="n">df</span><span class="o">:</span><span class="w"> </span><span class="m">16</span>
-<span class="w">  </span><span class="n">Optimized</span><span class="w"> </span><span class="n">objective</span><span class="o">:</span><span class="w"> </span><span class="n">V_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3.477</span><span class="w"> </span><span class="p">(</span><span class="n">minimized</span><span class="p">)</span>
-<span class="w">  </span><span class="n">E_aug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.5861</span><span class="p">,</span><span class="w"> </span><span class="n">V_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3.477</span><span class="p">,</span><span class="w"> </span><span class="n">V_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1.837</span>
-<span class="w">  </span><span class="n">max_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4.25</span><span class="p">,</span><span class="w"> </span><span class="n">max_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2.008</span>
-<span class="w">  </span><span class="n">Search</span><span class="w"> </span><span class="n">status</span><span class="o">:</span><span class="w"> </span><span class="n">ok</span>
-<span class="n">Location</span><span class="w"> </span><span class="n">CASSELTON</span><span class="o">:</span>
-<span class="w">  </span><span class="n">Residual</span><span class="w"> </span><span class="n">df</span><span class="o">:</span><span class="w"> </span><span class="m">16</span>
-<span class="w">  </span><span class="n">Optimized</span><span class="w"> </span><span class="n">objective</span><span class="o">:</span><span class="w"> </span><span class="n">V_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3.483</span><span class="w"> </span><span class="p">(</span><span class="n">minimized</span><span class="p">)</span>
-<span class="w">  </span><span class="n">E_aug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.585</span><span class="p">,</span><span class="w"> </span><span class="n">V_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3.483</span><span class="p">,</span><span class="w"> </span><span class="n">V_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1.84</span>
-<span class="w">  </span><span class="n">max_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4.233</span><span class="p">,</span><span class="w"> </span><span class="n">max_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span>
-<span class="w">  </span><span class="n">Search</span><span class="w"> </span><span class="n">status</span><span class="o">:</span><span class="w"> </span><span class="n">ok</span>
+Statistics by location (variances in units of the residual variance):
+Location FARGO:
+  Residual df: 16
+  Optimized objective: V_tt = 3.477 (minimized)
+  E_aug = 0.5861, V_tt = 3.477, V_tc = 1.837
+  max_tt = 4.25, max_tc = 2.008
+  Search status: ok
+Location CASSELTON:
+  Residual df: 16
+  Optimized objective: V_tt = 3.484 (minimized)
+  E_aug = 0.5849, V_tt = 3.484, V_tc = 1.84
+  max_tt = 4.293, max_tc = 2.004
+  Search status: ok
 
-<span class="n">Information</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">design</span><span class="w"> </span><span class="n">parameters</span><span class="o">:</span><span class="w"> </span>
-<span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">15</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">nrows</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">12</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">ncols</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">10</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">check_direction</span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;columns&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">v</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">12</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">s</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">10</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">k</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">4</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">checks</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">4</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;CH1&quot;</span><span class="w"> </span><span class="s">&quot;CH2&quot;</span><span class="w"> </span><span class="s">&quot;CH3&quot;</span><span class="w"> </span><span class="s">&quot;CH4&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">entries</span><span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">80</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locations</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">2</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locationNames</span><span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;FARGO&quot;</span><span class="w"> </span><span class="s">&quot;CASSELTON&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">residual_df</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">16</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">objective</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;V_tt&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">method</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;staged&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">budget</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">500</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">seed</span><span class="w">           </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">2026</span>
+Information on the design parameters: 
+List of 15
+ $ nrows          : int 12
+ $ ncols          : int 10
+ $ check_direction: chr &quot;columns&quot;
+ $ v              : int 12
+ $ s              : int 10
+ $ k              : int 4
+ $ checks         : chr [1:4] &quot;CH1&quot; &quot;CH2&quot; &quot;CH3&quot; &quot;CH4&quot;
+ $ entries        : int 80
+ $ locations      : num 2
+ $ locationNames  : chr [1:2] &quot;FARGO&quot; &quot;CASSELTON&quot;
+ $ residual_df    : int 16
+ $ objective      : chr &quot;V_tt&quot;
+ $ method         : chr &quot;staged&quot;
+ $ budget         : num 500
+ $ seed           : num 2026
 
-<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">First</span><span class="w"> </span><span class="n">observations</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">augmented_row_column</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">book</span><span class="o">:</span><span class="w"> </span>
-<span class="w">   </span><span class="n">ID</span><span class="w">     </span><span class="n">EXPT</span><span class="w"> </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w"> </span><span class="n">PLOT</span><span class="w"> </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="m">1</span><span class="w">   </span><span class="m">1</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1001</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">65</span><span class="w">       </span><span class="n">G65</span>
-<span class="m">2</span><span class="w">   </span><span class="m">2</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1002</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">40</span><span class="w">       </span><span class="n">G40</span>
-<span class="m">3</span><span class="w">   </span><span class="m">3</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1003</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">48</span><span class="w">       </span><span class="n">G48</span>
-<span class="m">4</span><span class="w">   </span><span class="m">4</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1004</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">62</span><span class="w">       </span><span class="n">G62</span>
-<span class="m">5</span><span class="w">   </span><span class="m">5</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1005</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">69</span><span class="w">       </span><span class="n">G69</span>
-<span class="m">6</span><span class="w">   </span><span class="m">6</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1006</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">       </span><span class="n">CH3</span>
-<span class="m">7</span><span class="w">   </span><span class="m">7</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1007</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">4</span><span class="w">       </span><span class="n">CH4</span>
-<span class="m">8</span><span class="w">   </span><span class="m">8</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1008</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">11</span><span class="w">       </span><span class="n">G11</span>
-<span class="m">9</span><span class="w">   </span><span class="m">9</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1009</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">20</span><span class="w">       </span><span class="n">G20</span>
-<span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1010</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w">       </span><span class="n">CH2</span>
-<span class="w">   </span><span class="n">CHECK_DIRECTION</span>
-<span class="m">1</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">2</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">3</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">4</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">5</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">6</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">7</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">8</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">9</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">10</span><span class="w">         </span><span class="n">columns</span>
+ 10 First observations of the data frame with the augmented_row_column field book: 
+   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 ARC_2026    FARGO 2026 1001   1      1      0    65       G65
+2   2 ARC_2026    FARGO 2026 1002   1      2      0    40       G40
+3   3 ARC_2026    FARGO 2026 1003   1      3      0    48       G48
+4   4 ARC_2026    FARGO 2026 1004   1      4      0    62       G62
+5   5 ARC_2026    FARGO 2026 1005   1      5      0    69       G69
+6   6 ARC_2026    FARGO 2026 1006   1      6      3     3       CH3
+7   7 ARC_2026    FARGO 2026 1007   1      7      4     4       CH4
+8   8 ARC_2026    FARGO 2026 1008   1      8      0    11       G11
+9   9 ARC_2026    FARGO 2026 1009   1      9      0    20       G20
+10 10 ARC_2026    FARGO 2026 1010   1     10      2     2       CH2
+   CHECK_DIRECTION
+1          columns
+2          columns
+3          columns
+4          columns
+5          columns
+6          columns
+7          columns
+8          columns
+9          columns
+10         columns
 </code></pre></div>
 <h3 id="statistics-diagnostics-and-contraction">Statistics, diagnostics and contraction<a class="headerlink" href="#statistics-diagnostics-and-contraction" title="Permanent link">&para;</a></h3>
 <p><code>arc$statistics</code> has one row per location: the three objectives, <code>V_cc</code>, <code>max_tt</code>, <code>max_tc</code>, the residual df, the scoring route (<code>authority</code>) and the connectivity diagnostic <code>lambda_min_rel</code>. They are computed from the returned, randomized placement.</p>
-<div class="highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">statistics</span>
-<span class="w">   </span><span class="n">LOCATION</span><span class="w">     </span><span class="n">E_aug</span><span class="w">     </span><span class="n">V_tt</span><span class="w">     </span><span class="n">V_tc</span><span class="w">      </span><span class="n">V_cc</span><span class="w">   </span><span class="n">max_tt</span><span class="w">   </span><span class="n">max_tc</span><span class="w"> </span><span class="n">residual_df</span>
-<span class="m">1</span><span class="w">     </span><span class="n">FARGO</span><span class="w"> </span><span class="m">0.5860973</span><span class="w"> </span><span class="m">3.476545</span><span class="w"> </span><span class="m">1.836753</span><span class="w"> </span><span class="m">0.2171206</span><span class="w"> </span><span class="m">4.250279</span><span class="w"> </span><span class="m">2.007862</span><span class="w">          </span><span class="m">16</span>
-<span class="m">2</span><span class="w"> </span><span class="n">CASSELTON</span><span class="w"> </span><span class="m">0.5850251</span><span class="w"> </span><span class="m">3.483327</span><span class="w"> </span><span class="m">1.839863</span><span class="w"> </span><span class="m">0.2167277</span><span class="w"> </span><span class="m">4.233351</span><span class="w"> </span><span class="m">1.999798</span><span class="w">          </span><span class="m">16</span>
-<span class="w">    </span><span class="n">authority</span><span class="w"> </span><span class="n">lambda_min_rel</span>
-<span class="m">1</span><span class="w"> </span><span class="n">full_layout</span><span class="w">      </span><span class="m">0.1618441</span>
-<span class="m">2</span><span class="w"> </span><span class="n">full_layout</span><span class="w">      </span><span class="m">0.1602844</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">statistics</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>   LOCATION     E_aug     V_tt     V_tc      V_cc   max_tt   max_tc residual_df
+1     FARGO 0.5860973 3.476545 1.836753 0.2171206 4.250279 2.007862          16
+2 CASSELTON 0.5849034 3.484066 1.840236 0.2167487 4.293083 2.003576          16
+    authority lambda_min_rel
+1 full_layout      0.1618441
+2 full_layout      0.1614049
 </code></pre></div>
 <p><code>arc$diagnostics</code> records the search for each location: the location seed, the status of the search and of each phase, the objective and proxy calls, proposals, failed proposals, disconnected candidates and whether a time limit was reached.</p>
-<div class="highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">diagnostics</span><span class="o">$</span><span class="n">FARGO</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;objective_calls&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;proxy_calls&quot;</span><span class="p">,</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">diagnostics</span><span class="o">$</span><span class="n">FARGO</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;objective_calls&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;proxy_calls&quot;</span><span class="p">,</span>
 <span class="w">                        </span><span class="s">&quot;time_limit_hit&quot;</span><span class="p">)]</span>
-<span class="o">$</span><span class="n">seed</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="m">2026</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>$seed
+[1] 2026
 
-<span class="o">$</span><span class="n">status</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;ok&quot;</span>
+$status
+[1] &quot;ok&quot;
 
-<span class="o">$</span><span class="n">objective_calls</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="m">303</span>
+$objective_calls
+[1] 303
 
-<span class="o">$</span><span class="n">proxy_calls</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="m">197</span>
+$proxy_calls
+[1] 197
 
-<span class="o">$</span><span class="n">time_limit_hit</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">FALSE</span>
+$time_limit_hit
+[1] FALSE
 </code></pre></div>
 <p><code>arc$contraction</code> holds the <span class="arithmatex">\(k \times s\)</span> contraction of each location: entry <span class="arithmatex">\((h, j)\)</span> is the field row that holds check <span class="arithmatex">\(h\)</span> in field column <span class="arithmatex">\(j\)</span>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">contraction</span><span class="o">$</span><span class="n">FARGO</span>
-<span class="w">     </span><span class="p">[,</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">2</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">3</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">4</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">5</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">6</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">7</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">8</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">9</span><span class="p">]</span><span class="w"> </span><span class="p">[,</span><span class="m">10</span><span class="p">]</span>
-<span class="p">[</span><span class="m">1</span><span class="p">,]</span><span class="w">   </span><span class="m">10</span><span class="w">    </span><span class="m">2</span><span class="w">    </span><span class="m">4</span><span class="w">    </span><span class="m">6</span><span class="w">    </span><span class="m">3</span><span class="w">    </span><span class="m">8</span><span class="w">    </span><span class="m">7</span><span class="w">   </span><span class="m">12</span><span class="w">    </span><span class="m">5</span><span class="w">    </span><span class="m">11</span>
-<span class="p">[</span><span class="m">2</span><span class="p">,]</span><span class="w">    </span><span class="m">7</span><span class="w">   </span><span class="m">11</span><span class="w">    </span><span class="m">9</span><span class="w">    </span><span class="m">5</span><span class="w">    </span><span class="m">6</span><span class="w">   </span><span class="m">10</span><span class="w">   </span><span class="m">12</span><span class="w">    </span><span class="m">2</span><span class="w">    </span><span class="m">8</span><span class="w">     </span><span class="m">1</span>
-<span class="p">[</span><span class="m">3</span><span class="p">,]</span><span class="w">   </span><span class="m">11</span><span class="w">   </span><span class="m">10</span><span class="w">   </span><span class="m">12</span><span class="w">    </span><span class="m">4</span><span class="w">    </span><span class="m">9</span><span class="w">    </span><span class="m">1</span><span class="w">    </span><span class="m">3</span><span class="w">    </span><span class="m">6</span><span class="w">    </span><span class="m">7</span><span class="w">     </span><span class="m">5</span>
-<span class="p">[</span><span class="m">4</span><span class="p">,]</span><span class="w">    </span><span class="m">9</span><span class="w">    </span><span class="m">3</span><span class="w">    </span><span class="m">5</span><span class="w">   </span><span class="m">11</span><span class="w">    </span><span class="m">8</span><span class="w">    </span><span class="m">4</span><span class="w">    </span><span class="m">1</span><span class="w">   </span><span class="m">10</span><span class="w">    </span><span class="m">2</span><span class="w">    </span><span class="m">12</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">arc</span><span class="o">$</span><span class="n">contraction</span><span class="o">$</span><span class="n">FARGO</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+[1,]   10    2    4    6    3    8    7   12    5    11
+[2,]    7   11    9    5    6   10   12    2    8     1
+[3,]   11   10   12    4    9    1    3    6    7     5
+[4,]    9    3    5   11    8    4    1   10    2    12
 </code></pre></div>
 <h3 id="access-to-the-field-book">Access to the field book<a class="headerlink" href="#access-to-the-field-book" title="Permanent link">&para;</a></h3>
 <p>The field book columns are <code>ID</code>, <code>EXPT</code>, <code>LOCATION</code>, <code>YEAR</code>, <code>PLOT</code>, <code>ROW</code>, <code>COLUMN</code>, <code>CHECKS</code>, <code>ENTRY</code>, <code>TREATMENT</code> and <code>CHECK_DIRECTION</code>.</p>
@@ -4510,58 +4786,60 @@ Line 007
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">arc</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
-<span class="w">   </span><span class="n">ID</span><span class="w">     </span><span class="n">EXPT</span><span class="w"> </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w"> </span><span class="n">PLOT</span><span class="w"> </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="m">1</span><span class="w">   </span><span class="m">1</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1001</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">65</span><span class="w">       </span><span class="n">G65</span>
-<span class="m">2</span><span class="w">   </span><span class="m">2</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1002</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">40</span><span class="w">       </span><span class="n">G40</span>
-<span class="m">3</span><span class="w">   </span><span class="m">3</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1003</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">48</span><span class="w">       </span><span class="n">G48</span>
-<span class="m">4</span><span class="w">   </span><span class="m">4</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1004</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">62</span><span class="w">       </span><span class="n">G62</span>
-<span class="m">5</span><span class="w">   </span><span class="m">5</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1005</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">69</span><span class="w">       </span><span class="n">G69</span>
-<span class="m">6</span><span class="w">   </span><span class="m">6</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1006</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">       </span><span class="n">CH3</span>
-<span class="m">7</span><span class="w">   </span><span class="m">7</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1007</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">4</span><span class="w">       </span><span class="n">CH4</span>
-<span class="m">8</span><span class="w">   </span><span class="m">8</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1008</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">11</span><span class="w">       </span><span class="n">G11</span>
-<span class="m">9</span><span class="w">   </span><span class="m">9</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1009</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">20</span><span class="w">       </span><span class="n">G20</span>
-<span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">ARC_2026</span><span class="w">    </span><span class="n">FARGO</span><span class="w"> </span><span class="m">2026</span><span class="w"> </span><span class="m">1010</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w">       </span><span class="n">CH2</span>
-<span class="w">   </span><span class="n">CHECK_DIRECTION</span>
-<span class="m">1</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">2</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">3</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">4</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">5</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">6</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">7</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">8</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">9</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">10</span><span class="w">         </span><span class="n">columns</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">arc</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>   ID     EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 ARC_2026    FARGO 2026 1001   1      1      0    65       G65
+2   2 ARC_2026    FARGO 2026 1002   1      2      0    40       G40
+3   3 ARC_2026    FARGO 2026 1003   1      3      0    48       G48
+4   4 ARC_2026    FARGO 2026 1004   1      4      0    62       G62
+5   5 ARC_2026    FARGO 2026 1005   1      5      0    69       G69
+6   6 ARC_2026    FARGO 2026 1006   1      6      3     3       CH3
+7   7 ARC_2026    FARGO 2026 1007   1      7      4     4       CH4
+8   8 ARC_2026    FARGO 2026 1008   1      8      0    11       G11
+9   9 ARC_2026    FARGO 2026 1009   1      9      0    20       G20
+10 10 ARC_2026    FARGO 2026 1010   1     10      2     2       CH2
+   CHECK_DIRECTION
+1          columns
+2          columns
+3          columns
+4          columns
+5          columns
+6          columns
+7          columns
+8          columns
+9          columns
+10         columns
 </code></pre></div>
 <p>The field book alone is enough to verify the placement. At FARGO each check appears once in every field column, and every field row holds 3 or 4 check plots (<span class="arithmatex">\(\lfloor 40/12 \rfloor = 3\)</span>, <span class="arithmatex">\(\lceil 40/12 \rceil = 4\)</span>):</p>
-<div class="highlight"><pre><span></span><code><span class="n">book</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">arc</span><span class="o">$</span><span class="n">fieldBook</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">book</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">arc</span><span class="o">$</span><span class="n">fieldBook</span>
 <span class="n">fargo_checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">book</span><span class="p">[</span><span class="n">book</span><span class="o">$</span><span class="n">LOCATION</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;FARGO&quot;</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">book</span><span class="o">$</span><span class="n">CHECKS</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="p">]</span>
 <span class="nf">table</span><span class="p">(</span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">TREATMENT</span><span class="p">,</span><span class="w"> </span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">COLUMN</span><span class="p">)</span>
-
-<span class="w">      </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="m">6</span><span class="w"> </span><span class="m">7</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="m">9</span><span class="w"> </span><span class="m">10</span>
-<span class="w">  </span><span class="n">CH1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">CH2</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">CH3</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">CH4</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="nf">table</span><span class="p">(</span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">ROW</span><span class="p">)</span>
-
-<span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">2</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">4</span><span class="w">  </span><span class="m">5</span><span class="w">  </span><span class="m">6</span><span class="w">  </span><span class="m">7</span><span class="w">  </span><span class="m">8</span><span class="w">  </span><span class="m">9</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="m">12</span><span class="w"> </span>
-<span class="w"> </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">4</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">3</span><span class="w">  </span><span class="m">4</span><span class="w">  </span><span class="m">4</span><span class="w">  </span><span class="m">4</span><span class="w"> </span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>      1 2 3 4 5 6 7 8 9 10
+  CH1 1 1 1 1 1 1 1 1 1  1
+  CH2 1 1 1 1 1 1 1 1 1  1
+  CH3 1 1 1 1 1 1 1 1 1  1
+  CH4 1 1 1 1 1 1 1 1 1  1
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">table</span><span class="p">(</span><span class="n">fargo_checks</span><span class="o">$</span><span class="n">ROW</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code> 1  2  3  4  5  6  7  8  9 10 11 12 
+ 3  3  3  3  4  3  3  3  3  4  4  4
 </code></pre></div>
 <h3 id="plot-the-field-layout">Plot the field layout<a class="headerlink" href="#plot-the-field-layout" title="Permanent link">&para;</a></h3>
 <p>Checks are colored by check and outlined; tests share a neutral fill.</p>
 <h4 id="plot-layout-for-location-1">Plot layout for location 1<a class="headerlink" href="#plot-layout-for-location-1" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">arc</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="augmented_row_column_files/figure-gfm/unnamed-chunk-14-1.png" alt="" width="691.2" style="display: block; margin: auto;" /></p>
 <h4 id="plot-layout-for-location-2">Plot layout for location 2<a class="headerlink" href="#plot-layout-for-location-2" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">arc</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">arc</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="augmented_row_column_files/figure-gfm/unnamed-chunk-15-1.png" alt="" width="691.2" style="display: block; margin: auto;" /></p>
 <h3 id="checks-along-rows">Checks along rows<a class="headerlink" href="#checks-along-rows" title="Permanent link">&para;</a></h3>
 <p>The same field turned through 90 degrees, 10 rows by 12 columns, with each check once in every field row, labeled checks, and the <code>E_aug</code> objective:</p>
-<div class="highlight"><pre><span></span><code><span class="n">arc_rows</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">arc_rows</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;Check A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check D&quot;</span><span class="p">),</span>
@@ -4573,18 +4851,20 @@ Line 007
 <span class="p">)</span>
 <span class="n">rows_checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">[</span><span class="n">arc_rows</span><span class="o">$</span><span class="n">fieldBook</span><span class="o">$</span><span class="n">CHECKS</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="m">0</span><span class="p">,</span><span class="w"> </span><span class="p">]</span>
 <span class="nf">table</span><span class="p">(</span><span class="n">rows_checks</span><span class="o">$</span><span class="n">TREATMENT</span><span class="p">,</span><span class="w"> </span><span class="n">rows_checks</span><span class="o">$</span><span class="n">ROW</span><span class="p">)</span>
-
-<span class="w">          </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="m">6</span><span class="w"> </span><span class="m">7</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="m">9</span><span class="w"> </span><span class="m">10</span>
-<span class="w">  </span><span class="n">Check</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">Check</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">Check</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="w">  </span><span class="n">Check</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">1</span><span class="w">  </span><span class="m">1</span>
-<span class="nf">unique</span><span class="p">(</span><span class="n">arc_rows</span><span class="o">$</span><span class="n">fieldBook</span><span class="o">$</span><span class="n">CHECK_DIRECTION</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;rows&quot;</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>          1 2 3 4 5 6 7 8 9 10
+  Check A 1 1 1 1 1 1 1 1 1  1
+  Check B 1 1 1 1 1 1 1 1 1  1
+  Check C 1 1 1 1 1 1 1 1 1  1
+  Check D 1 1 1 1 1 1 1 1 1  1
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">unique</span><span class="p">(</span><span class="n">arc_rows</span><span class="o">$</span><span class="n">fieldBook</span><span class="o">$</span><span class="n">CHECK_DIRECTION</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] &quot;rows&quot;
 </code></pre></div>
 <h3 id="a-direction-that-does-not-fit">A direction that does not fit<a class="headerlink" href="#a-direction-that-does-not-fit" title="Permanent link">&para;</a></h3>
 <p>Asking for each check once in every column of this 10 × 12 field needs at least 12 rows, so it is rejected before any search, and the message names the other direction:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">augmented_row_column</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">augmented_row_column</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">,</span>
@@ -4594,27 +4874,29 @@ Line 007
 <span class="w">  </span><span class="n">budget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">500</span><span class="p">,</span>
 <span class="w">  </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">7</span>
 <span class="p">)</span>
-<span class="n">Error</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">`arc_orient()`</span><span class="o">:</span>
-<span class="o">!</span><span class="w"> </span><span class="n">With</span><span class="w"> </span><span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;columns&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">every</span><span class="w"> </span><span class="n">check</span><span class="w"> </span><span class="n">appears</span><span class="w"> </span><span class="n">once</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">each</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">columns</span><span class="p">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">needs</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">least</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">rows</span><span class="p">;</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="n">.</span><span class="w"> </span><span class="n">Use</span><span class="w"> </span><span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;rows&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">change</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">columns.</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Error in `arc_orient()`:
+! With check_direction = &quot;columns&quot;, every check appears once in each of the 12 field columns, which needs at least 12 field rows; the field has 10 (s = 12 &gt; v = 10). Use check_direction = &quot;rows&quot;, or change the numbers of rows and columns.
 </code></pre></div>
 <h3 id="uploading-an-entry-list">Uploading an entry list<a class="headerlink" href="#uploading-an-entry-list" title="Permanent link">&para;</a></h3>
 <p>An entry list with the columns <code>ENTRY | NAME</code> can be passed as <code>data</code>. Here a 12 × 8 field with three checks along the columns has <span class="arithmatex">\(T = (12 - 3) \cdot 8 = 72\)</span> test plots, so the list has 75 rows, checks first. This field has only 3 residual degrees of freedom, so the call warns:</p>
-<div class="highlight"><pre><span></span><code><span class="n">k</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">3</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">k</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">3</span>
 <span class="n">n_tests</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="p">(</span><span class="m">12</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="m">8</span>
 <span class="n">entries_list</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">data.frame</span><span class="p">(</span>
 <span class="w">  </span><span class="n">ENTRY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">seq_len</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">n_tests</span><span class="p">),</span>
 <span class="w">  </span><span class="n">NAME</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;Check-&quot;</span><span class="p">,</span><span class="w"> </span><span class="nf">seq_len</span><span class="p">(</span><span class="n">k</span><span class="p">)),</span><span class="w"> </span><span class="nf">sprintf</span><span class="p">(</span><span class="s">&quot;Line %03d&quot;</span><span class="p">,</span><span class="w"> </span><span class="nf">seq_len</span><span class="p">(</span><span class="n">n_tests</span><span class="p">)))</span>
 <span class="p">)</span>
 <span class="nf">head</span><span class="p">(</span><span class="n">entries_list</span><span class="p">)</span>
-<span class="w">  </span><span class="n">ENTRY</span><span class="w">     </span><span class="n">NAME</span>
-<span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">  </span><span class="n">Check</span><span class="m">-1</span>
-<span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w">  </span><span class="n">Check</span><span class="m">-2</span>
-<span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">  </span><span class="n">Check</span><span class="m">-3</span>
-<span class="m">4</span><span class="w">     </span><span class="m">4</span><span class="w"> </span><span class="n">Line</span><span class="w"> </span><span class="m">001</span>
-<span class="m">5</span><span class="w">     </span><span class="m">5</span><span class="w"> </span><span class="n">Line</span><span class="w"> </span><span class="m">002</span>
-<span class="m">6</span><span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="n">Line</span><span class="w"> </span><span class="m">003</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">low_df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
+<div class="language-text highlight"><pre><span></span><code>  ENTRY     NAME
+1     1  Check-1
+2     2  Check-2
+3     3  Check-3
+4     4 Line 001
+5     5 Line 002
+6     6 Line 003
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="n">low_df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span>
@@ -4625,74 +4907,82 @@ Line 007
 <span class="w">  </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">99</span><span class="p">,</span>
 <span class="w">  </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entries_list</span>
 <span class="p">)</span>
-<span class="n">Warning</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="nf">augmented_row_column</span><span class="p">(</span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="p">,</span><span class="w"> </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span>
-<span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;columns&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">design</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="n">of</span>
-<span class="n">freedom.</span><span class="w"> </span><span class="n">Under</span><span class="w"> </span><span class="n">independent</span><span class="w"> </span><span class="n">normal</span><span class="w"> </span><span class="n">errors</span><span class="p">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">variance</span>
-<span class="n">then</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">relative</span><span class="w"> </span><span class="n">standard</span><span class="w"> </span><span class="n">deviation</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">about</span><span class="w"> </span><span class="m">82</span>%<span class="n">.</span><span class="w"> </span><span class="n">Only</span><span class="w"> </span><span class="n">adding</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">check</span><span class="w"> </span><span class="n">or</span>
-<span class="n">changing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="n">raises</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">freedom.</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">low_df</span><span class="p">)</span>
-<span class="n">Augmented</span><span class="w"> </span><span class="n">Row</span><span class="o">-</span><span class="n">Column</span><span class="w"> </span><span class="n">Design</span><span class="w"> </span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Warning in augmented_row_column(nrows = 12, ncols = 8, checks = 3,
+check_direction = &quot;columns&quot;, : The design has only 3 residual degrees of
+freedom. Under independent normal errors, the estimate of the residual variance
+then has a relative standard deviation of about 82%. Only adding a check or
+changing the number of rows or columns raises the residual degrees of freedom.
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">low_df</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Augmented Row-Column Design
 
-<span class="n">Statistics</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="nf">location </span><span class="p">(</span><span class="n">variances</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">units</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">variance</span><span class="p">)</span><span class="o">:</span>
-<span class="n">Location</span><span class="w"> </span><span class="m">1</span><span class="o">:</span>
-<span class="w">  </span><span class="n">Residual</span><span class="w"> </span><span class="n">df</span><span class="o">:</span><span class="w"> </span><span class="m">3</span>
-<span class="w">  </span><span class="n">Optimized</span><span class="w"> </span><span class="n">objective</span><span class="o">:</span><span class="w"> </span><span class="n">V_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2.782</span><span class="w"> </span><span class="p">(</span><span class="n">minimized</span><span class="p">)</span>
-<span class="w">  </span><span class="n">E_aug</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0.386</span><span class="p">,</span><span class="w"> </span><span class="n">V_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">5.293</span><span class="p">,</span><span class="w"> </span><span class="n">V_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2.782</span>
-<span class="w">  </span><span class="n">max_tt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">7.618</span><span class="p">,</span><span class="w"> </span><span class="n">max_tc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3.154</span>
-<span class="w">  </span><span class="n">Search</span><span class="w"> </span><span class="n">status</span><span class="o">:</span><span class="w"> </span><span class="n">ok</span>
-<span class="w">  </span><span class="n">Notice</span><span class="o">:</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="n">residual</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="nf">freedom </span><span class="p">(</span><span class="n">fewer</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="n">.</span><span class="w"> </span><span class="n">Only</span><span class="w"> </span><span class="n">adding</span><span class="w"> </span><span class="n">a</span>
-<span class="w">  </span><span class="n">check</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">changing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">rows</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="n">raises</span><span class="w"> </span><span class="n">them.</span>
+Statistics by location (variances in units of the residual variance):
+Location 1:
+  Residual df: 3
+  Optimized objective: V_tc = 2.782 (minimized)
+  E_aug = 0.386, V_tt = 5.293, V_tc = 2.782
+  max_tt = 7.618, max_tc = 3.154
+  Search status: ok
+  Notice: only 3 residual degrees of freedom (fewer than 10). Only adding a
+  check or changing the number of rows or columns raises them.
 
-<span class="n">Information</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">design</span><span class="w"> </span><span class="n">parameters</span><span class="o">:</span><span class="w"> </span>
-<span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">15</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">nrows</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">12</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">ncols</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">8</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">check_direction</span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;columns&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">v</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">12</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">s</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">8</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">k</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">3</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">checks</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">3</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;Check-1&quot;</span><span class="w"> </span><span class="s">&quot;Check-2&quot;</span><span class="w"> </span><span class="s">&quot;Check-3&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">entries</span><span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">72</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locations</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">1</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locationNames</span><span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">1</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">residual_df</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">3</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">objective</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;V_tc&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">method</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;staged&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">budget</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">500</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">seed</span><span class="w">           </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">99</span>
+Information on the design parameters: 
+List of 15
+ $ nrows          : int 12
+ $ ncols          : int 8
+ $ check_direction: chr &quot;columns&quot;
+ $ v              : int 12
+ $ s              : int 8
+ $ k              : int 3
+ $ checks         : chr [1:3] &quot;Check-1&quot; &quot;Check-2&quot; &quot;Check-3&quot;
+ $ entries        : int 72
+ $ locations      : num 1
+ $ locationNames  : int 1
+ $ residual_df    : int 3
+ $ objective      : chr &quot;V_tc&quot;
+ $ method         : chr &quot;staged&quot;
+ $ budget         : num 500
+ $ seed           : num 99
 
-<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">First</span><span class="w"> </span><span class="n">observations</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">augmented_row_column</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">book</span><span class="o">:</span><span class="w"> </span>
-<span class="w">   </span><span class="n">ID</span><span class="w">  </span><span class="n">EXPT</span><span class="w"> </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w"> </span><span class="n">PLOT</span><span class="w"> </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="m">1</span><span class="w">   </span><span class="m">1</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">101</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">30</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">027</span>
-<span class="m">2</span><span class="w">   </span><span class="m">2</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">102</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">   </span><span class="n">Check</span><span class="m">-3</span>
-<span class="m">3</span><span class="w">   </span><span class="m">3</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">103</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">43</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">040</span>
-<span class="m">4</span><span class="w">   </span><span class="m">4</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">104</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">35</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">032</span>
-<span class="m">5</span><span class="w">   </span><span class="m">5</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">105</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">34</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">031</span>
-<span class="m">6</span><span class="w">   </span><span class="m">6</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">106</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">27</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">024</span>
-<span class="m">7</span><span class="w">   </span><span class="m">7</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">107</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">66</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">063</span>
-<span class="m">8</span><span class="w">   </span><span class="m">8</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">108</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w">   </span><span class="n">Check</span><span class="m">-2</span>
-<span class="m">9</span><span class="w">   </span><span class="m">9</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">109</span><span class="w">   </span><span class="m">2</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">45</span><span class="w">  </span><span class="n">Line</span><span class="w"> </span><span class="m">042</span>
-<span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">110</span><span class="w">   </span><span class="m">2</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">   </span><span class="n">Check</span><span class="m">-3</span>
-<span class="w">   </span><span class="n">CHECK_DIRECTION</span>
-<span class="m">1</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">2</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">3</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">4</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">5</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">6</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">7</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">8</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">9</span><span class="w">          </span><span class="n">columns</span>
-<span class="m">10</span><span class="w">         </span><span class="n">columns</span>
+ 10 First observations of the data frame with the augmented_row_column field book: 
+   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Expt1        1 2026  101   1      1      0    30  Line 027
+2   2 Expt1        1 2026  102   1      2      0    39  Line 036
+3   3 Expt1        1 2026  103   1      3      1     1   Check-1
+4   4 Expt1        1 2026  104   1      4      0    35  Line 032
+5   5 Expt1        1 2026  105   1      5      0    34  Line 031
+6   6 Expt1        1 2026  106   1      6      2     2   Check-2
+7   7 Expt1        1 2026  107   1      7      0    66  Line 063
+8   8 Expt1        1 2026  108   1      8      0    45  Line 042
+9   9 Expt1        1 2026  109   2      8      0    41  Line 038
+10 10 Expt1        1 2026  110   2      7      0    40  Line 037
+   CHECK_DIRECTION
+1          columns
+2          columns
+3          columns
+4          columns
+5          columns
+6          columns
+7          columns
+8          columns
+9          columns
+10         columns
 </code></pre></div>
 <p>The summary repeats the low-df notice every time it is printed. Only adding a check or changing the number of rows or columns raises the residual degrees of freedom.</p>
 <p>Because the <code>ENTRY</code> values are exactly <code>1, ..., 75</code> in row order (the standard template), the upload is recorded as its check and test labels, with no data frame:</p>
-<div class="highlight"><pre><span></span><code><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">checks</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;Check-1&quot;</span><span class="w"> </span><span class="s">&quot;Check-2&quot;</span><span class="w"> </span><span class="s">&quot;Check-3&quot;</span>
-<span class="nf">head</span><span class="p">(</span><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">entries</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;Line 001&quot;</span><span class="w"> </span><span class="s">&quot;Line 002&quot;</span><span class="w"> </span><span class="s">&quot;Line 003&quot;</span><span class="w"> </span><span class="s">&quot;Line 004&quot;</span><span class="w"> </span><span class="s">&quot;Line 005&quot;</span><span class="w"> </span><span class="s">&quot;Line 006&quot;</span>
-<span class="nf">is.null</span><span class="p">(</span><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">data</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">checks</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] &quot;Check-1&quot; &quot;Check-2&quot; &quot;Check-3&quot;
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">entries</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] &quot;Line 001&quot; &quot;Line 002&quot; &quot;Line 003&quot; &quot;Line 004&quot; &quot;Line 005&quot; &quot;Line 006&quot;
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">is.null</span><span class="p">(</span><span class="n">low_df</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
 </code></pre></div>
 <h2 id="multiple-locations">Multiple locations<a class="headerlink" href="#multiple-locations" title="Permanent link">&para;</a></h2>
 <p>With <code>l</code> locations, the same search runs independently at each location with its own seed: the recorded seed plus the location index minus one (in the example, 2026 at FARGO and 2027 at CASSELTON).</p>
@@ -4705,19 +4995,30 @@ Line 007
 <p><strong>When it holds.</strong> For runs stopped by the evaluation budget, in which no location reached <code>time_limit</code>, and within the same software and numerical environment: the same FielDHub version, R version, BLAS/LAPACK library and thread count, and platform.</p>
 <p>A <code>time_limit</code> cutoff makes replay timing-dependent: how far the search got depends on the machine and its load. <code>time_limit</code> bounds each location’s search only (final scoring, randomization and field-book assembly always complete), so a call with <code>l</code> locations can take about <code>l * time_limit</code> seconds plus that work.</p>
 <p><strong>Across environments</strong> there is no promise of the same design. Small numerical differences can change search decisions, not only final scores. Replay in another environment gives a valid design with comparable statistics, which may be a different design. This is also why the numbers printed in this vignette can differ from those on another computer.</p>
-<div class="highlight"><pre><span></span><code><span class="n">replay</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">reproduce_design</span><span class="p">(</span><span class="n">arc_rows</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">replay</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">reproduce_design</span><span class="p">(</span><span class="n">arc_rows</span><span class="p">)</span>
 <span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
-<span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">contraction</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">contraction</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
-<span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">statistics</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">statistics</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
-<span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">diagnostics</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">diagnostics</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
-<span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="kc">TRUE</span>
-<span class="nf">names</span><span class="p">(</span><span class="n">arc_rows</span><span class="o">$</span><span class="n">timing</span><span class="p">)</span>
-<span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w"> </span><span class="s">&quot;LOCATION&quot;</span><span class="w">     </span><span class="s">&quot;search&quot;</span><span class="w">       </span><span class="s">&quot;verification&quot;</span><span class="w"> </span><span class="s">&quot;total&quot;</span><span class="w">       </span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">contraction</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">contraction</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">statistics</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">statistics</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">diagnostics</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">diagnostics</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">identical</span><span class="p">(</span><span class="n">replay</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="p">,</span><span class="w"> </span><span class="n">arc_rows</span><span class="o">$</span><span class="n">metadata</span><span class="o">$</span><span class="n">parameters</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] TRUE
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">names</span><span class="p">(</span><span class="n">arc_rows</span><span class="o">$</span><span class="n">timing</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>[1] &quot;LOCATION&quot;     &quot;search&quot;       &quot;verification&quot; &quot;total&quot;
 </code></pre></div>
 <p><code>timing</code> holds the search, verification and total seconds of each location. It is kept apart from the rest of the result precisely so that the deterministic content can be compared exactly.</p>
 <h3 id="standalone-reproduction-code">Standalone reproduction code<a class="headerlink" href="#standalone-reproduction-code" title="Permanent link">&para;</a></h3>
@@ -4728,41 +5029,43 @@ Line 007
 <li>An upload with other <code>ENTRY</code> values is recorded as uploaded. Up to 200 rows its script is standalone; above 200 rows no standalone script is produced, and the saved result (RDS, <code>write_design(x, file)</code>) is the way to keep the design. The app states this reason in place of the script.</li>
 </ul>
 <p>The RDS file preserves the result itself and does not depend on replay.</p>
-<div class="highlight"><pre><span></span><code><span class="n">script</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">tempfile</span><span class="p">(</span><span class="n">fileext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;.R&quot;</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">script</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">tempfile</span><span class="p">(</span><span class="n">fileext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;.R&quot;</span><span class="p">)</span>
 <span class="nf">write_design</span><span class="p">(</span><span class="n">arc_rows</span><span class="p">,</span><span class="w"> </span><span class="n">script</span><span class="p">,</span><span class="w"> </span><span class="n">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">)</span>
 <span class="nf">cat</span><span class="p">(</span><span class="nf">readLines</span><span class="p">(</span><span class="n">script</span><span class="p">),</span><span class="w"> </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-<span class="c1"># FielDHub version: 1.7.5</span>
-<span class="c1"># Replays recorded inputs; numerical results can depend on software versions.</span>
-<span class="n">design</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">local</span><span class="p">({</span>
-<span class="w">  </span><span class="n">.rng_kind</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">RNGkind</span><span class="p">()</span>
-<span class="w">  </span><span class="n">.had_seed</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">exists</span><span class="p">(</span><span class="s">&quot;.Random.seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nf">globalenv</span><span class="p">(),</span><span class="w"> </span><span class="n">inherits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span>
-<span class="w">  </span><span class="n">.rng_seed</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">.had_seed</span><span class="p">)</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="s">&quot;.Random.seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nf">globalenv</span><span class="p">())</span>
-<span class="w">  </span><span class="nf">on.exit</span><span class="p">({</span>
-<span class="w">    </span><span class="nf">do.call</span><span class="p">(</span><span class="n">RNGkind</span><span class="p">,</span><span class="w"> </span><span class="nf">as.list</span><span class="p">(</span><span class="n">.rng_kind</span><span class="p">))</span>
-<span class="w">    </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="n">.had_seed</span><span class="p">)</span><span class="w"> </span><span class="nf">assign</span><span class="p">(</span><span class="s">&quot;.Random.seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">.rng_seed</span><span class="p">,</span><span class="w"> </span><span class="nf">globalenv</span><span class="p">())</span>
-<span class="w">    </span><span class="kr">else</span><span class="w"> </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nf">exists</span><span class="p">(</span><span class="s">&quot;.Random.seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nf">globalenv</span><span class="p">(),</span><span class="w"> </span><span class="n">inherits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">))</span>
-<span class="w">      </span><span class="nf">rm</span><span class="p">(</span><span class="s">&quot;.Random.seed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">envir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">globalenv</span><span class="p">())</span>
-<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
-<span class="w">  </span><span class="n">.recorded_kind</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">as.list</span><span class="p">(</span><span class="nf">unname</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;Mersenne-Twister&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Inversion&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Rejection&quot;</span><span class="p">)))</span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nf">length</span><span class="p">(</span><span class="n">.recorded_kind</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">4L</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="s">&quot;binom.kind&quot;</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="nf">formals</span><span class="p">(</span><span class="n">RNGkind</span><span class="p">)))</span>
-<span class="w">    </span><span class="nf">stop</span><span class="p">(</span><span class="s">&quot;The recorded binomial RNG requires R &gt;= 4.7.&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="kr">if</span><span class="w"> </span><span class="p">(</span><span class="nf">length</span><span class="p">(</span><span class="n">.recorded_kind</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="m">3L</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="s">&quot;binom.kind&quot;</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="nf">formals</span><span class="p">(</span><span class="n">RNGkind</span><span class="p">)))</span>
-<span class="w">    </span><span class="n">.recorded_kind</span><span class="p">[[</span><span class="m">4L</span><span class="p">]]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;Buggy BTPE&quot;</span>
-<span class="w">  </span><span class="nf">do.call</span><span class="p">(</span><span class="n">RNGkind</span><span class="p">,</span><span class="w"> </span><span class="n">.recorded_kind</span><span class="p">)</span>
-<span class="w">  </span><span class="n">FielDHub</span><span class="o">::</span><span class="nf">augmented_row_column</span><span class="p">(</span>
-<span class="w">    </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">10</span><span class="p">,</span>
-<span class="w">    </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">,</span>
-<span class="w">    </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;Check A&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check C&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Check D&quot;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">check_direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;rows&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="n">objective</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;E_aug&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="n">budget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">500</span><span class="p">,</span>
-<span class="w">    </span><span class="n">locationNames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1L</span><span class="p">,</span>
-<span class="w">    </span><span class="n">exptName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Expt1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;2026&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">7</span>
-<span class="w">  </span><span class="p">)</span>
-<span class="p">})</span>
-<span class="nf">unlink</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code># FielDHub version: 1.7.5
+# Replays recorded inputs; numerical results can depend on software versions.
+design &lt;- local({
+  .rng_kind &lt;- RNGkind()
+  .had_seed &lt;- exists(&quot;.Random.seed&quot;, globalenv(), inherits = FALSE)
+  .rng_seed &lt;- if (.had_seed) get(&quot;.Random.seed&quot;, globalenv())
+  on.exit({
+    do.call(RNGkind, as.list(.rng_kind))
+    if (.had_seed) assign(&quot;.Random.seed&quot;, .rng_seed, globalenv())
+    else if (exists(&quot;.Random.seed&quot;, globalenv(), inherits = FALSE))
+      rm(&quot;.Random.seed&quot;, envir = globalenv())
+  }, add = TRUE)
+  .recorded_kind &lt;- as.list(unname(c(&quot;Mersenne-Twister&quot;, &quot;Inversion&quot;, &quot;Rejection&quot;)))
+  if (length(.recorded_kind) == 4L &amp;&amp; !&quot;binom.kind&quot; %in% names(formals(RNGkind)))
+    stop(&quot;The recorded binomial RNG requires R &gt;= 4.7.&quot;)
+  if (length(.recorded_kind) == 3L &amp;&amp; &quot;binom.kind&quot; %in% names(formals(RNGkind)))
+    .recorded_kind[[4L]] &lt;- &quot;Buggy BTPE&quot;
+  do.call(RNGkind, .recorded_kind)
+  FielDHub::augmented_row_column(
+    nrows = 10,
+    ncols = 12,
+    checks = c(&quot;Check A&quot;, &quot;Check B&quot;, &quot;Check C&quot;, &quot;Check D&quot;),
+    check_direction = &quot;rows&quot;,
+    objective = &quot;E_aug&quot;,
+    budget = 500,
+    locationNames = 1L,
+    exptName = &quot;Expt1&quot;,
+    year = &quot;2026&quot;,
+    seed = 7
+  )
+})
+</code></pre></div>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">unlink</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <div id="refs" class="references csl-bib-body hanging-indent">

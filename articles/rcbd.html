@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Randomized Complete Block Design — examples and documentation for FielDHub.">
+        <meta name="description" content="Randomized Complete Block Design in R and Shiny with FielDHub's RCBD(). Every treatment once in each complete block, at one or several locations.">
       
       
       
@@ -26,10 +26,10 @@
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
-      
-        <title>Randomized Complete Block Design - FielDHub</title>
-      
-    
+  
+    <title>Randomized Complete Block Design in R and Shiny | FielDHub</title>
+  
+
     
       <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
@@ -68,11 +68,15 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Randomized Complete Block Design">
-    <meta property="og:description" content="Randomized Complete Block Design — examples and documentation for FielDHub.">
+    <meta property="og:description" content="Randomized Complete Block Design in R and Shiny with FielDHub&#39;s RCBD(). Every treatment once in each complete block, at one or several locations.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/rcbd.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
+    
+      <script type="application/ld+json">
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Randomized Complete Block Design in R and Shiny with FielDHub\u0027s RCBD(). Every treatment once in each complete block, at one or several locations.", "headline": "Randomized Complete Block Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/rcbd.html"}
+      </script>
     
   
 
@@ -93,7 +97,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-the-fieldhub-shiny-app" class="md-skip">
+        <a href="#randomized-complete-block-design" class="md-skip">
           Skip to content
         </a>
       
@@ -242,6 +246,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Articles
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -325,6 +348,26 @@
   
   
   News
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../authors.html" class="md-tabs__link">
+          
+  
+  
+  About
 
         </a>
       </li>
@@ -437,6 +480,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Articles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -456,10 +526,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -477,8 +547,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -506,10 +576,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
             
   
   
@@ -527,8 +597,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -704,10 +774,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
             
   
   
@@ -725,8 +795,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -818,10 +888,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
             
   
   
@@ -839,8 +909,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -962,10 +1032,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
             
   
   
@@ -983,8 +1053,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1035,6 +1105,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -1076,6 +1148,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -1241,34 +1315,6 @@
     
   
     Latin Square Design (LSD)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/latin_rectangle.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Latin Rectangle Design
   
 
     
@@ -1483,10 +1529,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1504,8 +1550,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1529,7 +1575,35 @@
   <span class="md-ellipsis">
     
   
-    Methods
+    Methods in FielDHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="simulating_traits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulating Trait Data on a Field Design
   
 
     
@@ -1557,7 +1631,7 @@
   <span class="md-ellipsis">
     
   
-    Scientific Validation
+    Scientific validation and computational limits
   
 
     
@@ -1585,7 +1659,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture
+    Architecture and compatibility contracts
   
 
     
@@ -1613,7 +1687,7 @@
   <span class="md-ellipsis">
     
   
-    Extending Fieldhub
+    Adding designs and formats
   
 
     
@@ -1652,10 +1726,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -1673,8 +1747,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1730,10 +1804,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
             
   
   
@@ -1751,8 +1825,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2000,7 +2074,7 @@
   <span class="md-ellipsis">
     
   
-    Latin Rectangle Design
+    latin_rectangle
   
 
     
@@ -2348,10 +2422,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
             
   
   
@@ -2369,8 +2443,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2490,10 +2564,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
             
   
   
@@ -2511,8 +2585,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2688,10 +2762,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
         
           
-          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
             
   
   
@@ -2709,8 +2783,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2774,10 +2848,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_6" >
         
           
-          <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
             
   
   
@@ -2795,8 +2869,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3119,10 +3193,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -3140,8 +3214,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3186,14 +3260,14 @@
   
   
     <li class="md-nav__item">
-      <a href="news/fieldhub-0-1-0.html" class="md-nav__link">
+      <a href="news/fieldhub-1-3-1.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 0.1.0
+    FielDHub 1.3.1
   
 
     
@@ -3242,14 +3316,211 @@
   
   
     <li class="md-nav__item">
-      <a href="news/fieldhub-1-3-1.html" class="md-nav__link">
+      <a href="news/fieldhub-0-1-0.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 1.3.1
+    FielDHub 0.1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../authors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authors and citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONTRIBUTING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CODE_OF_CONDUCT.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LICENSE.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
   
 
     
@@ -3286,6 +3557,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -3447,15 +3720,14 @@
   
 
 
-  <h1>Randomized Complete Block Designs (RCBD)</h1>
-
+<h1 id="randomized-complete-block-design">Randomized Complete Block Design<a class="headerlink" href="#randomized-complete-block-design" title="Permanent link">&para;</a></h1>
 <p>This vignette shows how to generate a <strong>randomized complete block design</strong> using both the FielDHub Shiny App and the scripting function <code>RCBD()</code> from the <code>FielDHub</code> package.</p>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="headerlink" href="#using-the-fieldhub-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>
-<div class="highlight"><pre><span></span><code><span class="n">FielDHub</span><span class="o">::</span><span class="nf">run_app</span><span class="p">()</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">FielDHub</span><span class="o">::</span><span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 <span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <p>Once the app is running, go to <strong>Other Designs</strong> &gt; <strong>Randomized Complete Block Designs (RCBD)</strong></p>
@@ -3548,10 +3820,10 @@
 <h2 id="using-the-fieldhub-function-rcbd">2. Using the <code>FielDHub</code> function: <code>RCBD()</code><a class="headerlink" href="#using-the-fieldhub-function-rcbd" title="Permanent link">&para;</a></h2>
 <p>You can run the same design with a function in the FielDHub package, <code>RCBD()</code>.</p>
 <p>First, you need to load the <code>FielDHub</code> package typing,</p>
-<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 </code></pre></div>
 <p>Then, you can enter the information describing the above design like this:</p>
-<div class="highlight"><pre><span></span><code><span class="n">rcbd</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">RCBD</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">rcbd</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">RCBD</span><span class="p">(</span>
 <span class="w">  </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">24</span><span class="p">,</span><span class="w"> </span>
 <span class="w">  </span><span class="n">reps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">,</span>
 <span class="w">  </span><span class="n">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="p">,</span>
@@ -3571,9 +3843,9 @@
 <li><code>seed = 1234</code> is the random seed to replicate identical randomizations.</li>
 </ul>
 <h3 id="print-rcbd-object">Print <code>rcbd</code> object<a class="headerlink" href="#print-rcbd-object" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">rcbd</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">rcbd</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Randomized Complete Block Design (RCBD):
+<div class="language-text highlight"><pre><span></span><code>Randomized Complete Block Design (RCBD):
 
 Information on the design parameters: 
 List of 7
@@ -3601,10 +3873,10 @@ List of 7
 <h3 id="access-to-rcbd-object">Access to <code>RCBD</code> object<a class="headerlink" href="#access-to-rcbd-object" title="Permanent link">&para;</a></h3>
 <p>The function <code>RCBD</code> returns a list consisting of all the information displayed in the output tabs in the FielDHub app: design information, plot layout, plot numbering, entries list, and field book. These are accessible by the <code>$</code> operator, i.e. <code>rcbd$layoutRandom</code> or <code>rcbd$fieldBook</code>.</p>
 <p><code>rcbd$fieldBook</code> is a list containing information about every plot in the field, with information about the location of the plot and the treatment in each plot. As seen in the output below, the field book has columns for <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code>, <code>IBLOCK</code>, <code>UNIT</code>, <code>ENTRY</code>, and <code>TREATMENT</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">field_book</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rcbd</span><span class="o">$</span><span class="n">fieldBook</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">field_book</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rcbd</span><span class="o">$</span><span class="n">fieldBook</span>
 <span class="nf">head</span><span class="p">(</span><span class="n">rcbd</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>   ID LOCATION PLOT REP TREATMENT
+<div class="language-text highlight"><pre><span></span><code>   ID LOCATION PLOT REP TREATMENT
 1   1    FARGO  101   1        T6
 2   2    FARGO  102   1        T1
 3   3    FARGO  103   1       T21
@@ -3618,13 +3890,13 @@ List of 7
 </code></pre></div>
 <h3 id="plot-the-field-layout">Plot the field layout<a class="headerlink" href="#plot-the-field-layout" title="Permanent link">&para;</a></h3>
 <p>For plotting the layout in function of the coordinates <code>ROW</code> and <code>COLUMN</code>, you can use the the generic function <code>plot()</code> as follows,</p>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">rcbd</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">rcbd</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="rcbd_files/figure-gfm/unnamed-chunk-12-1.png" alt="" width="691.2" style="display: block; margin: auto;" /></p>
 <p><br> <br></p>
 <h2 id="rcbd-with-repeated-checks">RCBD with repeated checks<a class="headerlink" href="#rcbd-with-repeated-checks" title="Permanent link">&para;</a></h2>
 <p>In a classical RCBD, the residual is the treatment-by-block interaction, estimated by comparing each treatment’s performance across blocks. Repeating one or more checks inside every block gives an additional, within-block estimate of error and a form of local control that a design with each treatment appearing only once per block cannot provide. <code>RCBD()</code> supports this through three extra arguments: <code>checks</code> (a count or a vector of check labels), <code>rep_checks</code> (how many times each check repeats per block), and <code>spread_checks</code> (whether the repeated copies are spread across the block or placed with no restriction).</p>
-<div class="highlight"><pre><span></span><code><span class="n">rcbd_checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">RCBD</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">rcbd_checks</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">RCBD</span><span class="p">(</span>
 <span class="w">  </span><span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">18</span><span class="p">,</span>
 <span class="w">  </span><span class="n">reps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span><span class="p">,</span>
 <span class="w">  </span><span class="n">checks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s">&quot;CK1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;CK2&quot;</span><span class="p">),</span>
@@ -3635,9 +3907,9 @@ List of 7
 <span class="p">)</span>
 </code></pre></div>
 <p>Here, <code>t = 18</code> test entries are automatically labeled <code>T1</code>…<code>T18</code>, and the two checks <code>"CK1"</code> and <code>"CK2"</code> are each repeated twice per block (<code>rep_checks = c(2, 2)</code>), so every block has <code>18 + 2 + 2 = 22</code> plots.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">rcbd_checks</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">rcbd_checks</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>   ID LOCATION PLOT REP ENTRY CHECKS TREATMENT
+<div class="language-text highlight"><pre><span></span><code>   ID LOCATION PLOT REP ENTRY CHECKS TREATMENT
 1   1    FARGO  101   1     7      0        T5
 2   2    FARGO  102   1     8      0        T6
 3   3    FARGO  103   1    18      0       T16
@@ -3650,7 +3922,7 @@ List of 7
 10 10    FARGO  110   1     1      1       CK1
 </code></pre></div>
 <p>When <code>checks</code> is supplied, the field book gains an <code>ENTRY</code> column (a stable entry id for every check and test entry) and a <code>CHECKS</code> column (<code>0</code> for test entries, and a positive check index for each check) alongside the usual <code>ID</code>, <code>LOCATION</code>, <code>PLOT</code>, <code>REP</code> and <code>TREATMENT</code> columns.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">rcbd_checks</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">rcbd_checks</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="rcbd_files/figure-gfm/unnamed-chunk-16-1.png" alt="" width="691.2" style="display: block; margin: auto;" /></p>
 <p>With <code>spread_checks = TRUE</code> (the default), the repeated copies of each check are placed one per contiguous stratum of the block. This greatly reduces the odds of two copies landing side by side compared to placing the whole block with no restriction (<code>spread_checks = FALSE</code>) — measured across many simulated blocks, about 21.6% of blocks had two copies of a check adjacent with spreading on, versus about 62.1% with spreading off. Spreading is not a guarantee, though: because strata are contiguous ranges of plots, two copies can still end up next to each other right at a stratum boundary. How often that happens depends on check density — roughly 1.6% of blocks for this vignette’s own example, rising to roughly 22.8% at 33% check density and roughly 69% at 50% check density. In short, spreading places one copy per stratum and substantially lowers, but does not eliminate, the chance of adjacent copies.</p>

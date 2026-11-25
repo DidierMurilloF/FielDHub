@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="FielDHub — examples and documentation for FielDHub.">
+        <meta name="description" content="Free R package and Shiny app for design of experiments. Randomize CRD, RCBD, lattice, augmented, p-rep and sparse field trials, with field maps and field books.">
       
       
       
@@ -24,10 +24,10 @@
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
-      
-        <title>FielDHub - FielDHub</title>
-      
-    
+  
+    <title>FielDHub: Design of Experiments in R and Shiny for Field Trials</title>
+  
+
     
       <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
       
@@ -65,15 +65,16 @@
     
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
-    <meta property="og:title" content="FielDHub">
-    <meta property="og:description" content="FielDHub — examples and documentation for FielDHub.">
+    <meta property="og:title" content="Home">
+    <meta property="og:description" content="Free R package and Shiny app for design of experiments. Randomize CRD, RCBD, lattice, augmented, p-rep and sparse field trials, with field maps and field books.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
+      <meta name="keywords" content="design of experiments, experimental design, DOE in R, R package, Shiny app, field trials, plant breeding, agricultural experiments, randomization, field map, field book, completely randomized design, CRD, randomized complete block design, RCBD, Latin square, factorial design, split-plot design, split-split-plot design, strip-plot design, alpha lattice, square lattice, rectangular lattice, incomplete block design, row-column design, augmented design, augmented RCBD, augmented row-column design, partially replicated design, p-rep design, prep design, multi-location trials, sparse testing, sparse allocation, diagonal arrangement, unreplicated designs, simulate trait data, spatial correlation">
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "SoftwareSourceCode", "citation": "https://doi.org/10.21105/joss.03122", "codeRepository": "https://github.com/DidierMurilloF/FielDHub", "description": "FielDHub \u2014 examples and documentation for FielDHub.", "name": "FielDHub", "programmingLanguage": "R", "runtimePlatform": "R and Shiny", "url": "https://didiermurillof.github.io/FielDHub/", "version": "1.7.5"}
+        {"@context": "https://schema.org", "@type": ["SoftwareApplication", "SoftwareSourceCode"], "applicationCategory": "ScientificApplication", "citation": "https://doi.org/10.21105/joss.03122", "codeRepository": "https://github.com/DidierMurilloF/FielDHub", "description": "Free R package and Shiny app for design of experiments. Randomize CRD, RCBD, lattice, augmented, p-rep and sparse field trials, with field maps and field books.", "isAccessibleForFree": true, "keywords": "design of experiments, experimental design, DOE in R, R package, Shiny app, field trials, plant breeding, agricultural experiments, randomization, field map, field book, completely randomized design, CRD, randomized complete block design, RCBD, Latin square, factorial design, split-plot design, split-split-plot design, strip-plot design, alpha lattice, square lattice, rectangular lattice, incomplete block design, row-column design, augmented design, augmented RCBD, augmented row-column design, partially replicated design, p-rep design, prep design, multi-location trials, sparse testing, sparse allocation, diagonal arrangement, unreplicated designs, simulate trait data, spatial correlation", "license": "https://opensource.org/licenses/MIT", "name": "FielDHub", "operatingSystem": "Windows, macOS, Linux", "programmingLanguage": "R", "runtimePlatform": "R and Shiny", "url": "https://didiermurillof.github.io/FielDHub/", "version": "1.7.5"}
       </script>
     
   
@@ -95,7 +96,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fieldhub" class="md-skip">
+        <a href="#whats-new-in-1.7.5" class="md-skip">
           Skip to content
         </a>
       
@@ -130,7 +131,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FielDHub
+              Home
             
           </span>
         </div>
@@ -247,6 +248,25 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="articles/index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Articles
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
     
     
       
@@ -332,6 +352,26 @@
   
 
       
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="authors.html" class="md-tabs__link">
+          
+  
+  
+  About
+
+        </a>
+      </li>
+    
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -392,8 +432,6 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
-      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -436,25 +474,12 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#design-of-experiments-for-life-sciences" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design of experiments for life sciences
-      
-    </span>
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#whats-new-in-1.7.5" class="md-nav__link">
@@ -629,6 +654,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="articles/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Articles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -641,10 +693,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -662,8 +714,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -691,10 +743,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
         
           
-          <label class="md-nav__link" for="__nav_3_1" id="__nav_3_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
             
   
   
@@ -712,8 +764,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -889,10 +941,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
             
   
   
@@ -910,8 +962,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1003,10 +1055,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
             
   
   
@@ -1024,8 +1076,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1145,10 +1197,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
             
   
   
@@ -1166,8 +1218,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1248,34 +1300,6 @@
     
   
     Latin Square Design (LSD)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/latin_rectangle.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Latin Rectangle Design
   
 
     
@@ -1490,10 +1514,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1511,8 +1535,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1536,7 +1560,35 @@
   <span class="md-ellipsis">
     
   
-    Methods
+    Methods in FielDHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="articles/simulating_traits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Simulating Trait Data on a Field Design
   
 
     
@@ -1564,7 +1616,7 @@
   <span class="md-ellipsis">
     
   
-    Scientific Validation
+    Scientific validation and computational limits
   
 
     
@@ -1592,7 +1644,7 @@
   <span class="md-ellipsis">
     
   
-    Architecture
+    Architecture and compatibility contracts
   
 
     
@@ -1620,7 +1672,7 @@
   <span class="md-ellipsis">
     
   
-    Extending Fieldhub
+    Adding designs and formats
   
 
     
@@ -1659,10 +1711,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
             
   
   
@@ -1680,8 +1732,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1737,10 +1789,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
             
   
   
@@ -1758,8 +1810,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2007,7 +2059,7 @@
   <span class="md-ellipsis">
     
   
-    Latin Rectangle Design
+    latin_rectangle
   
 
     
@@ -2355,10 +2407,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_3" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
             
   
   
@@ -2376,8 +2428,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2497,10 +2549,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
             
   
   
@@ -2518,8 +2570,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2695,10 +2747,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_5" >
         
           
-          <label class="md-nav__link" for="__nav_5_5" id="__nav_5_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
             
   
   
@@ -2716,8 +2768,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2781,10 +2833,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_6" >
         
           
-          <label class="md-nav__link" for="__nav_5_6" id="__nav_5_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
             
   
   
@@ -2802,8 +2854,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3126,10 +3178,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -3147,8 +3199,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3193,14 +3245,14 @@
   
   
     <li class="md-nav__item">
-      <a href="articles/news/fieldhub-0-1-0.html" class="md-nav__link">
+      <a href="articles/news/fieldhub-1-3-1.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 0.1.0
+    FielDHub 1.3.1
   
 
     
@@ -3249,14 +3301,211 @@
   
   
     <li class="md-nav__item">
-      <a href="articles/news/fieldhub-1-3-1.html" class="md-nav__link">
+      <a href="articles/news/fieldhub-0-1-0.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    FielDHub 1.3.1
+    FielDHub 0.1.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    About
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="authors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authors and citation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CONTRIBUTING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CODE_OF_CONDUCT.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="LICENSE.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="RELEASING.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
   
 
     
@@ -3294,25 +3543,12 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#design-of-experiments-for-life-sciences" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Design of experiments for life sciences
-      
-    </span>
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#whats-new-in-1.7.5" class="md-nav__link">
@@ -3466,15 +3702,42 @@
   
 
 
-<!-- index.md is the pkgdown home page, generated from index.Rmd. Keep it in step with README.Rmd -->
+<!-- The website home page. Keep its content in step with README.Rmd -->
 
-<p><img src='man/figures/fieldhub-logo.png' alt="FielDHub logo" width="140px" align="right"/></p>
-<h1 id="fieldhub">FielDHub<a class="headerlink" href="#fieldhub" title="Permanent link">&para;</a></h1>
+<div class="fieldhub-hero">
+
+<div>
+
+<h1>
+
+FielDHub
+</h1>
+
+<p class="fieldhub-tagline">
+
+Design of experiments for life sciences
+</p>
+
+<p>
+
+An R package and Shiny app that randomizes field, greenhouse and laboratory experiments, with a field map and a field book for every design.
+</p>
+
+<p class="fieldhub-actions">
+
+<a class="md-button md-button--primary" href="get-started.html">Get started</a> <a class="md-button" href="articles/index.html">Browse the designs</a>
+</p>
+
+</div>
+
+<img class="fieldhub-hex" src="man/figures/fieldhub-logo.png" alt="FielDHub hex logo">
+
+</div>
+
 <!-- badges: start -->
 
 <p><a href="https://cran.r-project.org/package=FielDHub"><img alt="CRAN status" src="https://www.r-pkg.org/badges/version/FielDHub" /></a> <a href="https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml"><img alt="R-CMD-check" src="https://github.com/DidierMurilloF/FielDHub/actions/workflows/R-CMD-check.yaml/badge.svg" /></a> <a href="https://lifecycle.r-lib.org/articles/stages.html"><img alt="Lifecycle: stable" src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" /></a> <a href="https://cranlogs.r-pkg.org/badges/FielDHub"><img alt="CRAN downloads" src="https://cranlogs.r-pkg.org/badges/FielDHub" /></a> <a href="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub"><img alt="CRAN downloads, total" src="https://cranlogs.r-pkg.org/badges/grand-total/FielDHub" /></a> <a href="https://doi.org/10.21105/joss.03122"><img alt="JOSS" src="https://joss.theoj.org/papers/10.21105/joss.03122/status.svg" /></a> <!-- badges: end --></p>
-<h2 id="design-of-experiments-for-life-sciences">Design of experiments for life sciences<a class="headerlink" href="#design-of-experiments-for-life-sciences" title="Permanent link">&para;</a></h2>
-<p>FielDHub is an R package and Shiny app that randomizes field, greenhouse and laboratory experiments. It covers classic designs, such as completely randomized, complete block, Latin square, factorial and split-plot designs, and the unreplicated, augmented and partially replicated designs used in plant breeding. It serves agriculture, plant breeding, forestry, and animal and biological sciences.</p>
+<p>FielDHub is a free, open-source R package and Shiny app for the design of experiments. It randomizes field, greenhouse and laboratory experiments: completely randomized (CRD), randomized complete block (RCBD), Latin square, factorial, split-plot, split-split-plot and strip-plot designs; square, rectangular and alpha lattices, incomplete block and row-column designs; and the unreplicated, augmented, partially replicated (p-rep) and sparse designs used in plant breeding and multi-location trials. It serves agriculture, plant breeding, forestry, and animal and biological sciences.</p>
 <p>Every design comes with a field map and a field book. Every design in the app is also an R function with the same arguments, so a script can reproduce what the app made.</p>
 <h2 id="whats-new-in-1.7.5">What’s new in 1.7.5<a class="headerlink" href="#whats-new-in-1.7.5" title="Permanent link">&para;</a></h2>
 <ul>
@@ -3491,13 +3754,13 @@
 <p>See the <a href="news/index.html">release notes</a> for every change, including the changes to results for a given seed.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>From CRAN:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;FielDHub&quot;</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;FielDHub&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>The development version, from GitHub:</p>
-<div class="highlight"><pre><span></span><code><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;DidierMurilloF/FielDHub&quot;</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;DidierMurilloF/FielDHub&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="launch-the-app">Launch the app<a class="headerlink" href="#launch-the-app" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 <span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <p>The app’s dependencies install with the package, and it needs Shiny 1.8.1 or newer. To keep other sessions responsive while a long design runs, install <code>mirai</code> and start the app with <code>run_app(workers = 2L)</code>. Workers need an installed FielDHub; without <code>mirai</code>, or when running from the package source, designs run in the app’s own session.</p>
@@ -3628,7 +3891,7 @@
 </ul>
 <h2 id="example-a-multiple-diagonal-arrangement">Example: a multiple diagonal arrangement<a class="headerlink" href="#example-a-multiple-diagonal-arrangement" title="Permanent link">&para;</a></h2>
 <p>A project needs to test 280 genotypes in a field of 16 rows and 20 columns, split among three experiments. Four checks are placed on diagonals across the experiments and fill 40 plots, 12.5% of the field. To get the same design in the app and in a script, use the same seed, here 1249.</p>
-<div class="highlight"><pre><span></span><code><span class="n">diagonal</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">diagonal_arrangement</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">diagonal</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">diagonal_arrangement</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">16</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">20</span><span class="p">,</span>
 <span class="w">  </span><span class="n">lines</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">280</span><span class="p">,</span>
@@ -3642,84 +3905,86 @@
 <span class="p">)</span>
 </code></pre></div>
 <p>A summary of the design:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span>
-<span class="n">Un</span><span class="o">-</span><span class="n">replicated</span><span class="w"> </span><span class="n">Diagonal</span><span class="w"> </span><span class="n">Arrangement</span><span class="w"> </span><span class="n">Design</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Un-replicated Diagonal Arrangement Design
 
-<span class="n">Information</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">design</span><span class="w"> </span><span class="n">parameters</span><span class="o">:</span>
-<span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">11</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">rows</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">16</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">columns</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">20</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">treatments</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">3</span><span class="p">]</span><span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="m">100</span><span class="w"> </span><span class="m">80</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">checks</span><span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="m">4</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">entry_checks</span><span class="w">  </span><span class="o">:</span><span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">1</span>
-<span class="w">  </span><span class="n">..</span><span class="o">$</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">4</span><span class="p">]</span><span class="w"> </span><span class="m">1</span><span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="m">3</span><span class="w"> </span><span class="m">4</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">rep_checks</span><span class="w">    </span><span class="o">:</span><span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">1</span>
-<span class="w">  </span><span class="n">..</span><span class="o">$</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="m">4</span><span class="p">]</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="m">10</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locations</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">1</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">planter</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;serpentine&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">percent_checks</span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;12.5%&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">fillers</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">0</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">seed</span><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">1249</span>
+Information on the design parameters:
+List of 11
+ $ rows          : num 16
+ $ columns       : num 20
+ $ treatments    : num [1:3] 100 100 80
+ $ checks        : int 4
+ $ entry_checks  :List of 1
+  ..$ : int [1:4] 1 2 3 4
+ $ rep_checks    :List of 1
+  ..$ : num [1:4] 10 10 10 10
+ $ locations     : num 1
+ $ planter       : chr &quot;serpentine&quot;
+ $ percent_checks: chr &quot;12.5%&quot;
+ $ fillers       : num 0
+ $ seed          : num 1249
 
-<span class="n">Check</span><span class="w"> </span><span class="n">spacing</span><span class="w"> </span>—<span class="w"> </span><span class="n">Location</span><span class="w"> </span><span class="m">1</span>
-<span class="n">Optimization</span><span class="o">:</span><span class="w"> </span><span class="n">OFF</span><span class="w"> </span>
-<span class="n">Distance</span><span class="o">:</span><span class="w"> </span><span class="n">Euclidean</span><span class="p">,</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="n">steps</span>
-<span class="n">Same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">neighbor</span><span class="w"> </span><span class="n">radius</span><span class="o">:</span><span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="n">steps</span>
+Check spacing — Location 1
+Optimization: OFF 
+Distance: Euclidean, in grid steps
+Same-check neighbor radius: 5 grid steps
 
-<span class="w">                                 </span><span class="n">Metric</span><span class="w"> </span><span class="n">Value</span>
-<span class="w">            </span><span class="n">Minimum</span><span class="w"> </span><span class="n">same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="m">2.828</span>
-<span class="w">       </span><span class="n">Mean</span><span class="w"> </span><span class="n">nearest</span><span class="w"> </span><span class="n">same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="m">3.646</span>
-<span class="w">      </span><span class="n">Mean</span><span class="w"> </span><span class="n">pairwise</span><span class="w"> </span><span class="n">same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="m">9.703</span>
-<span class="w"> </span><span class="n">Occurrences</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">neighbor</span><span class="w"> </span><span class="m">77.5</span>%
+                                 Metric Value
+            Minimum same-check distance 2.828
+       Mean nearest same-check distance 3.646
+      Mean pairwise same-check distance 9.703
+ Occurrences with a same-check neighbor 77.5%
 
-<span class="n">Distance</span><span class="w"> </span><span class="n">averages</span><span class="w"> </span><span class="n">give</span><span class="w"> </span><span class="n">equal</span><span class="w"> </span><span class="n">weight</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">checks</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">repeated</span><span class="w"> </span><span class="n">occurrences.</span>
-<span class="n">Minimum</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">smallest</span><span class="w"> </span><span class="n">across</span><span class="w"> </span><span class="n">checks.</span>
-<span class="n">Neighbor</span><span class="w"> </span><span class="n">percentage</span><span class="w"> </span><span class="n">includes</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="n">check</span><span class="w"> </span><span class="n">occurrences.</span>
-<span class="kc">NA</span><span class="w"> </span><span class="n">means</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">same</span><span class="o">-</span><span class="n">check</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">calculated.</span>
-<span class="n">Spacing</span><span class="w"> </span><span class="n">metrics</span><span class="w"> </span><span class="n">do</span><span class="w"> </span><span class="n">not</span><span class="w"> </span><span class="n">measure</span><span class="w"> </span><span class="n">statistical</span><span class="w"> </span><span class="n">precision.</span>
+Distance averages give equal weight to checks with repeated occurrences.
+Minimum distance is the smallest across checks.
+Neighbor percentage includes all check occurrences.
+NA means that a same-check distance cannot be calculated.
+Spacing metrics do not measure statistical precision.
 
-<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">First</span><span class="w"> </span><span class="n">observations</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">diagonal_arrangement</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">book</span><span class="o">:</span><span class="w"> </span>
-<span class="w">   </span><span class="n">ID</span><span class="w">  </span><span class="n">EXPT</span><span class="w"> </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w"> </span><span class="n">PLOT</span><span class="w"> </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="m">1</span><span class="w">   </span><span class="m">1</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">101</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">42</span><span class="w">    </span><span class="n">Gen</span><span class="m">-42</span>
-<span class="m">2</span><span class="w">   </span><span class="m">2</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">102</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">23</span><span class="w">    </span><span class="n">Gen</span><span class="m">-23</span>
-<span class="m">3</span><span class="w">   </span><span class="m">3</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">103</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">10</span><span class="w">    </span><span class="n">Gen</span><span class="m">-10</span>
-<span class="m">4</span><span class="w">   </span><span class="m">4</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">104</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">45</span><span class="w">    </span><span class="n">Gen</span><span class="m">-45</span>
-<span class="m">5</span><span class="w">   </span><span class="m">5</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">105</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">51</span><span class="w">    </span><span class="n">Gen</span><span class="m">-51</span>
-<span class="m">6</span><span class="w">   </span><span class="m">6</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">106</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">13</span><span class="w">    </span><span class="n">Gen</span><span class="m">-13</span>
-<span class="m">7</span><span class="w">   </span><span class="m">7</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">107</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">   </span><span class="n">Check</span><span class="m">-3</span>
-<span class="m">8</span><span class="w">   </span><span class="m">8</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">108</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">43</span><span class="w">    </span><span class="n">Gen</span><span class="m">-43</span>
-<span class="m">9</span><span class="w">   </span><span class="m">9</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">109</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">84</span><span class="w">    </span><span class="n">Gen</span><span class="m">-84</span>
-<span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">110</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">      </span><span class="m">0</span><span class="w">   </span><span class="m">102</span><span class="w">   </span><span class="n">Gen</span><span class="m">-102</span>
+ 10 First observations of the data frame with the diagonal_arrangement field book: 
+   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Expt1        1 2026  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2026  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2026  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2026  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2026  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2026  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2026  107   1      7      3     3   Check-3
+8   8 Expt1        1 2026  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2026  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2026  110   1     10      0   102   Gen-102
 </code></pre></div>
 <p>The first 12 rows of the field book:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">diagonal</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">12</span><span class="p">)</span>
-<span class="w">   </span><span class="n">ID</span><span class="w">  </span><span class="n">EXPT</span><span class="w"> </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w"> </span><span class="n">PLOT</span><span class="w"> </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="m">1</span><span class="w">   </span><span class="m">1</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">101</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">42</span><span class="w">    </span><span class="n">Gen</span><span class="m">-42</span>
-<span class="m">2</span><span class="w">   </span><span class="m">2</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">102</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">23</span><span class="w">    </span><span class="n">Gen</span><span class="m">-23</span>
-<span class="m">3</span><span class="w">   </span><span class="m">3</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">103</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">10</span><span class="w">    </span><span class="n">Gen</span><span class="m">-10</span>
-<span class="m">4</span><span class="w">   </span><span class="m">4</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">104</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">45</span><span class="w">    </span><span class="n">Gen</span><span class="m">-45</span>
-<span class="m">5</span><span class="w">   </span><span class="m">5</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">105</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">51</span><span class="w">    </span><span class="n">Gen</span><span class="m">-51</span>
-<span class="m">6</span><span class="w">   </span><span class="m">6</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">106</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">13</span><span class="w">    </span><span class="n">Gen</span><span class="m">-13</span>
-<span class="m">7</span><span class="w">   </span><span class="m">7</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">107</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w">   </span><span class="n">Check</span><span class="m">-3</span>
-<span class="m">8</span><span class="w">   </span><span class="m">8</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">108</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">43</span><span class="w">    </span><span class="n">Gen</span><span class="m">-43</span>
-<span class="m">9</span><span class="w">   </span><span class="m">9</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">109</span><span class="w">   </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">84</span><span class="w">    </span><span class="n">Gen</span><span class="m">-84</span>
-<span class="m">10</span><span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">110</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">      </span><span class="m">0</span><span class="w">   </span><span class="m">102</span><span class="w">   </span><span class="n">Gen</span><span class="m">-102</span>
-<span class="m">11</span><span class="w"> </span><span class="m">11</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">111</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">11</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">89</span><span class="w">    </span><span class="n">Gen</span><span class="m">-89</span>
-<span class="m">12</span><span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="n">Expt1</span><span class="w">        </span><span class="m">1</span><span class="w"> </span><span class="m">2026</span><span class="w">  </span><span class="m">112</span><span class="w">   </span><span class="m">1</span><span class="w">     </span><span class="m">12</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">75</span><span class="w">    </span><span class="n">Gen</span><span class="m">-75</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">diagonal</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">12</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>   ID  EXPT LOCATION YEAR PLOT ROW COLUMN CHECKS ENTRY TREATMENT
+1   1 Expt1        1 2026  101   1      1      0    42    Gen-42
+2   2 Expt1        1 2026  102   1      2      0    23    Gen-23
+3   3 Expt1        1 2026  103   1      3      0    10    Gen-10
+4   4 Expt1        1 2026  104   1      4      0    45    Gen-45
+5   5 Expt1        1 2026  105   1      5      0    51    Gen-51
+6   6 Expt1        1 2026  106   1      6      0    13    Gen-13
+7   7 Expt1        1 2026  107   1      7      3     3   Check-3
+8   8 Expt1        1 2026  108   1      8      0    43    Gen-43
+9   9 Expt1        1 2026  109   1      9      0    84    Gen-84
+10 10 Expt1        1 2026  110   1     10      0   102   Gen-102
+11 11 Expt1        1 2026  111   1     11      0    89    Gen-89
+12 12 Expt1        1 2026  112   1     12      0    75    Gen-75
 </code></pre></div>
 <p>The field map. Each check has its own muted colour and appears throughout the field; the grey lines mark where each experiment starts and ends.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">diagonal</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="man/figures/README-diagonal-map-1.png" alt="Field map of the multiple diagonal arrangement: entry numbers on light grey plots, four checks in muted colours along diagonals, and grey lines between the three experiments." width="100%" style="display: block; margin: auto;" /></p>
 <p>The same field by experiment:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">diagonal</span><span class="p">,</span><span class="w"> </span><span class="n">text.string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;EXPT&quot;</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">diagonal</span><span class="p">,</span><span class="w"> </span><span class="n">text.string</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;EXPT&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="man/figures/README-diagonal-experiments-1.png" alt="Field map of the three experiments, each on its own light background and labelled by name." width="100%" style="display: block; margin: auto;" /></p>
 <p>In the app you can also choose how many filler plots to add and where. The R function adds fillers only when the experiments do not fill the field.</p>
 <p>More examples are in the <a href="articles/diagonal_arrangement.html">diagonal arrangement article</a>.</p>
 <h2 id="example-a-partially-replicated-design">Example: a partially replicated design<a class="headerlink" href="#example-a-partially-replicated-design" title="Permanent link">&para;</a></h2>
 <p>Partially replicated (p-rep) designs are common in early-generation trials: some entries are replicated and the rest appear once. Here 75 entries appear twice and 138 entries once, in a field of 16 rows and 18 columns (288 plots), with seed 77.</p>
-<div class="highlight"><pre><span></span><code><span class="n">pREP</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">partially_replicated</span><span class="p">(</span>
+<div class="language-r highlight"><pre><span></span><code><span class="n">pREP</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">partially_replicated</span><span class="p">(</span>
 <span class="w">  </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">16</span><span class="p">,</span>
 <span class="w">  </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">18</span><span class="p">,</span>
 <span class="w">  </span><span class="n">repGens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">138</span><span class="p">,</span><span class="w"> </span><span class="m">75</span><span class="p">),</span>
@@ -3732,61 +3997,63 @@
 <span class="p">)</span>
 </code></pre></div>
 <p>A summary of the design:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">pREP</span><span class="p">)</span>
-<span class="n">Partially</span><span class="w"> </span><span class="n">Replicated</span><span class="w"> </span><span class="n">Design</span><span class="w"> </span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">print</span><span class="p">(</span><span class="n">pREP</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>Partially Replicated Design
 
-<span class="n">Replications</span><span class="w"> </span><span class="n">within</span><span class="w"> </span><span class="n">location</span><span class="o">:</span><span class="w"> </span>
-<span class="w">  </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">Replicated</span><span class="w"> </span><span class="n">Unreplicated</span>
-<span class="m">1</span><span class="w">    </span><span class="n">FARGO</span><span class="w">         </span><span class="m">75</span><span class="w">          </span><span class="m">138</span>
+Replications within location: 
+  LOCATION Replicated Unreplicated
+1    FARGO         75          138
 
-<span class="w"> </span><span class="n">Information</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">design</span><span class="w"> </span><span class="n">parameters</span><span class="o">:</span><span class="w"> </span>
-<span class="n">List</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="m">10</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">rows</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">16</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">columns</span><span class="w">           </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">18</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">min_distance</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">5</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">incidence_in_rows</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">1</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">locations</span><span class="w">         </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">1</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">planter</span><span class="w">           </span><span class="o">:</span><span class="w"> </span><span class="n">chr</span><span class="w"> </span><span class="s">&quot;serpentine&quot;</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">experimental_plots</span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">288</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">field_capacity</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">288</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">fillers</span><span class="w">           </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">0</span>
-<span class="w"> </span><span class="o">$</span><span class="w"> </span><span class="n">seed</span><span class="w">              </span><span class="o">:</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="m">77</span>
+ Information on the design parameters: 
+List of 10
+ $ rows              : num 16
+ $ columns           : num 18
+ $ min_distance      : num 5
+ $ incidence_in_rows : num 1
+ $ locations         : num 1
+ $ planter           : chr &quot;serpentine&quot;
+ $ experimental_plots: num 288
+ $ field_capacity    : num 288
+ $ fillers           : num 0
+ $ seed              : num 77
 
-<span class="w"> </span><span class="m">10</span><span class="w"> </span><span class="n">First</span><span class="w"> </span><span class="n">observations</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">frame</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">partially_replicated</span><span class="w"> </span><span class="n">field</span><span class="w"> </span><span class="n">book</span><span class="o">:</span><span class="w"> </span>
-<span class="c1"># A tibble: 10 × 11</span>
-<span class="w">      </span><span class="n">ID</span><span class="w"> </span><span class="n">EXPT</span><span class="w">  </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w">   </span><span class="n">PLOT</span><span class="w">   </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w">   </span><span class="n">REP</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="w">   </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w">    </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w">    </span>
-<span class="w"> </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">69</span><span class="w"> </span><span class="n">G69</span><span class="w">      </span>
-<span class="w"> </span><span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">158</span><span class="w">   </span><span class="m">158</span><span class="w"> </span><span class="n">G158</span><span class="w">     </span>
-<span class="w"> </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">157</span><span class="w">   </span><span class="m">157</span><span class="w"> </span><span class="n">G157</span><span class="w">     </span>
-<span class="w"> </span><span class="m">4</span><span class="w">     </span><span class="m">4</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">201</span><span class="w">   </span><span class="m">201</span><span class="w"> </span><span class="n">G201</span><span class="w">     </span>
-<span class="w"> </span><span class="m">5</span><span class="w">     </span><span class="m">5</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">5</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">79</span><span class="w"> </span><span class="n">G79</span><span class="w">      </span>
-<span class="w"> </span><span class="m">6</span><span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">6</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">213</span><span class="w">   </span><span class="m">213</span><span class="w"> </span><span class="n">G213</span><span class="w">     </span>
-<span class="w"> </span><span class="m">7</span><span class="w">     </span><span class="m">7</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">7</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">     </span><span class="m">1</span><span class="w"> </span><span class="n">G1</span><span class="w">       </span>
-<span class="w"> </span><span class="m">8</span><span class="w">     </span><span class="m">8</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">8</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">   </span><span class="m">103</span><span class="w"> </span><span class="n">G103</span><span class="w">     </span>
-<span class="w"> </span><span class="m">9</span><span class="w">     </span><span class="m">9</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">9</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">37</span><span class="w"> </span><span class="n">G37</span><span class="w">      </span>
-<span class="m">10</span><span class="w">    </span><span class="m">10</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">     </span><span class="m">10</span><span class="w">     </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">12</span><span class="w"> </span><span class="n">G12</span><span class="w">      </span>
+ 10 First observations of the data frame with the partially_replicated field book: 
+# A tibble: 10 × 11
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+   &lt;int&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69      
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158     
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157     
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201     
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79      
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213     
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1       
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103     
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37      
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12
 </code></pre></div>
 <p>The first 12 rows of the field book:</p>
-<div class="highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">pREP</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">12</span><span class="p">)</span>
-<span class="c1"># A tibble: 12 × 11</span>
-<span class="w">      </span><span class="n">ID</span><span class="w"> </span><span class="n">EXPT</span><span class="w">  </span><span class="n">LOCATION</span><span class="w"> </span><span class="n">YEAR</span><span class="w">   </span><span class="n">PLOT</span><span class="w">   </span><span class="n">ROW</span><span class="w"> </span><span class="n">COLUMN</span><span class="w">   </span><span class="n">REP</span><span class="w"> </span><span class="n">CHECKS</span><span class="w"> </span><span class="n">ENTRY</span><span class="w"> </span><span class="n">TREATMENT</span>
-<span class="w">   </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w">    </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">int</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">dbl</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">chr</span><span class="o">&gt;</span><span class="w">    </span>
-<span class="w"> </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">1</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">69</span><span class="w"> </span><span class="n">G69</span><span class="w">      </span>
-<span class="w"> </span><span class="m">2</span><span class="w">     </span><span class="m">2</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">2</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">158</span><span class="w">   </span><span class="m">158</span><span class="w"> </span><span class="n">G158</span><span class="w">     </span>
-<span class="w"> </span><span class="m">3</span><span class="w">     </span><span class="m">3</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">3</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">157</span><span class="w">   </span><span class="m">157</span><span class="w"> </span><span class="n">G157</span><span class="w">     </span>
-<span class="w"> </span><span class="m">4</span><span class="w">     </span><span class="m">4</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">4</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">201</span><span class="w">   </span><span class="m">201</span><span class="w"> </span><span class="n">G201</span><span class="w">     </span>
-<span class="w"> </span><span class="m">5</span><span class="w">     </span><span class="m">5</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">5</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">5</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">79</span><span class="w"> </span><span class="n">G79</span><span class="w">      </span>
-<span class="w"> </span><span class="m">6</span><span class="w">     </span><span class="m">6</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">6</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">6</span><span class="w">     </span><span class="m">1</span><span class="w">    </span><span class="m">213</span><span class="w">   </span><span class="m">213</span><span class="w"> </span><span class="n">G213</span><span class="w">     </span>
-<span class="w"> </span><span class="m">7</span><span class="w">     </span><span class="m">7</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">7</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">7</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">     </span><span class="m">1</span><span class="w"> </span><span class="n">G1</span><span class="w">       </span>
-<span class="w"> </span><span class="m">8</span><span class="w">     </span><span class="m">8</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">8</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">8</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">   </span><span class="m">103</span><span class="w"> </span><span class="n">G103</span><span class="w">     </span>
-<span class="w"> </span><span class="m">9</span><span class="w">     </span><span class="m">9</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">      </span><span class="m">9</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">9</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">37</span><span class="w"> </span><span class="n">G37</span><span class="w">      </span>
-<span class="m">10</span><span class="w">    </span><span class="m">10</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">     </span><span class="m">10</span><span class="w">     </span><span class="m">1</span><span class="w">     </span><span class="m">10</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">12</span><span class="w"> </span><span class="n">G12</span><span class="w">      </span>
-<span class="m">11</span><span class="w">    </span><span class="m">11</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">     </span><span class="m">11</span><span class="w">     </span><span class="m">1</span><span class="w">     </span><span class="m">11</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">99</span><span class="w"> </span><span class="n">G99</span><span class="w">      </span>
-<span class="m">12</span><span class="w">    </span><span class="m">12</span><span class="w"> </span><span class="n">ExptA</span><span class="w"> </span><span class="n">FARGO</span><span class="w">    </span><span class="m">2026</span><span class="w">     </span><span class="m">12</span><span class="w">     </span><span class="m">1</span><span class="w">     </span><span class="m">12</span><span class="w">     </span><span class="m">1</span><span class="w">      </span><span class="m">0</span><span class="w">    </span><span class="m">50</span><span class="w"> </span><span class="n">G50</span><span class="w">      </span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">head</span><span class="p">(</span><span class="n">pREP</span><span class="o">$</span><span class="n">fieldBook</span><span class="p">,</span><span class="w"> </span><span class="m">12</span><span class="p">)</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code># A tibble: 12 × 11
+      ID EXPT  LOCATION YEAR   PLOT   ROW COLUMN   REP CHECKS ENTRY TREATMENT
+   &lt;int&gt; &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    
+ 1     1 ExptA FARGO    2026      1     1      1     1      0    69 G69      
+ 2     2 ExptA FARGO    2026      2     1      2     1    158   158 G158     
+ 3     3 ExptA FARGO    2026      3     1      3     1    157   157 G157     
+ 4     4 ExptA FARGO    2026      4     1      4     1    201   201 G201     
+ 5     5 ExptA FARGO    2026      5     1      5     1      0    79 G79      
+ 6     6 ExptA FARGO    2026      6     1      6     1    213   213 G213     
+ 7     7 ExptA FARGO    2026      7     1      7     1      0     1 G1       
+ 8     8 ExptA FARGO    2026      8     1      8     1      0   103 G103     
+ 9     9 ExptA FARGO    2026      9     1      9     1      0    37 G37      
+10    10 ExptA FARGO    2026     10     1     10     1      0    12 G12      
+11    11 ExptA FARGO    2026     11     1     11     1      0    99 G99      
+12    12 ExptA FARGO    2026     12     1     12     1      0    50 G50
 </code></pre></div>
 <p>The field map. Replicated entries are on soft blue and the rest on light grey.</p>
-<div class="highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">pREP</span><span class="p">)</span>
+<div class="language-r highlight"><pre><span></span><code><span class="nf">plot</span><span class="p">(</span><span class="n">pREP</span><span class="p">)</span>
 </code></pre></div>
 <p><img src="man/figures/README-prep-map-1.png" alt="Field map of the p-rep design: entry numbers in a white grid, replicated entries on soft blue and unreplicated entries on light grey." width="100%" style="display: block; margin: auto;" /></p>
 <p>More examples are in the <a href="articles/partially_replicated.html">partially replicated article</a>.</p>
