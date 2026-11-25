@@ -135,3 +135,26 @@ for group, items in design_groups.items():
 articles += ["## Background", ""] + cards(background)
 articles += ["## News", ""] + cards(news[:1], "Every change in every release.") + cards(news[1:], "Release announcement.")
 (root / "articles/index.md").write_text("\n".join(articles))
+
+# Search titles and descriptions: a design guide or reference page says what it
+# is, that it works in R and Shiny, and which function makes it.
+def set_meta(path, **values):
+    text = path.read_text()
+    meta, body = (front_matter(path), text.split("---", 2)[2]) if text.startswith("---") else ({}, "\n" + text)
+    meta.update(values)
+    path.write_text("---\n" + yaml.safe_dump(meta, sort_keys=False, allow_unicode=True) + "---" + body)
+
+for target, engine in functions.items():
+    if target.startswith("articles/"):
+        path = root / target
+        title = page_title(path)
+        summary = front_matter(path).get("description", "").rstrip(".")
+        set_meta(path, seo_title=f"{title} in R and Shiny | FielDHub",
+                 description=f"{title} in R and Shiny with FielDHub's {engine}(). {summary}.")
+
+for name in references:
+    path = root / "reference" / name
+    topic = Path(name).stem
+    title = page_title(path).rstrip(".")
+    set_meta(path, seo_title=f"{topic}: {title} | FielDHub R package",
+             description=f"{title}. Reference for {topic} in the FielDHub R package: arguments, value and examples.")

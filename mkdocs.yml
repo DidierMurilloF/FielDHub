@@ -1,6 +1,7 @@
 site_name: FielDHub
-site_description: Design field and life-science experiments with FielDHub, an open-source
-  R package and Shiny app.
+site_description: Free R package and Shiny app for design of experiments. Randomize
+  CRD, RCBD, lattice, augmented, p-rep and sparse field trials, with field maps and
+  field books.
 site_url: https://didiermurillof.github.io/FielDHub/
 repo_name: DidierMurilloF/FielDHub
 repo_url: https://github.com/DidierMurilloF/FielDHub
@@ -48,6 +49,46 @@ validation:
     absolute_links: relative_to_docs
     anchors: warn
     unrecognized_links: warn
+extra:
+  keywords:
+  - design of experiments
+  - experimental design
+  - DOE in R
+  - R package
+  - Shiny app
+  - field trials
+  - plant breeding
+  - agricultural experiments
+  - randomization
+  - field map
+  - field book
+  - completely randomized design
+  - CRD
+  - randomized complete block design
+  - RCBD
+  - Latin square
+  - factorial design
+  - split-plot design
+  - split-split-plot design
+  - strip-plot design
+  - alpha lattice
+  - square lattice
+  - rectangular lattice
+  - incomplete block design
+  - row-column design
+  - augmented design
+  - augmented RCBD
+  - augmented row-column design
+  - partially replicated design
+  - p-rep design
+  - prep design
+  - multi-location trials
+  - sparse testing
+  - sparse allocation
+  - diagonal arrangement
+  - unreplicated designs
+  - simulate trait data
+  - spatial correlation
 extra_css:
 - assets/fieldhub.css
 copyright: "<a href=\"https://www.ndsu.edu/agricultural-data-analytics\">\xA9 Agricultural\
