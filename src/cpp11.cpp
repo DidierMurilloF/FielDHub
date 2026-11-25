@@ -5,34 +5,6 @@
 #include "cpp11/declarations.hpp"
 #include <R_ext/Visibility.h>
 
-// block_space_probe.cpp
-cpp11::list block_space_probe_cpp(cpp11::integers counts, int v, int b, int r, cpp11::integers swaps, int refresh_every);
-extern "C" SEXP _FielDHub_block_space_probe_cpp(SEXP counts, SEXP v, SEXP b, SEXP r, SEXP swaps, SEXP refresh_every) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(block_space_probe_cpp(cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(counts), cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(swaps), cpp11::as_cpp<cpp11::decay_t<int>>(refresh_every)));
-  END_CPP11
-}
-// block_space_probe.cpp
-cpp11::list block_space_cached_probe_cpp(cpp11::integers counts, int v, int b, int r, cpp11::integers swaps, int refresh_every);
-extern "C" SEXP _FielDHub_block_space_cached_probe_cpp(SEXP counts, SEXP v, SEXP b, SEXP r, SEXP swaps, SEXP refresh_every) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(block_space_cached_probe_cpp(cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(counts), cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(swaps), cpp11::as_cpp<cpp11::decay_t<int>>(refresh_every)));
-  END_CPP11
-}
-// blocks_engine.cpp
-cpp11::list even_repair_probe_cpp(cpp11::integers treatments, int v, int r, int b);
-extern "C" SEXP _FielDHub_even_repair_probe_cpp(SEXP treatments, SEXP v, SEXP r, SEXP b) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(even_repair_probe_cpp(cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(treatments), cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b)));
-  END_CPP11
-}
-// blocks_engine.cpp
-cpp11::integers lattice_start_probe_cpp(int v, int r, int b);
-extern "C" SEXP _FielDHub_lattice_start_probe_cpp(SEXP v, SEXP r, SEXP b) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(lattice_start_probe_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b)));
-  END_CPP11
-}
 // blocks_engine.cpp
 cpp11::list blocks_engine_cpp(int v, int r, int b, int searches, int jumps_per_escape, int max_stale_escapes, double budget, double time_limit, bool debug, cpp11::integers start, double work_cap, int refresh_every, double evaluation_work, int mode, cpp11::integers column_of, cpp11::integers block_of, cpp11::integers segment_of, int options);
 extern "C" SEXP _FielDHub_blocks_engine_cpp(SEXP v, SEXP r, SEXP b, SEXP searches, SEXP jumps_per_escape, SEXP max_stale_escapes, SEXP budget, SEXP time_limit, SEXP debug, SEXP start, SEXP work_cap, SEXP refresh_every, SEXP evaluation_work, SEXP mode, SEXP column_of, SEXP block_of, SEXP segment_of, SEXP options) {
@@ -45,13 +17,6 @@ cpp11::doubles resolvable_score_cpp(int v, int r, int b, cpp11::integers start);
 extern "C" SEXP _FielDHub_resolvable_score_cpp(SEXP v, SEXP r, SEXP b, SEXP start) {
   BEGIN_CPP11
     return cpp11::as_sexp(resolvable_score_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(v), cpp11::as_cpp<cpp11::decay_t<int>>(r), cpp11::as_cpp<cpp11::decay_t<int>>(b), cpp11::as_cpp<cpp11::decay_t<cpp11::integers>>(start)));
-  END_CPP11
-}
-// engine_rng.cpp
-cpp11::integers engine_draw_indices_cpp(int n, int m);
-extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(engine_draw_indices_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(n), cpp11::as_cpp<cpp11::decay_t<int>>(m)));
   END_CPP11
 }
 // engine_rng.cpp
@@ -71,15 +36,10 @@ extern "C" SEXP _FielDHub_simulation_uniforms_cpp(SEXP stream, SEXP n) {
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_FielDHub_block_space_cached_probe_cpp", (DL_FUNC) &_FielDHub_block_space_cached_probe_cpp,  6},
-    {"_FielDHub_block_space_probe_cpp",        (DL_FUNC) &_FielDHub_block_space_probe_cpp,         6},
-    {"_FielDHub_blocks_engine_cpp",            (DL_FUNC) &_FielDHub_blocks_engine_cpp,            18},
-    {"_FielDHub_engine_draw_indices_cpp",      (DL_FUNC) &_FielDHub_engine_draw_indices_cpp,       2},
-    {"_FielDHub_even_repair_probe_cpp",        (DL_FUNC) &_FielDHub_even_repair_probe_cpp,         4},
-    {"_FielDHub_lattice_start_probe_cpp",      (DL_FUNC) &_FielDHub_lattice_start_probe_cpp,       3},
-    {"_FielDHub_resolvable_score_cpp",         (DL_FUNC) &_FielDHub_resolvable_score_cpp,          4},
-    {"_FielDHub_simulation_rng_cpp",           (DL_FUNC) &_FielDHub_simulation_rng_cpp,            1},
-    {"_FielDHub_simulation_uniforms_cpp",      (DL_FUNC) &_FielDHub_simulation_uniforms_cpp,       2},
+    {"_FielDHub_blocks_engine_cpp",       (DL_FUNC) &_FielDHub_blocks_engine_cpp,       18},
+    {"_FielDHub_resolvable_score_cpp",    (DL_FUNC) &_FielDHub_resolvable_score_cpp,     4},
+    {"_FielDHub_simulation_rng_cpp",      (DL_FUNC) &_FielDHub_simulation_rng_cpp,       1},
+    {"_FielDHub_simulation_uniforms_cpp", (DL_FUNC) &_FielDHub_simulation_uniforms_cpp,  2},
     {NULL, NULL, 0}
 };
 }

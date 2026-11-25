@@ -141,11 +141,6 @@ arc_work_bound_run <- function(alg, switch_at, v = 12, s = 8, k = 3,
   # Called by name so the clock can find the algorithm's frame.
   res <- switch(alg,
     staged = arc_search_staged(v, s, k, max_evals = Inf, seconds = seconds,
-                               seed = seed, now = clock, ...),
-    multistart = arc_search_multistart(v, s, k, max_evals = Inf,
-                                       seconds = seconds, seed = seed,
-                                       now = clock, ...),
-    anneal = arc_search_anneal(v, s, k, max_evals = Inf, seconds = seconds,
                                seed = seed, now = clock, ...)
   )
   ops <- data.frame(kind = st$kind, read = st$read, stringsAsFactors = FALSE)

@@ -701,34 +701,6 @@ cpp11::list crossed_engine(int v, int r, int b, const std::vector<int>& row_of,
                            double evaluation_work, int floors, bool treatment_form, bool strict,
                            const std::vector<int>& floor_of);
 
-// Test hook: run the even-up repair on a design given as the treatment of each
-// plot (1-based, plots in block order as in blocks_engine()). Returns the
-// repaired treatments and the number of swaps (-1 if it could not finish).
-[[cpp11::register]]
-cpp11::list even_repair_probe_cpp(cpp11::integers treatments, int v, int r, int b) {
-  Layout lay = make_layout(v, r, b);
-  std::vector<int> treat(lay.n);
-  for (int x = 0; x < lay.n; ++x) treat[x] = treatments[x] - 1;
-  int swaps = even_repair(lay, treat);
-  cpp11::writable::integers out(lay.n);
-  for (int x = 0; x < lay.n; ++x) out[x] = treat[x] + 1;
-  using namespace cpp11::literals;
-  return cpp11::writable::list({"treatments"_nm = out, "swaps"_nm = swaps});
-}
-
-// Test hook: the lattice start for (v, r, b) as 1-based treatments by plot,
-// or an empty vector when the shape is not a square lattice.
-[[cpp11::register]]
-cpp11::integers lattice_start_probe_cpp(int v, int r, int b) {
-  Layout lay = make_layout(v, r, b);
-  GetRNGstate();
-  std::vector<int> start = lattice_start(lay);
-  PutRNGstate();
-  cpp11::writable::integers out(static_cast<R_xlen_t>(start.size()));
-  for (size_t x = 0; x < start.size(); ++x) out[x] = start[x] + 1;
-  return out;
-}
-
 // b is the total number of blocks. `mode` 0 is single-level; 1 (resolvable)
 // nests b / r blocks in each of r complete replicates and skips the
 // single-level lattice start and the even-up repair (a no-op there: every
