@@ -211,6 +211,9 @@ test_that("field-book tables make the named columns filterable and keep the othe
   expected[columns] <- lapply(expected[columns], as.factor)
   expect_identical(field_book_table_data(book, columns), expected)
   expect_identical(field_book_table_data(book[rev(names(book))], columns), expected[rev(names(expected))])
+  # the augmented pages collapse their table's scroll area and still show every plot on one page
+  collapsed <- app_field_book_table(book, columns, collapse = TRUE)
+  expect_identical(list(collapsed$x$options$pageLength, nrow(collapsed$x$data)), list(3L, 3L))
 })
 
 test_that("invalid field-book tables and display controls have classed errors", {
