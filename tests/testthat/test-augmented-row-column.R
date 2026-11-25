@@ -306,8 +306,10 @@ test_that("low residual df warns once, before the seed is drawn", {
   before <- arc_rng()
   expect_error(withCallingHandlers(
     arc_run(nrows = 12, ncols = 8, checks = 3, seed = NULL),
-    fieldhub_arc_low_df_warning = function(w) stop("as error")
-  ), "as error")
+    fieldhub_arc_low_df_warning = function(w) {
+      rlang::abort("as error", class = "arc_warning_as_error")
+    }
+  ), class = "arc_warning_as_error")
   expect_identical(arc_rng(), before)
   expect_no_warning(arc_run(budget = 100))
 })
@@ -630,7 +632,8 @@ test_that("time_limit cuts each location's search and verification still runs", 
       info = site
     )
     # Scale of V_tt is O(1); see the oracle-agreement test for the tolerance
-    expect_lt(abs(limited$statistics$V_tt[site] - oracle$V_tt), 1e-10)
+    expect_lt(abs(limited$statistics$V_tt[site] - oracle$V_tt), 1e-10,
+              label = paste("V_tt deviation at location", site))
   }
   # A cutoff before any design exists is a classed search error
   arc_local_seed(9)
@@ -832,8 +835,9 @@ test_that("print() and summary() show each location's statistics, as the app doe
              "  Search status: ok"),
         info = nm
       )
-      # Printed to 4 significant digits (relative rounding <= 5e-4) against
-      # the independent oracle
+      # Printed to 4 significant digits: each shown value is within half a
+      # unit of the fourth digit, at most 5e-4 relative, of the independent
+      # oracle (the oracle itself agrees to 1e-10)
       oracle <- arc_field_book_oracle(arc_location_book(x, site))
       shown <- c(arc_printed_value(block[3], objective),
                  vapply(c("E_aug", "V_tt", "V_tc"), arc_printed_value, 0,
@@ -842,7 +846,11 @@ test_that("print() and summary() show each location's statistics, as the app doe
                         line = block[5]))
       want <- unlist(oracle[c(objective, "E_aug", "V_tt", "V_tc", "max_tt",
                               "max_tc")])
-      expect_equal(unname(shown), unname(want), tolerance = 1e-3, info = nm)
+      rel <- abs(unname(shown) - unname(want)) / abs(unname(want))
+      expect(length(rel) == 6L && !anyNA(rel) && all(rel <= 5e-4 + 1e-9),
+             sprintf("case %s: printed %s = %s, oracle %.8g", nm,
+                     names(want)[which.max(rel)], shown[which.max(rel)],
+                     want[which.max(rel)]))
     }
   }
 })
@@ -1025,8 +1033,14 @@ test_that("the reported-statistics scorer reproduces published values", {
   for (nm in names(cases)) {
     case <- cases[[nm]]
     got <- arc_final_score(case$contraction, case$v, "restricted")
-    dev <- abs(unlist(got[names(case$values)]) - case$values)
-    expect(identical(got[names(case$want)], case$want) && all(dev <= case$tol) &&
+    reported <- unlist(got[names(case$values)])
+    dev <- if (length(reported) == length(case$values)) {
+      abs(reported - case$values)
+    } else {
+      Inf # a published quantity is not reported
+    }
+    expect(identical(got[names(case$want)], case$want) &&
+             !anyNA(dev) && all(dev <= case$tol) &&
              !any(case$absent %in% names(got)),
            sprintf("case %s: fields %s, worst deviation %g", nm,
                    paste(names(case$want), collapse = "/"),
@@ -1052,7 +1066,9 @@ test_that("the paper route reproduces every row of Table 1", {
                arc_published_tol(entry$pub_Cbar_v_dec),
              Cbar_s = abs(result$Cbar_s - entry$pub_Cbar_s) -
                arc_published_tol(entry$pub_Cbar_s_dec))
-    expect(isTRUE(result$connected) && all(dev < 0),
+    # all four quantities must be reported: c() drops a missing one
+    expect(isTRUE(result$connected) && length(dev) == 4L && !anyNA(dev) &&
+             all(dev < 0),
            sprintf("%s: %s outside its published tolerance by %g", entry$file,
                    names(dev)[which.max(dev)], max(dev)))
   }
@@ -1156,9 +1172,11 @@ test_that("the 6 x 4 enumeration reproduces the research counts in both modes", 
                                   opposite = 0L, pairs = 15L))
   )
   for (mode in names(cases)) {
-    # best is rounded to the 9 printed decimals of the reference
+    # best is rounded to the 9 printed decimals of the reference, so it must
+    # equal it: relative 1e-9 is below one unit of the ninth decimal (2.2e-9
+    # relative) and far above rounding; the counts are integers
     expect_equal(arc_enum_summary(arc_enum_objectives(cases[[mode]]$reps, mode)),
-                 cases[[mode]]$want, info = mode)
+                 cases[[mode]]$want, tolerance = 1e-9, info = mode)
   }
 })
 
