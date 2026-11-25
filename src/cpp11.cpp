@@ -54,6 +54,20 @@ extern "C" SEXP _FielDHub_engine_draw_indices_cpp(SEXP n, SEXP m) {
     return cpp11::as_sexp(engine_draw_indices_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(n), cpp11::as_cpp<cpp11::decay_t<int>>(m)));
   END_CPP11
 }
+// engine_rng.cpp
+SEXP simulation_rng_cpp(int seed);
+extern "C" SEXP _FielDHub_simulation_rng_cpp(SEXP seed) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(simulation_rng_cpp(cpp11::as_cpp<cpp11::decay_t<int>>(seed)));
+  END_CPP11
+}
+// engine_rng.cpp
+cpp11::doubles simulation_uniforms_cpp(SEXP stream, int n);
+extern "C" SEXP _FielDHub_simulation_uniforms_cpp(SEXP stream, SEXP n) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(simulation_uniforms_cpp(cpp11::as_cpp<cpp11::decay_t<SEXP>>(stream), cpp11::as_cpp<cpp11::decay_t<int>>(n)));
+  END_CPP11
+}
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
@@ -64,6 +78,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FielDHub_even_repair_probe_cpp",        (DL_FUNC) &_FielDHub_even_repair_probe_cpp,         4},
     {"_FielDHub_lattice_start_probe_cpp",      (DL_FUNC) &_FielDHub_lattice_start_probe_cpp,       3},
     {"_FielDHub_resolvable_score_cpp",         (DL_FUNC) &_FielDHub_resolvable_score_cpp,          4},
+    {"_FielDHub_simulation_rng_cpp",           (DL_FUNC) &_FielDHub_simulation_rng_cpp,            1},
+    {"_FielDHub_simulation_uniforms_cpp",      (DL_FUNC) &_FielDHub_simulation_uniforms_cpp,       2},
     {NULL, NULL, 0}
 };
 }

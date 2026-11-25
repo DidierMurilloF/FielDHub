@@ -15,18 +15,19 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
     ids = spec$simulation_ids, field_book = field_book)
   shiny::observeEvent(input[[spec$ids[["simulate"]]]], {
     simulation_ready()
-    shiny::showModal(app_simulation_modal(session$ns, ids = spec$simulation_ids),
+    shiny::showModal(app_simulation_modal(session$ns, ids = spec$simulation_ids,
+      spatial_available = all(c("ROW", "COLUMN") %in% names(field_book()))),
                      session = session)
   })
   book <- shiny::reactive({
     shiny::req(field_book())
-    validate_design(classic_workflow_book(field_book(), settings(),
-      workflow_seed(seed(), design()), spec$order_by_id))
+    validate_design(app_trait_simulation(design(), field_book(), settings(),
+      workflow_seed(seed(), design()), order_by_id = spec$order_by_id))
   })
   heatmap <- shiny::reactive({
     data <- book()$df
     shiny::req(data)
-    response <- as.character(settings()$response_name)
+    response <- as.character(settings()$trait)
     simulated <- length(response) == 1L && response %in% names(data)
     # "Simulate data to see the heatmap." where the heatmap would be
     app_plot_state(design(), if (simulated) settings(), "heatmap")
@@ -57,7 +58,7 @@ app_classic_workflow <- function(input, output, session, design, layout, seed,
   layout_data <- shiny::reactive({
     shiny::req(book()$df, input[[spec$ids[["plot_type"]]]])
     if (input[[spec$ids[["plot_type"]]]] == 3) {
-      return(list(file = app_plot_grid_data(heatmap(), as.character(settings()$response_name))))
+      return(list(file = app_plot_grid_data(heatmap(), as.character(settings()$trait))))
     }
     validate_design(classic_workflow_layout(book()$df, selected(),
                                             input[[spec$ids[["plot_type"]]]], spec))

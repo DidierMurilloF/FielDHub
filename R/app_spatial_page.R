@@ -391,7 +391,6 @@ app_spatial_page <- function(input, output, session, spec, run, raw_controls) {
   app_spatial_workflow(input, output, session,
     design = function() design(),
     seed = function() run()$values$seed,
-    dimensions = function(field_book) spec$field_size(design(), design_inputs()$values),
     selected = function() location(),
     visible = function() randomized(),
     simulation_ready = function() {

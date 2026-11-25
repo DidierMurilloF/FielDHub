@@ -1,0 +1,198 @@
+---
+title: "Simulating Trait Data on a Field Design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulating Trait Data on a Field Design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = NA,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.5,
+  out.width = "85%",
+  dpi = 150
+)
+```
+
+```{r setup}
+library(FielDHub)
+library(ggplot2)
+theme_set(theme_minimal(base_size = 12) +
+            theme(plot.title = element_text(face = "bold")))
+```
+
+## Why simulate?
+
+A design tells you which treatment goes on which plot. Simulation adds a trait
+value to every plot, so you can see what data from that design could look
+like before anything is planted.
+
+FielDHub keeps the **true** effects behind every simulated value. That makes
+simulation useful for:
+
+* **Teaching**: analyse data whose answer is known, and see why blocking matters.
+* **Planning**: compare designs, replicates or block sizes before a trial.
+* **Testing**: check an analysis script or model on data with a known truth.
+* **Demonstrations**: realistic field books, heatmaps and examples.
+
+Each simulated value is the trait mean plus a treatment effect, an effect for
+each block (or replicate, row, column, whole plot) of the design, an optional
+spatial trend, and a plot error. Values are Gaussian, so they are not bounded,
+and a treatment has the same effect at every location.
+
+## In the Shiny app
+
+Generate a design and click **Simulate!**. Choose the trait, its mean and the
+plot-error (residual) SD, and optionally tick **Add spatial correlation**. The
+simulated trait appears in the field book, the heatmap and the download.
+
+## Example 1: simulate a trait
+
+```{r}
+rcbd <- RCBD(t = 10, reps = 4, nrows = 5, seed = 2026)
+sim <- simulate(rcbd, seed = 1, mean = 5, residual_sd = 0.5)
+sim
+```
+
+The simulated field book is `sim$field_book`. Each plot has a `ROW` and
+`COLUMN`, so the trait can be drawn on the field:
+
+```{r}
+ggplot(sim$field_book, aes(COLUMN, ROW, fill = YIELD)) +
+  geom_tile(colour = "white") +
+  geom_text(aes(label = TREATMENT), size = 3, colour = "white") +
+  scale_y_reverse(breaks = 1:5) +
+  scale_x_continuous(breaks = 1:8) +
+  scale_fill_viridis_c() +
+  coord_equal() +
+  labs(title = "Simulated yield on the RCBD field", x = "Column", y = "Row",
+       fill = "Yield") +
+  theme(panel.grid = element_blank())
+```
+
+## Example 2: compare an analysis with the truth
+
+The true treatment effects are stored in `sim$effects`. We compare them with
+the treatment means of the simulated data.
+
+```{r}
+book <- sim$field_book
+truth <- tapply(sim$effects[[1]]$treatment, book$TREATMENT, mean)
+estimate <- tapply(book$YIELD, book$TREATMENT, mean)
+cor(estimate, truth)
+```
+
+```{r, fig.width = 5.5, fig.height = 5, out.width = "65%"}
+recovered <- data.frame(truth = truth - mean(truth),
+                        estimate = estimate - mean(estimate),
+                        treatment = names(truth))
+
+ggplot(recovered, aes(truth, estimate)) +
+  geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_point(size = 3, colour = "#2C7FB8") +
+  geom_text(aes(label = treatment), vjust = -1, size = 3) +
+  coord_equal() +
+  labs(title = "Estimated versus true treatment effects",
+       x = "True effect (centred)", y = "Estimated effect (centred)")
+```
+
+Points close to the dashed line mean the trial recovered the treatments well.
+Try fewer replicates or a larger `residual_sd` and watch them spread.
+
+## Example 3: why blocking matters
+
+An alpha lattice splits each replicate into small incomplete blocks. We
+simulate a field with strong differences between blocks (`design_sd`), then
+analyse the trial twice: ignoring the blocks, and including them.
+
+```{r}
+alpha <- alpha_lattice(t = 30, k = 5, reps = 3, seed = 11)
+sim_alpha <- simulate(alpha, seed = 3, residual_sd = 4,
+                      design_sd = c(incomplete_block = 8))
+
+book <- sim_alpha$field_book
+book$BLOCK <- factor(paste(book$REP, book$IBLOCK))
+truth <- tapply(sim_alpha$effects[[1]]$treatment, book$TREATMENT, mean)
+
+ignoring_blocks <- tapply(book$YIELD, book$TREATMENT, mean)
+fit <- lm(YIELD ~ 0 + TREATMENT + BLOCK, data = book)
+with_blocks <- coef(fit)[paste0("TREATMENT", names(truth))]
+
+c(ignoring_blocks = cor(ignoring_blocks, truth),
+  with_blocks = cor(with_blocks, truth))
+```
+
+```{r, fig.width = 8, fig.height = 4.5, out.width = "90%"}
+compared <- rbind(
+  data.frame(analysis = "Ignoring blocks", truth = truth - mean(truth),
+             estimate = ignoring_blocks - mean(ignoring_blocks)),
+  data.frame(analysis = "Including blocks", truth = truth - mean(truth),
+             estimate = with_blocks - mean(with_blocks))
+)
+
+ggplot(compared, aes(truth, estimate)) +
+  geom_abline(linetype = "dashed", colour = "grey50") +
+  geom_point(size = 2.5, colour = "#2C7FB8") +
+  facet_wrap(~ analysis) +
+  theme(aspect.ratio = 1) +
+  labs(title = "Recovering treatment effects in an alpha lattice",
+       x = "True effect (centred)", y = "Estimated effect (centred)")
+```
+
+Including the blocks brings the estimates much closer to the truth. Set
+`incomplete_block = 0` and the gain disappears, which is a good discussion
+point for a class.
+
+## Example 4: add a spatial trend
+
+`spatial` adds a smooth trend over the field, so neighbouring plots are more
+alike. `rho_row` is the correlation between plots in neighbouring rows, and
+`rho_col` between plots in neighbouring columns.
+
+```{r}
+prep <- partially_replicated(nrows = 10, ncols = 12, repGens = c(80, 20),
+                             repUnits = c(1, 2), seed = 7)
+sim_prep <- simulate(prep, seed = 4,
+                     spatial = list(sd = 8, rho_row = 0.9, rho_col = 0.9))
+
+book <- sim_prep$field_book
+book$SPATIAL <- sim_prep$effects[[1]]$spatial
+```
+
+```{r, fig.width = 6.5, fig.height = 5, out.width = "70%"}
+ggplot(book, aes(COLUMN, ROW, fill = SPATIAL)) +
+  geom_tile(colour = "white") +
+  scale_y_reverse(breaks = 1:10) +
+  scale_x_continuous(breaks = 1:12) +
+  scale_fill_distiller(palette = "RdBu", direction = 1) +
+  coord_equal() +
+  labs(title = "Simulated spatial trend", x = "Column", y = "Row",
+       fill = "Effect") +
+  theme(panel.grid = element_blank())
+```
+
+For Latin square and row-column designs, first use the physical layout:
+
+```{r, eval = FALSE}
+rc <- row_column(t = 30, nrows = 5, reps = 3, seed = 3)
+rc$fieldBook <- field_layout(rc)
+simulate(rc, spatial = TRUE)
+```
+
+## More options
+
+* **Several draws**: `nsim = 50` gives `YIELD_1`, ..., `YIELD_50`.
+* **Several locations**: give a value per location, such as
+  `mean = c(LOC1 = 6, LOC2 = 4)`.
+* **Scales**: `treatment_sd`, `design_sd` and `location_sd` default to fixed
+  multiples of `residual_sd`, so changing the residual SD rescales everything.
+* **Reproduce**: `reproduce_simulation(sim)` rebuilds the same values.
+
+See `?simulate.FielDHub` for all the arguments.

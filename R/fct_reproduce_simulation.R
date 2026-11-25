@@ -1,6 +1,6 @@
 #' Reconstruct recorded simulated responses
 #'
-#' @description Replays a classic truncated-normal or spatial AR1-by-AR1
+#' @description Replays a design-based Gaussian, classic truncated-normal or spatial AR1-by-AR1
 #' simulation using its saved input field book, parameters, seed, and RNG settings.
 #'
 #' @param x A simulation record containing \code{input_field_book},
@@ -12,6 +12,11 @@
 #' layout: it starts from the exact saved input field book. Use
 #' \code{reproduce_design()} separately to reconstruct the experimental design.
 #' The caller's RNG settings and \code{.Random.seed} are restored on exit.
+#' R cannot save the normal value that Box-Muller holds in reserve, so when
+#' the caller uses Box-Muller normals, replaying a record made under another
+#' normal generator discards that reserved value and the caller's next
+#' \code{rnorm()} draw differs. Records made by \code{simulate()} under
+#' Box-Muller use a private stream and leave it untouched.
 #' Recorded arguments are passed as values rather than evaluated as R code.
 #' A changed FielDHub version signals a \code{fieldhub_reproduction_warning};
 #' reproduction across software versions or platforms is not guaranteed.
@@ -37,6 +42,11 @@ reproduce_simulation <- function(x) {
       data = list(recorded_version = meta$package_version, installed_version = current_version)
     )
   }
+  arguments <- c(list(field_book = x$input_field_book), meta$parameters)
+  if (identical(meta$model, "design_gaussian") && !is.null(meta$parameters$isolated_rng)) {
+    # This stream is independent of the caller's R generators.
+    return(invisible(do.call(engine, arguments, quote = TRUE)))
+  }
   local_rng_state()
   previous_kind <- RNGkind()
   on.exit(do.call(RNGkind, as.list(previous_kind)), add = TRUE, after = FALSE)
@@ -47,8 +57,7 @@ reproduce_simulation <- function(x) {
       data = list(parent = e)
     )
   )
-  invisible(do.call(engine, c(list(field_book = x$input_field_book), meta$parameters),
-                    quote = TRUE))
+  invisible(do.call(engine, arguments, quote = TRUE))
 }
 
 #' Validate the record and select a known simulation service
@@ -64,13 +73,24 @@ simulation_reproduction_engine <- function(x) {
     fieldhub_abort("The simulation has invalid or missing recorded parameters or RNG metadata.")
   }
   if (!is.character(meta$model) || length(meta$model) != 1L || is.na(meta$model) ||
-      !meta$model %in% c("truncated_normal", "ar1xar1")) {
+      !meta$model %in% c("truncated_normal", "ar1xar1", "design_gaussian")) {
     fieldhub_abort("The recorded simulation model is not supported.")
   }
-  engine <- if (meta$model == "truncated_normal") {
-    simulate_classic_field_book
-  } else simulate_spatial_field_book
+  engine <- switch(meta$model,
+    truncated_normal = simulate_classic_field_book,
+    ar1xar1 = simulate_spatial_field_book,
+    design_gaussian = simulate_design_field_book
+  )
   expected <- setdiff(names(formals(engine)), "field_book")
+  if (identical(meta$model, "design_gaussian")) {
+    if (!"isolated_rng" %in% names(meta$parameters)) {
+      # Gaussian records saved before adding the isolated stream.
+      expected <- setdiff(expected, "isolated_rng")
+    } else if (!identical(meta$parameters$isolated_rng, meta$rng_kind) ||
+               meta$rng_kind[2L] != "Box-Muller") {
+      fieldhub_abort("Invalid recorded isolated simulation RNG settings.")
+    }
+  }
   if (!setequal(names(meta$parameters), expected)) {
     fieldhub_abort("The recorded parameters do not match the simulation model.")
   }

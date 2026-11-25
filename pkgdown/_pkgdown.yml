@@ -59,6 +59,8 @@ navbar:
        href: articles/row_column.html
      - text: "Methods in FielDHub"
        href: articles/methods.html
+     - text: "Simulating Trait Data on a Field Design"
+       href: articles/simulating_traits.html
 
 news:
   releases:

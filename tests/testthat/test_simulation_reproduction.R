@@ -87,9 +87,9 @@ test_that("spatial modules retain the simulation record without rewriting its ou
   for (module in modules) {
     expect_identical(sum(all.names(spatial_server_body(module)) == "app_spatial_workflow"), 1L)
   }
-  expect_identical(sum(all.names(body(app_spatial_workflow)) == "spatial_workflow_book"), 1L)
-  expect_length(records(body(spatial_workflow_book)), 1L)
-  for (code in list(body(app_spatial_workflow), body(spatial_workflow_book))) {
+  expect_identical(sum(all.names(body(app_spatial_workflow)) == "app_trait_simulation"), 1L)
+  expect_length(records(body(app_trait_simulation)), 1L)
+  for (code in list(body(app_spatial_workflow), body(app_trait_simulation))) {
     expect_false(grepl("simulation$field_book$ID <-", paste(deparse(code), collapse = " "),
                        fixed = TRUE))
   }

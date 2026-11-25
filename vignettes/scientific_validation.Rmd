@@ -117,9 +117,12 @@ Spatial simulation tests compare the separable AR1 construction against an
 independent dense covariance/Cholesky calculation, including negative
 correlations and nonsquare fields (`test_separable_spatial.R`). Response tests
 check the stated treatment-specific model and unequal replication
-(`test_truncated_response_contract.R` and `test_simulation.R`). These are
-computational checks, not evidence that simulated responses fit a particular
-biological experiment.
+(`test_truncated_response_contract.R` and `test_simulation.R`). Design-aware
+simulation tests check, for every design, that responses equal the mean plus
+the stored effects, that each effect is constant within its treatment or
+experimental unit, and that records replay exactly (`test_simulate_design.R`).
+These are computational checks, not evidence that simulated responses fit a
+particular biological experiment.
 
 ## Search bounds and diagnostics
 

@@ -42,6 +42,14 @@ Every design comes with a field map and a field book. Every design in the app is
 also an R function with the same arguments, so a script can reproduce what the
 app made.
 
+## What's new in 1.7.5
+
+- **Design-aware trait simulation.** `stats::simulate(x)` generates trait data
+  for all 21 field designs using their treatment and experimental units.
+- **Optional spatial correlation.** Simulate field variation on physical
+  row and column coordinates. The Shiny app uses the same simulator for
+  tables, heatmaps, and downloads.
+
 ## What's new in 1.7.0
 
 - **A new design.** `augmented_row_column()` builds augmented row-column

@@ -2583,7 +2583,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY", "TREATMENT"]
+              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", "COLUMN_REP", "ENTRY", "TREATMENT"]
             },
             "row.names": {
               "type": "integer",
@@ -2626,6 +2626,16 @@
               "type": "double",
               "attributes": {},
               "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             },
             {
               "type": "integer",
@@ -3124,7 +3134,7 @@
             "names": {
               "type": "character",
               "attributes": {},
-              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ENTRY", "TREATMENT"]
+              "value": ["ID", "LOCATION", "PLOT", "ROW", "COLUMN", "REP", "ROW_REP", "COLUMN_REP", "ENTRY", "TREATMENT"]
             },
             "row.names": {
               "type": "integer",
@@ -3167,6 +3177,16 @@
               "type": "double",
               "attributes": {},
               "value": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3]
+            },
+            {
+              "type": "double",
+              "attributes": {},
+              "value": [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
             },
             {
               "type": "integer",

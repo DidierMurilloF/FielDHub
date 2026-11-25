@@ -18,6 +18,49 @@ knitr::opts_chunk$set(
 
 # Changelog
 
+# FielDHub 1.7.5
+
+## Design-aware trait simulation
+
+- `stats::simulate(x)` generates Gaussian trait data for all 21 field designs
+  using their realized treatment and experimental units. Repeated entries
+  and checks retain a shared treatment effect across locations. Set the
+  trait mean and residual SD globally or by location. Spatial correlation
+  is optional and uses physical field-book coordinates. Shiny calls the
+  package method and uses its simulated field book for tables, maps, and
+  downloads. `reproduce_simulation()` replays new and existing records.
+- Simulated augmented RCBD block effects are nested within experiment and
+  location. In augmented RCBD, whose entry list may repeat a display label,
+  distinct entries with the same label keep separate treatment effects.
+  Row-column layouts preserve the experimental axes as `ROW_REP` and
+  `COLUMN_REP`, so spatial simulation can use physical coordinates alongside
+  the experimental units.
+- Each `fieldhub_simulation` now prints a short summary instead of every
+  stored table. The simulated effects behind each draw remain in `effects`.
+- The new vignette "Simulating Trait Data on a Field Design"
+  (`vignette("simulating_traits")`) shows how to simulate traits and use the
+  known effects for teaching, planning and testing analyses.
+
+## Changes to results and outputs
+
+Field designs and their randomization are unchanged for a given seed. The
+simulated values and one layout format change:
+
+* The **Simulate!** dialog now asks for the trait mean and plot-error
+  (residual) SD instead of minimum and maximum values, and the app calls
+  `stats::simulate()`. Simulated values differ from those of FielDHub 1.7.0
+  for the same seed, and are Gaussian, so they are no longer bounded by a
+  minimum or maximum.
+* On the spatial pages (diagonal, optimized, partially replicated,
+  multi-location p-rep, sparse, augmented RCBD and augmented row-column),
+  spatial correlation is now optional. It is off unless **Add spatial
+  correlation** is ticked; 1.7.0 always applied it.
+* Row-column field layouts, in the app and from `field_layout()`, have two
+  additional columns, `ROW_REP` and `COLUMN_REP`, between `REP` and `ENTRY`.
+
+Simulation records saved with FielDHub 1.7.0 still replay with
+`reproduce_simulation()`.
+
 # FielDHub 1.7.0
 
 ## New design

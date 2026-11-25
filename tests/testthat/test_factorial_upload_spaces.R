@@ -49,9 +49,9 @@ test_that("the factorial page's results work with names containing spaces", {
   x <- factorial_page_design(factorial_upload, 2)
   view <- checked_layout_view(x, layout = 1, planter = "serpentine", location = 2,
                               stacked = "vertical")
-  book <- classic_workflow_book(view[[spec$book_component]],
-                                list(min_value = 1, max_value = 10, response_name = "YIELD"),
-                                7, spec$order_by_id)
+  book <- app_trait_simulation(x, view[[spec$book_component]],
+                               list(mean = 6, residual_sd = .4, trait = "YIELD"),
+                               7, spec$order_by_id)
   expect_true("YIELD" %in% names(book$df))
   expect_silent(field_book_table_data(book$df, factor_columns = spec$table_columns))
   for (plot_type in 1:3) {

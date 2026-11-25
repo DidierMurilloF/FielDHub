@@ -1,23 +1,25 @@
-# Business logic and static bindings only; no reactive or browser sessions.
-test_that("classic workflow books preserve the unsimulated view and replay simulations", {
-  book <- data.frame(ID = c(2L, 1L), LOCATION = c("B", "B"), PLOT = c(102, 101),
-                     ROW = 1:2, COLUMN = 1L, TREATMENT = c("A", "B"))
+# Business logic and static bindings only.
+test_that("classic workflow books preserve unsimulated data and simulation row alignment", {
+  x <- CRD(t = 4, reps = 2, seed = 12)
+  book <- x$fieldBook[rev(seq_len(nrow(x$fieldBook))), ]
   set.seed(811)
   before <- .Random.seed
-  plain <- classic_workflow_book(book, NULL, seed = stop("unused seed"))
-  expect_identical(plain, list(df = book, simulation = NULL))
-  settings <- list(min_value = 1, max_value = 10, response_name = "YIELD")
+  expect_identical(app_trait_simulation(x, book, seed = stop("unused seed")),
+                   list(df = book, simulation = NULL))
+  settings <- list(mean = 6, residual_sd = 0.4, trait = "YIELD")
+  reference <- do.call(stats::simulate, c(list(object = x, seed = 14), settings))
   for (ordered in c(TRUE, FALSE)) {
-    expected <- simulate_classic_field_book(book, 1, 10, "YIELD", 14, order_by_id = ordered)
-    actual <- classic_workflow_book(book, settings, 14, order_by_id = ordered)
-    expect_identical(actual, list(df = expected$field_book, simulation = expected))
+    actual <- app_trait_simulation(x, book, settings, 14, order_by_id = ordered)
+    expected <- actual$simulation$field_book
+    if (ordered) expected <- expected[order(expected$ID), ]
+    expect_identical(actual$df$YIELD, expected$YIELD)
+    expect_identical(actual$df$YIELD,
+                     reference$field_book$YIELD[match(actual$df$ID, reference$field_book$ID)])
+    expect_identical(reproduce_simulation(actual$simulation), actual$simulation)
   }
   expect_identical(.Random.seed, before)
   for (bad in list(NULL, list(), book[FALSE, ])) {
-    expect_error(classic_workflow_book(bad), class = "fieldhub_input_error")
-  }
-  for (bad in list(1, list(), list(min_value = 1), list(min_value = NA, max_value = 10, response_name = "YIELD"))) {
-    expect_error(classic_workflow_book(book, bad, 14), class = "fieldhub_input_error")
+    expect_error(app_trait_simulation(x, bad), class = "fieldhub_input_error")
   }
 })
 
