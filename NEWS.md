@@ -49,6 +49,13 @@ The simulated values and one layout format change:
 Simulation records saved with FielDHub 1.7.0 still replay with
 `reproduce_simulation()`.
 
+## Bug fixes
+
+- `diagonal_arrangement()` accepts `checks` given as the check entry
+  numbers, for example `checks = c(301, 302)`, as
+  `optimized_arrangement()` does. It previously stopped with “the
+  condition has length \> 1”.
+
 # FielDHub 1.7.0
 
 ## New design

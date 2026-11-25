@@ -257,10 +257,19 @@ test_that("spatial designs reject malformed checks, block sizes and options befo
   }
 })
 
-test_that("optimized_arrangement() accepts check entries in any order", {
-  design <- optimized_arrangement(nrows = 12, ncols = 10, lines = 100, rep_checks = rep(5, 4), checks = 4:1,
-                                  seed = 19)
-  expect_setequal(design$fieldBook$ENTRY[design$fieldBook$CHECKS != 0], 1:4)
+test_that("spatial designs accept check entry numbers", {
+  cases <- list(
+    optimized_any_order = list(quote(optimized_arrangement(nrows = 12, ncols = 10, lines = 100,
+      rep_checks = rep(5, 4), checks = 4:1, seed = 19)), 1:4),
+    diagonal_entries = list(quote(diagonal_arrangement(nrows = 15, ncols = 20, lines = 270,
+      checks = c(301, 302), seed = 19)), c(301, 302))
+  )
+  for (nm in names(cases)) {
+    book <- eval(cases[[nm]][[1]])$fieldBook
+    entries <- cases[[nm]][[2]]
+    expect(setequal(book$ENTRY[book$CHECKS != 0], entries) && !any(book$ENTRY[book$CHECKS == 0] %in% entries),
+           sprintf("case %s: the check plots do not hold exactly the given check entries", nm))
+  }
 })
 
 # ---- Check spreading ----
