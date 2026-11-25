@@ -34,7 +34,8 @@ diagonal_arrangement(
 
 \item{lines}{Number of genotypes, experimental lines or treatments.}
 
-\item{checks}{Number of genotypes checks.}
+\item{checks}{Number of genotypes checks, or a vector of their entry numbers
+(distinct consecutive whole numbers in increasing order, e.g. \code{c(301, 302)}).}
 
 \item{planter}{Option for \code{serpentine} or \code{cartesian} plot arrangement. 
 By default  \code{planter = 'serpentine'}.}

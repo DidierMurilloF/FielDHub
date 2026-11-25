@@ -91,17 +91,6 @@ test_that("plot numbers follow the requested planter path", {
   }
 })
 
-# Defect in the current layouts, left out of the property below: with a
-# serpentine planter, the incomplete-block layouts that lay each incomplete
-# block as a column of a replicate (stacked = "horizontal") number the plots
-# along no planter path.
-iblocks_as_columns <- function(book, planter) {
-  planter == "serpentine" && "IBLOCK" %in% names(book) &&
-    all(tapply(book$IBLOCK, list(book$REP, book$COLUMN), function(b) length(unique(b))) == 1L,
-        na.rm = TRUE) &&
-    length(unique(book$IBLOCK)) > 1L
-}
-
 # Catalogue designs whose REP column is not a block of the field
 unblocked <- c("CRD_count", "CRD_labels", "CRD_data", "full_factorial_crd_data",
                "split_plot_crd", "split_split_plot_crd")
@@ -128,7 +117,7 @@ test_that("every layout option places each plot once and plants it along the pla
             if (anyDuplicated(book[c("LOCATION", "ROW", "COLUMN")]) || anyDuplicated(book$ID)) {
               failures <- c(failures, paste(where, "repeats a plot"))
             }
-            if (!name %in% laid_out || iblocks_as_columns(book, planter)) next
+            if (!name %in% laid_out) next
             groups <- if (is.null(unit)) list(book$LOCATION) else list(book$LOCATION, book[[unit]])
             units <- split(book, groups, drop = TRUE)
             if (!all(vapply(units, follows_planter, logical(1), planter = planter))) {
