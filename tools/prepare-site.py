@@ -100,7 +100,7 @@ config["nav"][4] = {"Reference": [{"Overview": "reference/index.md"}] +
     [{group: items} for group, items in reference_groups.items() if items]}
 Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
 
-# The Vignettes page lists every vignette by title, grouped as in the menu.
+# The Articles page lists every vignette by title, grouped as in the menu.
 def lines(items, depth):
     out = []
     for item in items:
@@ -112,6 +112,6 @@ def lines(items, depth):
     return out
 
 sections = [entry for entry in config["nav"] if next(iter(entry)) in ("Designs", "Background", "News")]
-(root / "articles/index.md").write_text("# Vignettes\n" + "\n".join(lines(sections, 2)) + "\n")
-config["nav"].insert(2, {"Vignettes": "articles/index.md"})
+(root / "articles/index.md").write_text("# Articles\n" + "\n".join(lines(sections, 2)) + "\n")
+config["nav"].insert(2, {"Articles": "articles/index.md"})
 Path("mkdocs.yml").write_text(yaml.safe_dump(config, sort_keys=False))
