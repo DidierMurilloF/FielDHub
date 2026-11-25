@@ -25,7 +25,7 @@ test_that("the standard app installs with FielDHub while workers and tooling are
   expect_setequal(packages("Imports"),
     c("dplyr", "ggplot2", "rlang", "viridisLite", "desplot", app))
   expect_setequal(packages("Suggests"),
-    c("mirai", "codetools", "testthat", "spelling", "knitr", "rmarkdown"))
+    c("mirai", "later", "codetools", "testthat", "spelling", "knitr", "rmarkdown"))
   # Imports installs packages; qualified calls do not need whole-namespace imports.
   expect_length(intersect(names(getNamespaceImports("FielDHub")), app), 0L)
 })
