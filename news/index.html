@@ -3112,6 +3112,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#fieldhub-176" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FielDHub 1.7.6
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FielDHub 1.7.6">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spatial-correlations-drawn-for-each-simulated-trial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial correlations drawn for each simulated trial
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes-to-results-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changes to results and outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fieldhub-175" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3135,7 +3174,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changes-to-results-and-outputs" class="md-nav__link">
+  <a href="#changes-to-results-and-outputs_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Changes to results and outputs
@@ -3779,6 +3818,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#fieldhub-176" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FielDHub 1.7.6
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FielDHub 1.7.6">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spatial-correlations-drawn-for-each-simulated-trial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial correlations drawn for each simulated trial
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes-to-results-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Changes to results and outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fieldhub-175" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3802,7 +3880,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changes-to-results-and-outputs" class="md-nav__link">
+  <a href="#changes-to-results-and-outputs_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Changes to results and outputs
@@ -4145,6 +4223,32 @@
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
 <h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="fieldhub-176">FielDHub 1.7.6<a class="headerlink" href="#fieldhub-176" title="Permanent link">&para;</a></h2>
+<h3 id="spatial-correlations-drawn-for-each-simulated-trial">Spatial correlations drawn for each simulated trial<a class="headerlink" href="#spatial-correlations-drawn-for-each-simulated-trial" title="Permanent link">&para;</a></h3>
+<ul>
+<li>In <code>stats::simulate(x, spatial = ...)</code>, <code>rho_row</code> and <code>rho_col</code> each
+  take one fixed value or a range <code>c(low, high)</code>. A range is drawn from
+  uniformly for every draw and every location, so each location of each
+  simulated trial has its own spatial field. A correlation that is not
+  given is drawn from 0.15 to 0.9.</li>
+<li>The true correlations of every draw and location are returned in the
+  new <code>spatial_draws</code> table of the result (<code>draw</code>, <code>LOCATION</code>,
+  <code>rho_row</code>, <code>rho_col</code>) and shown when the simulation is printed.
+  <code>reproduce_simulation()</code> draws the same values again.</li>
+<li>The drawn correlations depend only on the seed, <code>nsim</code> and the number
+  of locations, so two layouts simulated with the same seed, even of
+  different designs, share them.</li>
+</ul>
+<h3 id="changes-to-results-and-outputs">Changes to results and outputs<a class="headerlink" href="#changes-to-results-and-outputs" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>simulate(x, spatial = TRUE)</code> now draws both correlations from 0.15
+  to 0.9 for each draw and location; in 1.7.5 it fixed them at 0.5. Give
+  <code>spatial = list(rho_row = 0.5, rho_col = 0.5)</code> for the 1.7.5 values.
+  Simulations with fixed correlations give the same values as in 1.7.5
+  for the same seed.</li>
+<li>The Shiny app is unchanged: its <strong>Add spatial correlation</strong> option
+  always uses the correlations selected in the dialog.</li>
+</ul>
 <h2 id="fieldhub-175">FielDHub 1.7.5<a class="headerlink" href="#fieldhub-175" title="Permanent link">&para;</a></h2>
 <h3 id="design-aware-trait-simulation">Design-aware trait simulation<a class="headerlink" href="#design-aware-trait-simulation" title="Permanent link">&para;</a></h3>
 <ul>
@@ -4169,7 +4273,7 @@
   (<code>vignette("simulating_traits")</code>) shows how to simulate traits and use
   the known effects for teaching, planning and testing analyses.</li>
 </ul>
-<h3 id="changes-to-results-and-outputs">Changes to results and outputs<a class="headerlink" href="#changes-to-results-and-outputs" title="Permanent link">&para;</a></h3>
+<h3 id="changes-to-results-and-outputs_1">Changes to results and outputs<a class="headerlink" href="#changes-to-results-and-outputs_1" title="Permanent link">&para;</a></h3>
 <p>Field designs and their randomization are unchanged for a given seed.
 The simulated values and one layout format change:</p>
 <ul>

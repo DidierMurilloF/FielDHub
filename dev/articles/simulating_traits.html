@@ -1539,6 +1539,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Example 4: add a spatial trend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-you-do-not-know-the-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When you do not know the field
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3575,6 +3592,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Example 4: add a spatial trend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-you-do-not-know-the-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When you do not know the field
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3748,6 +3782,19 @@
 <span class="n">rc</span><span class="o">$</span><span class="n">fieldBook</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">field_layout</span><span class="p">(</span><span class="n">rc</span><span class="p">)</span>
 <span class="nf">simulate</span><span class="p">(</span><span class="n">rc</span><span class="p">,</span><span class="w"> </span><span class="n">spatial</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span>
 </code></pre></div>
+<h3 id="when-you-do-not-know-the-field">When you do not know the field<a class="headerlink" href="#when-you-do-not-know-the-field" title="Permanent link">&para;</a></h3>
+<p>You rarely know how strongly neighbouring plots are correlated. Give a range instead of a value, and every simulated trial gets its own correlations, drawn uniformly from that range. With several locations, each location gets its own pair. The true values are returned in <code>spatial_draws</code>:</p>
+<div class="language-r highlight"><pre><span></span><code><span class="n">sim_many</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="n">prep</span><span class="p">,</span><span class="w"> </span><span class="n">nsim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">,</span><span class="w"> </span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span><span class="p">,</span>
+<span class="w">                     </span><span class="n">spatial</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="n">sd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="p">,</span><span class="w"> </span><span class="n">rho_row</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">0.3</span><span class="p">,</span><span class="w"> </span><span class="m">0.9</span><span class="p">),</span><span class="w"> </span><span class="n">rho_col</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">0.1</span><span class="p">,</span><span class="w"> </span><span class="m">0.6</span><span class="p">)))</span>
+<span class="n">sim_many</span><span class="o">$</span><span class="n">spatial_draws</span>
+</code></pre></div>
+<div class="language-text highlight"><pre><span></span><code>  draw LOCATION   rho_row   rho_col
+1    1     LOC1 0.6514802 0.1044729
+2    2     LOC1 0.4762438 0.2386875
+3    3     LOC1 0.7881445 0.2302139
+4    4     LOC1 0.7346435 0.5530461
+</code></pre></div>
+<p>A correlation you leave out is drawn from 0.15 to 0.9, and so are both with <code>spatial = TRUE</code>. A single number, such as <code>rho_row = 0.6</code>, stays fixed. This is useful when you test an analysis or a design: it should work over a range of fields, not only the one you guessed.</p>
 <h2 id="more-options">More options<a class="headerlink" href="#more-options" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Several draws</strong>: <code>nsim = 50</code> gives <code>YIELD_1</code>, …, <code>YIELD_50</code>.</li>
