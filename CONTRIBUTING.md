@@ -112,8 +112,9 @@ We try to follow the [GitHub flow](https://guides.github.com/introduction/flow/)
     * Document your code (see function documentation above).
     * Run `R CMD check --as-cran`, build the UI without starting a session, and
       inspect the completed check log. A development-version NOTE is expected;
-      other findings require investigation. Correctness lint and core coverage
-      are also checked in CI.
+      other findings require investigation. Check correctness lint and core
+      coverage locally with `Rscript inst/ci/lint-changed-lines.R <base-sha> <head-sha>`
+      and `Rscript inst/ci/compare-core-coverage.R <base-dir> <head-dir>`.
 5. Commit and push your changes.
 6. Submit a [pull request](https://guides.github.com/activities/forking/#making-a-pull-request).
 
@@ -208,7 +209,7 @@ one `fct_` file per exported function, no core reference to the Shiny
 layer, no dependency cycle between core files). Structural checks that must
 also run under `R CMD check`, where `R/` is not installed, inspect the
 namespace with `core_functions()` and `app_functions()` from
-`helper-source.R`. The core coverage gate in CI
+`helper-source.R`. The core coverage check
 (`inst/ci/compare-core-coverage.R`) measures every `R/` file except `app_*`,
 `mod_*` and `run_app.R`.
 
