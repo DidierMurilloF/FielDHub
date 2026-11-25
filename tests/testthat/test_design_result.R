@@ -160,6 +160,24 @@ test_that("replay rejects results whose shared field-book keys or metadata are b
   }
   cases[["design seed disagrees with infoDesign"]] <- edit(design, function(b) {
     b$infoDesign$seed <- 39; b})
+  # A design names its design in infoDesign, metadata and class, and has a field book
+  cases[["no infoDesign id_design"]] <- edit(design, function(b) {b$infoDesign$id_design <- NULL; b})
+  cases[["no metadata design"]] <- edit(design, function(b) {b$metadata$design <- NA_character_; b})
+  cases[["class disagrees with design"]] <- edit(design, function(b) {
+    class(b) <- c("fieldhub_crd", "FielDHub"); b})
+  cases[["empty field book"]] <- edit(design, function(b) {b$fieldBook <- b$fieldBook[0, ]; b})
+  # An allocation names its kind, and its counts, sizes and entry lists agree
+  cases[["allocation metadata design"]] <- edit(allocation, function(b) {
+    b$metadata$design <- "allocation_other"; b})
+  cases[["allocation class disagrees"]] <- edit(allocation, function(b) {
+    class(b) <- c("fieldhub_multi_prep_optimization", "MultiPrep"); b})
+  cases[["allocation count table"]] <- edit(allocation, function(b) {
+    b$allocation <- b$allocation[0, , drop = FALSE]; b})
+  cases[["allocation sizes disagree"]] <- edit(allocation, function(b) {
+    b$size_locations[1] <- b$size_locations[1] + 1; b})
+  cases[["allocation entry lists"]] <- edit(allocation, function(b) {b$list_locs <- NULL; b})
+  cases[["allocation multi-location entries"]] <- edit(allocation, function(b) {
+    b$multi_location_data$LOCATION[1] <- "nowhere"; b})
   accepted <- names(cases)[!vapply(cases, function(bad) {
     fails_with(reproduce_design(bad), "fieldhub_internal_error")
   }, logical(1))]

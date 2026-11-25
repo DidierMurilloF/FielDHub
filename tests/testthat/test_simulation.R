@@ -621,14 +621,23 @@ test_that("spatial simulations retain the exact input and effective parameters",
 })
 
 test_that("both recorded simulation models replay without advancing the caller stream", {
-  builds <- list(classic = recorded_classic_test, spatial = recorded_spatial_test)
+  # classic_by_id: a record of an app workflow that lists the plots by ID
+  classic_by_id <- function(seed) {
+    book <- data.frame(ID = c(4L, 1L, 6L, 2L, 5L, 3L), LOCATION = "B", PLOT = 101:106,
+                       TREATMENT = rep(letters[1:3], 2))
+    simulate_classic_field_book(book, 10, 20, "HEIGHT", seed, order_by_id = TRUE)
+  }
+  builds <- list(classic = recorded_classic_test, spatial = recorded_spatial_test,
+                 classic_by_id = classic_by_id)
   seeds <- list(17, NULL, -1, 17.9)
   failed <- character(0)
   for (model in names(builds)) for (seed in seeds) {
     x <- builds[[model]](seed)
     set.seed(39)
     before <- .Random.seed
-    if (!identical(reproduce_simulation(x), x) || !identical(.Random.seed, before)) {
+    replay <- reproduce_simulation(x)
+    if (!identical(replay, x) || !identical(.Random.seed, before) ||
+        (model == "classic_by_id" && !identical(replay$field_book$ID, 1:6))) {
       failed <- c(failed, paste(model, deparse(seed)))
     }
   }
@@ -637,13 +646,20 @@ test_that("both recorded simulation models replay without advancing the caller s
 
 test_that("simulation reconstruction validates metadata and never evaluates input expressions", {
   x <- recorded_spatial_test()
+  classic <- recorded_classic_test()
+  by_id <- within(classic, metadata$parameters$order_by_id <- TRUE)
   bad <- list(NULL, list(), within(x, rm(metadata)),
               within(x, metadata$model <- "system"),
               within(x, metadata$schema_version <- 99L),
               within(x, metadata$parameters$seed <- 2L),
-              within(x, metadata$parameters$unknown <- TRUE))
+              within(x, metadata$parameters$unknown <- TRUE),
+              # Classic records: one new response name, a flag, and finite IDs to order by
+              within(classic, metadata$parameters$response_name <- " "),
+              within(classic, metadata$parameters$response_name <- "PLOT"),
+              within(classic, metadata$parameters$order_by_id <- NA),
+              within(by_id, input_field_book$ID[2] <- NA))
   for (i in seq_along(bad)) {
-    expect_error(reproduce_simulation(bad[[i]]), class = "fieldhub_input_error", info = i)
+    expect_error(reproduce_simulation(bad[[i]]), class = "fieldhub_input_error", info = paste("record", i))
   }
   ran <- FALSE
   x$metadata$parameters$min_value <- quote({ran <<- TRUE; 10})

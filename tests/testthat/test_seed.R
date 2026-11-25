@@ -149,15 +149,20 @@ test_that("fractional seeds are truncated like set.seed() and recorded as suppli
 })
 
 test_that("row-column location seeds cannot overflow at the public seed boundary", {
-  for (method in c("onestage", "twostage")) {
+  # An integer seed and the same seed as a double wrap alike
+  cases <- list(onestage = .Machine$integer.max, twostage = .Machine$integer.max,
+                twostage = as.double(.Machine$integer.max))
+  for (i in seq_along(cases)) {
+    method <- names(cases)[i]
+    seed <- cases[[i]]
     set.seed(27)
     previous <- .Random.seed
     expect_no_warning(design <- row_column(t = 12, nrows = 3, reps = 2, l = 2,
-                                           seed = .Machine$integer.max, iterations = 1,
+                                           seed = seed, iterations = 1,
                                            plotNumber = c(101, 201), method = method))
     expect_identical(list(stream = .Random.seed, seed = design$metadata$seed,
                           replays = identical(reproduce_design(design), design)),
-                     list(stream = previous, seed = .Machine$integer.max, replays = TRUE),
-                     info = method)
+                     list(stream = previous, seed = seed, replays = TRUE),
+                     info = paste(method, typeof(seed)))
   }
 })

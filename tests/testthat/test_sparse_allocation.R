@@ -73,6 +73,23 @@ test_that("allocations are even for every number of locations and copies", {
   expect_true(alloc_is_even(y, 4, 3))
 })
 
+test_that("a square-lattice shape gives every two lines exactly one shared location", {
+  # q^2 lines in r q locations of q plots with r = q + 1 copies and q prime is
+  # the affine plane of order q, a balanced incomplete block design (lambda = 1),
+  # so the A-optimal allocation has every off-diagonal concurrence equal to 1.
+  cases <- list(order_5 = list(q = 5, seed = 1))
+  for (nm in names(cases)) {
+    q <- cases[[nm]]$q
+    x <- do_optim("sparse", lines = q^2, l = q * (q + 1), copies_per_entry = q + 1,
+                  add_checks = TRUE, checks = 1, seed = cases[[nm]]$seed)
+    N <- as.matrix(x$allocation)
+    concurrence <- tcrossprod(N)
+    off <- concurrence[upper.tri(concurrence)]
+    expect(all(off == 1), sprintf("case %s: %d line pairs do not share exactly one location (range %s)",
+                                  nm, sum(off != 1), paste(range(off), collapse = "-")))
+  }
+})
+
 test_that("the smallest designs (two plots per location) are even", {
   even <- vapply(3:6, function(l) alloc_is_even(alloc_optim(l, l, 2, seed = l), 2, l), logical(1))
   expect(all(even), sprintf("l = %d is uneven", (3:6)[which(!even)[1]]))
@@ -199,7 +216,13 @@ test_that("allocation inputs outside their contract are input errors", {
                           quote(do_optim(design = "prep", lines = 20, l = 4, add_checks = TRUE, checks = 2,
                                          seed = 1))),
     infeasible_blocks = list(quote(do_optim(design = "sparse", lines = 2, l = 10, copies_per_entry = 1,
-                                            add_checks = TRUE, checks = 2, seed = 1)))
+                                            add_checks = TRUE, checks = 2, seed = 1))),
+    # A supplied plan skips do_optim()'s check; merging the data still needs one replication per check
+    rep_checks_with_optim_list = list(quote(multi_location_prep(
+      lines = 80, l = 4, copies_per_entry = 5, checks = 2, rep_checks = c(4, 4, 4), allow_fillers = TRUE,
+      data = data.frame(ENTRY = 1:82, NAME = c("CH1", "CH2", paste0("L", 1:80))), seed = 1,
+      optim_list = do_optim("prep", lines = 80, l = 4, copies_per_entry = 5, add_checks = TRUE, checks = 2,
+                            rep_checks = c(4, 4), seed = 1))))
   )
   for (nm in names(cases)) {
     ok <- vapply(cases[[nm]], function(call) {
