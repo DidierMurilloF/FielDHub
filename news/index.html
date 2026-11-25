@@ -3145,6 +3145,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3801,6 +3812,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bug fixes
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4166,6 +4188,19 @@ The simulated values and one layout format change:</p>
 </ul>
 <p>Simulation records saved with FielDHub 1.7.0 still replay with
 <code>reproduce_simulation()</code>.</p>
+<h3 id="bug-fixes">Bug fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>diagonal_arrangement()</code> accepts <code>checks</code> given as the check entry
+  numbers, for example <code>checks = c(301, 302)</code>, as
+  <code>optimized_arrangement()</code> does. It previously stopped with “the
+  condition has length &gt; 1”.</li>
+<li>With a serpentine planter, the incomplete-block layouts that lay each
+  incomplete block as a column of a replicate (<code>stacked = "horizontal"</code>)
+  now number the plots along the planter’s path: down the first block,
+  back up the next, as the cartesian layout numbers them down every
+  block. The plot numbers of these layouts change; the designs and the
+  other layouts do not.</li>
+</ul>
 <h2 id="fieldhub-170">FielDHub 1.7.0<a class="headerlink" href="#fieldhub-170" title="Permanent link">&para;</a></h2>
 <h3 id="new-design">New design<a class="headerlink" href="#new-design" title="Permanent link">&para;</a></h3>
 <ul>

@@ -3854,12 +3854,14 @@ entry-script contracts without starting a server or changing the R session.</p>
 <li>Open the RStudio project file (<code>.Rproj</code>).</li>
 <li>Make your changes:<ul>
 <li>Add a plain-R regression test that fails before fixing a defect, then
-  implement the fix. Keep scientific logic out of Shiny modules; do not add
-  Shiny server or browser tests.</li>
-<li>Run the full tests with <code>NOT_CRAN=true FIELDHUB_GOLDEN=true</code>. Golden
-  snapshots are recorded on macOS. Review deliberate scientific output
-  changes and announce affected inputs in NEWS; never accept snapshots
-  blindly.</li>
+  implement the fix. Keep scientific logic out of Shiny modules. Test app
+  behaviour through the plain functions a page calls, or with
+  <code>shiny::testServer()</code> for a module's reactive contract; do not add
+  browser tests (shinytest2, screenshots).</li>
+<li>Run the full tests with <code>NOT_CRAN=true</code>. Tests check properties of the
+  output (counts, coordinates, efficiencies against independent
+  references), not recorded copies of it. Announce deliberate scientific
+  output changes and the affected inputs in NEWS.</li>
 <li>For output-preserving refactors, compare complete fixed-seed results with
   the previous implementation using <code>identical()</code>. Preserve supplied labels,
   field-book column types, RNG state, and process options.</li>
@@ -3990,8 +3992,10 @@ file is responsible for; the topic says what it holds (for example
 <li><code>globals.R</code> declares the column names used in non-standard evaluation.</li>
 <li><code>run_app.R</code> holds <code>run_app()</code>, the exported launcher of the Shiny app.</li>
 </ul>
-<p>Tests live in <code>tests/testthat/test_&lt;topic&gt;.R</code> and are plain R: never Shiny
-server or browser tests. <code>test_source_layout.R</code> checks this layout (prefixes,
+<p>Tests live in <code>tests/testthat/test_&lt;feature&gt;.R</code>, one table-driven file per
+feature, and check user-facing contracts only. They are plain R: app logic is
+tested through plain functions or <code>shiny::testServer()</code>, never through a
+browser. <code>test_package_hygiene.R</code> checks the source layout (prefixes,
 one <code>fct_</code> file per exported function, no core reference to the Shiny
 layer, no dependency cycle between core files). Structural checks that must
 also run under <code>R CMD check</code>, where <code>R/</code> is not installed, inspect the

@@ -3562,10 +3562,9 @@ maintainers. A clean local check is not evidence that remote CI has passed.</p>
 </ol>
 <h2 id="required-evidence">Required evidence<a class="headerlink" href="#required-evidence" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Run the complete plain-R tests, including the tests skipped on CRAN and
-  macOS golden snapshots:</li>
+<li>Run the complete plain-R tests, including the tests skipped on CRAN:</li>
 </ul>
-<div class="language-sh highlight"><pre><span></span><code><span class="nv">NOT_CRAN</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="nv">FIELDHUB_GOLDEN</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;devtools::test(stop_on_failure=TRUE)&#39;</span>
+<div class="language-sh highlight"><pre><span></span><code><span class="nv">NOT_CRAN</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;devtools::test(stop_on_failure=TRUE)&#39;</span>
 Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;pkgload::load_all(); invisible(FielDHub:::app_ui(NULL))&#39;</span>
 Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;rcmdcheck::rcmdcheck(args=c(&quot;--no-manual&quot;, &quot;--as-cran&quot;), error_on=&quot;warning&quot;)&#39;</span>
 </code></pre></div>
