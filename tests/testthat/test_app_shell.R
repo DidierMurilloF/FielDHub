@@ -139,7 +139,13 @@ test_that("every design in Help is an exported function with a reference page an
   expect(all(exported), sprintf("%s is not exported", topics$engine[!exported][1L]))
   # pkgdown names a reference page after its Rd file
   pages <- paste0(sub("[.]html$", "", basename(topics$url)), ".Rd")
-  documented <- pages %in% names(tools::Rd_db("FielDHub"))
+  package_path <- find.package("FielDHub")
+  rd_db <- if (dir.exists(file.path(package_path, "man"))) {
+    tools::Rd_db(dir = package_path)
+  } else {
+    tools::Rd_db("FielDHub")
+  }
+  documented <- pages %in% names(rd_db)
   expect(all(documented), sprintf("%s has no reference page %s", topics$engine[!documented][1L],
                                   pages[!documented][1L]))
   expect_identical(topics$help, paste0('help("', topics$engine, '", package = "FielDHub")'))

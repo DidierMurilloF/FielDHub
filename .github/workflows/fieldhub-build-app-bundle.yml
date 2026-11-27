@@ -83,7 +83,7 @@ jobs:
           - { os: windows-latest, platform: "win-x64" }
           - { os: macos-14,       platform: "mac-arm64" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # A manual run with a tag must build that tag's source, not the
           # default branch. Release and tag runs already point at the tag.

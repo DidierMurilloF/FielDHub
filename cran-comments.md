@@ -1,30 +1,31 @@
-# FielDHub 1.6.0 — draft submission notes
+# FielDHub 1.7.6 submission notes (draft)
 
-This minor release modernizes the Shiny app, simplifies required dependencies,
-and adds shared validation and reproducibility contracts. NEWS documents
-changed defaults, rejected invalid inputs and corrections to seeded results.
+This update from CRAN version 1.5.0 introduces a compiled block-design engine,
+updates the Shiny app, and expands design layout and trait simulation. NEWS
+documents changes to seeded outputs and defaults. Version 1.7.6 draws spatial
+correlations per simulation draw and location when requested. Explicit fixed
+correlations preserve the corresponding 1.7.5 simulated responses.
 
-## Local validation
+## Check results
 
-- R 4.5.3 on aarch64-apple-darwin20 (macOS 27.0).
-- `R CMD check --no-manual --as-cran`: completed with 0 errors, 0 warnings
-  and 0 NOTES, including examples, installed-package tests and vignette rebuilds.
-- Full plain-R suite, including NOT_CRAN and golden checks: 17,664 assertions
-  across 1,006 test cases, with no failures, errors, warnings or skips.
-- JavaScript loading tests: 15 passed.
-- Source build with vignettes, changed-line correctness lint and release-tool
-  checks passed. Website home, reference and NEWS pages were generated locally.
-- Help and About Us were checked in Chrome at four viewport sizes; the displayed
-  app version is 1.6.0, with no email links or separate copyright label.
-- The locked Linux Docker image built successfully. Its non-root runtime and
-  seeded replay checks passed with network access disabled. An isolated worker
-  produced the exact same seeded design, and the container served the 1.6.0 app.
+- `R CMD check --no-manual --as-cran` on macOS arm64 with R 4.6.2 reported
+  0 errors, 0 warnings, and 0 notes. The check included online CRAN incoming
+  feasibility, examples, installed-package tests, and vignette rebuilds.
+- The complete installed-package suite, with non-CRAN, slow-search, and
+  exhaustive tests enabled, reported 4,185 passes, 0 failures, and 0 warnings.
+  One test requires `RNGkind()` support for `binom.kind`, which is unavailable
+  in R 4.6.2.
+- Reverse-dependency checks passed for agricolaeplotr 1.0.0, beautils 0.3.0, and
+  modeldiagramR 0.2.1 against both the candidate and CRAN version 1.5.0.
+- The documentation site built and verified 134 public page paths. Changed-line
+  correctness lint, launcher and release-tool checks, and the static deployment
+  check passed. Core R line coverage was 90.88%, up from 90.85% for 1.7.5.
+- All 66 benchmark comparisons against the 1.7.5 development baseline met the
+  release thresholds. Smaller factor-pair and spatial workloads also returned
+  equivalent results against CRAN version 1.5.0.
 
-## Before submission
+## Maintainer checks before submission
 
-These are draft notes, not a claim of CRAN acceptance or a submission request.
-Confirm the remote platform/check matrix, documentation and coverage gates.
-Complete the independent scientific review, exact-revision performance review
-and historical licensing review described in RELEASING.md before publication.
-Reverse-dependency checks have not been performed for this candidate; do not
-reuse the previous release's platform or reverse-dependency claims.
+Confirm the standard and extended platform checks on the final commit and run
+the locked Linux deployment image. Complete the independent scientific review
+and the historical licensing review described in RELEASING.md.

@@ -243,6 +243,19 @@ test_that("the reported drawn correlation is the one behind the spatial field", 
   }
 })
 
+test_that("the simulation summary shows the drawn correlations by location", {
+  x <- RCBD(6, 3, l = 2, nrows = 3, seed = 1)
+  sim <- stats::simulate(x, nsim = 2, seed = 8, spatial = TRUE)
+  printed <- trimws(capture.output(print(sim)))
+  draws <- sim$spatial_draws
+  expected <- sprintf("draw %d, %s: rho_row = %s, rho_col = %s",
+                      draws$draw[1L], draws$LOCATION[1L],
+                      format(draws$rho_row[1L], digits = 3),
+                      format(draws$rho_col[1L], digits = 3))
+  expect_true(expected %in% printed)
+  expect_true("... 1 more" %in% printed)
+})
+
 test_that("fixed correlations give the values of FielDHub 1.7.5", {
   # Values from FielDHub 1.7.5 (master 8feaab5) for this call: fixed
   # correlations must consume no extra random numbers

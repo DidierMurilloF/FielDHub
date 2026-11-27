@@ -25,8 +25,9 @@ maintainers. A clean local check is not evidence that remote CI has passed.
 - Run the complete plain-R tests, including the tests skipped on CRAN:
 
   ```sh
-  NOT_CRAN=true Rscript -e 'devtools::test(stop_on_failure=TRUE)'
-  Rscript -e 'pkgload::load_all(); invisible(FielDHub:::app_ui(NULL))'
+  R CMD INSTALL . --preclean
+  NOT_CRAN=true Rscript -e 'testthat::test_local(load_package = "installed")'
+  Rscript -e 'invisible(FielDHub:::app_ui(NULL))'
   Rscript -e 'rcmdcheck::rcmdcheck(args=c("--no-manual", "--as-cran"), error_on="warning")'
   ```
 

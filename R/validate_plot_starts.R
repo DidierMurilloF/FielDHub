@@ -6,7 +6,7 @@
 #' @noRd
 validate_plot_starts <- function(values) {
   if (!is.numeric(values) || !is.null(dim(values)) ||
-      any(!is.finite(values)) || any(values %% 1 != 0)) {
+      any(!is.finite(values)) || any(values != trunc(values))) {
     fieldhub_abort("`plotNumber` must be a numeric vector of finite whole numbers.",
                    data = list(argument = "plotNumber"))
   }
