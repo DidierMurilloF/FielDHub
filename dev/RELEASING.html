@@ -230,17 +230,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3564,8 +3651,9 @@ maintainers. A clean local check is not evidence that remote CI has passed.</p>
 <ul>
 <li>Run the complete plain-R tests, including the tests skipped on CRAN:</li>
 </ul>
-<div class="language-sh highlight"><pre><span></span><code><span class="nv">NOT_CRAN</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;devtools::test(stop_on_failure=TRUE)&#39;</span>
-Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;pkgload::load_all(); invisible(FielDHub:::app_ui(NULL))&#39;</span>
+<div class="language-sh highlight"><pre><span></span><code>R<span class="w"> </span>CMD<span class="w"> </span>INSTALL<span class="w"> </span>.<span class="w"> </span>--preclean
+<span class="nv">NOT_CRAN</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;testthat::test_local(load_package = &quot;installed&quot;)&#39;</span>
+Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;invisible(FielDHub:::app_ui(NULL))&#39;</span>
 Rscript<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;rcmdcheck::rcmdcheck(args=c(&quot;--no-manual&quot;, &quot;--as-cran&quot;), error_on=&quot;warning&quot;)&#39;</span>
 </code></pre></div>
 <ul>

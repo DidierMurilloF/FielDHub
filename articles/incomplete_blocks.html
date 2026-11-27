@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Incomplete Block Design in R and Shiny with FielDHub's incomplete_blocks(). Resolvable incomplete blocks for a chosen number of treatments, replicates and block size.">
+        <meta name="description" content="Randomize treatments into smaller, resolvable blocks for a field trial in R or Shiny and get a field map and plot-level field book.">
       
       
       
@@ -27,7 +27,7 @@
     
     
   
-    <title>Incomplete Block Design in R and Shiny | FielDHub</title>
+    <title>Resolvable Incomplete Block Design in R | FielDHub</title>
   
 
     
@@ -68,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Incomplete Block Design">
-    <meta property="og:description" content="Incomplete Block Design in R and Shiny with FielDHub&#39;s incomplete_blocks(). Resolvable incomplete blocks for a chosen number of treatments, replicates and block size.">
+    <meta property="og:description" content="Randomize treatments into smaller, resolvable blocks for a field trial in R or Shiny and get a field map and plot-level field book.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Incomplete Block Design in R and Shiny with FielDHub\u0027s incomplete_blocks(). Resolvable incomplete blocks for a chosen number of treatments, replicates and block size.", "headline": "Incomplete Block Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Randomize treatments into smaller, resolvable blocks for a field trial in R or Shiny and get a field map and plot-level field book.", "headline": "Incomplete Block Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/incomplete_blocks.html"}
       </script>
     
   
@@ -228,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3699,6 +3786,10 @@
 
 
 <h1 id="incomplete-block-design">Incomplete Block Design<a class="headerlink" href="#incomplete-block-design" title="Permanent link">&para;</a></h1>
+<p>Use resolvable incomplete blocks when each replicate can include every treatment but a single block cannot. This guide works through the block sizes, randomization, and field layout.</p>
+<p>To run the examples, install FielDHub with <code>install.packages("FielDHub")</code>. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#using-the-fieldhub-function-incomplete_blocks">Jump to the R example</a>.</p>
+<p>Related guides: <a href="alpha_lattice.html">Alpha Lattice Design</a>, <a href="rcbd.html">Randomized Complete Block Design</a>.</p>
 <p>This vignette shows how to generate an <strong>incomplete block design</strong> using both the FielDHub Shiny App and the scripting function <code>incomplete_blocks()</code> from the <code>FielDHub</code> package.</p>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="headerlink" href="#using-the-fieldhub-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>

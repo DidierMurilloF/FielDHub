@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Simulate trait data on any design with simulate(), with optional spatial correlation.">
+        <meta name="description" content="Simulate yield or other traits on a randomized field design with optional spatial correlation, known treatment effects, and reproducible seeds.">
       
       
       
@@ -27,11 +27,7 @@
     
     
   
-    
-      
-        <title>Simulating Trait Data on a Field Design - FielDHub</title>
-      
-    
+    <title>Simulate Field Trial Trait Data in R | FielDHub</title>
   
 
     
@@ -72,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Simulating Trait Data on a Field Design">
-    <meta property="og:description" content="Simulate trait data on any design with simulate(), with optional spatial correlation.">
+    <meta property="og:description" content="Simulate yield or other traits on a randomized field design with optional spatial correlation, known treatment effects, and reproducible seeds.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/simulating_traits.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Simulate trait data on any design with simulate(), with optional spatial correlation.", "headline": "Simulating Trait Data on a Field Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/simulating_traits.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Simulate yield or other traits on a randomized field design with optional spatial correlation, known treatment effects, and reproducible seeds.", "headline": "Simulating Trait Data on a Field Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/simulating_traits.html"}
       </script>
     
   
@@ -232,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -457,9 +454,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -473,7 +484,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3643,6 +3726,10 @@
 
 
 <h1 id="simulating-trait-data-on-a-field-design">Simulating Trait Data on a Field Design<a class="headerlink" href="#simulating-trait-data-on-a-field-design" title="Permanent link">&para;</a></h1>
+<p>Start with a randomized field layout and simulate yield or another trait on the actual plots. The examples show how to add spatial correlation, recover the true simulated effects, and reproduce a run from its seed.</p>
+<p>This guide uses features introduced in FielDHub 1.7.6. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#example-1-simulate-a-trait">Jump to the R example</a>.</p>
+<p>Related guides: <a href="rcbd.html">Randomized Complete Block Design</a>, <a href="augmented_row_column.html">Augmented Row-Column Design</a>.</p>
 <div class="language-r highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">FielDHub</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span>
 <span class="nf">theme_set</span><span class="p">(</span><span class="nf">theme_minimal</span><span class="p">(</span><span class="n">base_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">12</span><span class="p">)</span><span class="w"> </span><span class="o">+</span>

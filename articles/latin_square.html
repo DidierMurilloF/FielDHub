@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Latin Square Design in R and Shiny with FielDHub's latin_square(). Every treatment once in each row and each column of a square.">
+        <meta name="description" content="Every treatment once in each row and each column of a square.">
       
       
       
@@ -68,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Latin Square Design">
-    <meta property="og:description" content="Latin Square Design in R and Shiny with FielDHub&#39;s latin_square(). Every treatment once in each row and each column of a square.">
+    <meta property="og:description" content="Every treatment once in each row and each column of a square.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/latin_square.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Latin Square Design in R and Shiny with FielDHub\u0027s latin_square(). Every treatment once in each row and each column of a square.", "headline": "Latin Square Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/latin_square.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Every treatment once in each row and each column of a square.", "headline": "Latin Square Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/latin_square.html"}
       </script>
     
   
@@ -228,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3699,6 +3786,8 @@
 
 
 <h1 id="latin-square-design">Latin Square Design<a class="headerlink" href="#latin-square-design" title="Permanent link">&para;</a></h1>
+<p>To run the examples, install FielDHub with <code>install.packages("FielDHub")</code>. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#using-the-fieldhub-function-latin_square">Jump to the R example</a>.</p>
 <p>This vignette shows how to generate a <strong>Latin square design</strong> using both the FielDHub Shiny App and the scripting function <code>latin_square()</code> from the <code>FielDHub</code> package.</p>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="headerlink" href="#using-the-fieldhub-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>

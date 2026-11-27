@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Install FielDHub, open the Shiny app and make your first field design in R.">
+        <meta name="description" content="Install FielDHub from CRAN, open the Shiny app, and randomize your first field trial in R to get a field map and field book.">
       
       
       
@@ -16,7 +16,7 @@
         <link rel="prev" href="index.html">
       
       
-        <link rel="next" href="articles/index.html">
+        <link rel="next" href="choose-field-trial-design.html">
       
       
         
@@ -27,11 +27,7 @@
     
     
   
-    
-      
-        <title>Get started - FielDHub</title>
-      
-    
+    <title>Install FielDHub and Randomize a Field Trial in R or Shiny</title>
   
 
     
@@ -71,15 +67,15 @@
     
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
-    <meta property="og:title" content="Get started">
-    <meta property="og:description" content="Install FielDHub, open the Shiny app and make your first field design in R.">
+    <meta property="og:title" content="Install and run">
+    <meta property="og:description" content="Install FielDHub from CRAN, open the Shiny app, and randomize your first field trial in R to get a field map and field book.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/get-started.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Install FielDHub, open the Shiny app and make your first field design in R.", "headline": "Get started", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/get-started.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Install FielDHub from CRAN, open the Shiny app, and randomize your first field trial in R to get a field map and field book.", "headline": "Install and run", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/get-started.html"}
       </script>
     
   
@@ -136,7 +132,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Get started
+              Install and run
             
           </span>
         </div>
@@ -234,17 +230,18 @@
     
   
   
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -459,6 +456,61 @@
   
   
   
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -474,7 +526,7 @@
   <span class="md-ellipsis">
     
   
-    Get started
+    Install and run
   
 
     
@@ -492,7 +544,7 @@
   <span class="md-ellipsis">
     
   
-    Get started
+    Install and run
   
 
     
@@ -575,6 +627,42 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -3567,7 +3655,9 @@ and field book for the same inputs and seed.</p>
 <p>From CRAN:</p>
 <div class="language-r highlight"><pre><span></span><code><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;FielDHub&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The development version, from GitHub:</p>
+<p>Check your installed version with <code>packageVersion("FielDHub")</code>. If the guide you
+are following requires a newer version than CRAN provides, install the
+development version from GitHub:</p>
 <div class="language-r highlight"><pre><span></span><code><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;DidierMurilloF/FielDHub&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="open-the-app">Open the app<a class="headerlink" href="#open-the-app" title="Permanent link">&para;</a></h2>
@@ -3575,7 +3665,9 @@ and field book for the same inputs and seed.</p>
 <span class="nf">run_app</span><span class="p">()</span>
 </code></pre></div>
 <p>Choose a design from the menus, fill in its inputs and click <strong>Run!</strong>. The app
-shows the field map and the field book, and lets you download them.</p>
+shows the field map and the field book, and lets you download them.
+If you are unsure which design fits your trial, use the
+<a href="choose-field-trial-design.html">field trial design chooser</a>.</p>
 <h2 id="make-a-design-in-r">Make a design in R<a class="headerlink" href="#make-a-design-in-r" title="Permanent link">&para;</a></h2>
 <p>Every design in the app is also a function. This one places 270 unreplicated
 entries and 4 checks in a field of 15 rows and 20 columns, with the checks on

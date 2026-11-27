@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Un-replicated Optimized Arrangement Design in R and Shiny with FielDHub's optimized_arrangement(). Unreplicated entries with checks placed at random and spread across the field.">
+        <meta name="description" content="Unreplicated entries with checks placed at random and spread across the field.">
       
       
       
@@ -68,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Un-replicated Optimized Arrangement Design">
-    <meta property="og:description" content="Un-replicated Optimized Arrangement Design in R and Shiny with FielDHub&#39;s optimized_arrangement(). Unreplicated entries with checks placed at random and spread across the field.">
+    <meta property="og:description" content="Unreplicated entries with checks placed at random and spread across the field.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/optimized_arrangement.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Un-replicated Optimized Arrangement Design in R and Shiny with FielDHub\u0027s optimized_arrangement(). Unreplicated entries with checks placed at random and spread across the field.", "headline": "Un-replicated Optimized Arrangement Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/optimized_arrangement.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Unreplicated entries with checks placed at random and spread across the field.", "headline": "Un-replicated Optimized Arrangement Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/optimized_arrangement.html"}
       </script>
     
   
@@ -228,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3831,6 +3918,8 @@
 
 
 <h1 id="un-replicated-optimized-arrangement-design">Un-replicated Optimized Arrangement Design<a class="headerlink" href="#un-replicated-optimized-arrangement-design" title="Permanent link">&para;</a></h1>
+<p>To run the examples, install FielDHub with <code>install.packages("FielDHub")</code>. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#using-the-fieldhub-function-optimized_arrangement.">Jump to the R example</a>.</p>
 <p>This vignette shows how to generate an <strong>un-replicated optimized arrangement design</strong> using both the FielDHub Shiny App and the scripting function <code>optimized_arrangement()</code> from the <code>FielDHub</code> R package.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>One un-replicated design you can use in FielDHub is the optimized arrangement. Unlike the diagonal design, the optimized arrangement completely randomizes the positions for the checks instead of putting them in a systematic diagonal pattern (Clarke and Stefanova 2011). Randomization is subject to some restrictions. These restrictions seek to optimize the distribution of control plots in the field and ensure they are spread while keeping a minimum distance between them.</p>

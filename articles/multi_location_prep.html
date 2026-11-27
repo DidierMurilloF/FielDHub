@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Optimized Multi-Location P-rep Design in R and Shiny with FielDHub's multi_location_prep(). Optimizes how the copies of each entry are shared among locations, then builds a p-rep design at each one.">
+        <meta name="description" content="Plan partially replicated field trials across locations, optimize where genotype copies are tested, and get a field book for each site.">
       
       
       
@@ -27,7 +27,7 @@
     
     
   
-    <title>Optimized Multi-Location P-rep Design in R and Shiny | FielDHub</title>
+    <title>Multi-Location P-Rep Trial Design in R | FielDHub</title>
   
 
     
@@ -68,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Optimized Multi-Location P-rep Design">
-    <meta property="og:description" content="Optimized Multi-Location P-rep Design in R and Shiny with FielDHub&#39;s multi_location_prep(). Optimizes how the copies of each entry are shared among locations, then builds a p-rep design at each one.">
+    <meta property="og:description" content="Plan partially replicated field trials across locations, optimize where genotype copies are tested, and get a field book for each site.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/multi_location_prep.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Optimized Multi-Location P-rep Design in R and Shiny with FielDHub\u0027s multi_location_prep(). Optimizes how the copies of each entry are shared among locations, then builds a p-rep design at each one.", "headline": "Optimized Multi-Location P-rep Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/multi_location_prep.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Plan partially replicated field trials across locations, optimize where genotype copies are tested, and get a field book for each site.", "headline": "Optimized Multi-Location P-rep Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/multi_location_prep.html"}
       </script>
     
   
@@ -228,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3999,6 +4086,10 @@
 
 
 <h1 id="optimized-multi-location-p-rep-design">Optimized Multi-Location P-rep Design<a class="headerlink" href="#optimized-multi-location-p-rep-design" title="Permanent link">&para;</a></h1>
+<p>Use multi-location p-rep when you need to decide both which genotypes to replicate and where to test those copies. The worked example shows how to define the locations and turn that allocation into randomized field layouts.</p>
+<p>To run the examples, install FielDHub with <code>install.packages("FielDHub")</code>. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#using-the-fieldhub-function-multi_location_prep.">Jump to the R example</a>.</p>
+<p>Related guides: <a href="partially_replicated.html">Partially Replicated (p-rep) Design</a>, <a href="sparse_allocation.html">Sparse Allocation</a>.</p>
 <p>This vignette shows how to generate an <strong>optimized multi-location partially replicated (p-rep) design</strong> using both the FielDHub Shiny App and the scripting function <code>multi_location_prep()</code> from the <code>FielDHub</code> R package.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Partially replicated (p-rep) designs are commonly employed in early generation field trials. This type of design is characterized by replication of a portion of the entries, with the remaining entries only appearing once in the experiment. Commonly, the part of treatments with reps is due to an arbitrary decision by the research, also in some cases, it is due to technical reasons. The replication ratio is typically 1:4 (<span class="nocase">Cullis</span> 2006), which means that the portion of treatment repeated twice is p = 25%. However, the design can be adapted to meet specific needs by adjusting the values of <span class="arithmatex">\(p\)</span> and the level of replication. For example, standard varieties (checks) may be included with higher levels of replication than test lines.</p>

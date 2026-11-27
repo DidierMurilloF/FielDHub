@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Alpha Lattice Design in R and Shiny with FielDHub's alpha_lattice(). Resolvable incomplete blocks for a flexible number of treatments and block sizes.">
+        <meta name="description" content="Generate an alpha lattice design in R or Shiny, arrange treatments in resolvable incomplete blocks, and get a field map and field book.">
       
       
       
@@ -27,7 +27,7 @@
     
     
   
-    <title>Alpha Lattice Design in R and Shiny | FielDHub</title>
+    <title>Alpha Lattice Design in R for Field Trials | FielDHub</title>
   
 
     
@@ -68,14 +68,14 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="FielDHub">
     <meta property="og:title" content="Alpha Lattice Design">
-    <meta property="og:description" content="Alpha Lattice Design in R and Shiny with FielDHub&#39;s alpha_lattice(). Resolvable incomplete blocks for a flexible number of treatments and block sizes.">
+    <meta property="og:description" content="Generate an alpha lattice design in R or Shiny, arrange treatments in resolvable incomplete blocks, and get a field map and field book.">
     <meta property="og:url" content="https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html">
     <meta property="og:image" content="https://didiermurillof.github.io/FielDHub/man/figures/README-diagonal-map-1.png">
     <meta property="og:image:alt" content="FielDHub field map with replicated checks in a diagonal arrangement">
     <meta name="twitter:card" content="summary_large_image">
     
       <script type="application/ld+json">
-        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Alpha Lattice Design in R and Shiny with FielDHub\u0027s alpha_lattice(). Resolvable incomplete blocks for a flexible number of treatments and block sizes.", "headline": "Alpha Lattice Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html"}
+        {"@context": "https://schema.org", "@type": "TechArticle", "description": "Generate an alpha lattice design in R or Shiny, arrange treatments in resolvable incomplete blocks, and get a field map and field book.", "headline": "Alpha Lattice Design", "isPartOf": {"@type": "WebSite", "name": "FielDHub", "url": "https://didiermurillof.github.io/FielDHub/"}, "url": "https://didiermurillof.github.io/FielDHub/articles/alpha_lattice.html"}
       </script>
     
   
@@ -228,17 +228,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../get-started.html" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../get-started.html" class="md-tabs__link">
+          
+  
   
   Get started
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -455,9 +456,23 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../get-started.html" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -471,7 +486,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Get started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../get-started.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install and run
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../choose-field-trial-design.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Choose a field trial design
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3699,6 +3786,10 @@
 
 
 <h1 id="alpha-lattice-design">Alpha Lattice Design<a class="headerlink" href="#alpha-lattice-design" title="Permanent link">&para;</a></h1>
+<p>An alpha lattice design splits each complete replicate into smaller blocks. Use it when a large set of varieties would make complete blocks too large to keep field conditions reasonably uniform.</p>
+<p>To run the examples, install FielDHub with <code>install.packages("FielDHub")</code>. <a href="../get-started.html#install">See installation and version instructions</a>.</p>
+<p><a href="#using-the-fieldhub-function-alpha_lattice">Jump to the R example</a>.</p>
+<p>Related guides: <a href="rcbd.html">Randomized Complete Block Design</a>, <a href="incomplete_blocks.html">Incomplete Block Design</a>.</p>
 <p>This vignette shows how to generate an <strong>alpha lattice design</strong> using both the FielDHub Shiny App and the scripting function <code>alpha_lattice()</code> from the <code>FielDHub</code> package.</p>
 <h2 id="using-the-fieldhub-shiny-app">1. Using the FielDHub Shiny App<a class="headerlink" href="#using-the-fieldhub-shiny-app" title="Permanent link">&para;</a></h2>
 <p>To launch the app you need to run either</p>
