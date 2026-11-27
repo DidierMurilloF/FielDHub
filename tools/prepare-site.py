@@ -91,7 +91,8 @@ reference_groups = {group: items for group, items in reference_groups.items() if
 # only; a design whose guide is its reference page is found under Reference.
 config["nav"] = [
     {"Home": "index.md"},
-    {"Get started": "get-started.md"},
+    {"Get started": [{"Install and run": "get-started.md"},
+                     {"Choose a field trial design": "choose-field-trial-design.md"}]},
     {"Articles": "articles/index.md"},
     {"Designs": [{group: [item for item in items if "".join(item.values()).startswith("articles/")]}
                  for group, items in design_groups.items()]},
@@ -144,17 +145,53 @@ def set_meta(path, **values):
     meta.update(values)
     path.write_text("---\n" + yaml.safe_dump(meta, sort_keys=False, allow_unicode=True) + "---" + body)
 
-for target, engine in functions.items():
+guide_details = yaml.safe_load(Path("website/guide-search.yml").read_text())
+for target in sorted({*functions, "articles/simulating_traits.md"}):
     if target.startswith("articles/"):
         path = root / target
         title = page_title(path)
-        summary = front_matter(path).get("description", "").rstrip(".")
-        set_meta(path, seo_title=f"{title} in R and Shiny | FielDHub",
-                 description=f"{title} in R and Shiny with FielDHub's {engine}(). {summary}.")
+        detail = guide_details.get(path.stem, {})
+        summary = front_matter(path).get("description")
+        engine = functions.get(target)
+        search_title = detail.get("title", f"{title} in R and Shiny")
+        set_meta(path, seo_title=f"{search_title} | FielDHub",
+                 description=detail.get("description", summary or
+                                        f"Generate {title.lower()} in R or Shiny with {engine}()."))
 
+        # Keep CRAN vignettes unchanged. Add the installation path in the web guide.
+        text = path.read_text()
+        front, heading, body = re.match(r"(?s)(---\n.*?\n---\n)(# [^\n]+\n)(.*)", text).groups()
+        sections = [detail["introduction"]] if detail else []
+        install = 'To run the examples, install FielDHub with `install.packages("FielDHub")`.'
+        if version := detail.get("version"):
+            install = f"This guide uses features introduced in FielDHub {version}."
+        sections += [f"{install} [See installation and version instructions](../get-started.md#install)."]
+        example = detail.get("example")
+        if not example and engine:
+            heading_with_example = re.search(r"^## [^\n]*`" + re.escape(engine) +
+                                             r"\(\)`[^\n]*\{#([^}]+)\}$", body, re.MULTILINE)
+            if heading_with_example:
+                example = heading_with_example[1]
+        if example:
+            sections.append(f"[Jump to the R example](#{example}).")
+        if detail:
+            related = [f"[{page_title(path.with_name(name + '.md'))}]({name}.md)"
+                       for name in detail["related"]]
+            sections.append("Related guides: " + ", ".join(related) + ".")
+        path.write_text(front + heading + "\n" + "\n\n".join(sections) + "\n\n" + body.lstrip("\n"))
+
+guides = {engine: Path(target).stem for target, engine in functions.items()
+          if target.startswith("articles/")}
 for name in references:
     path = root / "reference" / name
     topic = Path(name).stem
     title = page_title(path).rstrip(".")
     set_meta(path, seo_title=f"{topic}: {title} | FielDHub R package",
              description=f"{title}. Reference for {topic} in the FielDHub R package: arguments, value and examples.")
+    if topic in guides:
+        guide = guides[topic]
+        text = path.read_text()
+        front, body = text.split("\n---\n", 1)
+        path.write_text(front + "\n---\n\n"
+                        f"[Worked example in R and Shiny](../articles/{guide}.md) · "
+                        "[Install FielDHub](../get-started.md#install)\n\n" + body.lstrip("\n"))

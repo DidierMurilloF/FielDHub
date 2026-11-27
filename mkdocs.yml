@@ -96,7 +96,9 @@ copyright: "<a href=\"https://www.ndsu.edu/agricultural-data-analytics\">\xA9 Ag
   >JOSS paper</a>"
 nav:
 - Home: index.md
-- Get started: get-started.md
+- Get started:
+  - Install and run: get-started.md
+  - Choose a field trial design: choose-field-trial-design.md
 - Articles: articles/index.md
 - Designs:
   - Unreplicated Designs:

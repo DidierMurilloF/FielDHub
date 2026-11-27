@@ -1,5 +1,6 @@
 ---
-description: Install FielDHub, open the Shiny app and make your first field design in R.
+description: Install FielDHub from CRAN, open the Shiny app, and randomize your first field trial in R to get a field map and field book.
+seo_title: Install FielDHub and Randomize a Field Trial in R or Shiny
 ---
 # Get started
 
@@ -15,7 +16,9 @@ From CRAN:
 install.packages("FielDHub")
 ```
 
-The development version, from GitHub:
+Check your installed version with `packageVersion("FielDHub")`. If the guide you
+are following requires a newer version than CRAN provides, install the
+development version from GitHub:
 
 ```r
 remotes::install_github("DidierMurilloF/FielDHub")
@@ -30,6 +33,8 @@ run_app()
 
 Choose a design from the menus, fill in its inputs and click **Run!**. The app
 shows the field map and the field book, and lets you download them.
+If you are unsure which design fits your trial, use the
+[field trial design chooser](choose-field-trial-design.md).
 
 ## Make a design in R
 

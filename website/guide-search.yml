@@ -1,0 +1,48 @@
+rcbd:
+  title: Randomized Complete Block Design in R (RCBD)
+  description: Randomize treatments within complete blocks, draw a field map, and get a plot-level field book in R or Shiny.
+  introduction: Use an RCBD when every treatment can fit once in each block. This guide shows how to randomize treatments within blocks, lay out the plots, and get a field book for one or more locations.
+  related: [alpha_lattice, RCBD_augmented]
+RCBD_augmented:
+  title: Augmented RCBD in R for Unreplicated Field Trials
+  description: Randomize unreplicated breeding entries with replicated checks in an augmented randomized complete block design and get a field book.
+  introduction: Use an augmented randomized complete block design when most new lines have seed for one plot and common check varieties can be repeated in every block. Follow a worked example in R and Shiny.
+  related: [augmented_row_column, partially_replicated]
+augmented_row_column:
+  title: Augmented Row-Column Design in R for Field Trials
+  description: Design a rectangular breeding trial with unreplicated entries and repeated checks to account for variation across field rows and columns.
+  introduction: Use an augmented row-column design when field variation runs in two directions and most new entries can be tested only once. This guide shows how to repeat checks across field rows or columns, compare design criteria, and export the randomized layout.
+  related: [RCBD_augmented, partially_replicated]
+  version: "1.7.0"
+alpha_lattice:
+  title: Alpha Lattice Design in R for Field Trials
+  description: Generate an alpha lattice design in R or Shiny, arrange treatments in resolvable incomplete blocks, and get a field map and field book.
+  introduction: An alpha lattice design splits each complete replicate into smaller blocks. Use it when a large set of varieties would make complete blocks too large to keep field conditions reasonably uniform.
+  related: [rcbd, incomplete_blocks]
+partially_replicated:
+  title: Partially Replicated (P-Rep) Field Trial Design in R
+  description: Randomize a p-rep field trial in R or Shiny when some genotypes have multiple plots and others appear once. Get a field map and field book.
+  introduction: In a partially replicated design, some genotypes are replicated and the rest appear once. This guide shows how to randomize a p-rep trial at one or more locations when plot space or seed is limited.
+  related: [multi_location_prep, RCBD_augmented, sparse_allocation]
+multi_location_prep:
+  title: Multi-Location P-Rep Trial Design in R
+  description: Plan partially replicated field trials across locations, optimize where genotype copies are tested, and get a field book for each site.
+  introduction: Use multi-location p-rep when you need to decide both which genotypes to replicate and where to test those copies. The worked example shows how to define the locations and turn that allocation into randomized field layouts.
+  related: [partially_replicated, sparse_allocation]
+sparse_allocation:
+  title: Sparse Testing Designs for Plant Breeding in R
+  description: Allocate genotypes to a subset of field trial locations for sparse testing, then generate randomized field layouts and field books in R or Shiny.
+  introduction: Use sparse testing when your breeding program cannot grow every genotype at every location. This guide shows how to allocate genotypes across a subset of sites and produce a randomized layout for each field.
+  related: [multi_location_prep, partially_replicated]
+incomplete_blocks:
+  title: Resolvable Incomplete Block Design in R
+  description: Randomize treatments into smaller, resolvable blocks for a field trial in R or Shiny and get a field map and plot-level field book.
+  introduction: Use resolvable incomplete blocks when each replicate can include every treatment but a single block cannot. This guide works through the block sizes, randomization, and field layout.
+  related: [alpha_lattice, rcbd]
+simulating_traits:
+  title: Simulate Field Trial Trait Data in R
+  description: Simulate yield or other traits on a randomized field design with optional spatial correlation, known treatment effects, and reproducible seeds.
+  introduction: Start with a randomized field layout and simulate yield or another trait on the actual plots. The examples show how to add spatial correlation, recover the true simulated effects, and reproduce a run from its seed.
+  related: [rcbd, augmented_row_column]
+  version: "1.7.6"
+  example: example-1-simulate-a-trait
