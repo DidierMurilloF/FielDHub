@@ -360,8 +360,8 @@ Software. Run `citation("FielDHub")` in R for the reference.
 
 ## Contributing
 
-Contributions are welcome; see the [contributing guide](CONTRIBUTING.md)
-and the [code of conduct](CODE_OF_CONDUCT.md).
+Contributions are welcome; see the [contributing guide](https://github.com/DidierMurilloF/FielDHub/blob/master/CONTRIBUTING.md)
+and the [code of conduct](https://github.com/DidierMurilloF/FielDHub/blob/master/CODE_OF_CONDUCT.md).
 
 FielDHub is developed at [Agricultural Data
 Analytics](https://www.ndsu.edu/agricultural-data-analytics), North
